@@ -1,0 +1,1 @@
+/usr/bin/c++    -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/clksmpc.dir/clksmpc.cpp.o  -o clksmpc  ../../libgpstk.dylib 
