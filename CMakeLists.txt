@@ -2,14 +2,14 @@
 cmake_minimum_required(VERSION 2.8.4)
 
 # Project Name
-project (gpstk)
+project (rocket)
 
 # System Variables
 message ("system = ${CMAKE_SYSTEM}")
 message ("system_name = ${CMAKE_SYSTEM_NAME}")
 
 # Installation Path Prefix - Change to desired location
-set (CMAKE_INSTALL_PREFIX $ENV{gpstk})
+set (CMAKE_INSTALL_PREFIX $ENV{rocket})
 
 if (UNIX) #Unix Compiler Options
 	 set (STADYN "SHARED") #Dynamic Libraries Enabled
@@ -90,15 +90,14 @@ list(REMOVE_DUPLICATES INCLUDE_DIRS)
 # Include the mapped lib directory structure
 include_directories(${INCLUDE_DIRS})
 
-# Create the gpstk library
-add_library (gpstk ${STADYN} ${SOURCES} ${SOURCES2})
+# Create the rocket library
+add_library (rocket ${STADYN} ${SOURCES} ${SOURCES2})
 
-# Install the gpstk library and headers
-install (TARGETS gpstk DESTINATION lib)
-install (FILES ${HEADERS} ${HEADERS2} DESTINATION include/gpstk )
+# Install the rocket library and headers
+install (TARGETS rocket DESTINATION lib)
+install (FILES ${HEADERS} ${HEADERS2} DESTINATION include/rocket )
 
 
 # GPSTk Subdirectories
 add_subdirectory (apps)
-add_subdirectory (examples)
 

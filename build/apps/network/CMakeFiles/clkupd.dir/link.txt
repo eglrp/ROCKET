@@ -1,1 +1,1 @@
-/usr/bin/c++    -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/clkupd.dir/clkupd.cpp.o  -o clkupd  ../../libgpstk.dylib 
+/usr/bin/c++    -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/clkupd.dir/clkupd.cpp.o  -o clkupd  ../../librocket.dylib 

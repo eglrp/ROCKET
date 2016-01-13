@@ -1,25 +1,25 @@
 # apps/dev/CMakeLists.txt
 
 add_executable(upd upd.cpp)
-target_link_libraries(upd gpstk)
+target_link_libraries(upd rocket)
 install (TARGETS upd DESTINATION bin)
 
 add_executable(updzap updzap.cpp)
-target_link_libraries(updzap gpstk)
+target_link_libraries(updzap rocket)
 install (TARGETS updzap DESTINATION bin)
 
 add_executable(clkupd clkupd.cpp)
-target_link_libraries(clkupd gpstk)
+target_link_libraries(clkupd rocket)
 install (TARGETS clkupd DESTINATION bin)
 
 add_executable(clkupdzap clkupdzap.cpp)
-target_link_libraries(clkupdzap gpstk)
+target_link_libraries(clkupdzap rocket)
 install (TARGETS clkupdzap DESTINATION bin)
 
 add_executable(clk clk.cpp)
-target_link_libraries(clk gpstk)
+target_link_libraries(clk rocket)
 install (TARGETS clk DESTINATION bin)
 
 add_executable(clksmpc clksmpc.cpp)
-target_link_libraries(clksmpc gpstk)
+target_link_libraries(clksmpc rocket)
 install (TARGETS clksmpc DESTINATION bin)

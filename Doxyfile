@@ -1,7 +1,7 @@
 #
-#  The version in Subversion is optimized for the GPSTk website.  Note that
+#  The version in Subversion is optimized for the ROCKET website.  Note that
 #  any changes to this file will effect the documentation display at
-#  http://www.gpstk.org/doxygen/.
+#  http://www.rocket.org/doxygen/.
 #
 #  This file should work locally without modification however it will have
 #  a 'search' entry that will be nonfunctional unless hosted by a web server.
@@ -26,7 +26,7 @@
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = "GPS ToolKit Software Library"
+PROJECT_NAME           = "ROCKET Software Library"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number.
 # This could be handy for archiving the generated documentation or

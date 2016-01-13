@@ -126,6 +126,7 @@ apps/network/CMakeFiles/updzap.dir/updzap.cpp.o
  ../lib/deprecate/AmbiguityDatum2.hpp
  ../lib/deprecate/gps_constants.hpp
  ../lib/dev/ARRound.hpp
+ ../lib/dev/AmbiguityDatum.hpp
  ../lib/dev/AmbiguitySmoother.hpp
  ../lib/dev/Arc.hpp
  ../lib/dev/BasicModel.hpp
@@ -138,6 +139,9 @@ apps/network/CMakeFiles/updzap.dir/updzap.cpp.o
  ../lib/dev/EOPDataStore.hpp
  ../lib/dev/Edge.hpp
  ../lib/dev/Equation.hpp
+ ../lib/dev/EquationSystem2.hpp
+ ../lib/dev/IndepAmbiguityDatum.hpp
+ ../lib/dev/Kruskal.hpp
  ../lib/dev/LICSDetector.hpp
  ../lib/dev/LICSDetector2.hpp
  ../lib/dev/LinearCombinations.hpp
@@ -154,6 +158,8 @@ apps/network/CMakeFiles/updzap.dir/updzap.cpp.o
  ../lib/dev/SolverLMS.hpp
  ../lib/dev/SolverPPP.hpp
  ../lib/dev/SolverPPPFB.hpp
+ ../lib/dev/SolverZapNL.hpp
+ ../lib/dev/SolverZapWL.hpp
  ../lib/dev/SourceID.hpp
  ../lib/dev/SpecialFunctions.hpp
  ../lib/dev/StochasticModel.hpp
@@ -161,10 +167,4 @@ apps/network/CMakeFiles/updzap.dir/updzap.cpp.o
  ../lib/dev/TypeID.hpp
  ../lib/dev/Variable.hpp
  ../lib/dev/Vertex.hpp
- ../lib/network/AmbiguityDatum.hpp
- ../lib/network/EquationSystem2.hpp
- ../lib/network/IndepAmbiguityDatum.hpp
- ../lib/network/Kruskal.hpp
- ../lib/network/SolverZapNL.hpp
- ../lib/network/SolverZapWL.hpp
- /Users/shjzhang/Documents/Develop/gpstk/apps/network/updzap.cpp
+ /Users/shjzhang/Documents/Develop/rocket/ROCKET/apps/network/updzap.cpp

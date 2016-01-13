@@ -126,6 +126,7 @@ apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
  ../lib/Utilities/gpstkplatform.h
  ../lib/deprecate/gps_constants.hpp
  ../lib/dev/ARRound.hpp
+ ../lib/dev/AmbiguityDatum.hpp
  ../lib/dev/Arc.hpp
  ../lib/dev/BasicModel.hpp
  ../lib/dev/ClockSatStore.hpp
@@ -137,6 +138,8 @@ apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
  ../lib/dev/EOPDataStore.hpp
  ../lib/dev/Edge.hpp
  ../lib/dev/Equation.hpp
+ ../lib/dev/EquationSystem2.hpp
+ ../lib/dev/Kruskal.hpp
  ../lib/dev/LICSDetector.hpp
  ../lib/dev/LICSDetector2.hpp
  ../lib/dev/LinearCombinations.hpp
@@ -149,6 +152,7 @@ apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
  ../lib/dev/SP3EphemerisStore.hpp
  ../lib/dev/SatArcMarker2.hpp
  ../lib/dev/SimpleFilter.hpp
+ ../lib/dev/SolverGeneral2.hpp
  ../lib/dev/SolverLMS.hpp
  ../lib/dev/SolverPPP.hpp
  ../lib/dev/SourceID.hpp
@@ -158,8 +162,4 @@ apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
  ../lib/dev/TypeID.hpp
  ../lib/dev/Variable.hpp
  ../lib/dev/Vertex.hpp
- ../lib/network/AmbiguityDatum.hpp
- ../lib/network/EquationSystem2.hpp
- ../lib/network/Kruskal.hpp
- ../lib/network/SolverGeneral2.hpp
- /Users/shjzhang/Documents/Develop/gpstk/apps/network/clksmpc.cpp
+ /Users/shjzhang/Documents/Develop/rocket/ROCKET/apps/network/clksmpc.cpp

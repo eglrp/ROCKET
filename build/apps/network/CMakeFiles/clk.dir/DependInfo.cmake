@@ -4,13 +4,13 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/shjzhang/Documents/Develop/gpstk/apps/network/clk.cpp" "/Users/shjzhang/Documents/Develop/gpstk/build/apps/network/CMakeFiles/clk.dir/clk.cpp.o"
+  "/Users/shjzhang/Documents/Develop/rocket/ROCKET/apps/network/clk.cpp" "/Users/shjzhang/Documents/Develop/rocket/ROCKET/build/apps/network/CMakeFiles/clk.dir/clk.cpp.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "Clang")
 
 # Targets to which this target links.
 SET(CMAKE_TARGET_LINKED_INFO_FILES
-  "/Users/shjzhang/Documents/Develop/gpstk/build/CMakeFiles/gpstk.dir/DependInfo.cmake"
+  "/Users/shjzhang/Documents/Develop/rocket/ROCKET/build/CMakeFiles/rocket.dir/DependInfo.cmake"
   )
 
 # The include file search paths:
@@ -42,7 +42,6 @@ SET(CMAKE_C_TARGET_INCLUDE_PATH
   "../lib/Math"
   "../lib/Math/Matrix"
   "../lib/Math/Vector"
-  "../lib/network"
   "../lib/PosSol"
   "../lib/Procframe"
   "../lib/ProcLib"

@@ -42,10 +42,10 @@ EQUALS = =
 CMAKE_EDIT_COMMAND = /sw/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/shjzhang/Documents/Develop/gpstk
+CMAKE_SOURCE_DIR = /Users/shjzhang/Documents/Develop/rocket/ROCKET
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/shjzhang/Documents/Develop/gpstk/build
+CMAKE_BINARY_DIR = /Users/shjzhang/Documents/Develop/rocket/ROCKET/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -82,16 +82,6 @@ install/local: preinstall
 install/local/fast: install/local
 .PHONY : install/local/fast
 
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/sw/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: install/strip
-.PHONY : install/strip/fast
-
 # Special rule for the target list_install_components
 list_install_components:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
@@ -113,14 +103,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/shjzhang/Documents/Develop/gpstk/build/CMakeFiles /Users/shjzhang/Documents/Develop/gpstk/build/apps/network/CMakeFiles/progress.marks
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/shjzhang/Documents/Develop/gpstk/build/CMakeFiles 0
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(CMAKE_COMMAND) -E cmake_progress_start /Users/shjzhang/Documents/Develop/rocket/ROCKET/build/CMakeFiles /Users/shjzhang/Documents/Develop/rocket/ROCKET/build/apps/network/CMakeFiles/progress.marks
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/shjzhang/Documents/Develop/rocket/ROCKET/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/clean
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/clean
 .PHONY : clean
 
 # The main clean target
@@ -129,22 +119,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/preinstall
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/preinstall
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 apps/network/CMakeFiles/clk.dir/rule:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clk.dir/rule
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clk.dir/rule
 .PHONY : apps/network/CMakeFiles/clk.dir/rule
 
 # Convenience name for target.
@@ -153,12 +143,12 @@ clk: apps/network/CMakeFiles/clk.dir/rule
 
 # fast build rule for target.
 clk/fast:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/build
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/build
 .PHONY : clk/fast
 
 # Convenience name for target.
 apps/network/CMakeFiles/clksmpc.dir/rule:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clksmpc.dir/rule
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clksmpc.dir/rule
 .PHONY : apps/network/CMakeFiles/clksmpc.dir/rule
 
 # Convenience name for target.
@@ -167,12 +157,12 @@ clksmpc: apps/network/CMakeFiles/clksmpc.dir/rule
 
 # fast build rule for target.
 clksmpc/fast:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/build
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/build
 .PHONY : clksmpc/fast
 
 # Convenience name for target.
 apps/network/CMakeFiles/clkupd.dir/rule:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clkupd.dir/rule
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clkupd.dir/rule
 .PHONY : apps/network/CMakeFiles/clkupd.dir/rule
 
 # Convenience name for target.
@@ -181,12 +171,12 @@ clkupd: apps/network/CMakeFiles/clkupd.dir/rule
 
 # fast build rule for target.
 clkupd/fast:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/build
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/build
 .PHONY : clkupd/fast
 
 # Convenience name for target.
 apps/network/CMakeFiles/clkupdzap.dir/rule:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clkupdzap.dir/rule
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clkupdzap.dir/rule
 .PHONY : apps/network/CMakeFiles/clkupdzap.dir/rule
 
 # Convenience name for target.
@@ -195,12 +185,12 @@ clkupdzap: apps/network/CMakeFiles/clkupdzap.dir/rule
 
 # fast build rule for target.
 clkupdzap/fast:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/build
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/build
 .PHONY : clkupdzap/fast
 
 # Convenience name for target.
 apps/network/CMakeFiles/upd.dir/rule:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/upd.dir/rule
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/upd.dir/rule
 .PHONY : apps/network/CMakeFiles/upd.dir/rule
 
 # Convenience name for target.
@@ -209,12 +199,12 @@ upd: apps/network/CMakeFiles/upd.dir/rule
 
 # fast build rule for target.
 upd/fast:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/build
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/build
 .PHONY : upd/fast
 
 # Convenience name for target.
 apps/network/CMakeFiles/updzap.dir/rule:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/updzap.dir/rule
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/updzap.dir/rule
 .PHONY : apps/network/CMakeFiles/updzap.dir/rule
 
 # Convenience name for target.
@@ -223,7 +213,7 @@ updzap: apps/network/CMakeFiles/updzap.dir/rule
 
 # fast build rule for target.
 updzap/fast:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/build
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/build
 .PHONY : updzap/fast
 
 clk.o: clk.cpp.o
@@ -231,7 +221,7 @@ clk.o: clk.cpp.o
 
 # target to build an object file
 clk.cpp.o:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.o
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.o
 .PHONY : clk.cpp.o
 
 clk.i: clk.cpp.i
@@ -239,7 +229,7 @@ clk.i: clk.cpp.i
 
 # target to preprocess a source file
 clk.cpp.i:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.i
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.i
 .PHONY : clk.cpp.i
 
 clk.s: clk.cpp.s
@@ -247,7 +237,7 @@ clk.s: clk.cpp.s
 
 # target to generate assembly for a file
 clk.cpp.s:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.s
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.s
 .PHONY : clk.cpp.s
 
 clksmpc.o: clksmpc.cpp.o
@@ -255,7 +245,7 @@ clksmpc.o: clksmpc.cpp.o
 
 # target to build an object file
 clksmpc.cpp.o:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
 .PHONY : clksmpc.cpp.o
 
 clksmpc.i: clksmpc.cpp.i
@@ -263,7 +253,7 @@ clksmpc.i: clksmpc.cpp.i
 
 # target to preprocess a source file
 clksmpc.cpp.i:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.i
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.i
 .PHONY : clksmpc.cpp.i
 
 clksmpc.s: clksmpc.cpp.s
@@ -271,7 +261,7 @@ clksmpc.s: clksmpc.cpp.s
 
 # target to generate assembly for a file
 clksmpc.cpp.s:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.s
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.s
 .PHONY : clksmpc.cpp.s
 
 clkupd.o: clkupd.cpp.o
@@ -279,7 +269,7 @@ clkupd.o: clkupd.cpp.o
 
 # target to build an object file
 clkupd.cpp.o:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.o
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.o
 .PHONY : clkupd.cpp.o
 
 clkupd.i: clkupd.cpp.i
@@ -287,7 +277,7 @@ clkupd.i: clkupd.cpp.i
 
 # target to preprocess a source file
 clkupd.cpp.i:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.i
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.i
 .PHONY : clkupd.cpp.i
 
 clkupd.s: clkupd.cpp.s
@@ -295,7 +285,7 @@ clkupd.s: clkupd.cpp.s
 
 # target to generate assembly for a file
 clkupd.cpp.s:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.s
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.s
 .PHONY : clkupd.cpp.s
 
 clkupdzap.o: clkupdzap.cpp.o
@@ -303,7 +293,7 @@ clkupdzap.o: clkupdzap.cpp.o
 
 # target to build an object file
 clkupdzap.cpp.o:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.o
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.o
 .PHONY : clkupdzap.cpp.o
 
 clkupdzap.i: clkupdzap.cpp.i
@@ -311,7 +301,7 @@ clkupdzap.i: clkupdzap.cpp.i
 
 # target to preprocess a source file
 clkupdzap.cpp.i:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.i
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.i
 .PHONY : clkupdzap.cpp.i
 
 clkupdzap.s: clkupdzap.cpp.s
@@ -319,7 +309,7 @@ clkupdzap.s: clkupdzap.cpp.s
 
 # target to generate assembly for a file
 clkupdzap.cpp.s:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.s
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.s
 .PHONY : clkupdzap.cpp.s
 
 upd.o: upd.cpp.o
@@ -327,7 +317,7 @@ upd.o: upd.cpp.o
 
 # target to build an object file
 upd.cpp.o:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.o
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.o
 .PHONY : upd.cpp.o
 
 upd.i: upd.cpp.i
@@ -335,7 +325,7 @@ upd.i: upd.cpp.i
 
 # target to preprocess a source file
 upd.cpp.i:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.i
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.i
 .PHONY : upd.cpp.i
 
 upd.s: upd.cpp.s
@@ -343,7 +333,7 @@ upd.s: upd.cpp.s
 
 # target to generate assembly for a file
 upd.cpp.s:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.s
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.s
 .PHONY : upd.cpp.s
 
 updzap.o: updzap.cpp.o
@@ -351,7 +341,7 @@ updzap.o: updzap.cpp.o
 
 # target to build an object file
 updzap.cpp.o:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.o
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.o
 .PHONY : updzap.cpp.o
 
 updzap.i: updzap.cpp.i
@@ -359,7 +349,7 @@ updzap.i: updzap.cpp.i
 
 # target to preprocess a source file
 updzap.cpp.i:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.i
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.i
 .PHONY : updzap.cpp.i
 
 updzap.s: updzap.cpp.s
@@ -367,7 +357,7 @@ updzap.s: updzap.cpp.s
 
 # target to generate assembly for a file
 updzap.cpp.s:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.s
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.s
 .PHONY : updzap.cpp.s
 
 # Help Target
@@ -383,7 +373,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... install"
 	@echo "... install/local"
-	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... upd"
@@ -417,6 +406,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /Users/shjzhang/Documents/Develop/gpstk/build && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/shjzhang/Documents/Develop/rocket/ROCKET/build && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
