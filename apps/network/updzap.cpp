@@ -14,52 +14,59 @@
 //
 //  Revision
 //
-//  2014/03/18  Get the initial time using 'YDSTime' class. You MUST set the 
-//              'TimeSystem' as well, because the time system is set as 'GPS' 
-//              for 'gnssRinex'. if you don't set it as 'GPS', you could 
-//              operate the time correctly.  
+//  2014/03/18  
+//  Get the initial time using 'YDSTime' class. You MUST set the 
+//  'TimeSystem' as well, because the time system is set as 'GPS' 
+//  for 'gnssRinex'. if you don't set it as 'GPS', you could 
+//  operate the time correctly.  
 //
-//  2014/03/18  Add 'AmbiguitySmoother' to smooth the ambiguities. you can set 
-//              the type using the method 'setSmoothedType()'.  
+//  2014/03/18  
+//  Add 'AmbiguitySmoother' to smooth the ambiguities. you can set 
+//  the type using the method 'setSmoothedType()'.  
 //
-//  2014/03/18  'PhaseCodeAlignment' is used to calibrate the phase with code. 
-//              The old class 'PhaseCalibration' is deprecated.  
+//  2014/03/18  
+//  'PhaseCodeAlignment' is used to calibrate the phase with code. 
+//  The old class 'PhaseCalibration' is deprecated.  
 //  
-//  2014/11/14  Comment the 'AmbiguitySmoother' for BLC. We will determine the 
-//              UPD for LC epoch by epoch, supposing that the upd has the
-//              characteristics of white-noise.
+//  2014/11/14  
+//  Comment the 'AmbiguitySmoother' for BLC. We will determine the 
+//  UPD for LC epoch by epoch, supposing that the upd has the
+//  characteristics of white-noise.
 //
-//  2014/12/02  Comment the 'AmbiguitySmoother' for Widelane ambiguity
-//              smoothing. The experiments show that if the smoothed values
-//              are used to determine widelane UPD, the fixing rate of PPP with 
-//              the 'smoothed' UPDs is lower that that with the 'epoch-by-epoch'
-//              UPDs.
+//  2014/12/02  
+//  Comment the 'AmbiguitySmoother' for Widelane ambiguity
+//  smoothing. The experiments show that if the smoothed values
+//  are used to determine widelane UPD, the fixing rate of PPP with 
+//  the 'smoothed' UPDs is lower that that with the 'epoch-by-epoch'
+//  UPDs.
 //
-// 2014/12/09   Repalce the 'SolverGenWL/SolverGenNL' with 'SolverZapWL/SolverZapNL'
+//  2014/12/09   
+//  Repalce the 'SolverGenWL/SolverGenNL' with 'SolverZapWL/SolverZapNL'
 //
-// 2014/12/09   The UPD model has two different models:
-//              MW/LC <==> LW/LC 
-//              L1/L2 <==> L1/LW
-//              When the P1/P2 are used, the two class are identical.
-//              However, when the C1 is used, 
-//              MW/LC, LW/LC  </=> L1/L2, L1,LW
+//  2014/12/09   
+//  The UPD model has two different models:
+//  MW/LC <==> LW/LC 
+//  L1/L2 <==> L1/LW
+//  When the P1/P2 are used, the two class are identical.
+//  However, when the C1 is used, 
+//  MW/LC, LW/LC  </=> L1/L2, L1,LW
 //
-//              And, the LW/LC and L1, LW will be the two basic models. 
-//              
-//              If No constraints are appliced to the PPP model, 
-//              in theory, the L1/LW will has fast convergence.
-//              However, Owing to the spatial and temporal variations of 
-//              ionospheric delays and tropospheric delays, the LW/LC and L1/LW 
-//              will converge with different speed. 
+//  And, the LW/LC and L1, LW will be the two basic models. 
+//  If No constraints are appliced to the PPP model, 
+//  in theory, the L1/LW will has fast convergence.
+//  However, Owing to the spatial and temporal variations of 
+//  ionospheric delays and tropospheric delays, the LW/LC and L1/LW 
+//  will converge with different speed. 
 //
-//              Specially, for the sparse PPP-RTK, the model of LW/LC will
-//              have faster convergence than the L1/LW, because of the relative
-//              small variation of tropospheric delays than ionospheric delays.
+//  Specially, for the sparse PPP-RTK, the model of LW/LC will
+//  have faster convergence than the L1/LW, because of the relative
+//  small variation of tropospheric delays than ionospheric delays.
 //
-//              So, The upd/updx are two basic upd estiamtion for diffent models. 
+//  So, The upd/updx are two basic upd estiamtion for diffent models. 
 //
-// 2015/6/04    fast upd computation method by removing the fixed ambiguities 
-//              from the equations.
+//  2015/6/04    
+//  fast upd computation method by removing the fixed ambiguities 
+//  from the equations.
 //
 //============================================================================
 
@@ -190,12 +197,6 @@
 
    // Class to time conversion between different time system
 #include "Epoch.hpp"
-
-   // Class to deal with the ambiguity constraints for solver
-#include "AmbiguityDatum.hpp"
-
-   // Class to deal with the ambiguity constraints for solver
-#include "AmbiguityDatum2.hpp"
 
    // Class to smooth the ambiguities
 #include "AmbiguitySmoother.hpp"

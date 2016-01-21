@@ -123,10 +123,8 @@ apps/network/CMakeFiles/updzap.dir/updzap.cpp.o
  ../lib/Utilities/StringUtils.hpp
  ../lib/Utilities/ValidType.hpp
  ../lib/Utilities/gpstkplatform.h
- ../lib/deprecate/AmbiguityDatum2.hpp
  ../lib/deprecate/gps_constants.hpp
  ../lib/dev/ARRound.hpp
- ../lib/dev/AmbiguityDatum.hpp
  ../lib/dev/AmbiguitySmoother.hpp
  ../lib/dev/Arc.hpp
  ../lib/dev/BasicModel.hpp

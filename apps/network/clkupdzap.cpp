@@ -145,9 +145,6 @@
 #include "Epoch.hpp"
 
    // Class to deal with the ambiguity constraints for solver
-#include "AmbiguityDatum.hpp"
-
-   // Class to deal with the ambiguity constraints for solver
 #include "IndepAmbiguityDatum.hpp"
 
    // Class to smooth the ambiguities

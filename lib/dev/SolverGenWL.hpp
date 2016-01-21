@@ -35,7 +35,6 @@
 #include <set>
 #include "CommonTime.hpp"
 #include "IndepAmbiguityDatum.hpp"
-#include "AmbiguityDatum.hpp"
 #include "ProcessingClass.hpp"
 #include "EquationSystem2.hpp"
 #include "StochasticModel.hpp"

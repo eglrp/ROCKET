@@ -13,24 +13,28 @@
 //  
 //  Shoujian Zhang, Wuhan University, 2010, 2011 
 //
+//============================================================================
+//
 //  History
 //  -------
 //
-//  2012/05/12  Create this program at 2012.05.12 
+//  2012/05/12  
+//  Create this program at 2012.05.12 
 //
-//  2014/10/14  clkest is modified from the old version, since many classes has
-//              been changed.
-//              - remove class 'phaseCalibration', instead the 'PhaseCodeAligment'
-//                is used to aligh the phase observables to code ones.
+//  2014/10/14  
+//  clkest is modified from the old version, since many classes has
+//  been changed.
+//  - remove class 'phaseCalibration', instead the 'PhaseCodeAligment'
+//  is used to aligh the phase observables to code ones.
 //
-//  2015/07/24  Major revsion
-//
-//              This version use a new designed solver, 'SolverGeneral2'. The
-//              new version of clock solver impove the computational speed
-//              greatly by redesign the time udpate and measurement update of
-//              the kalman filter.
-//              In the measurement update, the update is basen on single-
-//              observable each time.
+//  2015/07/24  
+//  Major revsion
+//  This version use a new designed solver, 'SolverGeneral2'. The
+//  new version of clock solver impove the computational speed
+//  greatly by redesign the time udpate and measurement update of
+//  the kalman filter.
+//  In the measurement update, the update is basen on single-
+//  observable each time.
 //
 //============================================================================
 
@@ -156,9 +160,6 @@
 
 
 #include "Epoch.hpp"
-
-   // Class to deal with the ambiguity constraints for solver
-#include "AmbiguityDatum.hpp"
 
    // Class to filter out the PC outliers using prefit-residual
 #include "PrefitFilter.hpp"

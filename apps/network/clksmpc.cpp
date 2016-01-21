@@ -146,9 +146,6 @@
 
 #include "Epoch.hpp"
 
-   // Class to deal with the ambiguity constraints for solver
-#include "AmbiguityDatum.hpp"
-
    // Class to filter out the PC outliers using prefit-residual
 #include "PrefitFilter.hpp"
 

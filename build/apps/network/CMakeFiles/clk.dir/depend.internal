@@ -123,9 +123,6 @@ apps/network/CMakeFiles/clk.dir/clk.cpp.o
  ../lib/Utilities/ValidType.hpp
  ../lib/Utilities/gpstkplatform.h
  ../lib/deprecate/gps_constants.hpp
- ../lib/dev/ARRound.hpp
- ../lib/dev/AmbiguityDatum.hpp
- ../lib/dev/Arc.hpp
  ../lib/dev/BasicModel.hpp
  ../lib/dev/ClockSatStore.hpp
  ../lib/dev/CodeKalmanSolver.hpp
@@ -134,10 +131,8 @@ apps/network/CMakeFiles/clk.dir/clk.cpp.o
  ../lib/dev/DataStructures.hpp
  ../lib/dev/Decimate.hpp
  ../lib/dev/EOPDataStore.hpp
- ../lib/dev/Edge.hpp
  ../lib/dev/Equation.hpp
  ../lib/dev/EquationSystem2.hpp
- ../lib/dev/Kruskal.hpp
  ../lib/dev/LICSDetector.hpp
  ../lib/dev/LICSDetector2.hpp
  ../lib/dev/LinearCombinations.hpp
@@ -154,10 +149,8 @@ apps/network/CMakeFiles/clk.dir/clk.cpp.o
  ../lib/dev/SolverLMS.hpp
  ../lib/dev/SolverPPP.hpp
  ../lib/dev/SourceID.hpp
- ../lib/dev/SpecialFunctions.hpp
  ../lib/dev/StochasticModel.hpp
  ../lib/dev/TabularSatStore.hpp
  ../lib/dev/TypeID.hpp
  ../lib/dev/Variable.hpp
- ../lib/dev/Vertex.hpp
  /Users/shjzhang/Documents/Develop/rocket/ROCKET/apps/network/clk.cpp

@@ -34,7 +34,6 @@
 #include <list>
 #include <set>
 #include "CommonTime.hpp"
-#include "AmbiguityDatum2.hpp"
 #include "IndepAmbiguityDatum.hpp"
 #include "ProcessingClass.hpp"
 #include "EquationSystem2.hpp"
@@ -289,7 +288,6 @@ namespace gpstk
 
       
          /// Ambiguity Datum system
-      AmbiguityDatum2 ambiguityDatum;
       IndepAmbiguityDatum indepAmbDatum;
 
          /// Current set of unknowns

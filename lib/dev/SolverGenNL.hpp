@@ -5,8 +5,8 @@
  * General Solver with ambiguity fixing.
  */
 
-#ifndef GPSTK_SOLVERGENNL2_HPP
-#define GPSTK_SOLVERGENNL2_HPP
+#ifndef GPSTK_SOLVERGENNL_HPP
+#define GPSTK_SOLVERGENNL_HPP
 
 //============================================================================
 //
@@ -35,7 +35,6 @@
 #include <set>
 #include "CommonTime.hpp"
 #include "IndepAmbiguityDatum.hpp"
-#include "AmbiguityDatum.hpp"
 #include "ProcessingClass.hpp"
 #include "EquationSystem2.hpp"
 #include "StochasticModel.hpp"
@@ -425,4 +424,4 @@ namespace gpstk
       //@}
 
 }  // End of namespace gpstk
-#endif   // GPSTK_SOLVERGENNL2_HPP
+#endif   // GPSTK_SOLVERGENNL_HPP

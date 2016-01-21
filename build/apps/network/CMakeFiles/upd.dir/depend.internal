@@ -125,7 +125,6 @@ apps/network/CMakeFiles/upd.dir/upd.cpp.o
  ../lib/Utilities/gpstkplatform.h
  ../lib/deprecate/gps_constants.hpp
  ../lib/dev/ARRound.hpp
- ../lib/dev/AmbiguityDatum.hpp
  ../lib/dev/AmbiguitySmoother.hpp
  ../lib/dev/Arc.hpp
  ../lib/dev/BasicModel.hpp
