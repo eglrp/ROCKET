@@ -2,8 +2,7 @@
 
                      ROCKET
 
-The ROCKET is a software for Real-time Oribt determination, ClocK Estimation 
-Tookit. 
+The ROCKET is a Real-time Oribt determination, ClocK Estimation Tookit. 
 
 In order to solve satellite orbits, clocks and other satellite-related products,
 such as DCBs and UPDs. A new software should be designed according to the most
