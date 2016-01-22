@@ -1,21 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file SatOrbitPropagator.hpp
-* 
-*/
-
-#ifndef GPSTK_SAT_ORBIT_PROPAGATOR_HPP
-#define GPSTK_SAT_ORBIT_PROPAGATOR_HPP
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -26,10 +15,33 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
+
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+* @file SatOrbitPropagator.hpp
+* 
+*/
+
+#ifndef GPSTK_SAT_ORBIT_PROPAGATOR_HPP
+#define GPSTK_SAT_ORBIT_PROPAGATOR_HPP
 
 #include <iostream>
 #include <string>
@@ -52,7 +64,7 @@ namespace gpstk
        *
        * cout<<fixed<<setprecision(6);
        *
-       * UTCTime utc0(1999,3,1,0,0,0.0);
+       * CommonTime utc0(1999,3,1,0,0,0.0);
        * gpstk::Vector<double> rv0(6,0.0);
        * rv0(0) = 2682920.8943;
        * rv0(1) = 4652720.5672;
@@ -61,9 +73,9 @@ namespace gpstk
        * rv0(4) = 4183.3573;
        * rv0(5) = -5989.0576;
        *
-       * OrbitPropagator op;
-       * op.setInitState(utc0,rv0);
-       * op.setStepSize(30.0);
+       * SatOrbitPropagator sop;
+       * sop.setInitState(utc0,rv0);
+       * sop.setStepSize(30.0);
        * 
        * double tt=3600.0*12;
        * double step=1.0;
@@ -72,10 +84,10 @@ namespace gpstk
        * double t=0.0;
        * while(t<tt)
        * {
-       *   bool isOk = op.integrateTo(t+step);
+       *   bool isOk = sop.integrateTo(t+step);
        * 
-       *   cout<<op.getCurTime()<<" "
-       *      <<op.rvState()<<endl;
+       *   cout<<sop.getCurTime()<<" "
+       *      <<sop.rvState()<<endl;
        *
        *   t+=step;
        * }
@@ -97,7 +109,7 @@ namespace gpstk
       /* set force model setting
       */
       //void setForceModel(ForceModelSetting& fms);
-   
+
 
          /// set integrator, default is Rungge-Kutta 78
       SatOrbitPropagator& setIntegrator(Integrator* pIntg)
@@ -111,7 +123,7 @@ namespace gpstk
          /// set equation of motion of the orbit
       SatOrbitPropagator& setOrbit(SatOrbit* porbit)
       { pOrbit = porbit; return (*this); }
-      
+
 
          /// set the orbit to the default one
       SatOrbitPropagator& setDefaultOrbit()
@@ -127,7 +139,7 @@ namespace gpstk
           * @param rv0    init state
           * @return       
           */
-      SatOrbitPropagator& setInitState(UTCTime utc0, Vector<double> rv0);
+      SatOrbitPropagator& setInitState(CommonTime utc0, Vector<double> rv0);
       
 
          /** Take a single integration step.
@@ -149,8 +161,8 @@ namespace gpstk
       { return sMatrix; }
 
          /// return the current epoch
-      UTCTime getCurTime()
-      { UTCTime utc = pOrbit->getRefEpoch(); utc += curT; return utc;}
+      CommonTime getCurTime()
+      { CommonTime utc = pOrbit->getRefEpoch(); utc += curT; return utc;}
 
          /// return the current state
       Vector<double> getCurState()
@@ -165,7 +177,7 @@ namespace gpstk
       { return pOrbit; }
 
          /// write curT curState to a file
-      void writeToFile(ostream& s);
+      void writeToFile(std::ostream& s);
 
       /*
       * try to integrate ephemeris and print it to a file
@@ -176,15 +188,11 @@ namespace gpstk
       //void makeSatEph(OrbitSetting& os,string fileName);
       //void makeRefSatEph(OrbitSetting& os,string fileName);
 
-      /* For Testing and Debuging...
-      */
-      void test();
-
    protected:
 
          /** Take a single integration step.
           *
-          * @param x     time or independent variable
+          * @param t     time or independent variable
           * @param y     containing needed inputs (usually the state)
           * @param tf    next time
           * @return      containing the new state
@@ -204,7 +212,7 @@ namespace gpstk
       void setState(Vector<double> state);
 
          /// set reference epoch
-      void setRefEpoch(UTCTime utc)
+      void setRefEpoch(CommonTime utc)
       { pOrbit->setRefEpoch(utc); }
 
          /// update phiMatrix sMatrix and rvState from curState
@@ -225,7 +233,7 @@ namespace gpstk
       SatOrbit   defaultOrbit;
             
          /// current time since reference epoch
-      double curT;         
+      double curT;
 
          /// current state
          // r        3
@@ -236,18 +244,18 @@ namespace gpstk
          // dv_dr0   3*3
          // dv_dv0   3*3
          // dv_dp0   3*np
-      Vector<double> curState;         // 42+6*np
+      Vector<double> curState;      // 42+6*np
       
          /// the position and velocity
       Vector<double> rvVector;      // 6
 
          /// state transition matrix
-      Matrix<double> phiMatrix;      // 6*6
+      Matrix<double> phiMatrix;     // 6*6
       
          /// the sensitivity matrix 
-      Matrix<double> sMatrix;         // 6*np
+      Matrix<double> sMatrix;       // 6*np
       
-
+         /// the force model type set
       std::set<ForceModel::ForceModelType> setFMT;
 
    }; // End of class 'SatOrbitPropagator'
@@ -259,7 +267,7 @@ namespace gpstk
        * @param t CommonTime to append to stream  s.
        * @return reference to  s.
        */
-   ostream& operator<<(ostream& s, SatOrbitPropagator& op);
+   std::ostream& operator<<(std::ostream& s, SatOrbitPropagator& op);
 
       // @}
 
@@ -267,9 +275,3 @@ namespace gpstk
 
 
 #endif   // GPSTK_SAT_ORBIT_PROPAGATOR_HPP
-
-
-
-
-
-

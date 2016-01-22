@@ -40,7 +40,6 @@
 #include "CommonTime.hpp"
 #include "BLQDataReader.hpp"
 #include "GNSSconstants.hpp"
-#include "geometry.hpp"
 
 
 namespace gpstk

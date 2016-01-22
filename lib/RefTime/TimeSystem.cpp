@@ -1,12 +1,10 @@
-/// TimeSystem.cpp
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -17,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -25,16 +23,18 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software.
+//duplicate, distribute, disclose, or release this software. 
 //
-//Pursuant to DoD Directive 523024
+//Pursuant to DoD Directive 523024 
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
 //                           release, distribution is unlimited.
 //
 //=============================================================================
+
+/// TimeSystem.cpp
 
 #include <cmath>
 #include "TimeSystem.hpp"
@@ -58,9 +58,10 @@ namespace gpstk
        string("QZS"),
        string("BDT"),
        string("UTC"),
+       string("UT1"),
        string("TAI"),
        string("TT"),
-       string("TRT"),
+       string("TDB"),
      };
 
    void TimeSystem::setTimeSystem(const Systems& sys)
@@ -71,8 +72,7 @@ namespace gpstk
          system = sys;
    }
 
-   void TimeSystem::fromString(const string str)
-
+   void TimeSystem::fromString(const string& str)
    {
       system = Unknown;
       for(int i=0; i<count; i++) {
@@ -94,9 +94,9 @@ namespace gpstk
    // NB. Input day in a floating quantity and thus any epoch may be represented;
    // this is relevant the period 1960 to 1972, when UTC-TAI was not integral.
    // NB. GPS = TAI - 19sec and so GPS-UTC = getLeapSeconds()-19.
-   double TimeSystem::getLeapSeconds(const int& year,
-                                     const int& month,
-                                     const double& day)
+   double TimeSystem::getLeapSeconds(const int year,
+                                     const int month,
+                                     const double day)
    {
       // Leap second data --------------------------------------------------------
       // number of changes before leap seconds (1960-1971) - this should never change.
@@ -153,7 +153,8 @@ namespace gpstk
          { 1999,  1, 32 },
          { 2006,  1, 33 },
          { 2009,  1, 34 },
-         { 2012,  7, 35 }, // leave the last comma!
+         { 2012,  7, 35 },
+         { 2015,  7, 36 },// leave the last comma!
          // add new entry here, of the form:
          // { year, month(1-12), leap_sec }, // leave the last comma!
       };
@@ -208,8 +209,11 @@ namespace gpstk
    // @param int month, month (1-12) of the time to be converted.
    // @return double dt, correction (sec) to be added to t(in) to yield t(out).
    // @throw if input system(s) are invalid or Unknown.
-   double TimeSystem::Correction(const TimeSystem& inTS, const TimeSystem& outTS,
-                                 const int& year, const int& month, const double& day)
+   double TimeSystem::Correction(const TimeSystem& inTS,
+                                 const TimeSystem& outTS,
+                                 const int year,
+                                 const int month,
+                                 const double day)
    {
       double dt(0.0);
 
@@ -232,59 +236,71 @@ namespace gpstk
          double TJ2000(jday-2451545.5+frac);     // t-J2000
          //       0.0001657 sec * sin(357.53 + 0.98560028 * TJ2000 deg)
          frac = ::fmod(0.017201969994578 * TJ2000, 6.2831853071796);
-         TDBmTT = 0.0001657 * ::sin(6.240075674 + frac);
+         TDBmTT = 0.001657 * ::sin(6.240075674 + frac);
          //        0.000022 sec * sin(246.11 + 0.90251792 * TJ2000 deg)
          frac = ::fmod(0.015751909262251 * TJ2000, 6.2831853071796);
+         frac = 0.015751909262251 * TJ2000;
          TDBmTT += 0.000022  * ::sin(4.295429822 + frac);
       }
 
       // -----------------------------------------------------------
       // conversions: first convert inTS->TAI ...
       // TAI = GPS + 19s
+      // TAI = GAL + 19s
       // TAI = UTC + getLeapSeconds()
+      // TAI = GLO + getLeapSeconds()
+      // TAI = UT1 - UT1mUTC + getLeapSeconds()
+      // TAI = BDT + 33s
       // TAI = TT - 32.184s
+      // TAI = TDB - TDBmTT - 32.184s
       if(inTS == GPS ||       // GPS -> TAI
          inTS == GAL)         // GAL -> TAI
          dt = 19.;
-      else if(inTS == UTC |   // UTC -> TAI
-              inTS == BDT |   // BDT -> TAI           // TD is this right?
+      else if(inTS == UTC ||  // UTC -> TAI
               inTS == GLO)    // GLO -> TAI
          dt = getLeapSeconds(year, month, day);
-      //else if(inTS == BDT)    // BDT -> TAI         // RINEX 3.02 seems to say this
-      //   dt = 34.;
-      else if(inTS == TAI)    // TAI
-         ;
+//      else if(inTS == UT1)
+//         dt = -UT1mUTC + getLeapSeconds(year, month, day);
+      else if(inTS == BDT)    // BDT -> TAI         // RINEX 3.02 seems to say this
+         dt = 33.;
+      else if(inTS == TAI)    // TAI -> TAI
+         dt = 0.;
       else if(inTS == TT)     // TT -> TAI
          dt = -32.184;
       else if(inTS == TDB)    // TDB -> TAI
-         dt = -32.184 + TDBmTT;
+         dt = -32.184 - TDBmTT;
       else {                              // other
          Exception e("Invalid input TimeSystem " + inTS.asString());
          GPSTK_THROW(e);
       }
 
+
       // -----------------------------------------------------------
       // ... then convert TAI->outTS
       // GPS = TAI - 19s
+      // GAL = TAI - 19s
       // UTC = TAI - getLeapSeconds()
+      // GLO = TAI - getLeapSeconds()
+      // UT1 = TAI - getLeapSeconds() + UT1mUTC
+      // BDT = TAI - 33s
       // TT = TAI + 32.184s
+      // TDB = TAI + 32.184s + TDBmTT
       if(outTS == GPS ||      // TAI -> GPS
          outTS == GAL)        // TAI -> GAL
          dt -= 19.;
-      else if(outTS == UTC |  // TAI -> UTC
-              outTS == BDT |  // TAI -> BDT
+      else if(outTS == UTC || // TAI -> UTC
               outTS == GLO)   // TAI -> GLO
          dt -= getLeapSeconds(year, month, day);
-      //else if(outTS == BDT)   // TAI -> BDT
-      //   dt -= 34.;
+//      esle if(outTS == UT1)
+//         dt -= getLeapSeconds(year, month, day) - UT1mUTC;
+      else if(outTS == BDT)   // TAI -> BDT
+         dt -= 33.;
       else if(outTS == TAI)   // TAI
-         ;
+         dt -= 0.;
       else if(outTS == TT)    // TAI -> TT
          dt += 32.184;
       else if(outTS == TDB)   // TAI -> TDB
-         dt += 32.184 - TDBmTT;
-      else if(outTS == GAL)   // TD
-         dt = 0.0;
+         dt += 32.184 + TDBmTT;
       else {                              // other
          Exception e("Invalid output TimeSystem " + outTS.asString());
          GPSTK_THROW(e);

@@ -175,7 +175,7 @@ namespace gpstk
        * "setReceiverClockModel()". However, you are not allowed to change the
        * phase biases stochastic model.
        *
-       * For instance, in orden to use a 'full kinematic' mode we assign a white
+       * For instance, in order to use a 'full kinematic' mode we assign a white
        * noise model to all the coordinates:
        *
        * @code

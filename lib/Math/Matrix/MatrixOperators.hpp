@@ -1,12 +1,10 @@
-#pragma ident "$Id$"
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -21,6 +19,20 @@
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
+
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
 
 /**
  * @file MatrixOperators.hpp
@@ -918,27 +930,6 @@ namespace gpstk
       return M;
    }
 
-/**
- * Compute the outer product of vectors v and vT.
- */
-   template <class T, class BaseClass>
-   inline Matrix<T> outer(const ConstVectorBase<T, BaseClass>& v)
-      throw (MatrixException)
-   {
-      if(v.size() == 0) {
-         MatrixException e("Zero length vector(s)");
-         GPSTK_THROW(e);
-      }
-      Matrix<T> M(v.size(),v.size(),T(0));
-      for(size_t i=0; i<v.size(); i++)
-      {
-         M(i,i) = v(i)*v(i);
-         for(size_t j=i+1; j<v.size(); j++)
-            M(i,j) = M(j,i) =  v(i)*v(j);
-      }
-      return M;
-   }
-
 /// Multiplies all the elements of m by d.
    template <class T, class BaseClass>
    inline Matrix<T> operator* (const ConstMatrixBase<T, BaseClass>& m, const T d)
@@ -1001,6 +992,19 @@ namespace gpstk
    {
       Matrix<T> temp(m);
       return temp -= d;
+   }
+
+/// Return the skew symmetric matrix of v.
+   template <class T, class BaseClass>
+   inline Matrix<T> skewSymm(const ConstVectorBase<T, BaseClass>& v)
+   {
+	   Matrix<T> temp(3,3,T(0));
+
+	   temp(0,1) = -v(2); temp(1,0) =  v(2);
+	   temp(0,2) =  v(1); temp(2,0) = -v(1);
+	   temp(1,2) = -v(0); temp(2,1) =  v(0);
+
+	   return temp;
    }
 
    //@}

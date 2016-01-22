@@ -43,7 +43,6 @@
 #include "SimpleIURAWeight.hpp"
 #include "TropModel.hpp"
 #include "GNSSconstants.hpp"
-#include "geometry.hpp"                   // DEG_TO_RAD
 #include <cmath>
 #include <vector>
 

@@ -36,8 +36,9 @@
 //============================================================================
 
 
-#include "geometry.hpp"
 #include "ComputeElevWeights.hpp"
+
+#include "GNSSconstants.hpp"
 
 
 namespace gpstk

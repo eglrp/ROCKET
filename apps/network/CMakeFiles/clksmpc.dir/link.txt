@@ -1,0 +1,1 @@
+/usr/bin/c++       CMakeFiles/clksmpc.dir/clksmpc.cpp.o  -o clksmpc -rdynamic ../../librocket.so -Wl,-rpath,/home/kfkuang/rocket::::: 

@@ -1,18 +1,10 @@
-
-#pragma ident "$Id$"
-
-/**
-* @file Spacecraft.cpp
-* The Spacecraft class encapsulates physical parameters.
-*/
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,32 +15,55 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+* @file Spacecraft.cpp
+* The Spacecraft class encapsulates physical parameters.
+*/
+
 #include "Spacecraft.hpp"
 #include "Exception.hpp"
+
+using namespace std;
 
 namespace gpstk
 {
 
-      // Default constructor
-   Spacecraft::Spacecraft(std::string name)
+   // default constructor
+   Spacecraft::Spacecraft(string name)
    {
       scName = name;
 
-      reflectCoeff= 1.0;      //
-      dragCoeff   = 2.0;      //
-      crossArea   = 5;         // m^2
-      dryMass      = 1000;      // kg
+      reflectCoeff = 1.0;   //
+      dragCoeff = 2.0;      //
+      crossArea = 5;        // m^2
+      dryMass = 1000;       // kg
+      blockNum = 0;         //
 
       resetState();
-
    }
 
 
+   // reset State
    void Spacecraft::resetState()
    {
       // resize
@@ -74,6 +89,8 @@ namespace gpstk
       dv_dv0(8) = 1.0;
    }
 
+
+   // init State Vector
    void Spacecraft::initStateVector(Vector<double> rv, Vector<double> dp)
    {
       // first the size of input vector should be checked
@@ -106,7 +123,85 @@ namespace gpstk
 
    }  // End of method 'Spacecraft::initStateVector()'
 
-      // Get Transition Matrix
+
+   // get State Vector 6*(np+7)
+   Vector<double> Spacecraft::getStateVector()
+   {
+      const int np=p.size();
+      Vector<double> y(6*np+42);
+
+      // position and velocity
+      y(0) = r(0);
+      y(1) = r(1);
+      y(2) = r(2);
+      y(3) = v(0);
+      y(4) = v(1);
+      y(5) = v(2);
+      
+      // transition matrix
+      for(int i=0;i<9;i++)
+      {
+         y(6+i) = dr_dr0(i);
+         y(15+i) = dr_dv0(i);
+         
+         y(24+3*np+i) = dv_dr0(i);
+         y(33+3*np+i) = dv_dv0(i);
+      }
+
+      // sensitivity matrix
+      for(int i=0;i<3*np;i++)
+      {
+         y(24+i) = dr_dp0(i);
+         y(42+3*np+i) = dv_dp0(i);
+      }
+
+      return y;
+
+   }  // End of method 'Spacecraft::getStateVector()'
+
+
+   // set State Vector 
+   void Spacecraft::setStateVector(Vector<double> y)
+   {
+      // check the size of y !!!
+
+      const int dim = y.size();
+      const int np = (dim-42)/6;
+      
+      // resize the force model parameters
+//      p.resize(np,0.0);
+      dr_dp0.resize(3*np,0.0);
+      dv_dp0.resize(3*np,0.0);
+      
+      // set position and velocity
+      r(0) = y(0);
+      r(1) = y(1);
+      r(2) = y(2);
+      v(0) = y(3);
+      v(1) = y(4);
+      v(2) = y(5);
+
+      // set transition matrix
+      for(int i=0;i<9;i++)
+      {
+         dr_dr0(i) = y(6+i);
+         dr_dv0(i) = y(15+i);
+
+         dv_dr0(i) = y(24+3*np+i);
+         dv_dv0(i) = y(33+3*np+i);
+      }
+      
+      // set sensitivity matrix
+      for(int i=0;i<3*np;i++)
+      {
+         dr_dp0(i) = y(24+i);
+         dv_dp0(i) = y(42+3*np+i);
+      }
+
+   }  // End of method 'Spacecraft::setStateVector(Vector<double> y)'
+
+
+   // get Transition Matrix
    Matrix<double> Spacecraft::getTransitionMatrix()
    {
       /* Transition Matrix
@@ -115,13 +210,13 @@ namespace gpstk
           |                          |
       phi=| dv_dr0   dv_dv0   dv_dp0 |
           |                          |
-          | 0         0           I    |
+          | 0        0        I      |
           |                          |
       */
       
       const int np=p.size();
 
-      Matrix<double> phiMatrix(np+6,np+6,0.0);
+      Matrix<double> phiMatrix(6+np,6+np,0.0);
       
       /// dr/dr0
       phiMatrix(0,0)=dr_dr0(0);
@@ -164,7 +259,7 @@ namespace gpstk
       phiMatrix(5,4)=dv_dv0(7);
       phiMatrix(5,5)=dv_dv0(8);
 
-      /// dr/dp0
+      /// dr/dp0, dv/dp0
       for(int i=0;i<np;i++)
       {
          phiMatrix(0,i+6) = dr_dp0(i+0*np);
@@ -185,15 +280,18 @@ namespace gpstk
    }  // End of method 'Spacecraft::getTransitionMatrix()'
 
 
+   // set Transition Matrix
    void Spacecraft::setTransitionMatrix(Matrix<double> phiMatrix)
    {
+      // check the size of phiMatrix !!!
+
       /* Transition Matrix
           |                          |
           | dr_dr0   dr_dv0   dr_dp0 |
           |                          |
       phi=| dv_dr0   dv_dv0   dv_dp0 |
           |                          |
-          | 0         0          I     |
+          | 0        0        I      |
           |                          |
       */
 
@@ -245,7 +343,7 @@ namespace gpstk
       dv_dv0(7) = phiMatrix(5,4);
       dv_dv0(8) = phiMatrix(5,5);
 
-      // dr/dp0
+      // dr/dp0, dv/dp0
       for(int i=0;i<np;i++)
       {
          dr_dp0(i+0*np) = phiMatrix(0,i+6);
@@ -270,8 +368,6 @@ namespace gpstk
           | dv_dr0   dv_dv0  |
           |                  |
       */
-      const int np=p.size();
-#pragma unused(np)
 
       Matrix<double> phiMatrix(6,6,0.0);
 
@@ -320,6 +416,7 @@ namespace gpstk
 
    }  // End of method 'Spacecraft::getStateTransitionMatrix()'
 
+
    // get Sensitivity Matrix 6*np
    Matrix<double> Spacecraft::getSensitivityMatrix()
    {
@@ -333,7 +430,7 @@ namespace gpstk
       const int np=p.size();
 
       Matrix<double> sMatrix(6,np,0.0);
-      
+
       for(int i=0;i<np;i++)
       {
          sMatrix(0,i) = dr_dp0(i+0*np);
@@ -350,71 +447,7 @@ namespace gpstk
    }  // End of method 'Spacecraft::getSensitivityMatrix()'
 
 
-   Vector<double> Spacecraft::getStateVector()
-   {
-      const int np=p.size();
-      Vector<double> y(6*np+42);
-
-      y(0) = r(0);
-      y(1) = r(1);
-      y(2) = r(2);
-      y(3) = v(0);
-      y(4) = v(1); 
-      y(5) = v(2);
-      
-      for(int i=0;i<9;i++)
-      {
-         y(6+i) = dr_dr0(i);
-         y(15+i) = dr_dv0(i);
-         
-         y(24+3*np+i) = dv_dr0(i);
-         y(33+3*np+i) = dv_dv0(i);
-      }
-      for(int i=0;i<3*np;i++)
-      {
-         y(24+i) = dr_dp0(i);
-         y(42+3*np+i) = dv_dp0(i);
-      }
-
-      return y;
-
-   }  // End of method 'Spacecraft::getStateVector()'
-
-
-   void Spacecraft::setStateVector(Vector<double> y)
-   {
-      const int dim = y.size();
-      const int np = (dim-42)/6;
-      
-      // resize the vectors
-      p.resize(np,0.0);
-      dr_dp0.resize(3*np,0.0);
-      dv_dp0.resize(3*np,0.0);
-      
-      r(0) = y(0);
-      r(1) = y(1);
-      r(2) = y(2);
-      v(0) = y(3);
-      v(1) = y(4);
-      v(2) = y(5);
-
-      for(int i=0;i<9;i++)
-      {
-         dr_dr0(i) = y(6+i);
-         dr_dv0(i) = y(15+i);
-
-         dv_dr0(i) = y(24+3*np+i);
-         dv_dv0(i) = y(33+3*np+i);
-      }
-      
-      for(int i=0;i<3*np;i++)
-      {
-         dr_dp0(i) = y(24+i);
-         dv_dp0(i) = y(42+3*np+i);
-      }
-
-   }  // End of method 'Spacecraft::setStateVector(Vector<double> y)'
-
+   // test
    void Spacecraft::test()
    {
       cout<<"testing Spacecraft"<<endl;
@@ -450,18 +483,16 @@ namespace gpstk
    }   // End of method 'Spacecraft::test()'
 
 
-      // Stream output for CommonTime objects.  Typically used for debugging.
-      // @param s stream to append formatted CommonTime to.
-      // @param t Spacecraft to append to stream \c s.
+      // Stream output for Spacecraft objects.  Typically used for debugging.
+      // @param s stream to append formatted Spacecraft to.
+      // @param sc Spacecraft to append to stream \c s.
       // @return reference to \c s.
    ostream& operator<<( ostream& s, 
                         const gpstk::Spacecraft& sc )
    {
-      // s << endl;
 
       return s;
 
    }  // End of 'ostream& operator<<()'
 
 }  // End of namespace 'gpstk'
-

@@ -1,18 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file RungeKuttaFehlberg.cpp
- * This class do integrations with Runge Kutta Fehlberg algorithm.
- */
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,18 +15,38 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file RungeKuttaFehlberg.cpp
+ * This class do integrations with Runge Kutta Fehlberg algorithm.
+ */
+
 #include "RungeKuttaFehlberg.hpp"
+
+using namespace std;
 
 namespace gpstk
 {
-   using namespace std;
-
-   const double RungeKuttaFehlberg::RKF_EPS = 1.0-30; 
+   const double RungeKuttaFehlberg::RKF_EPS = 1.0-30;
 
    const double RungeKuttaFehlberg::RKF_MAXSTEP = 1000000;
       
@@ -113,18 +125,18 @@ namespace gpstk
       // c1
       {
          41.0 / 840,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            34.0 / 105.0,
-            9.0 / 35.0,
-            9.0 / 35.0,
-            9.0 / 280.0,
-            9.0 / 280.0,
-            41.0 / 840.0,
-            0.0,
-            0.0,
+         0.0,
+         0.0,
+         0.0,
+         0.0,
+         34.0 / 105.0,
+         9.0 / 35.0,
+         9.0 / 35.0,
+         9.0 / 280.0,
+         9.0 / 280.0,
+         41.0 / 840.0,
+         0.0,
+         0.0,
       } ,
       // c2
       {
@@ -149,10 +161,9 @@ namespace gpstk
       // Default constructor
    RungeKuttaFehlberg::RungeKuttaFehlberg()
       :accuracyEps(1.0e-12),
-      minStepSize(1.2e-10),
-      isAdaptive(false)
-   {
-   }
+       minStepSize(1.2e-10),
+       isAdaptive(false)
+   {}
 
 
 
@@ -163,10 +174,10 @@ namespace gpstk
        * @param tf    next time
        * @return      containing the new state
        */
-   Vector<double> RungeKuttaFehlberg::integrateTo(const double&           t, 
-                                                  const Vector<double>&   y, 
-                                                  EquationOfMotion*       peom,
-                                                  const double&           tf )
+   Vector<double> RungeKuttaFehlberg::integrateTo(const double&          t, 
+                                                  const Vector<double>&  y, 
+                                                  EquationOfMotion*      peom,
+                                                  const double&          tf)
    {
       if(isAdaptive)
       {
@@ -178,10 +189,174 @@ namespace gpstk
       }
       else
       {
+//         cout << "come to RKF::integrateTo()" << endl;
          return integrateFixedStep(t,y,peom,tf);
       }
       
    }  // End of 'RungeKuttaFehlberg::integrateTo()'
+
+
+   Vector<double> RungeKuttaFehlberg::integrateFixedStep(const double&           t, 
+                                                         const Vector<double>&   y, 
+                                                         EquationOfMotion*       peom,
+                                                         const double&           tf )
+   {
+/*
+      // for debug, only valid for CODE SRP model
+//////////////////////////////////////////////////////////////////////////////
+      cout << "t: " << t << endl;
+
+      cout << "r: " << y(0) << ' ' << y(1) << ' ' << y(2) << endl;
+      cout << "v: " << y(3) << ' ' << y(4) << ' ' << y(5) << endl;
+
+      cout << "dr/dr0: " << endl
+           << y(6) << ' ' << y(7) << ' ' << y(8) << endl
+           << y(9) << ' ' << y(10) << ' ' << y(11) << endl
+           << y(12) << ' ' << y(13) << ' ' << y(14) << endl;
+      cout << "dr/dv0: " << endl
+           << y(15) << ' ' << y(16) << ' ' << y(17) << endl
+           << y(18) << ' ' << y(19) << ' ' << y(20) << endl
+           << y(21) << ' ' << y(22) << ' ' << y(23) << endl;
+      cout << "dr/dp0: " << endl;
+      for(int i=0; i<3; i++)
+      {
+          for(int j=0; j<9; j++)
+          {
+              cout << y(24+i*9+j) << ' ';
+          }
+          cout << endl;
+      }
+
+      cout << "dv/dr0: " << endl
+           << y(51) << ' ' << y(52) << ' ' << y(53) << endl
+           << y(54) << ' ' << y(55) << ' ' << y(56) << endl
+           << y(57) << ' ' << y(58) << ' ' << y(59) << endl;
+      cout << "dv/dv0: " << endl
+           << y(60) << ' ' << y(61) << ' ' << y(62) << endl
+           << y(63) << ' ' << y(64) << ' ' << y(65) << endl
+           << y(66) << ' ' << y(67) << ' ' << y(68) << endl;
+      cout << "dv/dp0: " << endl;
+      for(int i=0; i<3; i++)
+      {
+          for(int j=0; j<9; j++)
+          {
+              cout << y(69+i*9+j) << ' ';
+          }
+          cout << endl;
+      }
+
+      cout << "tf: " << tf << endl;
+//////////////////////////////////////////////////////////////////////////////
+*/
+      Vector<double> yout,yerr;
+
+      Vector<double> oldState = y;
+
+      double dt = stepSize;
+
+//      cout << "dt: " << dt << endl;
+
+//      cout << "come to RKF::integrateFixedStep()" << endl;
+      double tt = t;
+      while(t <= tf)
+      {
+         if((tt + dt) >= tf)
+         {
+            dt = tf - tt;
+            break;
+         }
+
+//         cout << "before rkfs78()" << endl;
+         rkfs78(tt,oldState,dt,peom,yout,yerr);
+//         cout << "after rkfs78()" << endl;
+
+         oldState = yout;
+
+         tt += dt;
+      }
+
+      dt = tf - tt;
+
+      rkfs78(tt,oldState,dt,peom,yout,yerr);
+
+      return yout;
+
+   }  // End of method 'RungeKuttaFehlberg::integrateFixedStep'
+
+
+   Vector<double> RungeKuttaFehlberg::integrateAdaptive(const double&           t, 
+                                                        const Vector<double>&   y, 
+                                                        EquationOfMotion*       peom,
+                                                        const double&           tf )
+   {
+      double eps = accuracyEps;
+      double x1 = t;
+      double x2 = tf;
+      double h1 = stepSize;
+      double hmin = minStepSize;
+
+      // number of variables
+      const int nvar = y.size();
+
+
+      double x = x1 ;
+      double h = std::fabs(h1) * ( ( x2 < x1 ) ? -1.0 : 1.0);
+
+      // make a copy of the data
+      Vector<double> yend = y;
+
+      for (int nstp = 0; nstp < RKF_MAXSTEP; nstp++) 
+      {
+
+         Vector<double> dydx = peom->getDerivatives(x, yend);
+      
+         Vector<double> yscal(nvar,0.0);
+         for(int i=0;i<nvar;i++)
+         {
+            yscal(i) = std::fabs(yend(i)) + std::fabs(dydx(i)*h) + RKF_EPS;
+         }
+         
+
+         if ( ( x + h - x2 ) * ( x + h - x1 ) > 0.0)
+         {
+            h = x2 - x ;
+         }
+
+         double hdid(0.0),hnext(0.0);
+
+         int jstat = rkfqcs(x, yend, h, eps, peom, yscal, hdid, hnext);
+         if ( jstat != 0 ) 
+         {
+            // 1  Failed to allocate
+            // 2  Stepsize underflow
+
+            Exception e2("Stepsize underflow!");
+            GPSTK_THROW(e2);
+         } ;
+
+         if ( ( x - x2 ) * ( x2 - x1 ) >= 0.0 )
+         {           
+            return yend ;
+         }
+
+         if ( fabs ( hnext ) <= hmin ) 
+         {
+            // Stepsize too small
+
+            Exception e4("Stepsize too small!");
+            GPSTK_THROW(e4);
+         }
+
+         h = hnext ;
+      }
+
+      // Maximum steps exceeded
+
+      Exception e3("Maximum steps exceeded!");
+      GPSTK_THROW(e3);
+
+   }  // End of method 'RungeKuttaFehlberg::integrateAdaptive'
+
 
 
       // RKF78 single step
@@ -197,68 +372,116 @@ namespace gpstk
       // number of variable
       const int n = y.size();
 
+//      cout << "before peom->getDerivatives()" << endl;
       Vector<double> dydx = peom->getDerivatives(x, y);  // ak1
-      
-      Vector<double> ytemp(n,0.0) ;
+
+//      dydx(3) = -3.6368908031933240E-1;
+//      dydx(4) =  4.2096939115567533E-1;
+//      dydx(5) = -7.6865787936242501E-2;
+/*
+//////////////////////////////////////////////////////////////////////////////
+      // for debug, only valid for CODE SRP model
+      cout << "v: " << dydx(0) << ' ' << dydx(1) << ' ' << dydx(2) << endl;
+      cout << "a: " << dydx(3) << ' ' << dydx(4) << ' ' << dydx(5) << endl;
+
+      cout << "dv/dr0: " << endl
+           << dydx(6) << ' ' << dydx(7) << ' ' << dydx(8) << endl
+           << dydx(9) << ' ' << dydx(10) << ' ' << dydx(11) << endl
+           << dydx(12) << ' ' << dydx(13) << ' ' << dydx(14) << endl;
+      cout << "dv/dv0: " << endl
+           << dydx(15) << ' ' << dydx(16) << ' ' << dydx(17) << endl
+           << dydx(18) << ' ' << dydx(19) << ' ' << dydx(20) << endl
+           << dydx(21) << ' ' << dydx(22) << ' ' << dydx(23) << endl;
+      cout << "dv/dp0: " << endl;
+      for(int i=0; i<3; i++)
+      {
+          for(int j=0; j<9; j++)
+          {
+              cout << dydx(24+i*9+j) << ' ';
+          }
+          cout << endl;
+      }
+
+      cout << "da/dr0: " << endl
+           << dydx(51) << ' ' << dydx(52) << ' ' << dydx(53) << endl
+           << dydx(54) << ' ' << dydx(55) << ' ' << dydx(56) << endl
+           << dydx(57) << ' ' << dydx(58) << ' ' << dydx(59) << endl;
+      cout << "da/dv0: " << endl
+           << dydx(60) << ' ' << dydx(61) << ' ' << dydx(62) << endl
+           << dydx(63) << ' ' << dydx(64) << ' ' << dydx(65) << endl
+           << dydx(66) << ' ' << dydx(67) << ' ' << dydx(68) << endl;
+      cout << "da/dp0: " << endl;
+      for(int i=0; i<3; i++)
+      {
+          for(int j=0; j<9; j++)
+          {
+              cout << dydx(69+i*9+j) << ' ';
+          }
+          cout << endl;
+      }
+//////////////////////////////////////////////////////////////////////////////
+*/
+//      cout << "after peom->getDerivatives()" << endl;
+
+      Vector<double> ytemp(n,0.0);
 
       // ak2
-      ytemp = y + B(1,0) * h * dydx ;
+      ytemp = y + B(1,0) * h * dydx;
       Vector<double> ak2 = peom->getDerivatives(x + A(1) * h, ytemp);
 
-
       // ak3
-      ytemp = y + h * (B(2,0) * dydx + B(2,1) * ak2) ;
+      ytemp = y + h * (B(2,0) * dydx + B(2,1) * ak2);
       Vector<double> ak3 = peom->getDerivatives(x + A(2) * h, ytemp);
-      
+
       // ak4
-      ytemp = y + h * (B(3,0) * dydx + B(3,1) * ak2 + B(3,2) * ak3) ;
+      ytemp = y + h * (B(3,0) * dydx + B(3,1) * ak2 + B(3,2) * ak3);
       Vector<double> ak4 = peom->getDerivatives(x + A(3) * h, ytemp);
 
       // ak5
-      ytemp = y + h * (B(4,0) * dydx + B(4,1) * ak2 + B(4,2) * ak3 + B(4,3) * ak4) ;
+      ytemp = y + h * (B(4,0) * dydx + B(4,1) * ak2 + B(4,2) * ak3 + B(4,3) * ak4);
       Vector<double> ak5 = peom->getDerivatives(x + A(4) * h, ytemp);
-      
+
       // ak6
       ytemp = y + h * (B(5,0) * dydx + B(5,1) * ak2 + B(5,2) * ak3 + B(5,3) * ak4 
-         + B(5,4) * ak5) ;
+         + B(5,4) * ak5);
       Vector<double> ak6 = peom->getDerivatives(x + A(5) * h, ytemp);
-      
+
       // ak7
       ytemp = y + h * (B(6,0) * dydx + B(6,1) * ak2 + B(6,2) * ak3 + B(6,3) * ak4
-         + B(6,4) * ak5 + B(6,5) * ak6) ;
+         + B(6,4) * ak5 + B(6,5) * ak6);
       Vector<double> ak7 = peom->getDerivatives(x + A(6) * h, ytemp);
       
       // ak8
       ytemp = y + h * (B(7,0) * dydx + B(7,1) * ak2 + B(7,2) * ak3 + B(7,3) * ak4 
-         + B(7,4) * ak5 + B(7,5) * ak6 + B(7,6) * ak7) ;
+         + B(7,4) * ak5 + B(7,5) * ak6 + B(7,6) * ak7);
       Vector<double> ak8 = peom->getDerivatives(x + A(7) * h, ytemp);
       
       // ak9
       ytemp = y + h * (B(8,0) * dydx + B(8,1) * ak2 + B(8,2) * ak3 + B(8,3) * ak4 
-         + B(8,4) * ak5 + B(8,5) * ak6 + B(8,6) * ak7 + B(8,7) * ak8) ;
+         + B(8,4) * ak5 + B(8,5) * ak6 + B(8,6) * ak7 + B(8,7) * ak8);
       Vector<double> ak9 = peom->getDerivatives(x + A(8) * h, ytemp);
       
       // ak10
       ytemp = y + h * (B(9,0) * dydx + B(9,1) * ak2 + B(9,2) * ak3 + B(9,3) * ak4
-         + B(9,4) * ak5 + B(9,5) * ak6 + B(9,6) * ak7 + B(9,7) * ak8 + B(9,8) * ak9) ;
+         + B(9,4) * ak5 + B(9,5) * ak6 + B(9,6) * ak7 + B(9,7) * ak8 + B(9,8) * ak9);
       Vector<double> ak10 = peom->getDerivatives(x + A(9) * h, ytemp);
 
       // ak11
       ytemp = y + h * (B(10,0) * dydx + B(10,1) * ak2 + B(10,2) * ak3 + B(10,3) * ak4
          + B(10,4) * ak5 + B(10,5) * ak6 + B(10,6) * ak7 + B(10,7) * ak8 + B(10,8) * ak9 
-         + B(10,9) * ak10) ;
+         + B(10,9) * ak10);
       Vector<double> ak11 = peom->getDerivatives(x + A(10) * h, ytemp);
       
       // ak12
       ytemp = y + h * (B(11,0) * dydx + B(11,1) * ak2 + B(11,2) * ak3 + B(11,3) * ak4 
          + B(11,4) * ak5 + B(11,5) * ak6 + B(11,6) * ak7 + B(11,7) * ak8 + B(11,8) * ak9 
-         + B(11,9) * ak10 + B(11,10) * ak11) ;
+         + B(11,9) * ak10 + B(11,10) * ak11);
       Vector<double> ak12 = peom->getDerivatives(x + A(11) * h, ytemp);
       
       // ak13
       ytemp = y + h * (B(12,0) * dydx + B(12,1) * ak2 + B(12,2) * ak3 + B(12,3) * ak4 
          + B(12,4) * ak5 + B(12,5) * ak6 + B(12,6) * ak7 + B(12,7) * ak8 + B(12,8) * ak9
-         + B(12,9) * ak10 + B(12,10) * ak11 + B(12,11) * ak12) ;
+         + B(12,9) * ak10 + B(12,10) * ak11 + B(12,11) * ak12);
       Vector<double> ak13 = peom->getDerivatives(x + A(12) * h, ytemp);
       
       yout.resize(n,0.0);
@@ -284,7 +507,7 @@ namespace gpstk
          
          //dydx ak2 ak3 4 5 6 7 8 9 10 11 12 13
          //0     1   2  3 4 5 6 7 8 9  10 11 12 
-         yerr[i] = h*C(0)*(ak12[i] + ak13[i] - dydx[i] - ak11[i]);
+         yerr[i] = h*C1(0)*(ak12[i] + ak13[i] - dydx[i] - ak11[i]);
 
       }
 
@@ -376,115 +599,6 @@ namespace gpstk
    }  // End of method 'RungeKuttaFehlberg::rkfqcs()'
    
 
-   Vector<double> RungeKuttaFehlberg::integrateFixedStep(const double&           t, 
-                                                         const Vector<double>&   y, 
-                                                         EquationOfMotion*       peom,
-                                                         const double&           tf )
-   {
-      Vector<double> yout,yerr;
-
-      Vector<double> oldState = y;
-
-      double dt = stepSize;
-
-      double tt = t;
-      while(t <= tf)
-      {
-         if((tt + dt) >= tf)
-         {
-            dt = tf - tt;
-            break;
-         }
-            
-         rkfs78(tt,oldState,dt,peom,yout,yerr);
-         
-         oldState = yout;
-
-         tt += dt;
-      }
-
-      dt=tf-tt;
-
-      rkfs78(tt,oldState,dt,peom,yout,yerr);
-
-      return yout;
-
-   }  // End of method 'RungeKuttaFehlberg::integrateFixedStep'
-
-   Vector<double> RungeKuttaFehlberg::integrateAdaptive(const double&           t, 
-                                    const Vector<double>&   y, 
-                                    EquationOfMotion*       peom,
-                                    const double&           tf )
-   {
-      double eps = accuracyEps;
-      double x1 = t;
-      double x2 = tf;
-      double h1 = stepSize;
-      double hmin = minStepSize;
-
-      // number of variables
-      const int nvar = y.size();
-
-
-      double x = x1 ;
-      double h = std::fabs(h1) * ( ( x2 < x1 ) ? -1.0 : 1.0);
-
-      // make a copy of the data
-      Vector<double> yend = y;
-
-      for (int nstp = 0; nstp < RKF_MAXSTEP; nstp++ ) 
-      {
-
-         Vector<double> dydx = peom->getDerivatives(x, yend);
-      
-         Vector<double> yscal(nvar,0.0);
-         for(int i=0;i<nvar;i++)
-         {
-            yscal(i) = std::fabs(yend(i)) + std::fabs(dydx(i)*h) + RKF_EPS;
-         }
-         
-
-         if ( ( x + h - x2 ) * ( x + h - x1 ) > 0.0)
-         {
-            h = x2 - x ;
-         }
-
-         double hdid(0.0),hnext(0.0);
-
-         int jstat = rkfqcs(x, yend, h, eps, peom, yscal, hdid, hnext);
-         if ( jstat != 0 ) 
-         {
-            // 1  Failed to allocate
-            // 2  Stepsize underflow
-
-            Exception e2("Stepsize underflow!");
-            GPSTK_THROW(e2);
-         } ;
-
-         if ( ( x - x2 ) * ( x2 - x1 ) >= 0.0 )
-         {           
-            return yend ;
-         }
-
-         if ( fabs ( hnext ) <= hmin ) 
-         {
-            // Stepsize too small
-
-            Exception e4("Stepsize too small!");
-            GPSTK_THROW(e4);
-         }
-
-         h = hnext ;
-      }
-
-      // Maximum steps exceeded
-
-      Exception e3("Maximum steps exceeded!");
-      GPSTK_THROW(e3);
-
-   }  // End of method 'RungeKuttaFehlberg::integrateAdaptive'
-
-
 
    //////////////////////////////////////////////////////////////////////////
    // class to test integrator
@@ -515,15 +629,12 @@ namespace gpstk
       double t0   = 0.0;
       double h   = 1.0;
       gpstk::Vector<double> y0(1,0.0); 
-      int dim      = 1;
-#pragma unused(dim)
       gpstk::Vector<double> y(1,0.0);   // = {0.0};
       
       this->setStepSize(0.01);
       //this->setAdaptive(true);
 
-      int i=0;
-      for(i=0;i<1000000;i++)
+      for(int i=0;i<1000000;i++)
       {
          y = integrateTo(t0, y0, &eom, t0 + h);
          double t = t0 + h;

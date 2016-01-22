@@ -1,20 +1,10 @@
-#pragma ident "$Id$"
-
-
-/**
- * @file AtmosphericDrag.cpp
- * This class computes the acceleration due to drag on a satellite
- * using an Earth atmosphere model that conforms to the computeDensity 
- * abstract method.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -25,13 +15,35 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file AtmosphericDrag.cpp
+ * This class computes the acceleration due to drag on a satellite
+ * using an Earth atmosphere model that conforms to the computeDensity 
+ * abstract method.
+ */
+
 #include "AtmosphericDrag.hpp"
-#include "ReferenceFrames.hpp"
+#include "IERSConventions.hpp"
 
 namespace gpstk
 {
@@ -62,12 +74,8 @@ namespace gpstk
 
    
       // this is the real one
-   void AtmosphericDrag::doCompute(UTCTime utc, EarthBody& rb, Spacecraft& sc)
+   void AtmosphericDrag::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
-      // To consist with STK
-      double omega_e = 7.292115E-05;  // IERS 1996 conventions
-      //double omega_e = rb.getSpinRate(utc);
-
       Vector<double> r = sc.R();   // satellite position in m
       Vector<double> v = sc.V();   // satellite velocity in m/s
 
@@ -81,12 +89,9 @@ namespace gpstk
       // compute the atmospheric density
       double rho = computeDensity(utc, rb, r, v);   // [kg/m^3]
 
-      // debuging...
-      //rho  = 6.3097802844338E-12;
-      
       // compute the relative velocity vector and magnitude
       Vector<double> we(3,0.0);
-      we(2)= omega_e;
+      we(2)= OMEGA_EARTH;
 
       Vector<double> wxr = cross(we,r);
       Vector<double> vr = v - wxr;
@@ -97,7 +102,7 @@ namespace gpstk
       double coeff2 = coeff * vrmag;
 
       // compute the acceleration in ECI frame (km/s^2)
-      a = vr * coeff2;                                  ///////// a
+      a = vr * coeff2;                              // a
 
       // Partial reference: Montenbruck,P248
 
@@ -116,7 +121,7 @@ namespace gpstk
       vrm = eye3;
 
       vrm = vrm * vrmag;
-      da_dv = (vrvrt + vrm) * coeff;               //////// da_dv
+      da_dv = (vrvrt + vrm) * coeff;                // da/dv
 
       // da_dr
       // da_dr = -0.5*Cd*(A/M)*vr*dp_dr-da_dv*X(w)
@@ -135,14 +140,14 @@ namespace gpstk
       
    
       // Get the J2000 to TOD transformation
-      Matrix<double> N = ReferenceFrames::J2kToTODMatrix(utc);
+      Matrix<double> N = C2TMatrix(utc);
 
       // Transform r from J2000 to TOD
       Vector<double> r_tod = N * r;
-      Position geoidPos(r_tod(0),r_tod(1),r_tod(3));
+      Position geoidPos(r_tod(0),r_tod(1),r_tod(2));
       
       // Satellite height
-      double height = geoidPos.getAltitude()/1000.0;              //  convert to [km]
+      double height = geoidPos.getAltitude()/1000.0;    //  m -> km
       
       const int n = CIRA_SIZE; ;
 
@@ -173,7 +178,7 @@ namespace gpstk
       tr2(1,0) = drhodr(1);
       tr2(2,0) = drhodr(2);
 
-      part1 = tr*transpose(tr2);      // //Matrix part1 = vr.outerProduct(drhodr);
+      part1 = tr*transpose(tr2);      // Matrix part1 = vr.outerProduct(drhodr);
       part1 = part1*coeff2;
 
       //part1 = dp_dr*a/rho;
@@ -182,15 +187,12 @@ namespace gpstk
 
       // form partial of drag wrt cd
       double coeff3 = coeff2 / cd;
-      this->dadcd = vr*coeff3;                        ////////   da_dcd
+      this->dadcd = vr*coeff3;                      // da_dcd
 
-      this->da_dcd(0,0) = dadcd(0);
-      this->da_dcd(1,0) = dadcd(1);
-      this->da_dcd(2,0) = dadcd(2);
+      this->da_dCd(0) = dadcd(0);
+      this->da_dCd(1) = dadcd(1);
+      this->da_dCd(2) = dadcd(2);
 
    }  // End of method 'AtmosphericDrag::doCompute()'
 
 }  // End of namespace 'gpstk'
-
-
-

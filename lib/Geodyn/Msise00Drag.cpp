@@ -1,18 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file Msise00Drag.cpp
-* This class computes the NRLMSISE atmosphere model.
-*/
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,21 +15,42 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
 
-#include "Msise00Drag.hpp"
+/**
+* @file Msise00Drag.cpp
+* This class computes the NRLMSISE atmosphere model.
+*/
+
 #include <string>
 #include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
-#include "ReferenceFrames.hpp"
-#include "IERS.hpp"
-#include "ASConstant.hpp"
+
+#include "Msise00Drag.hpp"
+#include "IERSConventions.hpp"
+#include "GNSSconstants.hpp"
 #include "YDSTime.hpp"
+
+using namespace std;
 
 namespace gpstk
 {
@@ -291,13 +304,13 @@ namespace gpstk
 
    
       /* Abstract class requires the subclass to compute the atmospheric density.
-       * @param utc epoch in UTC
+       * @param utc Time in UTC
        * @param rb  EarthRef object.
        * @param r   Position vector.
-       * @param v   Velocity vector
-       * @return Atmospheric density in kg/m^3
+       * @param v   Velocity vector.
+       * @return Atmospheric density in kg/m^3.
        */
-   double Msise00Drag::computeDensity(UTCTime utc, 
+   double Msise00Drag::computeDensity(CommonTime utc, 
                                       EarthBody& rb, 
                                       Vector<double> r, 
                                       Vector<double> v)
@@ -307,13 +320,13 @@ namespace gpstk
       struct nrlmsise_flags flags;
 
       //* Get the J2000 to TOD transformation
-      Matrix<double> N = ReferenceFrames::J2kToTODMatrix(utc);
+      Matrix<double> N = C2TMatrix(utc);
 
       //* Transform r from J2000 to TOD
       Vector<double> r_tod = N * r;
 
 
-      Matrix<double> eci2ecef = ReferenceFrames::J2kToECEFMatrix(utc);
+      Matrix<double> eci2ecef = C2TMatrix(utc);
 
       Vector<double> r_ecef = eci2ecef * r;
       
@@ -343,7 +356,7 @@ namespace gpstk
       }
 
       input.doy = static_cast<YDSTime>(utc).doy;
-      input.year = 2004;         // without effect 
+      input.year = 2004;         // without effect
       input.sec = static_cast<YDSTime>(utc).sod;
       input.alt= alt;
       input.g_lat = geoidPos.getGeodeticLatitude();
@@ -356,7 +369,8 @@ namespace gpstk
       if(alt > 500.0)
       {
          gtd7d(&input, &flags, &output);
-      }else
+      }
+      else
       {
          gtd7(&input, &flags, &output);
       }
@@ -369,7 +383,7 @@ namespace gpstk
    // LOCAL FUNCTIONS
    //-----------------------------------------------------------------------
 
-   void Msise00Drag::tselec(struct nrlmsise_flags *flags) 
+   void Msise00Drag::tselec(struct nrlmsise_flags *flags)
    {
       for (int i=0; i<24; i++) 
       {
@@ -849,15 +863,14 @@ namespace gpstk
          g0(ap[6],p)*std::pow(ex,12.0))*(1.0-std::pow(ex,8.0))/(1.0-ex)))/sumex(ex);
    }
 
-   double Msise00Drag::globe7(double *p, struct nrlmsise_input *input, struct nrlmsise_flags *flags) 
+   double Msise00Drag::globe7(double *p, struct nrlmsise_input *input,
+                              struct nrlmsise_flags *flags) 
    {
       /*       CALCULATE G(L) FUNCTION 
       *       Upper Thermosphere Parameters */
       double t[15];
       int i,j;
-      int sw9=1;
       double apd;
-      double xlong;
       double tloc;
       double c, s, c2, c4, s2;
       double sr = 7.2722E-5;
@@ -865,7 +878,6 @@ namespace gpstk
       double dr = 1.72142E-2;
       double hr = 0.2618;
       double cd32, cd18, cd14, cd39;
-      double p32, p18, p14, p39;
       double df;
       double f1, f2;
       double tinf;
@@ -874,11 +886,13 @@ namespace gpstk
       tloc=input->lst;
       for (j=0;j<14;j++)
          t[j]=0;
+#ifdef GPSTK_MSISE_UNUSED
+      int sw9=1;      // unused (is it somehow informative?)
       if (flags->sw[9]>0)
          sw9=1;
       else if (flags->sw[9]<0)
          sw9=-1;
-      xlong = input->g_long;
+#endif  // GPSTK_MSISE_UNUSED
 
       /* calculate legendre polynomials */
       c = std::sin(input->g_lat * dgtr);
@@ -927,10 +941,6 @@ namespace gpstk
       cd18 = std::cos(2.0*dr*(input->doy-p[17]));
       cd14 = std::cos(dr*(input->doy-p[13]));
       cd39 = std::cos(2.0*dr*(input->doy-p[38]));
-      p32=p[31];
-      p18=p[17];
-      p14=p[13];
-      p39=p[38];
 
       /* F10.7 EFFECT */
       df = input->f107 - input->f107A;
@@ -1105,7 +1115,6 @@ namespace gpstk
       double t[14];
       double tt;
       double cd32, cd18, cd14, cd39;
-      double p32, p18, p14, p39;
       int i,j;
       double dr=1.72142E-2;
       double dgtr=1.74533E-2;
@@ -1123,10 +1132,6 @@ namespace gpstk
       cd18 = std::cos(2.0*dr*(input->doy-p[17]));
       cd14 = std::cos(dr*(input->doy-p[13]));
       cd39 = std::cos(2.0*dr*(input->doy-p[38]));
-      p32=p[31];
-      p18=p[17];
-      p14=p[13];
-      p39=p[38];
 
       /* F10.7 */
       t[0] = p[21]*dfa;
@@ -1427,14 +1432,14 @@ namespace gpstk
       */
       double za;
       int i, j;
-      double ddum, z;
+      double z;
       double zn1[5] = {120.0, 110.0, 100.0, 90.0, 72.5};
       double tinf;
       int mn1 = 5;
       double g0;
       double tlb;
-      double s, z0, t0, tr12;
-      double db01, db04, db14, db16, db28, db32, db40, db48;
+      double s;
+      double db01, db04, db14, db16, db28, db32, db40;
       double zh28, zh04, zh16, zh32, zh40, zh01, zh14;
       double zhm28, zhm04, zhm16, zhm32, zhm40, zhm01, zhm14;
       double xmd;
@@ -1494,10 +1499,6 @@ namespace gpstk
          meso_tn1[4]=ptm[4]*ptl[3][0];
          meso_tgn1[1]=ptm[8]*pma[8][0]*meso_tn1[4]*meso_tn1[4]/(std::pow((ptm[4]*ptl[3][0]),2.0));
       }
-
-      z0 = zn1[3];
-      t0 = meso_tn1[3];
-      tr12 = 1.0;
 
       /* N2 variation factor at Zlb */
       g28=flags->sw[21]*globe7(pd[2], input, flags);
@@ -1743,13 +1744,13 @@ namespace gpstk
 
       /* total mass density */
       output->d[5] = 1.66E-24*(4.0*output->d[0]+16.0*output->d[1]+28.0*output->d[2]+32.0*output->d[3]+40.0*output->d[4]+ output->d[6]+14.0*output->d[7]);
-      db48=1.66E-24*(4.0*db04+16.0*db16+28.0*db28+32.0*db32+40.0*db40+db01+14.0*db14);
+      //const double db48=1.66E-24*(4.0*db04+16.0*db16+28.0*db28+32.0*db32+40.0*db40+db01+14.0*db14);
 
 
 
       /* temperature */
       z = std::sqrt(input->alt*input->alt);
-      ddum = densu(z,1.0, tinf, tlb, 0.0, 0.0, &output->t[1], ptm[5], s, mn1, zn1, meso_tn1, meso_tgn1);
+      (void)densu(z,1.0, tinf, tlb, 0.0, 0.0, &output->t[1], ptm[5], s, mn1, zn1, meso_tn1, meso_tgn1);
       if (flags->sw[0]) 
       {
          for(i=0;i<9;i++)
@@ -2539,7 +2540,3 @@ namespace gpstk
 
 
 }  // End of namespace 'gpstk'
-
-
-
-

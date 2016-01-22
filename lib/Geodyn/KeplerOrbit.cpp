@@ -1,18 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file KeplerOrbit.cpp
-* Class to do Kepler orbit computation.
-*/
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,21 +15,42 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
-#include "KeplerOrbit.hpp"
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+* @file KeplerOrbit.cpp
+* Class to do Kepler orbit computation.
+*/
+
 #include <limits>
 #include <cmath>
-#include "ASConstant.hpp"
-#include "ReferenceFrames.hpp"
+
+#include "KeplerOrbit.hpp"
+#include "IERSConventions.hpp"
+#include "GNSSconstants.hpp"
+
+using namespace std;
 
 namespace gpstk
 {
-   using namespace std;
-
    const double KeplerOrbit::eps_mach = numeric_limits<double>::epsilon();
 
       /* Computes the eccentric anomaly for elliptic orbits
@@ -56,11 +69,11 @@ namespace gpstk
 
       // Starting value
 
-      M = Modulo(M, 2.0*ASConstant::PI);   
-      if (e<0.8) E=M; else E= ASConstant::PI;
+      M = Modulo(M, TWO_PI);
+      if (e<0.8) E = M; else E = PI;
 
       // Iteration
-      do 
+      do
       {
          f = E - e*std::sin(E) - M;
          E = E - f / ( 1.0 - e*std::cos(E) );
@@ -90,9 +103,9 @@ namespace gpstk
       double scta = std::sqrt(1.0-e*e)*std::sin(E)/(1.0-e*std::cos(E));
       double ccta = (std::cos(E)-e)/(1.0-e*std::cos(E));
 
-      return atan2(scta, ccta);
+      return std::atan2(scta, ccta);
    }
-   
+
 
       /** Computes the true anomaly for elliptic orbits
        * @param cta  True anomaly in [rad]
@@ -103,13 +116,13 @@ namespace gpstk
    {
       double sinE = (std::sqrt(1.0-e*e)*std::sin(cta))/(1.0+e*std::cos(cta));
       double cosE = (e+std::cos(cta))/(1.0+e*std::cos(cta));
-      double E = atan2(sinE,cosE);
+      double E = std::atan2(sinE,cosE);
 
       return (E- e * std::sin(E));
    }
 
-      /*Computes the sector-triangle ratio from two position vectors and 
-       * the intermediate time 
+      /**Computes the sector-triangle ratio from two position vectors and
+       * the intermediate time.
        * @param r_a     Position at time t_a
        * @param r_a     Position at time t_b
        * @param tau     Normalized time (sqrt(GM)*(t_a-t_b))
@@ -122,7 +135,7 @@ namespace gpstk
       // Constants
 
       const int maxit = 30;
-      const double delta = 100.0*eps_mach;  
+      const double delta = 100.0*eps_mach;
 
       // Variables
 
@@ -131,8 +144,8 @@ namespace gpstk
 
       // Auxiliary quantities
 
-      s_a = norm(r_a);  
-      s_b = norm(r_b);  
+      s_a = norm(r_a);
+      s_b = norm(r_b);
 
       kappa = std::sqrt ( 2.0*(s_a*s_b+dot(r_a,r_b)) );
 
@@ -144,24 +157,24 @@ namespace gpstk
       // Start with Hansen's approximation
 
       eta2 = ( 12.0 + 10.0*std::sqrt(1.0+(44.0/9.0)*m /(l+5.0/6.0)) ) / 22.0;
-      eta1 = eta2 + 0.1;   
+      eta1 = eta2 + 0.1;
 
       // Secant method
 
-      F1 = F(eta1, m, l);   
-      F2 = F(eta2, m, l);  
+      F1 = F(eta1, m, l);
+      F2 = F(eta2, m, l);
 
       int i = 0;
 
       while (std::fabs(F2-F1) > delta)
       {
-         d_eta = -F2*(eta2-eta1)/(F2-F1);  
-         eta1 = eta2; F1 = F2; 
+         d_eta = -F2*(eta2-eta1)/(F2-F1);
+         eta1 = eta2; F1 = F2;
          while (eta2+d_eta<=eta_min)  d_eta *= 0.5;
-         eta2 += d_eta;  
+         eta2 += d_eta;
          F2 = F(eta2,m,l); ++i;
 
-         if ( i == maxit ) 
+         if ( i == maxit )
          {
             cerr << "WARNING: Convergence problems in FindEta" << endl;
             break;
@@ -171,7 +184,7 @@ namespace gpstk
       return eta2;
    }
 
-      /*Computes the satellite state vector from osculating Keplerian 
+      /*Computes the satellite state vector from osculating Keplerian
        * elements for elliptic orbits.
        * @GM       Gravitational coefficient
        * @Kep      Keplerian elements(a e i OMG omg M)
@@ -220,9 +233,7 @@ namespace gpstk
 
       // Transformation to reference system (Gaussian vectors)
       Matrix<double> PQW(3,3,0.0);
-      PQW = ReferenceFrames::Rz(-Omega) 
-          * ReferenceFrames::Rx(-i) 
-          * ReferenceFrames::Rz(-omega);
+      PQW = rotation(-Omega,3) * rotation(-i,1) * rotation(-omega,3);
 
       r = PQW * r;
       v = PQW * v;
@@ -305,9 +316,7 @@ namespace gpstk
 
       // Transformation to reference system (Gaussian vectors) and partials
       Matrix<double>  PQW(3,3,0.0);
-      PQW = ReferenceFrames::Rz(-Omega) 
-          * ReferenceFrames::Rx(-i) 
-          * ReferenceFrames::Rz(-omega);
+      PQW = rotation(-Omega,3) * rotation(-i,1) * rotation(-omega,3);
 
       //P = PQW.Col(0);  Q = PQW.Col(1);  W = PQW.Col(2);
       Vector<double>  P(3),Q(3),W(3),e_z(3),N(3);
@@ -394,8 +403,8 @@ namespace gpstk
       Vector<double> h = cross(r,v);                           // Areal velocity
       double H = norm(h);
 
-      double Omega = atan2( h(0), -h(1) );                     // Long. ascend. node 
-      Omega = Modulo(Omega,2.0*ASConstant::PI);
+      double Omega = std::atan2( h(0), -h(1) );                     // Long. ascend. node 
+      Omega = Modulo(Omega,TWO_PI);
 
       double i     = std::atan2( std::sqrt(h(0)*h(0)+h(1)*h(1)), h(2) ); // Inclination        
       
@@ -411,11 +420,11 @@ namespace gpstk
       double e  = std::sqrt(e2);                                     // Eccentricity 
       double E  = std::atan2(eSinE,eCosE);                           // Eccentric anomaly  
 
-      double M  = Modulo(E-eSinE,2.0*ASConstant::PI);                // Mean anomaly
+      double M  = Modulo(E-eSinE,TWO_PI);                // Mean anomaly
 
       double nu = std::atan2(std::sqrt(1.0-e2)*eSinE, eCosE-e2);     // True anomaly
 
-      double omega = Modulo(u-nu,2.0*ASConstant::PI);                // Arg. of perihelion 
+      double omega = Modulo(u-nu,2.0*TWO_PI);                // Arg. of perihelion 
 
       // Keplerian elements vector
 
@@ -468,7 +477,7 @@ namespace gpstk
 
       Vector<double> W = cross(e_a,e_0);
       Omega = std::atan2( W(0), -W(1) );                     // Long. ascend. node 
-      Omega = Modulo(Omega,2.0*ASConstant::PI);
+      Omega = Modulo(Omega,TWO_PI);
       i     = std::atan2( std::sqrt(W(0)*W(0)+W(1)*W(1)), W(2) ); // Inclination        
       
       double u(0.0);
@@ -494,19 +503,17 @@ namespace gpstk
       e  = std::sqrt( ecos_nu*ecos_nu + esin_nu*esin_nu );
       double nu = std::atan2(esin_nu,ecos_nu);
 
-      omega = Modulo(u-nu,2.0*ASConstant::PI);
+      omega = Modulo(u-nu,TWO_PI);
 
       // Perihelion distance, semimajor axis and mean motion
 
       a = p/(1.0-e*e);
-      double n = std::sqrt( GM / std::fabs(a*a*a) );
-#pragma unused(n)
 
       // Mean anomaly and time of perihelion passage
 
       if (e<1.0) {
          double E = std::atan2( std::sqrt((1.0-e)*(1.0+e)) * esin_nu,  ecos_nu + e*e );
-         M = Modulo( E - e*std::sin(E), 2.0*ASConstant::PI );
+         M = Modulo( E - e*std::sin(E), TWO_PI );
       }
       else 
       {
@@ -649,7 +656,7 @@ namespace gpstk
    double KeplerOrbit::getPeriod(double GM, const Vector<double>& Kep)
    {
       const double n = std::sqrt(GM / std::pow(Kep(0),3));
-      return 2.0 * ASConstant::PI / n;
+      return TWO_PI / n;
    }
    
    double KeplerOrbit::getApogee(double GM, const Vector<double>& Kep)
@@ -673,7 +680,7 @@ namespace gpstk
    {
       const double GM_Earth    = 398600.4415e+9;    // [m^3/s^2]; JGM3
       
-      const double Deg = 180.0 / ASConstant::PI;
+      const double Deg = 180.0 / PI;
       
       double rv[6]={-6345.000e3, -3723.000e3,  -580.000e3, +2.169000e3, -9.266000e3, -1.079000e3 };
 
@@ -731,12 +738,7 @@ namespace gpstk
       }
       
   
-   }	// End of method 'KeplerOrbit::test()'
+   }  // End of method 'KeplerOrbit::test()'
 
 
-}	// End of namespace 'gpstk'
-
-
-
-
-
+}  // End of namespace 'gpstk'

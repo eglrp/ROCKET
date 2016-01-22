@@ -1,17 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file SatOrbit.cpp
- * This Class handle general orbit for different satellite orbit type.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -22,18 +15,46 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file SatOrbit.cpp
+ * This Class handle general orbit for different satellite orbit type.
+ */
 
 #include "SatOrbit.hpp"
-#include "JGM3GravityModel.hpp"
+
 #include "EGM96GravityModel.hpp"
+#include "EGM08GravityModel.hpp"
+
 #include "HarrisPriesterDrag.hpp"
 #include "Msise00Drag.hpp"
 #include "CiraExponentialDrag.hpp"
+
+#include "SimplePressure.hpp"
+#include "ROCKPressure.hpp"
+#include "CODEPressure.hpp"
+
+
+using namespace std;
 
 namespace gpstk
 {
@@ -41,38 +62,46 @@ namespace gpstk
    Vector<double> SatOrbit::getDerivatives(const double&         t,
                                            const Vector<double>& y)
    {
+//      cout << "SatOrbit::getDerivatives() " << getForceModelType() << endl;
+
       if(fmlPrepared == false)
       {
-         createFMObjects(forceConfig);
+         createFMObjects(fmcData);
       }
+
+//      cout << "SatOrbit::getDerivatives() " << getForceModelType() << endl;
 
       // import the state vector to sc
       sc.setStateVector(y);
 
-      UTCTime utc = utc0;
+//      cout << sc.P() << endl;
+
+      CommonTime utc = utc0;
       utc += t;
-      return forceList.getDerivatives(utc, earthBody, sc);
+
+      return fml.getDerivatives(utc, earthBody, sc);
    }
 
    void SatOrbit::init()
    {
-      setSpacecraftData("sc-test01",1000.0,20.0,20.0,1.0,2.2);
+      setSpacecraftData("spacecraft",1000.0,20.0,20.0,1.0,2.2);
  
-      enableGeopotential(GM_JGM3,1,1,false,false,false);
+      enableGeopotential(GM_EGM96,1,1,false,false,false);
       enableThirdBodyPerturbation(false,false);
       enableAtmosphericDrag(AM_HarrisPriester,false);
-      enableSolarRadiationPressure(false);
+      enableSolarRadiationPressure(SRPM_Simple,false);
       enableRelativeEffect(false);
 
    }  // End of method 'SatOrbit::init()'
 
 
-   SatOrbit& SatOrbit::setSpacecraftData(std::string name,
+   SatOrbit& SatOrbit::setSpacecraftData(string name,
                                          const double& mass,
                                          const double& area,
                                          const double& areaSRP,
                                          const double& Cr,
-                                         const double& Cd)
+                                         const double& Cd,
+                                         const int& block)
    {
       sc.setName(name);
       sc.setDryMass(mass);
@@ -80,21 +109,24 @@ namespace gpstk
       sc.setSRPArea(areaSRP);
       sc.setDragCoeff(Cd);
       sc.setReflectCoeff(Cr);
+      sc.setBlockNum(block);
 
       return (*this);
 
    }  // End of method 'SatOrbit::setSpacecraftData()'
 
+
    SatOrbit& SatOrbit::setSpaceData(double dayF107,
-                                    double aveF107, 
+                                    double aveF107,
                                     double dayKp)
    {
-      forceConfig.dailyF107 = dayF107;
-      forceConfig.averageF107 = aveF107;
-      forceConfig.dailyKp = dayKp;
+      fmcData.dailyF107 = dayF107;
+      fmcData.averageF107 = aveF107;
+      fmcData.dailyKp = dayKp;
 
       return (*this);
    }
+
 
    SatOrbit& SatOrbit::enableGeopotential(SatOrbit::GravityModel model,
                                           const int& maxDegree,
@@ -103,18 +135,18 @@ namespace gpstk
                                           const bool& oceanTide,
                                           const bool& poleTide)
    {
-      // DONOT allow to change the configuration 
-      if(fmlPrepared) return (*this);    
+      // DO NOT allow to change the configuration 
+      if(fmlPrepared) return (*this);
 
-      forceConfig.geoEarth = true;
+      fmcData.geoEarth = true;
 
-      forceConfig.grvModel = model;
-      forceConfig.grvDegree = maxDegree;
-      forceConfig.grvOrder = maxOrder;
+      fmcData.grvModel = model;
+      fmcData.grvDegree = maxDegree;
+      fmcData.grvOrder = maxOrder;
 
-      forceConfig.solidTide = solidTide;
-      forceConfig.oceanTide = oceanTide;
-      forceConfig.poleTide = poleTide;
+      fmcData.solidTide = solidTide;
+      fmcData.oceanTide = oceanTide;
+      fmcData.poleTide = poleTide;
 
       return (*this);
 
@@ -124,11 +156,11 @@ namespace gpstk
    SatOrbit& SatOrbit::enableThirdBodyPerturbation(const bool& bsun,
                                                    const bool& bmoon)
    {
-      // DONOT allow to change the configuration 
-      if(fmlPrepared) return (*this); 
+      // DO NOT allow to change the configuration 
+      if(fmlPrepared) return (*this);
 
-      forceConfig.geoSun = bsun;
-      forceConfig.geoMoon = bmoon;
+      fmcData.geoSun = bsun;
+      fmcData.geoMoon = bmoon;
 
       return (*this);
 
@@ -138,55 +170,58 @@ namespace gpstk
    SatOrbit& SatOrbit::enableAtmosphericDrag(SatOrbit::AtmosphericModel model,
                                              const bool& bdrag)
    {
-      // DONOT allow to change the configuration 
-      if(fmlPrepared) return (*this); 
+      // DO NOT allow to change the configuration
+      if(fmlPrepared) return (*this);
 
-      forceConfig.atmModel = model;
-      forceConfig.atmDrag = bdrag;
+      fmcData.atmModel = model;
+      fmcData.atmDrag = bdrag;
 
       return (*this);
 
    }  // End of method 'SatOrbit::enableAtmosphericDrag()'
 
 
-   SatOrbit& SatOrbit::enableSolarRadiationPressure(bool bsrp)
-   { 
-      // DONOT allow to change the configuration 
-      if(fmlPrepared) return (*this);  
+   SatOrbit& SatOrbit::enableSolarRadiationPressure(SatOrbit::SRPModel model,
+                                                    const bool& bsrp)
+   {
+       // DO NOT allow to change the configuration
+       if(fmlPrepared) return (*this);
 
-      forceConfig.solarPressure = bsrp; 
-      
-      return (*this);
-   
+       fmcData.srpModel = model;
+       fmcData.solarPressure = bsrp;
+
+       return (*this);
+
    }  // End of method 'SatOrbit::enableSolarRadiationPressure()'
 
 
    SatOrbit& SatOrbit::enableRelativeEffect(const bool& brel)
    {
-      // DONOT allow to change the configuration 
-      if(fmlPrepared) return (*this);  
+      // DO NOT allow to change the configuration
+      if(fmlPrepared) return (*this);
 
-      forceConfig.relEffect = brel; 
+      fmcData.relEffect = brel;
 
       return (*this);
 
-   }  // End of method 'SatOrbit::enableRelativeEffect()' 
+   }  // End of method 'SatOrbit::enableRelativeEffect()'
+
 
    void SatOrbit::createFMObjects(FMCData& fmc)
    {
       // First, we release the memory
       deleteFMObjects(fmc);
 
-      // 
+      //
 
       // GeoEarth
-      if(fmc.grvModel == GM_JGM3)
-      {
-         fmc.pGeoEarth = new JGM3GravityModel();
-      }
-      else if(fmc.grvModel == GM_EGM96)
+      if(fmc.grvModel == GM_EGM96)
       {
          fmc.pGeoEarth = new EGM96GravityModel();
+      }
+      else if (fmc.grvModel == GM_EGM08)
+      {
+         fmc.pGeoEarth = new EGM08GravityModel();
       }
       else
       {
@@ -218,11 +253,26 @@ namespace gpstk
       }
 
       // SRP
-      fmc.pSolarPressure = new SolarRadiationPressure();
-     
+      if(fmc.srpModel == SRPM_Simple)
+      {
+          fmc.pSolarPressure = new SimplePressure();
+      }
+      else if(fmc.srpModel == SRPM_ROCK)
+      {
+          fmc.pSolarPressure = new ROCKPressure();
+      }
+      else if(fmc.srpModel == SRPM_CODE)
+      {
+          fmc.pSolarPressure = new CODEPressure();
+      }
+      else
+      {
+          // Unexpected, never go here
+      }
+
       // Rel
       fmc.pRelEffect = new RelativityEffect();
-      
+
       // Now, it's time to check if we create these objects successfully
       if( !fmc.pGeoEarth || !fmc.pGeoSun || !fmc.pGeoMoon ||
           !fmc.pAtmDrag || !fmc.pSolarPressure || !fmc.pRelEffect )
@@ -243,14 +293,17 @@ namespace gpstk
       fmc.pAtmDrag->setSpaceData(fmc.dailyF107,
          fmc.averageF107, fmc.dailyKp);
 
-      forceList.clear();
+      fml.clear();
 
-      if(fmc.geoEarth) forceList.addForce(fmc.pGeoEarth);
-      if(fmc.geoSun) forceList.addForce(fmc.pGeoSun);
-      if(fmc.geoMoon) forceList.addForce(fmc.pGeoMoon);
-      if(fmc.atmDrag) forceList.addForce(fmc.pAtmDrag);
-      if(fmc.solarPressure) forceList.addForce(fmc.pSolarPressure);
-      if(fmc.relEffect) forceList.addForce(fmc.pRelEffect);
+      if(fmc.geoEarth) fml.addForce(fmc.pGeoEarth);
+      if(fmc.geoSun) fml.addForce(fmc.pGeoSun);
+      if(fmc.geoMoon) fml.addForce(fmc.pGeoMoon);
+      if(fmc.atmDrag) fml.addForce(fmc.pAtmDrag);
+      if(fmc.solarPressure) fml.addForce(fmc.pSolarPressure);
+      if(fmc.relEffect) fml.addForce(fmc.pRelEffect);
+
+//      cout << fml.getFMPList().size() << endl;
+//      cout << fml.getFMTSet().size() << endl;
 
       // set the flag
       fmlPrepared = true;
@@ -263,12 +316,7 @@ namespace gpstk
       // GeoEarth
       if(fmc.pGeoEarth)
       {
-         if(fmc.grvModel == GM_JGM3)
-         {
-            delete (JGM3GravityModel*) fmc.pGeoEarth;
-            fmc.pGeoEarth = NULL;
-         }
-         else if(fmc.grvModel == GM_EGM96)
+         if(fmc.grvModel == GM_EGM96)
          {
             delete (EGM96GravityModel*) fmc.pGeoEarth;
             fmc.pGeoEarth = NULL;
@@ -322,8 +370,26 @@ namespace gpstk
       // SRP
       if(fmc.pSolarPressure)
       {
-         delete fmc.pSolarPressure;
-         fmc.pSolarPressure = NULL;
+          if(fmc.srpModel == SRPM_Simple)
+          {
+              delete (SimplePressure*) fmc.pSolarPressure;
+              fmc.pSolarPressure = NULL;
+          }
+          else if(fmc.srpModel == SRPM_ROCK)
+          {
+              delete (ROCKPressure*) fmc.pSolarPressure;
+              fmc.pSolarPressure = NULL;
+          }
+          else if(fmc.srpModel == SRPM_CODE)
+          {
+              delete (CODEPressure*) fmc.pSolarPressure;
+              fmc.pSolarPressure = NULL;
+          }
+          else
+          {
+              delete fmc.pSolarPressure;
+              fmc.pSolarPressure = NULL;
+          }
       }
 
       // Rel
@@ -333,15 +399,11 @@ namespace gpstk
          fmc.pRelEffect = NULL;
       }
 
-      
 
       // set the flag
       fmlPrepared = false;
 
-   }  // End of method 'SatOrbit::uninstallForceModelList()'
+   }  // End of method 'SatOrbit::deleteForceModelList()'
 
 
 }  // End of namespace 'gpstk'
-
-
-

@@ -1,21 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file EGM96GravityModel.hpp
- * EGM96 gravity model
- */
-
-#ifndef GPSTK_EGM96_GRAVITY_MODEL_HPP
-#define GPSTK_EGM96_GRAVITY_MODEL_HPP
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -26,14 +15,35 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  
+//  Copyright 2004, The University of Texas at Austin
+//  Kaifa Kuang - Wuhan University . 2015
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file EGM96GravityModel.hpp
+ * EGM96 gravity model
+ */
+
+#ifndef GPSTK_EGM96_GRAVITY_MODEL_HPP
+#define GPSTK_EGM96_GRAVITY_MODEL_HPP
 
 #include "SphericalHarmonicGravity.hpp"
-
 
 namespace gpstk
 {
@@ -46,42 +56,85 @@ namespace gpstk
    class EGM96GravityModel : public SphericalHarmonicGravity
    {
    public:
-         /// Constructor
-      EGM96GravityModel (int n = 20, int m = 20)
-         : SphericalHarmonicGravity( n, m )
-      {
-         gmData.modelName = "EGM96";
+       /** Constructor.
+        * @param n  Desired degree
+        * @param m  Desired order
+        */
+       EGM96GravityModel(int n=12, int m=12)
+           : SphericalHarmonicGravity(n, m)
+       {
+           gmData.modelName = "EGM96";
 
-         gmData.GM = 3.9860044150E+14;
-         gmData.refDistance = 6378136.300000;
+           gmData.GM = 3.986004415E+14;
+           gmData.ae = 6378136.3;
 
-         gmData.includesPermTide = false;
+           gmData.includesPermTide = false;
 
-         gmData.refMJD =  46431.0;
-         gmData.dotC20 =  1.1627553400E-11;
-         gmData.dotC21 = -0.3200000000E-11;
-         gmData.dotS21 =  1.6200000000E-11;
+           gmData.refMJD = 51544.0;
 
-         gmData.maxDegree = 70;
-         gmData.maxOrder  = 70;
+           gmData.dotC20 = +1.162755E-11;
+           gmData.dotC21 = -0.320000E-11;
+           gmData.dotS21 = +1.606000E-11;
 
-         gmData.unnormalizedCS.resize(71, 71);
-         gmData.unnormalizedCS = &gmcs[0][0];
-      }
+           gmData.maxDegree = 12;
+           gmData.maxOrder = 12;
+
+//           gmData.xp.resize(3,2,0.0);
+//           gmData.yp.resize(3,2,0.0);
+
+           int size = n*(n+1)/2 + (m+1) - 3;
+           gmData.normalizedCS.resize(size,2);
+
+           for(int i=0; i<size; i++)
+           {
+                gmData.normalizedCS(i,0) = gmcs[i][0];
+                gmData.normalizedCS(i,1) = gmcs[i][1];
+           }
+
+       }    // End of constructor
+
+        
+       /** Compute the acceleration due to earth gravitation.
+        * @param utc   Time reference class
+        * @param rb    Reference body class
+        * @param sc    Spacecraft parameters and state
+        * @return the accelerations [m/s^2]
+        */
+       virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+
+       virtual std::string modelName() const
+       { return gmData.modelName; }
       
-      virtual ~EGM96GravityModel(){};
-
-      virtual void initialize(){};
+       virtual ~EGM96GravityModel(){};
 
    private:
 
-         /**Gravitational coefficients C, S are efficiently stored in a single array CS. The lower 
-          * triangle matrix CS holds the non-sectorial C coefficients C[n][m] ( n != m ). Sectorial C 
-          * coefficients C[n][n] are the diagonal elements of CS and the upper triangular matrix 
-          * stores the S[n][m] ( m != 0 ) coefficients in columns, for the same degree n. Mapping of 
-          * CS to C, S is achieved through C[n][m] = CS[n][m], S[n][m] = CS[m-1][n].
-          */
-      static const double gmcs[71][71];      // it's unnormalized
+       struct GravityModelData
+       {
+
+           std::string modelName;
+
+           double GM;
+           double ae;
+
+           bool includesPermTide;
+
+           double refMJD;
+
+           double dotC20;
+           double dotC21;
+           double dotS21;
+
+           int maxDegree;
+           int maxOrder;
+
+           Matrix<double> normalizedCS;
+
+       } gmData;
+
+       // normalized gravity model coefficients, not include order 0 and 1
+       //    (n+1)(n+2)/2 - 3 = 13*14/2 - 3 = 88
+       static const double gmcs[88][2];
 
    }; // End of class 'EGM96GravityModel'
 
@@ -90,4 +143,3 @@ namespace gpstk
 }  // End of namespace 'gpstk'
 
 #endif   // GPSTK_EGM96_GRAVITY_MODEL_HPP
-

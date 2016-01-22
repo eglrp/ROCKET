@@ -1,21 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file HarrisPriesterDrag.hpp
- * The HarrisPriester class computes the Harris-Priester atmosphere model.
- */
-
-#ifndef   GPSTK_HARRIS_PRIESTER_DRAG_HPP
-#define   GPSTK_HARRIS_PRIESTER_DRAG_HPP
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -26,14 +15,36 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file HarrisPriesterDrag.hpp
+ * The HarrisPriester class computes the Harris-Priester atmosphere model.
+ */
+
+#ifndef   GPSTK_HARRIS_PRIESTER_DRAG_HPP
+#define   GPSTK_HARRIS_PRIESTER_DRAG_HPP
 
 #include "AtmosphericDrag.hpp"
-#include "Matrix.hpp"
+
 #include <map>
 
 namespace gpstk
@@ -56,24 +67,19 @@ namespace gpstk
          /// Default destructor
       virtual ~HarrisPriesterDrag() {};
 
-         ///
-      void test();
-
          /// Update woring F107(Mean Solar Flux)
       void updateF107(double f107 = 157);
 
-
          /** Abstract class requires the subclass to compute the atmospheric density.
-          * @param utc epoch in UTC
+          * @param utc Time in UTC
           * @param rb  EarthRef object.
-          * @param r   Position vector.
-          * @param v   Velocity vector
-          * @return Atmospheric density in kg/m^3
+          * @param r   ECI position vector in m.
+          * @param v   ECI velocity vector in m/s.
+          * @return Atmospheric density in kg/m^3.
           */
-      virtual double computeDensity(UTCTime utc, EarthBody& rb, Vector<double> r, Vector<double> v);
+      virtual double computeDensity(CommonTime utc, EarthBody& rb, Vector<double> r, Vector<double> v);
 
    protected:
-
          /// do init some work
       void init();
 
@@ -97,7 +103,7 @@ namespace gpstk
 
          /// Object holding HP coefficients
       std::map<int, Matrix<double> > hpCoeficient;
-         
+
          /// Harris-Priester atmospheric density coefficients
          /// it's modified from JAT by Richard C.
       static const double hpcoef[10][177];
@@ -109,8 +115,3 @@ namespace gpstk
 }  // End of namespace 'gpstk'
 
 #endif   // GPSTK_HARRIS_PRIESTER_DRAG_HPP
-
-
-
-
-

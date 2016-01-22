@@ -1,21 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file SphericalHarmonicGravity.hpp
-* 
-*/
-
-#ifndef GPSTK_SPHERICAL_HARMONIC_GRAVITY_HPP
-#define GPSTK_SPHERICAL_HARMONIC_GRAVITY_HPP
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -26,21 +15,44 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  
+//  Copyright 2004, The University of Texas at Austin
+//  Kaifa Kuang - Wuhan University . 2015
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+* @file SphericalHarmonicGravity.hpp
+* 
+*/
+
+#ifndef GPSTK_SPHERICAL_HARMONIC_GRAVITY_HPP
+#define GPSTK_SPHERICAL_HARMONIC_GRAVITY_HPP
 
 #include "ForceModel.hpp"
 #include "EarthSolidTide.hpp"
 #include "EarthOceanTide.hpp"
 #include "EarthPoleTide.hpp"
+#include "StringUtils.hpp"
+
+using namespace gpstk::StringUtils;
 
 namespace gpstk
 {
-   using namespace StringUtils;
-
       /** @addtogroup GeoDynamics */
       //@{
 
@@ -56,40 +68,27 @@ namespace gpstk
           * @param n Desired degree.
           * @param m Desired order.
           */
-      SphericalHarmonicGravity(int n, int m);
+      SphericalHarmonicGravity(int n, int m)
+          : desiredDegree(n),
+            desiredOrder(m),
+            correctSolidTide(false),
+            correctPoleTide(false),
+            correctOceanTide(false)
+       {}
 
 
          /// Default destructor
       virtual ~SphericalHarmonicGravity() {};
 
 
-         /// We declare a pure virtual function
-      virtual void initialize() = 0;
-
-   
-         /** Computes the acceleration due to gravity in m/s^2.
-          * @param r ECI position vector.
-          * @param E ECI to ECEF transformation matrix.
-          * @return ECI acceleration in m/s^2.
-          */
-      Vector<double> gravity(Vector<double> r, Matrix<double> E);
-
-
-         /** Computes the partial derivative of gravity with respect to position.
-          * @return ECI gravity gradient matrix.
-          * @param r ECI position vector.
-          * @param E ECI to ECEF transformation matrix.
-          */
-      Matrix<double> gravityGradient(Vector<double> r, Matrix<double> E);
-      
-
          /** Call the relevant methods to compute the acceleration.
           * @param utc Time reference class
           * @param rb  Reference body class
           * @param sc  Spacecraft parameters and state
-          * @return the acceleration [m/s^s]
+          * @return the acceleration [m/s^2]
           */
-      virtual void doCompute(UTCTime utc, EarthBody& rb, Spacecraft& sc);
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
+      {}
 
 
       SphericalHarmonicGravity& setDesiredDegree(const int& n, const int& m)
@@ -99,77 +98,65 @@ namespace gpstk
       /// Methods to enable earth tide correction
 
       SphericalHarmonicGravity& enableSolidTide(bool b = true)
-      { correctSolidTide = b; return (*this);}
+      { correctSolidTide = b; return (*this); }
+
+      SphericalHarmonicGravity& setOceanTideFile(std::string fileName)
+      { oceanTide.setOceanTideFile(fileName); return (*this); }
 
       SphericalHarmonicGravity& enableOceanTide(bool b = true)
-      { correctOceanTide = b; return (*this);}
+      { correctOceanTide = b; return (*this); }
       
       SphericalHarmonicGravity& enablePoleTide(bool b = true)
-      { correctPoleTide = b; return (*this);}
+      { correctPoleTide = b; return (*this); }
 
-         /// Return force model name
+         /// Return the force model name
       virtual std::string modelName() const
-      {return "SphericalHarmonicGravity";}
+      { return "SphericalHarmonicGravity"; }
 
          /// return the force model index
       virtual int forceIndex() const
       { return FMI_GEOEARTH; }
 
-
-      virtual void test();
-
    protected:
 
-         /** Evaluates the two harmonic functions V and W.
-          * @param r ECI position vector.
-          * @param E ECI to ECEF transformation matrix.
-          */
-      void computeVW(Vector<double> r, Matrix<double> E);
-
-         /// Add tides to coefficients 
-      void correctCSTides(UTCTime t,bool solidFlag = false, bool oceanFlag = false, bool poleFlag = false);
-
-         /// normalized coefficient
-      double normFactor(int n, int m);
-
-   protected:
-
-      struct GravityModelData
+      /** Translate degree and order (n,m) from 2-D to 1-D.
+       * @param n   Degree
+       * @param m   Order
+       *
+       * For example:
+       * (n,m) = (0,0) <===> return = 1
+       *         (1,0) <===>          2
+       *         (1,1) <===>          3
+       *         (2,0) <===>          4
+       *          ...                ...
+       */
+      inline int index(int n, int m)
       {
-         std::string modelName;
+          return n*(n+1)/2 + (m+1);
+      }
 
-         double GM;
-         double refDistance;
+       /** Evaluate the fnALF and its gradients.
+        * @param degree     Desired degree
+        * @param lat        Geocentric latitude in radians
+        * @param leg        Fully normalized associated legendre functions
+        * @param leg1       First-order derivatives of leg
+        * @param leg2       Second-order derivatives of leg
+        */
+       void legendre(int degree, double lat, Vector<double>& leg, Vector<double>& leg1, Vector<double>& leg2);
 
-         bool includesPermTide;
 
-         double refMJD;
-
-         double dotC20;
-         double dotC21;
-         double dotS21;
-
-         int maxDegree;
-         int maxOrder;
-
-         Matrix<double> unnormalizedCS;
-
-      } gmData;
-
-         /// V W  (nmax+3)*(nmax+3)
-         /// Harmonic function V and W
-      Matrix<double> V, W;
+   protected:
 
          /// Degree and Order of gravity model desired.
       int desiredDegree, desiredOrder;
-         
+
          /// Flags to indicate earth tides correction
       bool   correctSolidTide;
       bool   correctPoleTide;
       bool   correctOceanTide;
 
          /// Objects to do earth tides correction
-      EarthSolidTide   solidTide;
+      EarthSolidTide  solidTide;
       EarthPoleTide   poleTide;
       EarthOceanTide  oceanTide;
 
@@ -181,7 +168,3 @@ namespace gpstk
 }  // End of namespace 'gpstk'
 
 #endif   // GPSTK_SPHERICAL_HARMONIC_GRAVITY_HPP
-
-
-
-

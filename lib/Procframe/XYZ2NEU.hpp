@@ -33,11 +33,11 @@
 
 
 
-#include "geometry.hpp"                   // DEG_TO_RAD
 #include "Matrix.hpp"
 #include "Position.hpp"
 #include "TypeID.hpp"
 #include "ProcessingClass.hpp"
+#include "GNSSconstants.hpp"
 
 
 namespace gpstk

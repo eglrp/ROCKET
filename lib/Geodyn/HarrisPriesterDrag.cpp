@@ -1,17 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file HarrisPriesterDrag.cpp
- * The HarrisPriester class computes the Harris-Priester atmosphere model.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -22,23 +15,41 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file HarrisPriesterDrag.cpp
+ * The HarrisPriester class computes the Harris-Priester atmosphere model.
+ */
 
 #include "HarrisPriesterDrag.hpp"
-#include "IERS.hpp"
-#include "ReferenceFrames.hpp"
+#include "IERSConventions.hpp"
+#include "GNSSconstants.hpp"
 #include "StringUtils.hpp"
-#include "Epoch.hpp"
-#include <map>
+
+using namespace std;
+using namespace gpstk::StringUtils;
 
 namespace gpstk
 {
-   using namespace std;
-
 
       // Upper height limit [km]
    const double HarrisPriesterDrag::upper_limit = 2000.0;         
@@ -52,7 +63,7 @@ namespace gpstk
       // Harris-Priester atmospheric density coefficients
       // it's modified from JAT by Richard C.
    const double HarrisPriesterDrag::hpcoef[10][177] = {
-   
+
    // ALTITUDE              MINIMUM DENSITY       MAXIMUM DENSITY
 
    {   // F107 = +65.000000
@@ -735,53 +746,6 @@ namespace gpstk
    }  // End of method 'HarrisPriesterDrag::getDensityCoeficentsByF107()'
 
 
-      // do some test here
-   void HarrisPriesterDrag::test()
-   {
-      cout<<"testing HarrisPriesterDrag"<<endl;
-      
-      IERS::loadSTKFile("InputData\\EOP-v1.1.txt");
-      ReferenceFrames::setJPLEphFile("InputData\\DE405\\jplde405");
-
-      Vector<double> r(3),v(3);
-      r(0)=-4453783.586;
-      r(1)=-5038203.756;
-      r(2)=-426384.456;
-
-      v(0) =  3831.888;
-      v(1) = -2887.221;
-      v(2) = -6.018232;
-      
-      EarthBody body;
-      UTCTime t(53157.5);
-
-      Spacecraft sc;
-      sc.setDragArea(20.0);
-      sc.setDragCoeff(2.2);
-      sc.setDryMass(1000.0);
-
-      Vector<double> rv(6,0.0);
-      Vector<double> p(0,0);
-      for(int i=0;i<3;i++)
-      {
-         rv(i) = r(i);
-         rv(i+3) = v(i);
-      }
-      sc.initStateVector(rv);
-
-      double den = computeDensity(t,body,r,v);
-      doCompute(t,body,sc);
-      
-      Vector<double> accl = getAccel();
-      
-      double ax = accl(0);
-      double ay = accl(1);
-      double az = accl(2);
-
-      int a = 0;
-#pragma unused(ay,ax,az,den,a)
-   }
-   
    void HarrisPriesterDrag::updateF107(double f107)
    {
       workingF107 = f107;
@@ -789,13 +753,13 @@ namespace gpstk
    }
 
       /* Abstract class requires the subclass to compute the atmospheric density.
-       * @param utc epoch in UTC
+       * @param utc Time in UTC
        * @param rb  EarthRef object.
-       * @param r   Position vector.
-       * @param v   Velocity vector
+       * @param r   ECI position vector in m.
+       * @param v   ECI velocity vector in m/s.
        * @return Atmospheric density in kg/m^3
        */
-   double HarrisPriesterDrag::computeDensity( UTCTime utc, 
+   double HarrisPriesterDrag::computeDensity( CommonTime utc, 
                                               EarthBody& rb, 
                                               Vector<double> r, 
                                               Vector<double> v)
@@ -803,27 +767,12 @@ namespace gpstk
       double density = 0.0;
       
       // Get the J2000 to TOD transformation
-      Matrix<double> N = ReferenceFrames::J2kToTODMatrix(utc);
+      Matrix<double> N = C2TMatrix(utc);
 
-      // Debuging
-      /*
-      double nn[3][3]={ {0.9999994803, -0.0009350126, -0.0004063480},
-      {0.0009349995, 0.9999995624, -0.0000322758},
-      {0.0004063780, 0.0000318958, 0.9999999169}};
-      
-      N = &nn[0][0];
-
-      
-      cout<<fixed<<setprecision(6);
-      //cout<<workingDens<<endl;
-      */
 
       // Transform r from J2000 to TOD
       Vector<double> r_tod = N * r;
 
-      double rmag = norm(r_tod);
-#pragma unused(rmag)
-      
       //* Satellite true altitude
       Position pos(r_tod(0), r_tod(1), r_tod(2), Position::Cartesian);
       double alt = pos.getAltitude()/1000.0;      // km
@@ -834,38 +783,26 @@ namespace gpstk
 
          string msg = "HarrisPriesterDrag is good for 100.0 km t0 2000.0 km"
             + string("the altitude you try is ")
-            + StringUtils::asString(alt) + " km!";
+            + asString(alt) + " km!";
          
          Exception e(msg);
-         
+
          //GPSTK_THROW(e);
       }
 
-      Vector<double> r_Sun = ReferenceFrames::getJ2kPosition( utc.asTDB(),
-                                                              SolarSystem::Sun);
+      Vector<double> r_Sun = J2kPosition(UTC2TT(utc), SolarSystem::Sun);
 
       // get coefficients for this F107
       //updateF107(std::pow(149597870.0/norm(r_Sun),2)*dailyF107);
       updateF107(averageF107);
 
-      // Debuging
-      /*
-      alt = 360.01323431364915;
-      cout<<r_Sun<<endl;
-      double rr[3] = {4.87202078904524E7,	1.318213179104784E8,	5.71498291483194E7};
-      r_Sun = &rr[0];
-      */
 
       double ra_Sun  = std::atan2( r_Sun(1), r_Sun(0));
-      double dec_Sun = std::atan2( r_Sun(2), 
-                                   std::sqrt( 
-                                     std::pow(r_Sun(0),2) + std::pow(r_Sun(1),2)
-                                     ) );
+      double dec_Sun = std::atan2( r_Sun(2), std::sqrt(std::pow(r_Sun(0),2) + std::pow(r_Sun(1),2)) );
 
         //* Unit vector u towards the apex of the diurnal bulge
         //* in inertial geocentric coordinates
       double c_dec = std::cos(dec_Sun);
-      
 
       Vector<double> u(3,0.0);      // Apex of diurnal bulge
       u(0) = c_dec * std::cos(ra_Sun + ra_lag);
@@ -905,8 +842,7 @@ namespace gpstk
       double n_prm = 2.0;
       Vector<double> h = cross(r,v);
       double inc = std::acos(h(2) / norm(h));
-      n_prm = 2.0 + inc * 8.0 / ASConstant::PI;
-
+      n_prm = 2.0 + inc * 8.0 / PI;
 
       density = d_min + (d_max - d_min) * std::pow(c_psi2,n_prm / 2.0);
 
@@ -916,6 +852,3 @@ namespace gpstk
 
 
 }  // End of namespace 'gpstk'
-
-
-

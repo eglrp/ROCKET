@@ -1,20 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file ForceModelList.hpp
-* ForceModelList is a countainer for force models.
-*/
-
-#ifndef GPSTK_FORCE_MODEL_LIST_HPP
-#define GPSTK_FORCE_MODEL_LIST_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -25,13 +15,34 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
 
-#include "EarthBody.hpp"
+/**
+* @file ForceModelList.hpp
+* ForceModelList is a countainer for force models.
+*/
+
+#ifndef GPSTK_FORCE_MODEL_LIST_HPP
+#define GPSTK_FORCE_MODEL_LIST_HPP
+
 #include "ForceModel.hpp"
 
 #include <list>
@@ -56,17 +67,20 @@ namespace gpstk
          /// Default destructor
       virtual ~ForceModelList()
       {};
-         
-         /// Clear the force model list
+
+         /// Clear the force model pointer list
       void clear()
-      { setFMT.clear(); }
+      {
+          fmpList.clear();
+//          fmtSet.clear();
+      }
 
          /**
          * Adds a generic force to the list
          * @param f Object which implements the ForceModel interface
          */
       void addForce(ForceModel* pForce)
-      { forceList.push_back(pForce); };
+      { fmpList.push_back(pForce); };
 
 
          /**
@@ -74,14 +88,27 @@ namespace gpstk
          * @param f Object which implements the ForceModel interface
          */
       void removeForce(ForceModel* pForce)
-      { forceList.remove(pForce); }
-      
+      { fmpList.remove(pForce); }
+
 
          /// interface implementation for the 'ForceModel'
-      virtual Vector<double> getDerivatives(UTCTime utc, EarthBody& bref, Spacecraft& sc);
-      
+      virtual Vector<double> getDerivatives(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
+
+         /// get force model type
+      std::set<ForceModel::ForceModelType> getForceModelType()
+      { return fmtSet; }
+
+         /// set force model type
       void setForceModelType(std::set<ForceModel::ForceModelType> fmt);
+
+
+         /// get force model pointer
+      std::list<ForceModel*> getForceModel()
+      { return fmpList; }
+
+         /// set force model pointer
+      void setForceModel(std::list<ForceModel*> fmp);
 
          /// return the force model name
       virtual std::string modelName() const
@@ -97,10 +124,11 @@ namespace gpstk
 
    protected:
 
-         /// List of forces
-      list<ForceModel*> forceList;
+         /// List of force model pointer
+      std::list<ForceModel*> fmpList;
 
-      std::set<ForceModel::ForceModelType> setFMT;
+         /// Set of force model type
+      std::set<ForceModel::ForceModelType> fmtSet;
 
    }; // End of class 'ForceModelList'
 
@@ -109,6 +137,3 @@ namespace gpstk
 }  // End of namespace 'gpstk'
 
 #endif   // GPSTK_FORCE_MODEL_LIST_HPP
-
-
-

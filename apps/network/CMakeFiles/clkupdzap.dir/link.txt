@@ -1,0 +1,1 @@
+/usr/bin/c++       CMakeFiles/clkupdzap.dir/clkupdzap.cpp.o  -o clkupdzap -rdynamic ../../librocket.so -Wl,-rpath,/home/kfkuang/rocket::::: 
