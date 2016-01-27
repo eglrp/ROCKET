@@ -89,6 +89,9 @@ namespace gpstk
       Matrix<double> I = ident<double>(3);
       da_dr = -mu * (I/d3 - 3.0*outer(dist,dist)/d5);
 
+//      cout << "df_sun/dr: " << endl;
+//      cout << setprecision(15) << da_dr << endl;
+
       // da_dv
       da_dv.resize(3,3,0.0);
 

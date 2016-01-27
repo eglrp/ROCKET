@@ -215,7 +215,7 @@ namespace gpstk
        {
            cerr << "Unknown block number for radiation scaling!" << endl;
        }
-
+/*
        if(iblock == 2 || iblock == 3)
        {
            dt = 0.813e-9*cos2beta - 0.517e-9*cos4beta;
@@ -237,7 +237,7 @@ namespace gpstk
                cerr << "Sat block not supported for CODE radiation model!" << endl;
            }
        }
-
+*/
        // shadow factor
        double lambda(1.0);
        lambda = getShadowFunction(r_Sat, r_Sun, r_Moon, SM_CONICAL);
@@ -258,7 +258,7 @@ namespace gpstk
        radprs = radprs + (Dc*d0*cosu*ssvec + Ds*d0*sinu*ssvec
                         + Yc*d0*cosu*yvec + Ys*d0*sinu*yvec
                         + Bc*d0*cosu*bvec + Bs*d0*sinu*bvec)*distfct;
-       radprs = radprs + (xt1*sinuu0*xvec + xt3*sin3uu0*xvec + zt*sin3uu0*zvec)*distfct;
+//       radprs = radprs + (xt1*sinuu0*xvec + xt3*sin3uu0*xvec + zt*sin3uu0*zvec)*distfct;
 
        // srp acceleration
        a = radprs;

@@ -983,7 +983,7 @@ namespace gpstk
        }
    }
 
-      // Planet position and velocity in J2000
+      // Planet position and velocity in J2000, in m and m/s
    Vector<double> J2kPosVel(const CommonTime&   TT,
                             SolarSystem::Planet entity,
                             SolarSystem::Planet center)
@@ -1022,7 +1022,7 @@ namespace gpstk
    }
 
 
-      // Planet position in J2000
+      // Planet position in J2000, in m
    Vector<double> J2kPosition(const CommonTime&   TT,
                               SolarSystem::Planet entity)
    {
@@ -1038,7 +1038,7 @@ namespace gpstk
    }
 
 
-      // Planet velocity in J2000
+      // Planet velocity in J2000, in m/s
    Vector<double> J2kVelocity(const CommonTime&   TT,
                               SolarSystem::Planet entity)
    {
