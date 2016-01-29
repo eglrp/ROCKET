@@ -321,6 +321,11 @@ namespace gpstk
             delete (EGM96GravityModel*) fmc.pGeoEarth;
             fmc.pGeoEarth = NULL;
          }
+         else if(fmc.grvModel == GM_EGM08)
+         {
+             delete (EGM08GravityModel*) fmc.pGeoEarth;
+             fmc.pGeoEarth = NULL;
+         }
          else
          {
             delete fmc.pGeoEarth;

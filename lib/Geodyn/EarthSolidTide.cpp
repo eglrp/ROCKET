@@ -53,10 +53,12 @@ namespace gpstk
    // For dC21 and dS21
    // The coefficients we choose are in-phase(ip) amplitudes and out-of-phase amplitudes of the
    // corrections for frequency dependence, and multipliers of the Delaunay variables
-   // Refers to Table 6.3a in IERS2003 P64
+   // Refers to Table 6.3a in IERS Conventions 2003
 
    const double EarthSolidTide::Argu_C21[48][7]=
    {
+//      Amp.    Amp.    l   l'  F   D   Omega
+//      (ip)    (op)
       {-0.1,    0,       2,    0,  2,  0,  2},
       {-0.1,    0,       0,    0,  2,  2,  2},
       {-0.1,    0,       1,    0,  2,  0,  1},
@@ -64,38 +66,38 @@ namespace gpstk
       {-0.1,    0,      -1,    0,  2,  2,  2},
       {-1.3,    0.1,     0,    0,  2,  0,  1},
       {-6.8,    0.6,     0,    0,  2,  0,  2},
-       {0.1,    0,       0,    0,  0,  2,  0},
-       {0.1,    0,       1,    0,  2, -2,  2},
-       {0.1,    0,      -1,    0,  2,  0,  1},
-       {0.4,    0,      -1,    0,  2,  0,  2},
-       {1.3,   -0.1,     1,    0,  0,  0,  0},
-       {0.3,    0,       1,    0,  0,  0,  1},
-       {0.3,    0,      -1,    0,  0,  2,  0},
-       {0.1,    0,      -1,    0,  0,  2,  1},
+      { 0.1,    0,       0,    0,  0,  2,  0},
+      { 0.1,    0,       1,    0,  2, -2,  2},
+      { 0.1,    0,      -1,    0,  2,  0,  1},
+      { 0.4,    0,      -1,    0,  2,  0,  2},
+      { 1.3,   -0.1,     1,    0,  0,  0,  0},
+      { 0.3,    0,       1,    0,  0,  0,  1},
+      { 0.3,    0,      -1,    0,  0,  2,  0},
+      { 0.1,    0,      -1,    0,  0,  2,  1},
       {-1.9,    0.1,     0,    1,  2, -2,  2},
-       {0.5,    0,       0,    0,  2, -2,  1},
+      { 0.5,    0,       0,    0,  2, -2,  1},
       {-43.4,   2.9,     0,    0,  2, -2,  2},
-       {0.6,    0,       0,   -1,  2, -2,  2},
-       {1.6,   -0.1,     0,    1,  0,  0,  0},
-       {0.1,    0,      -2,    0,  2,  0,  1},
-       {0.1,    0,       0,    0,  0,  0, -2},
+      { 0.6,    0,       0,   -1,  2, -2,  2},
+      { 1.6,   -0.1,     0,    1,  0,  0,  0},
+      { 0.1,    0,      -2,    0,  2,  0,  1},
+      { 0.1,    0,       0,    0,  0,  0, -2},
       {-8.8,    0.5,     0,    0,  0,  0, -1},
-       {470.9, -30.2,    0,    0,  0,  0,  0},
-       {68.1,  -4.6,     0,    0,  0,  0,  1},
+      {470.9, -30.2,     0,    0,  0,  0,  0},
+      { 68.1,  -4.6,     0,    0,  0,  0,  1},
       {-1.6,    0.1,     0,    0,  0,  0,  2},
-       {0.1,    0,      -1,    0,  0,  1,  0},
+      { 0.1,    0,      -1,    0,  0,  1,  0},
       {-0.1,    0,       0,   -1,  0,  0, -1},
       {-20.6,  -0.3,     0,   -1,  0,  0,  0},
-       {0.3,    0,       0,    1, -2,  2, -2},
+      { 0.3,    0,       0,    1, -2,  2, -2},
       {-0.3,    0,       0,   -1,  0,  0,  1},
       {-0.2,    0,      -2,    0,  0,  2,  0},
       {-0.1,    0,      -2,    0,  0,  2,  1},
       {-5.0,    0.3,     0,    0, -2,  2, -2},
-       {0.2,    0,       0,    0, -2,  2, -1},
+      { 0.2,    0,       0,    0, -2,  2, -1},
       {-0.2,    0,       0,   -1, -2,  2, -2},
       {-0.5,    0,       1,    0,  0, -2,  0},
       {-0.1,    0,       1,    0,  0, -2,  1},
-       {0.1,    0,      -1,    0,  0,  0, -1},
+      { 0.1,    0,      -1,    0,  0,  0, -1},
       {-2.1,    0.1,    -1,    0,  0,  0,  0},
       {-0.4,    0,      -1,    0,  0,  0,  1},
       {-0.2,    0,       0,    0,  0, -2,  0},
@@ -108,12 +110,13 @@ namespace gpstk
    };
 
    // For dC22 and dS22
-   // Refer to Table 6.3c in IERS2003
+   // Refers to Table 6.3c in IERS Conventions 2003
    // (0.30102 . i 0.00130).
    const double EarthSolidTide::Argu_C22[2][6] = 
    {
-      {-0.3, 1, 0, 2, 0, 2},
-      {-1.2, 0, 0, 2, 0, 2}
+//        Amp.   l   l'  F   D   Omega
+       {  -0.3,  1,  0,  2,  0,  2  },
+       {  -1.2,  0,  0,  2,  0,  2  }
    };
 
    // For dC20
@@ -121,8 +124,10 @@ namespace gpstk
    // The nominal value k20 for the zonal tides is taken as 0.30190
    const double EarthSolidTide::Argu_C20[21][7]=
    {
-       {16.6, -6.7,  0,  0,  0,  0,  1},
-      {-0.1,   0.1,  0,  0,  0,  0,  2},
+//        Amp.  Amp.    l   l'  F   D   Omega
+//        (ip)  (op)
+       {  16.6,  -6.7,  0,  0,  0,  0,  1   },
+       {  -0.1,   0.1,  0,  0,  0,  0,  2   },
       {-1.2,   0.8,  0, -1,  0,  0,  0},
       {-5.5,   4.3,  0,  0, -2,  2, -2},
        {0.1,  -0.1,  0,  0, -2,  2, -1},
@@ -167,8 +172,8 @@ namespace gpstk
        Matrix<double> E = C2TMatrix(UTC);
 
        // Moon and Sun Position in ECI, m
-       Vector<double> moonReci = J2kPosition(TT, SolarSystem::Moon)*1000.0;
-       Vector<double> sunReci = J2kPosition(TT, SolarSystem::Sun)*1000.0;
+       Vector<double> moonReci = J2kPosition(TT, SolarSystem::Moon);
+       Vector<double> sunReci = J2kPosition(TT, SolarSystem::Sun);
 
        // Moon and Sun Position in ECEF, m
        Vector<double> moonR = E * moonReci;
@@ -179,13 +184,13 @@ namespace gpstk
 
        double r_sun, phi_sun, lamda_sun;
        r_sun = norm(sunR);
-       phi_sun = sunP.getGeocentricLatitude()*PI/180.0;
-       lamda_sun = sunP.getLongitude()*PI/180.0;
+       phi_sun = sunP.getGeocentricLatitude()*DEG_TO_RAD;
+       lamda_sun = sunP.getLongitude()*DEG_TO_RAD;
 
        double r_lunar, phi_lunar, lamda_lunar;
        r_lunar = norm(moonR);
-       phi_lunar = moonP.getGeocentricLatitude()*PI/180.0;
-       lamda_lunar = moonP.getLongitude()*PI/180.0;
+       phi_lunar = moonP.getGeocentricLatitude()*DEG_TO_RAD;
+       lamda_lunar = moonP.getLongitude()*DEG_TO_RAD;
 
        // reference bern 5 TIDPT2.f
        /*

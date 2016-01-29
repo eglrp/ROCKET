@@ -172,8 +172,8 @@ namespace gpstk
         gmData.normalizedCS(index(3,0)-3-1, 0) += leapYears*gmData.dotC30;
         gmData.normalizedCS(index(4,0)-3-1, 1) += leapYears*gmData.dotC40;
 
-        gmData.normalizedCS(index(11,0)-3-1, 0) = 0.0;
-        gmData.normalizedCS(index(12,0)-3-1, 0) = 0.0;
+//        gmData.normalizedCS(index(11,0)-3-1, 0) = 0.0;
+//        gmData.normalizedCS(index(12,0)-3-1, 0) = 0.0;
 
         // get the mean pole at epoch 2000.0 from IERS Conventions 2010
         // see IERS Conventions 2010, Equation 7.25
@@ -357,7 +357,7 @@ namespace gpstk
         dbdlat(1,0) = -clat_Sat * clon_Sat / rho_Sat;
         dbdlat(1,1) = -clat_Sat * slon_Sat / rho_Sat;
         dbdlat(1,2) = -slat_Sat / rho_Sat;
-        dbdlat(2,0) = -slat_Sat * slon_Sat / (rho_Sat*rho_Sat * clat_Sat*clat_Sat);
+        dbdlat(2,0) = -slat_Sat * slon_Sat / (rho_Sat * clat_Sat*clat_Sat);
         dbdlat(2,1) =  slat_Sat * clon_Sat / (rho_Sat * clat_Sat*clat_Sat);
 
         Matrix<double> dbdlon(3,3,0.0);     // db / dlon
@@ -438,8 +438,8 @@ namespace gpstk
         // gravitation acceleration in ECI
         a = T2C * acce;
 
-        cout << "f_earth (EGM08): " << endl;
-        cout << setprecision(15) << a << endl;
+//        cout << "f_earth (EGM08): " << endl;
+//        cout << setprecision(15) << a << endl;
 
 
         // partials of gravitation acceleration in ECEF to spherical coordinates (rho, lat, lon)

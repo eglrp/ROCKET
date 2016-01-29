@@ -4873,12 +4873,15 @@ CMakeFiles/rocket.dir/lib/Math/StudentDistribution.cpp.o
 CMakeFiles/rocket.dir/lib/Math/Triple.cpp.o
  /home/kfkuang/rocket/lib/Math/Triple.cpp
  /home/kfkuang/rocket/lib/Math/Triple.hpp
+ lib/GNSSCore/GNSSconstants.hpp
+ lib/GNSSEph/SatID.hpp
  lib/Math/MathBase.hpp
  lib/Math/Vector/Vector.hpp
  lib/Math/Vector/VectorBase.hpp
  lib/Math/Vector/VectorBaseOperators.hpp
  lib/Math/Vector/VectorOperators.hpp
  lib/Utilities/Exception.hpp
+ lib/deprecate/gps_constants.hpp
 CMakeFiles/rocket.dir/lib/Math/Vector/VectorBase.cpp.o
  /home/kfkuang/rocket/lib/Math/Vector/VectorBase.cpp
  /home/kfkuang/rocket/lib/Math/Vector/VectorBase.hpp
@@ -9955,276 +9958,6 @@ CMakeFiles/rocket.dir/lib/Vplot/SurfacePlot.cpp.o
  lib/Vdraw/VDrawException.hpp
  lib/Vdraw/VGImage.hpp
  lib/Vdraw/VGState.hpp
-CMakeFiles/rocket.dir/lib/deprecate/AmbiguityDatum2.cpp.o
- /home/kfkuang/rocket/lib/deprecate/AmbiguityDatum2.cpp
- /home/kfkuang/rocket/lib/deprecate/AmbiguityDatum2.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/SystemTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/UnixTime.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARRound.hpp
- lib/dev/Arc.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/Edge.hpp
- lib/dev/Equation.hpp
- lib/dev/Kruskal.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
-CMakeFiles/rocket.dir/lib/deprecate/CorrectUPDXs.cpp.o
- /home/kfkuang/rocket/lib/deprecate/CorrectUPDXs.cpp
- /home/kfkuang/rocket/lib/deprecate/CorrectUPDXs.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXBase.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXData.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXHeader.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXStore.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXStream.hpp
- /home/kfkuang/rocket/lib/deprecate/SatUPDX.hpp
- lib/FileDirProc/FileStore.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeString.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SourceID.hpp
- lib/dev/TabularSatStore.hpp
- lib/dev/TypeID.hpp
-CMakeFiles/rocket.dir/lib/deprecate/CycleSlipSimulation.cpp.o
- /home/kfkuang/rocket/lib/deprecate/CycleSlipSimulation.cpp
- /home/kfkuang/rocket/lib/deprecate/CycleSlipSimulation.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SourceID.hpp
- lib/dev/TypeID.hpp
-CMakeFiles/rocket.dir/lib/deprecate/RinexUPDXData.cpp.o
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXBase.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXData.cpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXData.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXHeader.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXStream.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeString.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
-CMakeFiles/rocket.dir/lib/deprecate/RinexUPDXHeader.cpp.o
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXBase.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXHeader.cpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXHeader.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXStream.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Math/MathBase.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/BDSWeekSecond.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/Epoch.hpp
- lib/TimeHandling/GALWeekSecond.hpp
- lib/TimeHandling/GPSWeek.hpp
- lib/TimeHandling/GPSWeekSecond.hpp
- lib/TimeHandling/GPSWeekZcount.hpp
- lib/TimeHandling/GPSZcount.hpp
- lib/TimeHandling/JulianDate.hpp
- lib/TimeHandling/MJD.hpp
- lib/TimeHandling/QZSWeekSecond.hpp
- lib/TimeHandling/SystemTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeConverters.hpp
- lib/TimeHandling/TimeString.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/UnixTime.hpp
- lib/TimeHandling/Week.hpp
- lib/TimeHandling/WeekSecond.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
-CMakeFiles/rocket.dir/lib/deprecate/RinexUPDXStore.cpp.o
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXBase.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXData.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXHeader.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXStore.cpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXStore.hpp
- /home/kfkuang/rocket/lib/deprecate/RinexUPDXStream.hpp
- /home/kfkuang/rocket/lib/deprecate/SatUPDX.hpp
- lib/FileDirProc/FileStore.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Math/MathBase.hpp
- lib/Math/MiscMath.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeString.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/TabularSatStore.hpp
 CMakeFiles/rocket.dir/lib/deprecate/SVExclusionList.cpp.o
  /home/kfkuang/rocket/lib/deprecate/SVExclusionList.cpp
  /home/kfkuang/rocket/lib/deprecate/SVExclusionList.hpp
@@ -10236,808 +9969,6 @@ CMakeFiles/rocket.dir/lib/deprecate/SVExclusionList.cpp.o
  lib/TimeHandling/TimeTag.hpp
  lib/Utilities/Exception.hpp
  lib/Utilities/StringUtils.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverPPP2.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverPPP2.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverPPP2.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverPPPUC.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverPPPUC.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverPPPUC.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverPPPX.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverPPPX.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverPPPX.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverPPPX2.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverPPPX2.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverPPPX2.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverPPPXAR2.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverPPPXAR2.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverPPPXAR2.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARBase.hpp
- lib/dev/ARLambda.hpp
- lib/dev/ARMLambda.hpp
- lib/dev/ARRound.hpp
- lib/dev/Arc.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/DatumPPP.hpp
- lib/dev/DatumPPPNL.hpp
- lib/dev/DatumPPPWL.hpp
- lib/dev/Edge.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverRTKLc.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverRTKLc.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverRTKLc.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARBase.hpp
- lib/dev/ARLambda.hpp
- lib/dev/ARMLambda.hpp
- lib/dev/ARRound.hpp
- lib/dev/Arc.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/DatumPPP.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverRTKLw.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverRTKLw.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverRTKLw.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARBase.hpp
- lib/dev/ARLambda.hpp
- lib/dev/ARMLambda.hpp
- lib/dev/ARRound.hpp
- lib/dev/Arc.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/DatumPPP.hpp
- lib/dev/DatumPPPNL.hpp
- lib/dev/DatumPPPWL.hpp
- lib/dev/Edge.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverRTKUC.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverRTKUC.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverRTKUC.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARBase.hpp
- lib/dev/ARLambda.hpp
- lib/dev/ARMLambda.hpp
- lib/dev/ARRound.hpp
- lib/dev/Arc.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/DatumPPP.hpp
- lib/dev/DatumPPPNL.hpp
- lib/dev/DatumPPPWL.hpp
- lib/dev/Edge.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverRTKX.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverRTKX.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverRTKX.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/PowerSum.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARBase.hpp
- lib/dev/ARLambda.hpp
- lib/dev/ARMLambda.hpp
- lib/dev/ARRound.hpp
- lib/dev/Arc.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/DatumPPPNL.hpp
- lib/dev/DatumPPPWL.hpp
- lib/dev/Edge.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverRTKX2.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverRTKX2.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverRTKX2.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Stats.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARBase.hpp
- lib/dev/ARLambda.hpp
- lib/dev/ARMLambda.hpp
- lib/dev/ARRound.hpp
- lib/dev/Arc.hpp
- lib/dev/CodeKalmanSolver.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/DatumPPPNL.hpp
- lib/dev/DatumPPPWL.hpp
- lib/dev/Edge.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverLMS.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverUpdNL.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverUpdNL.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverUpdNL.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARRound.hpp
- lib/dev/AmbiguityDatum.hpp
- lib/dev/Arc.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/Edge.hpp
- lib/dev/Equation.hpp
- lib/dev/EquationSystem.hpp
- lib/dev/IndepAmbiguityDatum.hpp
- lib/dev/Kruskal.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverGeneral.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
-CMakeFiles/rocket.dir/lib/deprecate/SolverUpdWL.cpp.o
- /home/kfkuang/rocket/lib/deprecate/SolverUpdWL.cpp
- /home/kfkuang/rocket/lib/deprecate/SolverUpdWL.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/SimpleKalmanFilter.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/ProcLib/SolverBase.hpp
- lib/Procframe/ProcessingClass.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/BDSWeekSecond.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/Epoch.hpp
- lib/TimeHandling/GALWeekSecond.hpp
- lib/TimeHandling/GPSWeek.hpp
- lib/TimeHandling/GPSWeekSecond.hpp
- lib/TimeHandling/GPSWeekZcount.hpp
- lib/TimeHandling/GPSZcount.hpp
- lib/TimeHandling/JulianDate.hpp
- lib/TimeHandling/MJD.hpp
- lib/TimeHandling/QZSWeekSecond.hpp
- lib/TimeHandling/SystemTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeConverters.hpp
- lib/TimeHandling/TimeString.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/UnixTime.hpp
- lib/TimeHandling/Week.hpp
- lib/TimeHandling/WeekSecond.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/ARRound.hpp
- lib/dev/AmbiguityDatum.hpp
- lib/dev/Arc.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/Edge.hpp
- lib/dev/Equation.hpp
- lib/dev/EquationSystem.hpp
- lib/dev/IndepAmbiguityDatum.hpp
- lib/dev/Kruskal.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/RinexObsHeader.hpp
- lib/dev/SolverGeneral.hpp
- lib/dev/SourceID.hpp
- lib/dev/StochasticModel.hpp
- lib/dev/TypeID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
 CMakeFiles/rocket.dir/lib/dev/ARLambda.cpp.o
  /home/kfkuang/rocket/lib/dev/ARBase.hpp
  /home/kfkuang/rocket/lib/dev/ARLambda.cpp
@@ -11079,68 +10010,6 @@ CMakeFiles/rocket.dir/lib/dev/Ambiguity.cpp.o
  lib/GNSSEph/SatID.hpp
  lib/Utilities/Exception.hpp
  lib/deprecate/gps_constants.hpp
-CMakeFiles/rocket.dir/lib/dev/AmbiguityDatum.cpp.o
- /home/kfkuang/rocket/lib/dev/ARRound.hpp
- /home/kfkuang/rocket/lib/dev/AmbiguityDatum.cpp
- /home/kfkuang/rocket/lib/dev/AmbiguityDatum.hpp
- /home/kfkuang/rocket/lib/dev/Arc.hpp
- /home/kfkuang/rocket/lib/dev/DataHeaders.hpp
- /home/kfkuang/rocket/lib/dev/DataStructures.hpp
- /home/kfkuang/rocket/lib/dev/Edge.hpp
- /home/kfkuang/rocket/lib/dev/Equation.hpp
- /home/kfkuang/rocket/lib/dev/Kruskal.hpp
- /home/kfkuang/rocket/lib/dev/RinexObsData.hpp
- /home/kfkuang/rocket/lib/dev/SourceID.hpp
- /home/kfkuang/rocket/lib/dev/StochasticModel.hpp
- /home/kfkuang/rocket/lib/dev/TypeID.hpp
- /home/kfkuang/rocket/lib/dev/Variable.hpp
- /home/kfkuang/rocket/lib/dev/Vertex.hpp
- lib/FileHandling/FFData.hpp
- lib/FileHandling/FFStream.hpp
- lib/FileHandling/FFStreamError.hpp
- lib/FileHandling/FFTextStream.hpp
- lib/FileHandling/RINEX/RinexObsBase.hpp
- lib/FileHandling/RINEX/RinexObsStream.hpp
- lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
- lib/FileHandling/RINEX3/Rinex3ObsData.hpp
- lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
- lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
- lib/GNSSCore/EllipsoidModel.hpp
- lib/GNSSCore/GNSSconstants.hpp
- lib/GNSSCore/ObsID.hpp
- lib/GNSSCore/ObsIDInitializer.hpp
- lib/GNSSCore/Position.hpp
- lib/GNSSCore/Xvt.hpp
- lib/GNSSEph/RinexObsID.hpp
- lib/GNSSEph/RinexSatID.hpp
- lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
- lib/Math/MathBase.hpp
- lib/Math/Matrix/Matrix.hpp
- lib/Math/Matrix/MatrixBase.hpp
- lib/Math/Matrix/MatrixBaseOperators.hpp
- lib/Math/Matrix/MatrixFunctors.hpp
- lib/Math/Matrix/MatrixImplementation.hpp
- lib/Math/Matrix/MatrixOperators.hpp
- lib/Math/MiscMath.hpp
- lib/Math/Triple.hpp
- lib/Math/Vector/Vector.hpp
- lib/Math/Vector/VectorBase.hpp
- lib/Math/Vector/VectorBaseOperators.hpp
- lib/Math/Vector/VectorOperators.hpp
- lib/RefTime/ReferenceFrame.hpp
- lib/RefTime/TimeSystem.hpp
- lib/TimeHandling/CivilTime.hpp
- lib/TimeHandling/CommonTime.hpp
- lib/TimeHandling/SystemTime.hpp
- lib/TimeHandling/TimeConstants.hpp
- lib/TimeHandling/TimeTag.hpp
- lib/TimeHandling/UnixTime.hpp
- lib/TimeHandling/YDSTime.hpp
- lib/Utilities/Exception.hpp
- lib/Utilities/StringUtils.hpp
- lib/deprecate/gps_constants.hpp
- lib/dev/RinexObsHeader.hpp
 CMakeFiles/rocket.dir/lib/dev/AmbiguitySmoother.cpp.o
  /home/kfkuang/rocket/lib/dev/AmbiguitySmoother.cpp
  /home/kfkuang/rocket/lib/dev/AmbiguitySmoother.hpp
@@ -11794,7 +10663,6 @@ CMakeFiles/rocket.dir/lib/dev/DatumPPP.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -11803,6 +10671,7 @@ CMakeFiles/rocket.dir/lib/dev/DatumPPP.cpp.o
  lib/Math/Matrix/MatrixImplementation.hpp
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Stats.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
@@ -11855,7 +10724,6 @@ CMakeFiles/rocket.dir/lib/dev/DatumPPPNL.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -11864,6 +10732,7 @@ CMakeFiles/rocket.dir/lib/dev/DatumPPPNL.cpp.o
  lib/Math/Matrix/MatrixImplementation.hpp
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Stats.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
@@ -11916,7 +10785,6 @@ CMakeFiles/rocket.dir/lib/dev/DatumPPPWL.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -11925,6 +10793,7 @@ CMakeFiles/rocket.dir/lib/dev/DatumPPPWL.cpp.o
  lib/Math/Matrix/MatrixImplementation.hpp
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Stats.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
@@ -12349,7 +11218,6 @@ CMakeFiles/rocket.dir/lib/dev/IndepAmbiguityDatum.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -12358,6 +11226,7 @@ CMakeFiles/rocket.dir/lib/dev/IndepAmbiguityDatum.cpp.o
  lib/Math/Matrix/MatrixImplementation.hpp
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
  lib/Math/Vector/VectorBase.hpp
@@ -12820,6 +11689,68 @@ CMakeFiles/rocket.dir/lib/dev/MWFilter.cpp.o
  lib/dev/RinexObsHeader.hpp
  lib/dev/SourceID.hpp
  lib/dev/TypeID.hpp
+CMakeFiles/rocket.dir/lib/dev/NetworkAmbiDatum.cpp.o
+ /home/kfkuang/rocket/lib/dev/ARRound.hpp
+ /home/kfkuang/rocket/lib/dev/Arc.hpp
+ /home/kfkuang/rocket/lib/dev/DataHeaders.hpp
+ /home/kfkuang/rocket/lib/dev/DataStructures.hpp
+ /home/kfkuang/rocket/lib/dev/Edge.hpp
+ /home/kfkuang/rocket/lib/dev/Equation.hpp
+ /home/kfkuang/rocket/lib/dev/Kruskal.hpp
+ /home/kfkuang/rocket/lib/dev/NetworkAmbiDatum.cpp
+ /home/kfkuang/rocket/lib/dev/NetworkAmbiDatum.hpp
+ /home/kfkuang/rocket/lib/dev/RinexObsData.hpp
+ /home/kfkuang/rocket/lib/dev/SourceID.hpp
+ /home/kfkuang/rocket/lib/dev/StochasticModel.hpp
+ /home/kfkuang/rocket/lib/dev/TypeID.hpp
+ /home/kfkuang/rocket/lib/dev/Variable.hpp
+ /home/kfkuang/rocket/lib/dev/Vertex.hpp
+ lib/FileHandling/FFData.hpp
+ lib/FileHandling/FFStream.hpp
+ lib/FileHandling/FFStreamError.hpp
+ lib/FileHandling/FFTextStream.hpp
+ lib/FileHandling/RINEX/RinexObsBase.hpp
+ lib/FileHandling/RINEX/RinexObsStream.hpp
+ lib/FileHandling/RINEX3/Rinex3ObsBase.hpp
+ lib/FileHandling/RINEX3/Rinex3ObsData.hpp
+ lib/FileHandling/RINEX3/Rinex3ObsHeader.hpp
+ lib/FileHandling/RINEX3/Rinex3ObsStream.hpp
+ lib/GNSSCore/EllipsoidModel.hpp
+ lib/GNSSCore/GNSSconstants.hpp
+ lib/GNSSCore/ObsID.hpp
+ lib/GNSSCore/ObsIDInitializer.hpp
+ lib/GNSSCore/Position.hpp
+ lib/GNSSCore/Xvt.hpp
+ lib/GNSSEph/RinexObsID.hpp
+ lib/GNSSEph/RinexSatID.hpp
+ lib/GNSSEph/SatID.hpp
+ lib/Math/MathBase.hpp
+ lib/Math/Matrix/Matrix.hpp
+ lib/Math/Matrix/MatrixBase.hpp
+ lib/Math/Matrix/MatrixBaseOperators.hpp
+ lib/Math/Matrix/MatrixFunctors.hpp
+ lib/Math/Matrix/MatrixImplementation.hpp
+ lib/Math/Matrix/MatrixOperators.hpp
+ lib/Math/MiscMath.hpp
+ lib/Math/SpecialFunctions.hpp
+ lib/Math/Triple.hpp
+ lib/Math/Vector/Vector.hpp
+ lib/Math/Vector/VectorBase.hpp
+ lib/Math/Vector/VectorBaseOperators.hpp
+ lib/Math/Vector/VectorOperators.hpp
+ lib/RefTime/ReferenceFrame.hpp
+ lib/RefTime/TimeSystem.hpp
+ lib/TimeHandling/CivilTime.hpp
+ lib/TimeHandling/CommonTime.hpp
+ lib/TimeHandling/SystemTime.hpp
+ lib/TimeHandling/TimeConstants.hpp
+ lib/TimeHandling/TimeTag.hpp
+ lib/TimeHandling/UnixTime.hpp
+ lib/TimeHandling/YDSTime.hpp
+ lib/Utilities/Exception.hpp
+ lib/Utilities/StringUtils.hpp
+ lib/deprecate/gps_constants.hpp
+ lib/dev/RinexObsHeader.hpp
 CMakeFiles/rocket.dir/lib/dev/PoleTides.cpp.o
  /home/kfkuang/rocket/lib/dev/EOPDataStore.hpp
  /home/kfkuang/rocket/lib/dev/PoleTides.cpp
@@ -13259,7 +12190,6 @@ CMakeFiles/rocket.dir/lib/dev/SimpleFilter.cpp.o
  lib/dev/TypeID.hpp
 CMakeFiles/rocket.dir/lib/dev/SolverGenNL.cpp.o
  /home/kfkuang/rocket/lib/dev/ARRound.hpp
- /home/kfkuang/rocket/lib/dev/AmbiguityDatum.hpp
  /home/kfkuang/rocket/lib/dev/Arc.hpp
  /home/kfkuang/rocket/lib/dev/DataHeaders.hpp
  /home/kfkuang/rocket/lib/dev/DataStructures.hpp
@@ -13296,7 +12226,6 @@ CMakeFiles/rocket.dir/lib/dev/SolverGenNL.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -13306,6 +12235,7 @@ CMakeFiles/rocket.dir/lib/dev/SolverGenNL.cpp.o
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
  lib/Math/SimpleKalmanFilter.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
  lib/Math/Vector/VectorBase.hpp
@@ -13341,7 +12271,6 @@ CMakeFiles/rocket.dir/lib/dev/SolverGenNL.cpp.o
  lib/deprecate/gps_constants.hpp
 CMakeFiles/rocket.dir/lib/dev/SolverGenWL.cpp.o
  /home/kfkuang/rocket/lib/dev/ARRound.hpp
- /home/kfkuang/rocket/lib/dev/AmbiguityDatum.hpp
  /home/kfkuang/rocket/lib/dev/Arc.hpp
  /home/kfkuang/rocket/lib/dev/DataHeaders.hpp
  /home/kfkuang/rocket/lib/dev/DataStructures.hpp
@@ -13378,7 +12307,6 @@ CMakeFiles/rocket.dir/lib/dev/SolverGenWL.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -13388,6 +12316,7 @@ CMakeFiles/rocket.dir/lib/dev/SolverGenWL.cpp.o
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
  lib/Math/SimpleKalmanFilter.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
  lib/Math/Vector/VectorBase.hpp
@@ -13749,7 +12678,6 @@ CMakeFiles/rocket.dir/lib/dev/SolverPPPAR.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -13759,6 +12687,7 @@ CMakeFiles/rocket.dir/lib/dev/SolverPPPAR.cpp.o
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
  lib/Math/SimpleKalmanFilter.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Stats.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
@@ -13830,7 +12759,6 @@ CMakeFiles/rocket.dir/lib/dev/SolverPPPARFB.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -13840,6 +12768,7 @@ CMakeFiles/rocket.dir/lib/dev/SolverPPPARFB.cpp.o
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
  lib/Math/SimpleKalmanFilter.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Stats.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
@@ -13954,7 +12883,6 @@ CMakeFiles/rocket.dir/lib/dev/SolverZapNL.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -13964,6 +12892,7 @@ CMakeFiles/rocket.dir/lib/dev/SolverZapNL.cpp.o
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
  lib/Math/SimpleKalmanFilter.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
  lib/Math/Vector/VectorBase.hpp
@@ -13999,13 +12928,23 @@ CMakeFiles/rocket.dir/lib/dev/SolverZapNL.cpp.o
  lib/deprecate/gps_constants.hpp
 CMakeFiles/rocket.dir/lib/dev/SolverZapWL.cpp.o
  /home/kfkuang/rocket/lib/dev/ARRound.hpp
+ /home/kfkuang/rocket/lib/dev/Arc.hpp
+ /home/kfkuang/rocket/lib/dev/DataHeaders.hpp
+ /home/kfkuang/rocket/lib/dev/DataStructures.hpp
+ /home/kfkuang/rocket/lib/dev/Edge.hpp
+ /home/kfkuang/rocket/lib/dev/Equation.hpp
  /home/kfkuang/rocket/lib/dev/EquationSystem2.hpp
  /home/kfkuang/rocket/lib/dev/IndepAmbiguityDatum.hpp
+ /home/kfkuang/rocket/lib/dev/Kruskal.hpp
+ /home/kfkuang/rocket/lib/dev/RinexObsData.hpp
  /home/kfkuang/rocket/lib/dev/RinexObsHeader.hpp
  /home/kfkuang/rocket/lib/dev/SolverZapWL.cpp
  /home/kfkuang/rocket/lib/dev/SolverZapWL.hpp
+ /home/kfkuang/rocket/lib/dev/SourceID.hpp
  /home/kfkuang/rocket/lib/dev/StochasticModel.hpp
  /home/kfkuang/rocket/lib/dev/TypeID.hpp
+ /home/kfkuang/rocket/lib/dev/Variable.hpp
+ /home/kfkuang/rocket/lib/dev/Vertex.hpp
  lib/FileHandling/FFData.hpp
  lib/FileHandling/FFStream.hpp
  lib/FileHandling/FFStreamError.hpp
@@ -14025,7 +12964,6 @@ CMakeFiles/rocket.dir/lib/dev/SolverZapWL.cpp.o
  lib/GNSSEph/RinexObsID.hpp
  lib/GNSSEph/RinexSatID.hpp
  lib/GNSSEph/SatID.hpp
- lib/Geomatics/SpecialFunctions.hpp
  lib/Math/MathBase.hpp
  lib/Math/Matrix/Matrix.hpp
  lib/Math/Matrix/MatrixBase.hpp
@@ -14035,6 +12973,7 @@ CMakeFiles/rocket.dir/lib/dev/SolverZapWL.cpp.o
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
  lib/Math/SimpleKalmanFilter.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
  lib/Math/Vector/VectorBase.hpp
@@ -14067,18 +13006,7 @@ CMakeFiles/rocket.dir/lib/dev/SolverZapWL.cpp.o
  lib/TimeHandling/YDSTime.hpp
  lib/Utilities/Exception.hpp
  lib/Utilities/StringUtils.hpp
- lib/deprecate/AmbiguityDatum2.hpp
  lib/deprecate/gps_constants.hpp
- lib/dev/Arc.hpp
- lib/dev/DataHeaders.hpp
- lib/dev/DataStructures.hpp
- lib/dev/Edge.hpp
- lib/dev/Equation.hpp
- lib/dev/Kruskal.hpp
- lib/dev/RinexObsData.hpp
- lib/dev/SourceID.hpp
- lib/dev/Variable.hpp
- lib/dev/Vertex.hpp
 CMakeFiles/rocket.dir/lib/dev/SourceID.cpp.o
  /home/kfkuang/rocket/lib/dev/RinexObsHeader.hpp
  /home/kfkuang/rocket/lib/dev/SourceID.cpp

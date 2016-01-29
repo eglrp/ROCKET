@@ -166,31 +166,22 @@ namespace gpstk
      * @param rb  Reference body class  
      * @param sc  Spacecraft parameters and state
      * @return the acceleration [m/s^2]
+     *
+     * Reference: IERS Conventions 2003, Chapter 6
      */
     void EGM96GravityModel::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
     {
         // compute time in years since J2000
-        double MJD_UTC = MJD(utc).mjd;
+        long double MJD_UTC = MJD(utc).mjd;
         double leapYears = (MJD_UTC - gmData.refMJD) / 365.25;
 
-//        cout << "(2,0): " << index(2,0)-3-1 << endl;
-//        cout << "(2,1): " << index(2,1)-3-1 << endl;
-//        cout << "(2,2): " << index(2,2)-3-1 << endl;
-/*
-        // get the mean pole at epoch 2000.0 from IERS Conventions 2010
-        double xpm, ypm;
+//        cout << setprecision(12);
+//        cout << gmData.normalizedCS(index(2,0)-3-1, 0) << endl;
+//        cout << gmData.normalizedCS(index(2,1)-3-1, 0) << endl;
+//        cout << gmData.normalizedCS(index(2,1)-3-1, 1) << endl;
+//        cout << gmData.normalizedCS(index(2,2)-3-1, 0) << endl;
+//        cout << gmData.normalizedCS(index(2,2)-3-1, 1) << endl;
 
-        if(mjd < 55197.0)   // Until 2010.0
-        {
-            xpm = ( xp(0,0) + xp(1,0)*leapYears + xp(2,0)*leapYears*leapYears + xp(3,0)*leapYears*leapYears*leapYears )*1e-3;
-            ypm = ( yp(0,0) + yp(1,0)*leapYears + yp(2,0)*leapYears*leapYears + yp(3,0)*leapYears*leapYears*leapYears )*1e-3;
-        }
-        else                // After 2010.0
-        {
-            xpm = ( xp(0,1) + xp(1,1)*leapYears )*1e-3;
-            ypm = ( yp(0,0) + yp(1,0)*leapYears )*1e-3;
-       }
-*/
         gmData.normalizedCS(index(2,0)-3-1, 0) += leapYears*gmData.dotC20;
         gmData.normalizedCS(index(2,1)-3-1, 0) += leapYears*gmData.dotC21;
         gmData.normalizedCS(index(2,1)-3-1, 1) += leapYears*gmData.dotS21;
@@ -319,9 +310,9 @@ namespace gpstk
 
         // partials of (rho, lat, lon) to (x, y, z)
         Matrix<double> b(3,3,0.0);
-        b(0,0) = clat_Sat * clon_Sat;
-        b(0,1) = clat_Sat * slon_Sat;
-        b(0,2) = slat_Sat;
+        b(0,0) =  clat_Sat * clon_Sat;
+        b(0,1) =  clat_Sat * slon_Sat;
+        b(0,2) =  slat_Sat;
         b(1,0) = -slat_Sat * clon_Sat / rho_Sat;
         b(1,1) = -slat_Sat * slon_Sat / rho_Sat;
         b(1,2) =  clat_Sat / rho_Sat;
@@ -330,30 +321,30 @@ namespace gpstk
         b(2,2) =  0.0;
 
         // partials of b matrix to (rho, lat, lon)
-        Matrix<double> dbdrho(3,3,0.0);     // db / drho
-        dbdrho(1,0) =  slat_Sat * clon_Sat / (rho_Sat*rho_Sat);
-        dbdrho(1,1) =  slat_Sat * slon_Sat / (rho_Sat*rho_Sat);
-        dbdrho(1,2) = -clat_Sat / (rho_Sat*rho_Sat);
-        dbdrho(2,0) =  slon_Sat / (rho_Sat*rho_Sat * clat_Sat);
-        dbdrho(2,1) = -clon_Sat / (rho_Sat*rho_Sat * clat_Sat);
+        Matrix<double> db_drho(3,3,0.0);     // db / drho
+        db_drho(1,0) =  slat_Sat * clon_Sat / (rho_Sat*rho_Sat);
+        db_drho(1,1) =  slat_Sat * slon_Sat / (rho_Sat*rho_Sat);
+        db_drho(1,2) = -clat_Sat / (rho_Sat*rho_Sat);
+        db_drho(2,0) =  slon_Sat / (rho_Sat*rho_Sat * clat_Sat);
+        db_drho(2,1) = -clon_Sat / (rho_Sat*rho_Sat * clat_Sat);
 
-        Matrix<double> dbdlat(3,3,0.0);     // db / dlat
-        dbdlat(0,0) = -slat_Sat * clon_Sat;
-        dbdlat(0,1) = -slat_Sat * slon_Sat;
-        dbdlat(0,2) =  clat_Sat;
-        dbdlat(1,0) = -clat_Sat * clon_Sat / rho_Sat;
-        dbdlat(1,1) = -clat_Sat * slon_Sat / rho_Sat;
-        dbdlat(1,2) = -slat_Sat / rho_Sat;
-        dbdlat(2,0) = -slat_Sat * slon_Sat / (rho_Sat*rho_Sat * clat_Sat*clat_Sat);
-        dbdlat(2,1) =  slat_Sat * clon_Sat / (rho_Sat * clat_Sat*clat_Sat);
+        Matrix<double> db_dlat(3,3,0.0);     // db / dlat
+        db_dlat(0,0) = -slat_Sat * clon_Sat;
+        db_dlat(0,1) = -slat_Sat * slon_Sat;
+        db_dlat(0,2) =  clat_Sat;
+        db_dlat(1,0) = -clat_Sat * clon_Sat / rho_Sat;
+        db_dlat(1,1) = -clat_Sat * slon_Sat / rho_Sat;
+        db_dlat(1,2) = -slat_Sat / rho_Sat;
+        db_dlat(2,0) = -slat_Sat * slon_Sat / (rho_Sat * clat_Sat*clat_Sat);
+        db_dlat(2,1) =  slat_Sat * clon_Sat / (rho_Sat * clat_Sat*clat_Sat);
 
-        Matrix<double> dbdlon(3,3,0.0);     // db / dlon
-        dbdlon(0,0) = -clat_Sat * slon_Sat;
-        dbdlon(0,1) =  clat_Sat * clon_Sat;
-        dbdlon(1,0) =  slat_Sat * slon_Sat / rho_Sat;
-        dbdlon(1,1) = -slat_Sat * clon_Sat / rho_Sat;
-        dbdlon(2,0) = -clon_Sat / (rho_Sat * clat_Sat);
-        dbdlon(2,1) = -slon_Sat / (rho_Sat * clat_Sat);
+        Matrix<double> db_dlon(3,3,0.0);     // db / dlon
+        db_dlon(0,0) = -clat_Sat * slon_Sat;
+        db_dlon(0,1) =  clat_Sat * clon_Sat;
+        db_dlon(1,0) =  slat_Sat * slon_Sat / rho_Sat;
+        db_dlon(1,1) = -slat_Sat * clon_Sat / rho_Sat;
+        db_dlon(2,0) = -clon_Sat / (rho_Sat * clat_Sat);
+        db_dlon(2,1) = -slon_Sat / (rho_Sat * clat_Sat);
 
         // partials of gravitation potential V to spherical coordinates (rho, lat, lon)
         //
@@ -421,6 +412,10 @@ namespace gpstk
         //        | b31 b32 b33 |    | dV/dlon |
         //
         Vector<double> acce = transpose(b) * dV;
+//        Vector<double> acce(3,0.0);
+//        acce(0) = b(0,0)*dV(0) + b(1,0)*dV(1) + b(2,0)*dV(2);
+//        acce(1) = b(0,1)*dV(0) + b(1,1)*dV(1) + b(2,1)*dV(2);
+//        acce(2) = b(0,2)*dV(0) + b(1,2)*dV(1) + b(2,2)*dV(2);
 
         // gravitation acceleration in ECI
         a = T2C * acce;
@@ -434,27 +429,27 @@ namespace gpstk
         Matrix<double> da(3,3,0.0);
         // dax / d(rho, lat, lon)
         j = 0;
-        da(0,0) = dbdrho(0,j)*dV(0) + dbdrho(1,j)*dV(1) + dbdrho(2,j)*dV(2)
+        da(0,0) = db_drho(0,j)*dV(0) + db_drho(1,j)*dV(1) + db_drho(2,j)*dV(2)
                 + b(0,j)*ddV(0,0) + b(1,j)*ddV(0,1) + b(2,j)*ddV(0,2);
-        da(0,1) = dbdlat(0,j)*dV(0) + dbdlat(1,j)*dV(1) + dbdlat(2,j)*dV(2)
+        da(0,1) = db_dlat(0,j)*dV(0) + db_dlat(1,j)*dV(1) + db_dlat(2,j)*dV(2)
                 + b(0,j)*ddV(1,0) + b(1,j)*ddV(1,1) + b(2,j)*ddV(1,2);
-        da(0,2) = dbdlon(0,j)*dV(0) + dbdlon(1,j)*dV(1) + dbdlon(2,j)*dV(2)
+        da(0,2) = db_dlon(0,j)*dV(0) + db_dlon(1,j)*dV(1) + db_dlon(2,j)*dV(2)
                 + b(0,j)*ddV(2,0) + b(1,j)*ddV(2,1) + b(2,j)*ddV(2,2);
         // day / d(rho, lat, lon)
         j = 1;
-        da(1,0) = dbdrho(0,j)*dV(0) + dbdrho(1,j)*dV(1)+ dbdrho(2,j)*dV(2)
+        da(1,0) = db_drho(0,j)*dV(0) + db_drho(1,j)*dV(1)+ db_drho(2,j)*dV(2)
                 + b(0,j)*ddV(0,0) + b(1,j)*ddV(0,1) + b(2,j)*ddV(0,2);
-        da(1,1) = dbdlat(0,j)*dV(0) + dbdlat(1,j)*dV(1)+ dbdlat(2,j)*dV(2)
+        da(1,1) = db_dlat(0,j)*dV(0) + db_dlat(1,j)*dV(1)+ db_dlat(2,j)*dV(2)
                 + b(0,j)*ddV(1,0) + b(1,j)*ddV(1,1) + b(2,j)*ddV(1,2);
-        da(1,2) = dbdlon(0,j)*dV(0) + dbdlon(1,j)*dV(1)+ dbdlon(2,j)*dV(2)
+        da(1,2) = db_dlon(0,j)*dV(0) + db_dlon(1,j)*dV(1)+ db_dlon(2,j)*dV(2)
                 + b(0,j)*ddV(2,0) + b(1,j)*ddV(2,1) + b(2,j)*ddV(2,2);
         // daz / d(rho, lat, lon)
         j = 2;
-        da(2,0) = dbdrho(0,j)*dV(0) + dbdrho(1,j)*dV(1)+ dbdrho(2,j)*dV(2)
+        da(2,0) = db_drho(0,j)*dV(0) + db_drho(1,j)*dV(1)+ db_drho(2,j)*dV(2)
                 + b(0,j)*ddV(0,0) + b(1,j)*ddV(0,1) + b(2,j)*ddV(0,2);
-        da(2,1) = dbdlat(0,j)*dV(0) + dbdlat(1,j)*dV(1)+ dbdlat(2,j)*dV(2)
+        da(2,1) = db_dlat(0,j)*dV(0) + db_dlat(1,j)*dV(1)+ db_dlat(2,j)*dV(2)
                 + b(0,j)*ddV(1,0) + b(1,j)*ddV(1,1) + b(2,j)*ddV(1,2);
-        da(2,2) = dbdlon(0,j)*dV(0) + dbdlon(1,j)*dV(1)+ dbdlat(2,j)*dV(2)
+        da(2,2) = db_dlon(0,j)*dV(0) + db_dlon(1,j)*dV(1)+ db_dlat(2,j)*dV(2)
                 + b(0,j)*ddV(2,0) + b(1,j)*ddV(2,1) + b(2,j)*ddV(2,2);
 
         // gravitation gradient in ECEF
