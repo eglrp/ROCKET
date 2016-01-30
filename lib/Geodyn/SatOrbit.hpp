@@ -230,6 +230,7 @@ namespace gpstk
       SatOrbit& setForceModelListPrepared()
       {
           createFMObjects(fmcData);
+          return(*this);
       }
 
 

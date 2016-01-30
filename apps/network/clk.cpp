@@ -134,9 +134,6 @@
 #include "Decimate.hpp"
 
    // Class to solve a general equation.
-#include "SolverPPP.hpp"
-
-   // Class to solve a general equation.
 #include "SolverGeneral2.hpp"
 
    // Class to read configuration files.
