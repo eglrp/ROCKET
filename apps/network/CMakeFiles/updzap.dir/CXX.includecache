@@ -93,6 +93,10 @@ Decimate.hpp
 /home/kfkuang/rocket/apps/network/Decimate.hpp
 Epoch.hpp
 /home/kfkuang/rocket/apps/network/Epoch.hpp
+AmbiguityDatum.hpp
+/home/kfkuang/rocket/apps/network/AmbiguityDatum.hpp
+AmbiguityDatum2.hpp
+/home/kfkuang/rocket/apps/network/AmbiguityDatum2.hpp
 AmbiguitySmoother.hpp
 /home/kfkuang/rocket/apps/network/AmbiguitySmoother.hpp
 SolverZapWL.hpp
@@ -1306,6 +1310,24 @@ sys/timeb.h
 stdint.h
 -
 
+lib/deprecate/AmbiguityDatum2.hpp
+algorithm
+-
+DataStructures.hpp
+lib/deprecate/DataStructures.hpp
+StochasticModel.hpp
+lib/deprecate/StochasticModel.hpp
+Equation.hpp
+lib/deprecate/Equation.hpp
+Arc.hpp
+lib/deprecate/Arc.hpp
+Edge.hpp
+lib/deprecate/Edge.hpp
+Kruskal.hpp
+lib/deprecate/Kruskal.hpp
+ARRound.hpp
+lib/deprecate/ARRound.hpp
+
 lib/deprecate/gps_constants.hpp
 
 lib/dev/ARRound.hpp
@@ -1315,6 +1337,24 @@ Exception.hpp
 lib/dev/Exception.hpp
 SpecialFunctions.hpp
 lib/dev/SpecialFunctions.hpp
+
+lib/dev/AmbiguityDatum.hpp
+algorithm
+-
+DataStructures.hpp
+lib/dev/DataStructures.hpp
+StochasticModel.hpp
+lib/dev/StochasticModel.hpp
+Equation.hpp
+lib/dev/Equation.hpp
+Arc.hpp
+lib/dev/Arc.hpp
+Edge.hpp
+lib/dev/Edge.hpp
+Kruskal.hpp
+lib/dev/Kruskal.hpp
+ARRound.hpp
+lib/dev/ARRound.hpp
 
 lib/dev/AmbiguitySmoother.hpp
 PowerSum.hpp
@@ -1707,6 +1747,8 @@ set
 -
 CommonTime.hpp
 lib/dev/CommonTime.hpp
+AmbiguityDatum2.hpp
+lib/dev/AmbiguityDatum2.hpp
 IndepAmbiguityDatum.hpp
 lib/dev/IndepAmbiguityDatum.hpp
 ProcessingClass.hpp

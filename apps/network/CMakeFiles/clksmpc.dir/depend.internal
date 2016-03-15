@@ -69,6 +69,7 @@ apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
  lib/Math/Matrix/MatrixOperators.hpp
  lib/Math/MiscMath.hpp
  lib/Math/SimpleKalmanFilter.hpp
+ lib/Math/SpecialFunctions.hpp
  lib/Math/Stats.hpp
  lib/Math/Triple.hpp
  lib/Math/Vector/Vector.hpp
@@ -125,6 +126,9 @@ apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
  lib/Utilities/ValidType.hpp
  lib/Utilities/gpstkplatform.h
  lib/deprecate/gps_constants.hpp
+ lib/dev/ARRound.hpp
+ lib/dev/AmbiguityDatum.hpp
+ lib/dev/Arc.hpp
  lib/dev/BasicModel.hpp
  lib/dev/ClockSatStore.hpp
  lib/dev/CodeKalmanSolver.hpp
@@ -133,8 +137,10 @@ apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
  lib/dev/DataStructures.hpp
  lib/dev/Decimate.hpp
  lib/dev/EOPDataStore.hpp
+ lib/dev/Edge.hpp
  lib/dev/Equation.hpp
  lib/dev/EquationSystem2.hpp
+ lib/dev/Kruskal.hpp
  lib/dev/LICSDetector.hpp
  lib/dev/LICSDetector2.hpp
  lib/dev/LinearCombinations.hpp
@@ -155,3 +161,4 @@ apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
  lib/dev/TabularSatStore.hpp
  lib/dev/TypeID.hpp
  lib/dev/Variable.hpp
+ lib/dev/Vertex.hpp

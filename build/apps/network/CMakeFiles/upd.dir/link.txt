@@ -1,1 +1,0 @@
-/usr/bin/c++    -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/upd.dir/upd.cpp.o  -o upd  ../../librocket.dylib 
