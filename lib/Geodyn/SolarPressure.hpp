@@ -94,7 +94,7 @@ namespace gpstk
 
          /// return the force model index
       virtual int forceIndex() const
-      { return FMI_SRP; }
+      { return FMI_SolarRadiationPressure; }
        
          /// this is the real one
       virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc) = 0;

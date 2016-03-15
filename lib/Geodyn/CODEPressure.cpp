@@ -52,10 +52,10 @@ namespace gpstk
 
    void CODEPressure::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
-       // get satellite block number
-       const int iblock = sc.getBlockNum();
+       // get satellite block type
+       const string type = sc.getBlock();
        // get satellite mass
-       const double mass = sc.getDryMass();
+       const double mass = sc.getMass();
 
        // check the size of sc.P() !!!
 
@@ -64,34 +64,33 @@ namespace gpstk
 
        // coefficients of CODE model
        double D0, Y0, B0, Dc, Ds, Yc, Ys, Bc, Bs;
-       D0 = p[0]; Y0 = p[1]; B0 = p[2];
-       Dc = p[3]; Ds = p[4];
-       Yc = p[5]; Ys = p[6];
-       Bc = p[7]; Bs = p[8];
+       D0 = p(0); Y0 = p(1); B0 = p(2);
+       Dc = p(3); Yc = p(4); Bc = p(5);
+       Ds = p(6); Ys = p(7); Bs = p(8);
 
-       // TT
+       // time in TT
        CommonTime tt( UTC2TT(utc) );
 
-       // Sun and Moon position in ECI
+       // sun and moon position in eci, unit: m
        Vector<double> r_Sun(3,0.0), r_Moon(3,0.0);
        r_Sun = J2kPosition(tt, SolarSystem::Sun);
        r_Moon = J2kPosition(tt, SolarSystem::Moon);
 
-       // Sat position in ECI
+       // satellite position in eci, unit: m
        Vector<double> r_Sat(3,0.0);
        r_Sat = sc.R();
 
-       // Sat velocity in ECI
+       // satellite velocity in eci, unit: m/s
        Vector<double> v_Sat(3,0.0);
        v_Sat = sc.V();
 
-       // Sat position wrt Sun in ECI
+       // satellite position wrt sun in eci, unit: m
        Vector<double> r_SunSat(3,0.0);
        r_SunSat = r_Sat - r_Sun;
 
         /// CODE model, GAMIT 10.5 ertorb.f
 
-       // Compute unit vectors
+       // compute unit vectors
        //   rvec    points from the earth to the satellite (= -zvec)
        //   vvec    points in the direction of the satellite's motion
        //   zvec    points from the satellite to the earth (= -rvec)
@@ -144,7 +143,7 @@ namespace gpstk
        Vector<double> xvec = cross(rvec, yvec);         // +X direction
        xvec = normalize(xvec);
 
-       // Compute the B-angle between the sun and the orbital plane for CODE
+       // compute the B-angle between the sun and the orbital plane for CODE
 
        // beta is the angle ( [-90,+90] ) of the Sun above (+) the orbital
        // plane
@@ -194,20 +193,24 @@ namespace gpstk
 
        double d0=0.0, dt=0.0, xt=0.0, yt=0.0, zt=0.0, bt=0.0, xt1=0.0, xt3=0.0;
 
-       // units (m/s^2)
-       if(iblock == 1)
+       // unit: m/s^2
+       if(type == "I")
        {
            d0 = 4.54e-5 / mass;
        }
-       else if(iblock == 2 || iblock == 3)
+       else if(type == "II"
+            || type == "IIA")
        {
            d0 = 8.695e-5 / mass;
        }
-       else if(iblock == 4 || iblock == 5 || iblock == 6)
+       else if(type == "IIR"
+            || type == "IIR-A"
+            || type == "IIR-B"
+            || type == "IIR-M")
        {
            d0 = 11.15e-5 / mass;
        }
-       else if(iblock == 7)
+       else if(type == "IIF")
        {
            d0 = 16.7e-5 / mass;
        }
@@ -216,7 +219,8 @@ namespace gpstk
            cerr << "Unknown block number for radiation scaling!" << endl;
        }
 /*
-       if(iblock == 2 || iblock == 3)
+       if(type == "II"
+       || type == "IIA")
        {
            dt = 0.813e-9*cos2beta - 0.517e-9*cos4beta;
            yt = 0.067e-9*cos2beta;
@@ -224,17 +228,17 @@ namespace gpstk
            xt1 = -0.015e-9 - 0.018e-9*cos2beta - 0.033e-9*sin2beta;
            xt3 = 0.004e-9 - 0.046e-9*cos2beta - 0.398e-9*sin2beta;
 
-           if(iblock == 2)
+           if(type == "II")
            {
                zt = 1.024e-9 + 0.519e-9*cos2beta + 0.125e-9*sin2beta + 0.047e-9*cos4beta - 0.045e-9*sin4beta;
            }
-           else if(iblock == 3)
+           else if(type == "IIA")
            {
                zt = 0.979e-9 + 0.519e-9*cos2beta + 0.125e-9*sin2beta + 0.047e-9*cos4beta - 0.045e-9*sin4beta;
            }
            else
            {
-               cerr << "Sat block not supported for CODE radiation model!" << endl;
+               cerr << "Satellite block not supported for CODE radiation model!" << endl;
            }
        }
 */
@@ -263,7 +267,7 @@ namespace gpstk
        // srp acceleration
        a = radprs;
 
-       
+
         /// Partials of acceleration wrt satellite position, velocity and SRP
         /// parameters
       
@@ -281,21 +285,40 @@ namespace gpstk
        da_dY0 = d0 * yvec * distfct;
        da_dB0.resize(3,0.0);
        da_dB0 = d0 * bvec * distfct;
+//       cout << "da/dD0: " << endl;
+//       cout << setprecision(16) << da_dD0 << endl;
+//       cout << "da/dY0: " << endl;
+//       cout << setprecision(16) << da_dY0 << endl;
+//       cout << "da/dB0: " << endl;
+//       cout << setprecision(16) << da_dB0 << endl;
 
        da_dDc.resize(3,0.0);
        da_dDc = cosu * d0 * ssvec * distfct;
        da_dDs.resize(3,0.0);
        da_dDs = sinu * d0 * ssvec * distfct;
+//       cout << "da/dDc: " << endl;
+//       cout << setprecision(16) << da_dDc << endl;
+//       cout << "da/dDs: " << endl;
+//       cout << setprecision(16) << da_dDs << endl;
 
        da_dYc.resize(3,0.0);
        da_dYc = cosu * d0 * yvec * distfct;
        da_dYs.resize(3,0.0);
        da_dYs = sinu * d0 * yvec * distfct;
+//       cout << "da/dYc: " << endl;
+//       cout << setprecision(16) << da_dYc << endl;
+//       cout << "da/dYs: " << endl;
+//       cout << setprecision(16) << da_dYs << endl;
 
        da_dBc.resize(3,0.0);
        da_dBc = cosu * d0 * bvec * distfct;
        da_dBs.resize(3,0.0);
        da_dBs = sinu * d0 * bvec * distfct;
+//       cout << "da/dBc: " << endl;
+//       cout << setprecision(16) << da_dBc << endl;
+//       cout << "da/dBs: " << endl;
+//       cout << setprecision(16) << da_dBs << endl;
+
 
    }  // End of method 'CODEPressure::doCompute()'
 

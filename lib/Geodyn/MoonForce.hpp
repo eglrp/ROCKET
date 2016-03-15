@@ -80,7 +80,7 @@ namespace gpstk
 
          /// return the force model index
       virtual int forceIndex() const
-      { return FMI_GEOMOON; }
+      { return FMI_MoonGravitation; }
 
    protected:
          /// Gravitational constant for the body. [m^3/s^2]

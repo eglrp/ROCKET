@@ -48,6 +48,7 @@
 
 #include "Vector.hpp"
 #include "Matrix.hpp"
+#include "SatID.hpp"
 #include "CommonTime.hpp"
 
 
@@ -58,7 +59,7 @@ namespace gpstk
       //@{
 
       /**
-       * The Spacecraft class encapsulates physical parameters
+       * The Spacecraft class encapsulates physical parameters.
        * 
        */
    class Spacecraft
@@ -66,12 +67,41 @@ namespace gpstk
    public:
 
          /// Default constructor
-      Spacecraft(std::string name = "spacecraft");
+      Spacecraft()
+      {
+          resetState();
+      }
 
          /// Default destructor
       ~Spacecraft() {};
 
-         /// SC position(R), velocity(V) and dynamic parameters(P)
+
+         /// Set sat id of the spacecraft
+      Spacecraft& setSatID(const SatID& s) { satid = s; return *this; }
+
+         /// Get sat id of the spacecraft
+      SatID getSatID() const { return satid; }
+
+         /// Set epoch of the spacecraft
+      Spacecraft& setEpoch(const CommonTime& t) { epoch = t; return *this; }
+
+         /// Get epoch of the spacecraft
+      CommonTime getEpoch() const { return epoch; }
+
+         /// Set block of the spacecraft
+      Spacecraft& setBlock(const std::string& b) { block = b; return *this; }
+
+         /// Get block of the spacecraft
+      std::string getBlock() const { return block; };
+
+         /// Set mass of the spacecraft
+      Spacecraft& setMass(const double& m) { mass = m; return *this; }
+
+         /// Get mass of the spacecraft
+      double getMass() const { return mass; };
+
+
+         /// SC position(R), velocity(V) and force model parameters(P)
       Vector<double> R() {return r;}
       Vector<double> V() {return v;}
       Vector<double> P() {return p;}
@@ -87,18 +117,18 @@ namespace gpstk
          /// Get number of force model parameters
       int getNumOfP()
       { return p.size(); }
-      
-         /// initialize the state vector with position and velocity and force model parameters
-      void initStateVector(Vector<double> rv, Vector<double> dp = Vector<double>(0,0.0));
 
-         /// Methods to handle SC state vector
+         /// initialize the state vector with position, velocity and force model parameters
+      void initStateVector(const Vector<double>& rv, const Vector<double>& dp);
+
+         /// Methods to handle SC state vector 6 + 6*(6+np)
       Vector<double> getStateVector();
       void setStateVector(Vector<double> y);
 
-         /// Methods to handle SC transition matrix
+         /// Methods to handle SC transition matrix 6*(6+np)
       Matrix<double> getTransitionMatrix();
       void setTransitionMatrix(Matrix<double> phiMatrix);
-      
+
          /// Method to get SC state transition matrix 6*6
       Matrix<double> getStateTransitionMatrix();
 
@@ -106,121 +136,33 @@ namespace gpstk
       Matrix<double> getSensitivityMatrix();
 
 
-         // Methods to handle SC physical parameters
-      
-         /// Get spacecraft name
-      std::string getName()
-      { return scName; }
-
-         /// Set spacecraft name
-      Spacecraft& setName(std::string satName)
-      { scName = satName; return (*this); }
-
-         /// Get reflect coefficient
-      double getReflectCoeff()
-      { return reflectCoeff; }
-
-         /// Set reflect coefficient
-      Spacecraft& setReflectCoeff(double Cr)
-      { reflectCoeff = Cr; return (*this); }
-
-         /// Get drag coefficient
-      double getDragCoeff()
-      { return dragCoeff; }
-
-         /// Set drag coefficient
-      Spacecraft& setDragCoeff(double Cd)
-      { dragCoeff = Cd; return (*this); }
-
-         /// Get drag area
-      double getDragArea()
-      { return crossArea; }
-
-         /// Set drag area
-      Spacecraft& setDragArea(double satArea)
-      { crossArea = satArea; return (*this); }
-
-         /// Get SRP area
-      double getSRPArea()
-      { return crossArea; }
-
-         /// Set SRP area
-      Spacecraft& setSRPArea(double satArea)
-      { crossArea = satArea; return (*this); }
-
-         /// Get dry mass
-      double getDryMass()
-      { return dryMass; }
-
-         /// Set dry mass
-      Spacecraft& setDryMass(double satMass)
-      { dryMass = satMass; return (*this); }
-
-         /// Get block number
-      int getBlockNum()
-      { return blockNum; }
-
-         /// Set block number
-      Spacecraft& setBlockNum(int satBlock)
-      { blockNum = satBlock; return (*this); }
-
-
-         /// some basic test
-      void test();
-
-
-   protected:
+   private:
 
          /// Reset state of the spacecraft
       void resetState();
-      
-         /// The name of the spacecraft (e.g. "NCC-1701-D") 
-      std::string scName;
-      
-         /// Object to hold epoch in UTC
-      CommonTime utc;
+
+
+         /// SatID of the spacecraft
+      SatID satid;
+         /// Epoch of the spacecraft
+      CommonTime epoch;
+         /// Block of the spacecraft
+      std::string block;
+         /// Mass of the spacecraft
+      double mass;
 
          /// State vector     6*n + 42
-      Vector<double> r;         // 3 Position
-      Vector<double> v;         // 3 Velocity
-      Vector<double> p;         // n dynamical parameters
+      Vector<double> r;       // 3 Position
+      Vector<double> v;       // 3 Velocity
+      Vector<double> p;       // n Force Model Parameters
 
-
-         /// Change the Vector to Matrix ???
+         /// Partial derivatives
       Vector<double> dr_dr0;      // 3*3  I
       Vector<double> dr_dv0;      // 3*3  0
       Vector<double> dr_dp0;      // 3*n  0
       Vector<double> dv_dr0;      // 3*3  0
       Vector<double> dv_dv0;      // 3*3  I
       Vector<double> dv_dp0;      // 3*n  0
-
-         /// Coefficient of Reflectivity
-      double reflectCoeff;
-
-         /// Coefficient of drag
-      double dragCoeff;
-
-         /// Cross sectional (reflective) area [m^2]
-      double crossArea;
-
-         /// Mass [kg]
-      double dryMass;
-
-         /// Block number for GNSS satellites, added by kfkuang, 2015/09/09
-         // BLOCK NUMBER (GPS):
-         //     1: BLOCK I
-         //     2: BLOCK II
-         //     3: BLOCK IIA
-         //     4: BLOCK IIR
-         //     5: BLOCK IIR-A
-         //     6: BLOCK IIR-B
-         //     7: BLOCK IIR-M
-         //     8: BLOCK IIF
-         // BLOCK NUMBER (GLONASS):
-         //     101: GLONASS
-         //     102: GLONASS-M
-         //     103: GLONASS-K1
-      int blockNum;
 
    }; // End of class 'Spacecraft'
 

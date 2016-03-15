@@ -51,13 +51,13 @@ namespace gpstk
 
    void ROCKPressure::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
-       // TT
+       // time in TT
        CommonTime TT( UTC2TT(utc) );
 
-       // get satellite block number
-       const int iblock = sc.getBlockNum();
+       // get satellite block type
+       const string type = sc.getBlock();
        // get satellite mass
-       const double mass = sc.getDryMass();
+       const double mass = sc.getMass();
 
        /// check the size of sc.P() !!!
 
@@ -68,25 +68,23 @@ namespace gpstk
        double Gx,Gy,Gz;
        Gx = p[0]; Gy = p[1]; Gz = p[2];
 
-       // Sun and Moon position in ECI
+       // sun and moon position in eci, unit: m
        Vector<double> r_Sun(3,0.0), r_Moon(3,0.0);
        r_Sun = J2kPosition(TT, SolarSystem::Sun);
        r_Moon = J2kPosition(TT, SolarSystem::Moon);
-       r_Sun = r_Sun*1e3;     // km -> m
-       r_Moon = r_Moon*1e3;   // km -> m
 
-       // Sat position in ECI
+       // satellite position in eci, unit: m
        Vector<double> r_Sat = sc.R();
 
-       // Sat velocity in ECI
+       // satellite velocity in eci, unit: m/s
        Vector<double> v_Sat = sc.V();
 
-       // Sat position wrt Sun
+       // satellite position wrt sun, unit: m
        Vector<double> r_SunSat = r_Sat - r_Sun;
 
         /// ROCK-T model, GAMIT 10.5 ertorb.f
 
-       // Compute unit vectors
+       // compute unit vectors
        Vector<double> rvec = r_Sat / norm(r_Sat);       // +R direction
        Vector<double> vvec = v_Sat / norm(v_Sat);       // +T direction
        Vector<double> zvec = -rvec;                     // +Z direction
@@ -102,8 +100,8 @@ namespace gpstk
        Vector<double> xvec = cross(rvec, yvec);         // +X direction
        xvec = normalize(xvec);
 
-       // Compute the B-angle between the sun and the SV-BODY +Z axis for ROCK4
-       // Also same as sun-satellite-earth angle
+       // compute the B-angle between the sun and the SV-BODY +Z axis for ROCK4
+       // also same as sun-satellite-earth angle
        double anga, angb, ang2b, ang3b, ang4b, ang5b, ang6b, ang7b;
        anga = dot(ssvec,rvec);
        angb = std::acos(anga);
@@ -113,7 +111,7 @@ namespace gpstk
        ang5b = ang3b + ang2b;
        ang7b = ang5b + ang2b;
 
-       // Compute the distance factor for the radiation force
+       // compute the distance factor for the radiation force
        double dmag2 = norm(r_SunSat) * norm(r_SunSat);
        double au2 = AU * AU;
        double distfct = au2/dmag2;
@@ -124,19 +122,23 @@ namespace gpstk
             /// SRXYZ ///
 
 
-       if(iblock == 1)  // BLOCK-I
+       if(type == "I")  // BLOCK-I
        {
            d0 = 4.54e-5 / mass;
            xt = (-4.55e-5*std::sin(angb) + 0.08e-5*std::sin(ang2b+0.9) - 0.06e-5*std::cos(ang4b+0.08) + 0.08e-5) / mass;
            zt = (-4.54e-5*std::cos(angb) + 0.20e-5*std::sin(ang2b-0.3) - 0.03e-5*std::sin(ang4b)) / mass;
        }
-       else if(iblock == 2 || iblock == 3)  // BLOCK-II or BLOCK-IIA
+       else if(type == "II"
+            || type == "IIA")  // BLOCK-II or BLOCK-IIA
        {
            d0 = 8.695e-5 / mass;
            xt = (-8.96e-5*std::sin(angb) + 0.16e-5*std::sin(ang3b) + 0.10e-5*std::sin(ang5b) - 0.07e-5*std::sin(ang7b)) / mass;
            zt = -8.43e-5*std::cos(angb) / mass;
        }
-       else if(iblock == 4 || iblock == 5 || iblock == 6)   // BLOCK-IIR
+       else if(type == "IIR"
+            || type == "IIR-A"
+            || type == "IIR-B"
+            || type == "IIR-M")   // BLOCK-IIR
        {
            d0 = 11.15e-5 / mass;
 //           xt = (-11.0e-5*std::sin(angb) - 0.2e-5*std::sin(ang3b) + 0.2e-5*std::sin(ang5b)) / mass;
@@ -148,7 +150,7 @@ namespace gpstk
        // direct coefficient ~1.0. Since the mass is 1.416 times larger, this
        // implies that the effective cross-sectional area is 2.12 times larger,
        // Note: no xt or zt terms yet available for IIFs.
-       else if(iblock == 7) // BLOCK-IIF
+       else if(type == "IIF") // BLOCK-IIF
        {
            d0 = 16.7e-5 / mass;
        }

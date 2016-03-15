@@ -73,10 +73,6 @@ namespace gpstk
       virtual std::string modelName() const
       { return "CODEPressure"; }
 
-         /// Return the force model index
-      virtual int forceIndex() const
-      { return FMI_SRP; }
-
    protected:
 
       // some local variables

@@ -75,7 +75,7 @@ namespace gpstk
 
          /// return the force model index
       virtual int forceIndex() const
-      { return FMI_RELATIVE; }
+      { return FMI_RelativisticEffect; }
 
    protected:
 

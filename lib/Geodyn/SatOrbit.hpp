@@ -51,7 +51,6 @@
 #include "SphericalHarmonicGravity.hpp"
 #include "SunForce.hpp"
 #include "MoonForce.hpp"
-#include "AtmosphericDrag.hpp"
 #include "SolarPressure.hpp"
 #include "RelativityEffect.hpp"
 
@@ -75,18 +74,9 @@ namespace gpstk
          GM_EGM08
       };
 
-         /// Valid atmospheric models
-      enum AtmosphericModel
-      {
-         AM_HarrisPriester,
-         AM_MSISE00,
-         AM_CIRA
-      };
-
          /// Valid solar radiation pressure models, add by kfkuang, 2015/10/07
       enum SRPModel
       {
-          SRPM_Simple,
           SRPM_ROCK,
           SRPM_CODE
       };
@@ -97,7 +87,6 @@ namespace gpstk
          bool geoEarth;
          bool geoSun;
          bool geoMoon;
-         bool atmDrag;
          bool solarPressure;
          bool relEffect;
 
@@ -108,8 +97,6 @@ namespace gpstk
          bool solidTide;
          bool oceanTide;
          bool poleTide;
-
-         AtmosphericModel atmModel;
 
          SRPModel srpModel;
 
@@ -122,21 +109,14 @@ namespace gpstk
          
          MoonForce* pGeoMoon;
          
-         AtmosphericDrag* pAtmDrag;
-         
          SolarPressure* pSolarPressure;
 
          RelativityEffect* pRelEffect;
-
-         double dailyF107;
-         double averageF107;
-         double dailyKp;
 
          FMCData()
          {
             geoEarth = true;
             geoSun = geoMoon = false;
-            atmDrag = false;
             solarPressure = false;
             relEffect = false;
 
@@ -146,19 +126,13 @@ namespace gpstk
 
             solidTide = oceanTide = poleTide = false;
 
-            atmModel = AM_HarrisPriester;
-            srpModel = SRPM_Simple;
+            srpModel = SRPM_CODE;
 
             pGeoEarth = NULL;
             pGeoSun   = NULL;
             pGeoMoon  = NULL;
-            pAtmDrag  = NULL;
             pSolarPressure  = NULL;
             pRelEffect      = NULL;
-
-            dailyF107 = 150.0;
-            averageF107 = 150.0;
-            dailyKp = 3.0;
          }
       };
 
@@ -187,31 +161,8 @@ namespace gpstk
       CommonTime getRefEpoch() const
       { return utc0; }
 
-
-      /// added by kfkuang
-
-         /// set spacecraft
-      SatOrbit& setSpacecraft(const Spacecraft& spacecraft)
-      { sc = spacecraft; return (*this); }
-
-         /// get spacecraft
-      Spacecraft getSpacecraft() const
-      { return sc; }
-
-
-         /// set spacecraft physical parameters
-      SatOrbit& setSpacecraftData(std::string name = "spacecraft",
-                                  const double& mass = 1000.0,
-                                  const double& dragArea = 20.0,
-                                  const double& SRPArea = 20.0,
-                                  const double& Cr = 1.0,
-                                  const double& Cd = 2.2,
-                                  const int& block = 0);
-
-         /// set space data
-      SatOrbit& setSpaceData(double dayF107 = 150.0,
-                             double aveF107 = 150.0, 
-                             double dayKp = 3.0);
+         /// Set spacecraft
+      SatOrbit& setSpacecraft(const Spacecraft& s) { sc = s; return *this; }
 
 
          // Methods to configure the orbit perturbation force models
@@ -227,19 +178,11 @@ namespace gpstk
       SatOrbit& enableThirdBodyPerturbation(const bool& bsun = false,
                                             const bool& bmoon = false);
 
-
-      SatOrbit& enableAtmosphericDrag(SatOrbit::AtmosphericModel model 
-                                                 = SatOrbit::AM_HarrisPriester,
-                                      const bool& bdrag = false);
-
-
       SatOrbit& enableSolarRadiationPressure(SatOrbit::SRPModel model
-                                                 = SatOrbit::SRPM_Simple,
+                                                 = SatOrbit::SRPM_CODE,
                                              const bool& bsrp = false);
 
-
       SatOrbit& enableRelativeEffect(const bool& brel = false);
-
 
       SatOrbit& setForceModelListPrepared()
       {
@@ -259,7 +202,7 @@ namespace gpstk
           return fml;
       }
 
-   protected:
+   private:
 
       virtual void init();
 

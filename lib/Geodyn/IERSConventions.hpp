@@ -92,10 +92,8 @@ namespace gpstk
 
       /// ERP data file from IERS
    void LoadIERSERPFile(const std::string& fileName);
-   
       /// ERP data file from IGS
    void LoadIGSERPFile(const std::string& fileName);
-
       /// ERP data file from STK
    void LoadSTKERPFile(const std::string& fileName);
 

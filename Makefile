@@ -3107,30 +3107,6 @@ lib/GNSSEph/YumaAlmanacStore.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/GNSSEph/YumaAlmanacStore.cpp.s
 .PHONY : lib/GNSSEph/YumaAlmanacStore.cpp.s
 
-lib/Geodyn/AtmosphericDrag.o: lib/Geodyn/AtmosphericDrag.cpp.o
-.PHONY : lib/Geodyn/AtmosphericDrag.o
-
-# target to build an object file
-lib/Geodyn/AtmosphericDrag.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/AtmosphericDrag.cpp.o
-.PHONY : lib/Geodyn/AtmosphericDrag.cpp.o
-
-lib/Geodyn/AtmosphericDrag.i: lib/Geodyn/AtmosphericDrag.cpp.i
-.PHONY : lib/Geodyn/AtmosphericDrag.i
-
-# target to preprocess a source file
-lib/Geodyn/AtmosphericDrag.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/AtmosphericDrag.cpp.i
-.PHONY : lib/Geodyn/AtmosphericDrag.cpp.i
-
-lib/Geodyn/AtmosphericDrag.s: lib/Geodyn/AtmosphericDrag.cpp.s
-.PHONY : lib/Geodyn/AtmosphericDrag.s
-
-# target to generate assembly for a file
-lib/Geodyn/AtmosphericDrag.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/AtmosphericDrag.cpp.s
-.PHONY : lib/Geodyn/AtmosphericDrag.cpp.s
-
 lib/Geodyn/CODEPressure.o: lib/Geodyn/CODEPressure.cpp.o
 .PHONY : lib/Geodyn/CODEPressure.o
 
@@ -3154,30 +3130,6 @@ lib/Geodyn/CODEPressure.s: lib/Geodyn/CODEPressure.cpp.s
 lib/Geodyn/CODEPressure.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/CODEPressure.cpp.s
 .PHONY : lib/Geodyn/CODEPressure.cpp.s
-
-lib/Geodyn/CiraExponentialDrag.o: lib/Geodyn/CiraExponentialDrag.cpp.o
-.PHONY : lib/Geodyn/CiraExponentialDrag.o
-
-# target to build an object file
-lib/Geodyn/CiraExponentialDrag.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/CiraExponentialDrag.cpp.o
-.PHONY : lib/Geodyn/CiraExponentialDrag.cpp.o
-
-lib/Geodyn/CiraExponentialDrag.i: lib/Geodyn/CiraExponentialDrag.cpp.i
-.PHONY : lib/Geodyn/CiraExponentialDrag.i
-
-# target to preprocess a source file
-lib/Geodyn/CiraExponentialDrag.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/CiraExponentialDrag.cpp.i
-.PHONY : lib/Geodyn/CiraExponentialDrag.cpp.i
-
-lib/Geodyn/CiraExponentialDrag.s: lib/Geodyn/CiraExponentialDrag.cpp.s
-.PHONY : lib/Geodyn/CiraExponentialDrag.s
-
-# target to generate assembly for a file
-lib/Geodyn/CiraExponentialDrag.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/CiraExponentialDrag.cpp.s
-.PHONY : lib/Geodyn/CiraExponentialDrag.cpp.s
 
 lib/Geodyn/EGM08GravityModel.o: lib/Geodyn/EGM08GravityModel.cpp.o
 .PHONY : lib/Geodyn/EGM08GravityModel.o
@@ -3347,30 +3299,6 @@ lib/Geodyn/ForceModelList.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/ForceModelList.cpp.s
 .PHONY : lib/Geodyn/ForceModelList.cpp.s
 
-lib/Geodyn/HarrisPriesterDrag.o: lib/Geodyn/HarrisPriesterDrag.cpp.o
-.PHONY : lib/Geodyn/HarrisPriesterDrag.o
-
-# target to build an object file
-lib/Geodyn/HarrisPriesterDrag.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/HarrisPriesterDrag.cpp.o
-.PHONY : lib/Geodyn/HarrisPriesterDrag.cpp.o
-
-lib/Geodyn/HarrisPriesterDrag.i: lib/Geodyn/HarrisPriesterDrag.cpp.i
-.PHONY : lib/Geodyn/HarrisPriesterDrag.i
-
-# target to preprocess a source file
-lib/Geodyn/HarrisPriesterDrag.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/HarrisPriesterDrag.cpp.i
-.PHONY : lib/Geodyn/HarrisPriesterDrag.cpp.i
-
-lib/Geodyn/HarrisPriesterDrag.s: lib/Geodyn/HarrisPriesterDrag.cpp.s
-.PHONY : lib/Geodyn/HarrisPriesterDrag.s
-
-# target to generate assembly for a file
-lib/Geodyn/HarrisPriesterDrag.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/HarrisPriesterDrag.cpp.s
-.PHONY : lib/Geodyn/HarrisPriesterDrag.cpp.s
-
 lib/Geodyn/IERSConventions.o: lib/Geodyn/IERSConventions.cpp.o
 .PHONY : lib/Geodyn/IERSConventions.o
 
@@ -3442,30 +3370,6 @@ lib/Geodyn/MoonForce.s: lib/Geodyn/MoonForce.cpp.s
 lib/Geodyn/MoonForce.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/MoonForce.cpp.s
 .PHONY : lib/Geodyn/MoonForce.cpp.s
-
-lib/Geodyn/Msise00Drag.o: lib/Geodyn/Msise00Drag.cpp.o
-.PHONY : lib/Geodyn/Msise00Drag.o
-
-# target to build an object file
-lib/Geodyn/Msise00Drag.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/Msise00Drag.cpp.o
-.PHONY : lib/Geodyn/Msise00Drag.cpp.o
-
-lib/Geodyn/Msise00Drag.i: lib/Geodyn/Msise00Drag.cpp.i
-.PHONY : lib/Geodyn/Msise00Drag.i
-
-# target to preprocess a source file
-lib/Geodyn/Msise00Drag.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/Msise00Drag.cpp.i
-.PHONY : lib/Geodyn/Msise00Drag.cpp.i
-
-lib/Geodyn/Msise00Drag.s: lib/Geodyn/Msise00Drag.cpp.s
-.PHONY : lib/Geodyn/Msise00Drag.s
-
-# target to generate assembly for a file
-lib/Geodyn/Msise00Drag.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/Msise00Drag.cpp.s
-.PHONY : lib/Geodyn/Msise00Drag.cpp.s
 
 lib/Geodyn/PvtStore.o: lib/Geodyn/PvtStore.cpp.o
 .PHONY : lib/Geodyn/PvtStore.o
@@ -3563,29 +3467,29 @@ lib/Geodyn/RelativityEffect.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/RelativityEffect.cpp.s
 .PHONY : lib/Geodyn/RelativityEffect.cpp.s
 
-lib/Geodyn/RungeKuttaFehlberg.o: lib/Geodyn/RungeKuttaFehlberg.cpp.o
-.PHONY : lib/Geodyn/RungeKuttaFehlberg.o
+lib/Geodyn/RungeKuttaFehlberg7.o: lib/Geodyn/RungeKuttaFehlberg7.cpp.o
+.PHONY : lib/Geodyn/RungeKuttaFehlberg7.o
 
 # target to build an object file
-lib/Geodyn/RungeKuttaFehlberg.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/RungeKuttaFehlberg.cpp.o
-.PHONY : lib/Geodyn/RungeKuttaFehlberg.cpp.o
+lib/Geodyn/RungeKuttaFehlberg7.cpp.o:
+	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/RungeKuttaFehlberg7.cpp.o
+.PHONY : lib/Geodyn/RungeKuttaFehlberg7.cpp.o
 
-lib/Geodyn/RungeKuttaFehlberg.i: lib/Geodyn/RungeKuttaFehlberg.cpp.i
-.PHONY : lib/Geodyn/RungeKuttaFehlberg.i
+lib/Geodyn/RungeKuttaFehlberg7.i: lib/Geodyn/RungeKuttaFehlberg7.cpp.i
+.PHONY : lib/Geodyn/RungeKuttaFehlberg7.i
 
 # target to preprocess a source file
-lib/Geodyn/RungeKuttaFehlberg.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/RungeKuttaFehlberg.cpp.i
-.PHONY : lib/Geodyn/RungeKuttaFehlberg.cpp.i
+lib/Geodyn/RungeKuttaFehlberg7.cpp.i:
+	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/RungeKuttaFehlberg7.cpp.i
+.PHONY : lib/Geodyn/RungeKuttaFehlberg7.cpp.i
 
-lib/Geodyn/RungeKuttaFehlberg.s: lib/Geodyn/RungeKuttaFehlberg.cpp.s
-.PHONY : lib/Geodyn/RungeKuttaFehlberg.s
+lib/Geodyn/RungeKuttaFehlberg7.s: lib/Geodyn/RungeKuttaFehlberg7.cpp.s
+.PHONY : lib/Geodyn/RungeKuttaFehlberg7.s
 
 # target to generate assembly for a file
-lib/Geodyn/RungeKuttaFehlberg.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/RungeKuttaFehlberg.cpp.s
-.PHONY : lib/Geodyn/RungeKuttaFehlberg.cpp.s
+lib/Geodyn/RungeKuttaFehlberg7.cpp.s:
+	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/RungeKuttaFehlberg7.cpp.s
+.PHONY : lib/Geodyn/RungeKuttaFehlberg7.cpp.s
 
 lib/Geodyn/SatOrbit.o: lib/Geodyn/SatOrbit.cpp.o
 .PHONY : lib/Geodyn/SatOrbit.o
@@ -3610,54 +3514,6 @@ lib/Geodyn/SatOrbit.s: lib/Geodyn/SatOrbit.cpp.s
 lib/Geodyn/SatOrbit.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SatOrbit.cpp.s
 .PHONY : lib/Geodyn/SatOrbit.cpp.s
-
-lib/Geodyn/SatOrbitPropagator.o: lib/Geodyn/SatOrbitPropagator.cpp.o
-.PHONY : lib/Geodyn/SatOrbitPropagator.o
-
-# target to build an object file
-lib/Geodyn/SatOrbitPropagator.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SatOrbitPropagator.cpp.o
-.PHONY : lib/Geodyn/SatOrbitPropagator.cpp.o
-
-lib/Geodyn/SatOrbitPropagator.i: lib/Geodyn/SatOrbitPropagator.cpp.i
-.PHONY : lib/Geodyn/SatOrbitPropagator.i
-
-# target to preprocess a source file
-lib/Geodyn/SatOrbitPropagator.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SatOrbitPropagator.cpp.i
-.PHONY : lib/Geodyn/SatOrbitPropagator.cpp.i
-
-lib/Geodyn/SatOrbitPropagator.s: lib/Geodyn/SatOrbitPropagator.cpp.s
-.PHONY : lib/Geodyn/SatOrbitPropagator.s
-
-# target to generate assembly for a file
-lib/Geodyn/SatOrbitPropagator.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SatOrbitPropagator.cpp.s
-.PHONY : lib/Geodyn/SatOrbitPropagator.cpp.s
-
-lib/Geodyn/SimplePressure.o: lib/Geodyn/SimplePressure.cpp.o
-.PHONY : lib/Geodyn/SimplePressure.o
-
-# target to build an object file
-lib/Geodyn/SimplePressure.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SimplePressure.cpp.o
-.PHONY : lib/Geodyn/SimplePressure.cpp.o
-
-lib/Geodyn/SimplePressure.i: lib/Geodyn/SimplePressure.cpp.i
-.PHONY : lib/Geodyn/SimplePressure.i
-
-# target to preprocess a source file
-lib/Geodyn/SimplePressure.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SimplePressure.cpp.i
-.PHONY : lib/Geodyn/SimplePressure.cpp.i
-
-lib/Geodyn/SimplePressure.s: lib/Geodyn/SimplePressure.cpp.s
-.PHONY : lib/Geodyn/SimplePressure.s
-
-# target to generate assembly for a file
-lib/Geodyn/SimplePressure.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SimplePressure.cpp.s
-.PHONY : lib/Geodyn/SimplePressure.cpp.s
 
 lib/Geodyn/SolarPressure.o: lib/Geodyn/SolarPressure.cpp.o
 .PHONY : lib/Geodyn/SolarPressure.o
@@ -10374,15 +10230,9 @@ help:
 	@echo "... lib/GNSSEph/YumaAlmanacStore.o"
 	@echo "... lib/GNSSEph/YumaAlmanacStore.i"
 	@echo "... lib/GNSSEph/YumaAlmanacStore.s"
-	@echo "... lib/Geodyn/AtmosphericDrag.o"
-	@echo "... lib/Geodyn/AtmosphericDrag.i"
-	@echo "... lib/Geodyn/AtmosphericDrag.s"
 	@echo "... lib/Geodyn/CODEPressure.o"
 	@echo "... lib/Geodyn/CODEPressure.i"
 	@echo "... lib/Geodyn/CODEPressure.s"
-	@echo "... lib/Geodyn/CiraExponentialDrag.o"
-	@echo "... lib/Geodyn/CiraExponentialDrag.i"
-	@echo "... lib/Geodyn/CiraExponentialDrag.s"
 	@echo "... lib/Geodyn/EGM08GravityModel.o"
 	@echo "... lib/Geodyn/EGM08GravityModel.i"
 	@echo "... lib/Geodyn/EGM08GravityModel.s"
@@ -10404,9 +10254,6 @@ help:
 	@echo "... lib/Geodyn/ForceModelList.o"
 	@echo "... lib/Geodyn/ForceModelList.i"
 	@echo "... lib/Geodyn/ForceModelList.s"
-	@echo "... lib/Geodyn/HarrisPriesterDrag.o"
-	@echo "... lib/Geodyn/HarrisPriesterDrag.i"
-	@echo "... lib/Geodyn/HarrisPriesterDrag.s"
 	@echo "... lib/Geodyn/IERSConventions.o"
 	@echo "... lib/Geodyn/IERSConventions.i"
 	@echo "... lib/Geodyn/IERSConventions.s"
@@ -10416,9 +10263,6 @@ help:
 	@echo "... lib/Geodyn/MoonForce.o"
 	@echo "... lib/Geodyn/MoonForce.i"
 	@echo "... lib/Geodyn/MoonForce.s"
-	@echo "... lib/Geodyn/Msise00Drag.o"
-	@echo "... lib/Geodyn/Msise00Drag.i"
-	@echo "... lib/Geodyn/Msise00Drag.s"
 	@echo "... lib/Geodyn/PvtStore.o"
 	@echo "... lib/Geodyn/PvtStore.i"
 	@echo "... lib/Geodyn/PvtStore.s"
@@ -10431,18 +10275,12 @@ help:
 	@echo "... lib/Geodyn/RelativityEffect.o"
 	@echo "... lib/Geodyn/RelativityEffect.i"
 	@echo "... lib/Geodyn/RelativityEffect.s"
-	@echo "... lib/Geodyn/RungeKuttaFehlberg.o"
-	@echo "... lib/Geodyn/RungeKuttaFehlberg.i"
-	@echo "... lib/Geodyn/RungeKuttaFehlberg.s"
+	@echo "... lib/Geodyn/RungeKuttaFehlberg7.o"
+	@echo "... lib/Geodyn/RungeKuttaFehlberg7.i"
+	@echo "... lib/Geodyn/RungeKuttaFehlberg7.s"
 	@echo "... lib/Geodyn/SatOrbit.o"
 	@echo "... lib/Geodyn/SatOrbit.i"
 	@echo "... lib/Geodyn/SatOrbit.s"
-	@echo "... lib/Geodyn/SatOrbitPropagator.o"
-	@echo "... lib/Geodyn/SatOrbitPropagator.i"
-	@echo "... lib/Geodyn/SatOrbitPropagator.s"
-	@echo "... lib/Geodyn/SimplePressure.o"
-	@echo "... lib/Geodyn/SimplePressure.i"
-	@echo "... lib/Geodyn/SimplePressure.s"
 	@echo "... lib/Geodyn/SolarPressure.o"
 	@echo "... lib/Geodyn/SolarPressure.i"
 	@echo "... lib/Geodyn/SolarPressure.s"

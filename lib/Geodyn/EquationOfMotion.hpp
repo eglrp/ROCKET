@@ -38,7 +38,7 @@
 /**
  * @file EquationOfMotion.hpp
  *
- * Class to provides the mechanism for passing a method
+ * Class provides the mechanism for passing a method
  * that computes the derivatives to an integrator.
  */
 

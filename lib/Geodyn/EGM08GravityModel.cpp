@@ -487,7 +487,7 @@ namespace gpstk
         //
         da_dr = T2C * grad * C2T;
 
-//        cout << "df_earth/dr: " << endl;
+//        cout << "df_earth/dr (EGM08): " << endl;
 //        cout << setprecision(15) << da_dr << endl;
 
         da_dv.resize(3,3,0.0);
