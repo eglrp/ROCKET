@@ -76,6 +76,8 @@ namespace gpstk
    static const double RAD_TO_AS    = 206264.8062470963551564734;
       /// Conversion Factor from seconds of time to radians (unit: seconds^-1)
    static const double SEC_TO_RAD   = 7.272205216643039903848712e-5;
+      /// Conversion Factor from radians to seconds of time (unit: seconds)
+   static const double RAD_TO_SEC   = 43200.0/PI;
       /// Arcseconds in a full circle
    static const double TURNAS       = 1296000.0;
       /// Seconds per day
@@ -86,6 +88,8 @@ namespace gpstk
    static const double MJD_J2000    = 51544.5;
       /// Julian Date of Modified Julian Date zero
    static const double JD_TO_MJD    = 2400000.5;
+      /// Reference epoch (J2000.0), Julian Data
+   static const double JD_J2000     = 2451545.0;
 
 
    // IERS 2003 Numerical Standards
