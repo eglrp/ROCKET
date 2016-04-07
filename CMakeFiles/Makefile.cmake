@@ -13,6 +13,7 @@ SET(CMAKE_MAKEFILE_DEPENDS
   "CMakeLists.txt"
   "apps/CMakeLists.txt"
   "apps/network/CMakeLists.txt"
+  "oldtests/CMakeLists.txt"
   "/usr/share/cmake-2.8/Modules/CMakeCInformation.cmake"
   "/usr/share/cmake-2.8/Modules/CMakeCXXInformation.cmake"
   "/usr/share/cmake-2.8/Modules/CMakeCommonLanguageInclude.cmake"
@@ -39,6 +40,7 @@ SET(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   "apps/CMakeFiles/CMakeDirectoryInformation.cmake"
   "apps/network/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "oldtests/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -50,4 +52,8 @@ SET(CMAKE_DEPEND_INFO_FILES
   "apps/network/CMakeFiles/clkupdzap.dir/DependInfo.cmake"
   "apps/network/CMakeFiles/upd.dir/DependInfo.cmake"
   "apps/network/CMakeFiles/updzap.dir/DependInfo.cmake"
+  "oldtests/CMakeFiles/test_egm.dir/DependInfo.cmake"
+  "oldtests/CMakeFiles/test_iers.dir/DependInfo.cmake"
+  "oldtests/CMakeFiles/test_jpl.dir/DependInfo.cmake"
+  "oldtests/CMakeFiles/test_sp3.dir/DependInfo.cmake"
   )

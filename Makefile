@@ -227,6 +227,58 @@ updzap/fast:
 	$(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/build
 .PHONY : updzap/fast
 
+#=============================================================================
+# Target rules for targets named test_egm
+
+# Build rule for target.
+test_egm: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_egm
+.PHONY : test_egm
+
+# fast build rule for target.
+test_egm/fast:
+	$(MAKE) -f oldtests/CMakeFiles/test_egm.dir/build.make oldtests/CMakeFiles/test_egm.dir/build
+.PHONY : test_egm/fast
+
+#=============================================================================
+# Target rules for targets named test_iers
+
+# Build rule for target.
+test_iers: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_iers
+.PHONY : test_iers
+
+# fast build rule for target.
+test_iers/fast:
+	$(MAKE) -f oldtests/CMakeFiles/test_iers.dir/build.make oldtests/CMakeFiles/test_iers.dir/build
+.PHONY : test_iers/fast
+
+#=============================================================================
+# Target rules for targets named test_jpl
+
+# Build rule for target.
+test_jpl: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_jpl
+.PHONY : test_jpl
+
+# fast build rule for target.
+test_jpl/fast:
+	$(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/build
+.PHONY : test_jpl/fast
+
+#=============================================================================
+# Target rules for targets named test_sp3
+
+# Build rule for target.
+test_sp3: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_sp3
+.PHONY : test_sp3
+
+# fast build rule for target.
+test_sp3/fast:
+	$(MAKE) -f oldtests/CMakeFiles/test_sp3.dir/build.make oldtests/CMakeFiles/test_sp3.dir/build
+.PHONY : test_sp3/fast
+
 lib/AppFrame/BasicFramework.o: lib/AppFrame/BasicFramework.cpp.o
 .PHONY : lib/AppFrame/BasicFramework.o
 
@@ -9870,6 +9922,10 @@ help:
 	@echo "... clkupdzap"
 	@echo "... upd"
 	@echo "... updzap"
+	@echo "... test_egm"
+	@echo "... test_iers"
+	@echo "... test_jpl"
+	@echo "... test_sp3"
 	@echo "... lib/AppFrame/BasicFramework.o"
 	@echo "... lib/AppFrame/BasicFramework.i"
 	@echo "... lib/AppFrame/BasicFramework.s"

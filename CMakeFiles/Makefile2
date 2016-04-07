@@ -56,7 +56,7 @@ CMAKE_BINARY_DIR = /home/kfkuang/rocket
 CMakeFiles/rocket.dir/all:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/depend
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98
 	@echo "Built target rocket"
 .PHONY : CMakeFiles/rocket.dir/all
 
@@ -66,7 +66,7 @@ all: CMakeFiles/rocket.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/rocket.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 99
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/rocket.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
 .PHONY : CMakeFiles/rocket.dir/rule
@@ -141,7 +141,7 @@ all: apps/network/CMakeFiles/clk.dir/all
 
 # Build rule for subdir invocation for target.
 apps/network/CMakeFiles/clk.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 99
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
 	$(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clk.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
 .PHONY : apps/network/CMakeFiles/clk.dir/rule
@@ -176,7 +176,7 @@ all: apps/network/CMakeFiles/clksmpc.dir/all
 
 # Build rule for subdir invocation for target.
 apps/network/CMakeFiles/clksmpc.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 99
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
 	$(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clksmpc.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
 .PHONY : apps/network/CMakeFiles/clksmpc.dir/rule
@@ -211,7 +211,7 @@ all: apps/network/CMakeFiles/clkupd.dir/all
 
 # Build rule for subdir invocation for target.
 apps/network/CMakeFiles/clkupd.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 99
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
 	$(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clkupd.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
 .PHONY : apps/network/CMakeFiles/clkupd.dir/rule
@@ -246,7 +246,7 @@ all: apps/network/CMakeFiles/clkupdzap.dir/all
 
 # Build rule for subdir invocation for target.
 apps/network/CMakeFiles/clkupdzap.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 99
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
 	$(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clkupdzap.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
 .PHONY : apps/network/CMakeFiles/clkupdzap.dir/rule
@@ -281,7 +281,7 @@ all: apps/network/CMakeFiles/upd.dir/all
 
 # Build rule for subdir invocation for target.
 apps/network/CMakeFiles/upd.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 99
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
 	$(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/upd.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
 .PHONY : apps/network/CMakeFiles/upd.dir/rule
@@ -316,7 +316,7 @@ all: apps/network/CMakeFiles/updzap.dir/all
 
 # Build rule for subdir invocation for target.
 apps/network/CMakeFiles/updzap.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 100
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 99
 	$(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/updzap.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
 .PHONY : apps/network/CMakeFiles/updzap.dir/rule
@@ -332,6 +332,167 @@ apps/network/CMakeFiles/updzap.dir/clean:
 
 # clean rule for target.
 clean: apps/network/CMakeFiles/updzap.dir/clean
+.PHONY : clean
+
+#=============================================================================
+# Directory level rules for directory oldtests
+
+# Convenience name for "all" pass in the directory.
+oldtests/all: oldtests/CMakeFiles/test_egm.dir/all
+oldtests/all: oldtests/CMakeFiles/test_iers.dir/all
+oldtests/all: oldtests/CMakeFiles/test_jpl.dir/all
+oldtests/all: oldtests/CMakeFiles/test_sp3.dir/all
+.PHONY : oldtests/all
+
+# Convenience name for "clean" pass in the directory.
+oldtests/clean: oldtests/CMakeFiles/test_egm.dir/clean
+oldtests/clean: oldtests/CMakeFiles/test_iers.dir/clean
+oldtests/clean: oldtests/CMakeFiles/test_jpl.dir/clean
+oldtests/clean: oldtests/CMakeFiles/test_sp3.dir/clean
+.PHONY : oldtests/clean
+
+# Convenience name for "preinstall" pass in the directory.
+oldtests/preinstall:
+.PHONY : oldtests/preinstall
+
+#=============================================================================
+# Target rules for target oldtests/CMakeFiles/test_egm.dir
+
+# All Build rule for target.
+oldtests/CMakeFiles/test_egm.dir/all: CMakeFiles/rocket.dir/all
+	$(MAKE) -f oldtests/CMakeFiles/test_egm.dir/build.make oldtests/CMakeFiles/test_egm.dir/depend
+	$(MAKE) -f oldtests/CMakeFiles/test_egm.dir/build.make oldtests/CMakeFiles/test_egm.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles 
+	@echo "Built target test_egm"
+.PHONY : oldtests/CMakeFiles/test_egm.dir/all
+
+# Include target in all.
+all: oldtests/CMakeFiles/test_egm.dir/all
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+oldtests/CMakeFiles/test_egm.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
+	$(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_egm.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
+.PHONY : oldtests/CMakeFiles/test_egm.dir/rule
+
+# Convenience name for target.
+test_egm: oldtests/CMakeFiles/test_egm.dir/rule
+.PHONY : test_egm
+
+# clean rule for target.
+oldtests/CMakeFiles/test_egm.dir/clean:
+	$(MAKE) -f oldtests/CMakeFiles/test_egm.dir/build.make oldtests/CMakeFiles/test_egm.dir/clean
+.PHONY : oldtests/CMakeFiles/test_egm.dir/clean
+
+# clean rule for target.
+clean: oldtests/CMakeFiles/test_egm.dir/clean
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target oldtests/CMakeFiles/test_iers.dir
+
+# All Build rule for target.
+oldtests/CMakeFiles/test_iers.dir/all: CMakeFiles/rocket.dir/all
+	$(MAKE) -f oldtests/CMakeFiles/test_iers.dir/build.make oldtests/CMakeFiles/test_iers.dir/depend
+	$(MAKE) -f oldtests/CMakeFiles/test_iers.dir/build.make oldtests/CMakeFiles/test_iers.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles  99
+	@echo "Built target test_iers"
+.PHONY : oldtests/CMakeFiles/test_iers.dir/all
+
+# Include target in all.
+all: oldtests/CMakeFiles/test_iers.dir/all
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+oldtests/CMakeFiles/test_iers.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 99
+	$(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_iers.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
+.PHONY : oldtests/CMakeFiles/test_iers.dir/rule
+
+# Convenience name for target.
+test_iers: oldtests/CMakeFiles/test_iers.dir/rule
+.PHONY : test_iers
+
+# clean rule for target.
+oldtests/CMakeFiles/test_iers.dir/clean:
+	$(MAKE) -f oldtests/CMakeFiles/test_iers.dir/build.make oldtests/CMakeFiles/test_iers.dir/clean
+.PHONY : oldtests/CMakeFiles/test_iers.dir/clean
+
+# clean rule for target.
+clean: oldtests/CMakeFiles/test_iers.dir/clean
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target oldtests/CMakeFiles/test_jpl.dir
+
+# All Build rule for target.
+oldtests/CMakeFiles/test_jpl.dir/all: CMakeFiles/rocket.dir/all
+	$(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/depend
+	$(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles 
+	@echo "Built target test_jpl"
+.PHONY : oldtests/CMakeFiles/test_jpl.dir/all
+
+# Include target in all.
+all: oldtests/CMakeFiles/test_jpl.dir/all
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+oldtests/CMakeFiles/test_jpl.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
+	$(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_jpl.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
+.PHONY : oldtests/CMakeFiles/test_jpl.dir/rule
+
+# Convenience name for target.
+test_jpl: oldtests/CMakeFiles/test_jpl.dir/rule
+.PHONY : test_jpl
+
+# clean rule for target.
+oldtests/CMakeFiles/test_jpl.dir/clean:
+	$(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/clean
+.PHONY : oldtests/CMakeFiles/test_jpl.dir/clean
+
+# clean rule for target.
+clean: oldtests/CMakeFiles/test_jpl.dir/clean
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target oldtests/CMakeFiles/test_sp3.dir
+
+# All Build rule for target.
+oldtests/CMakeFiles/test_sp3.dir/all: CMakeFiles/rocket.dir/all
+	$(MAKE) -f oldtests/CMakeFiles/test_sp3.dir/build.make oldtests/CMakeFiles/test_sp3.dir/depend
+	$(MAKE) -f oldtests/CMakeFiles/test_sp3.dir/build.make oldtests/CMakeFiles/test_sp3.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles 
+	@echo "Built target test_sp3"
+.PHONY : oldtests/CMakeFiles/test_sp3.dir/all
+
+# Include target in all.
+all: oldtests/CMakeFiles/test_sp3.dir/all
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+oldtests/CMakeFiles/test_sp3.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
+	$(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_sp3.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
+.PHONY : oldtests/CMakeFiles/test_sp3.dir/rule
+
+# Convenience name for target.
+test_sp3: oldtests/CMakeFiles/test_sp3.dir/rule
+.PHONY : test_sp3
+
+# clean rule for target.
+oldtests/CMakeFiles/test_sp3.dir/clean:
+	$(MAKE) -f oldtests/CMakeFiles/test_sp3.dir/build.make oldtests/CMakeFiles/test_sp3.dir/clean
+.PHONY : oldtests/CMakeFiles/test_sp3.dir/clean
+
+# clean rule for target.
+clean: oldtests/CMakeFiles/test_sp3.dir/clean
 .PHONY : clean
 
 #=============================================================================

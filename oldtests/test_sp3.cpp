@@ -10,7 +10,7 @@ using namespace gpstk;
 
 int main(void)
 {
-
+    // sp3 files
 	SP3EphemerisStore sp3Eph;
     sp3Eph.rejectBadPositions(true);
     sp3Eph.rejectBadClocks(true);

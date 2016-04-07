@@ -1,0 +1,1 @@
+/usr/bin/c++       CMakeFiles/test_jpl.dir/test_jpl.cpp.o  -o test_jpl -rdynamic ../librocket.so -Wl,-rpath,/home/kfkuang/rocket 
