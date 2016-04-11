@@ -137,6 +137,20 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+oldtests/CMakeFiles/test_de.dir/rule:
+	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_de.dir/rule
+.PHONY : oldtests/CMakeFiles/test_de.dir/rule
+
+# Convenience name for target.
+test_de: oldtests/CMakeFiles/test_de.dir/rule
+.PHONY : test_de
+
+# fast build rule for target.
+test_de/fast:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/build
+.PHONY : test_de/fast
+
+# Convenience name for target.
 oldtests/CMakeFiles/test_egm.dir/rule:
 	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_egm.dir/rule
 .PHONY : oldtests/CMakeFiles/test_egm.dir/rule
@@ -165,20 +179,6 @@ test_iers/fast:
 .PHONY : test_iers/fast
 
 # Convenience name for target.
-oldtests/CMakeFiles/test_jpl.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_jpl.dir/rule
-.PHONY : oldtests/CMakeFiles/test_jpl.dir/rule
-
-# Convenience name for target.
-test_jpl: oldtests/CMakeFiles/test_jpl.dir/rule
-.PHONY : test_jpl
-
-# fast build rule for target.
-test_jpl/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/build
-.PHONY : test_jpl/fast
-
-# Convenience name for target.
 oldtests/CMakeFiles/test_sp3.dir/rule:
 	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_sp3.dir/rule
 .PHONY : oldtests/CMakeFiles/test_sp3.dir/rule
@@ -191,6 +191,44 @@ test_sp3: oldtests/CMakeFiles/test_sp3.dir/rule
 test_sp3/fast:
 	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_sp3.dir/build.make oldtests/CMakeFiles/test_sp3.dir/build
 .PHONY : test_sp3/fast
+
+# Convenience name for target.
+oldtests/CMakeFiles/test_srp.dir/rule:
+	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_srp.dir/rule
+.PHONY : oldtests/CMakeFiles/test_srp.dir/rule
+
+# Convenience name for target.
+test_srp: oldtests/CMakeFiles/test_srp.dir/rule
+.PHONY : test_srp
+
+# fast build rule for target.
+test_srp/fast:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/build
+.PHONY : test_srp/fast
+
+test_de.o: test_de.cpp.o
+.PHONY : test_de.o
+
+# target to build an object file
+test_de.cpp.o:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/test_de.cpp.o
+.PHONY : test_de.cpp.o
+
+test_de.i: test_de.cpp.i
+.PHONY : test_de.i
+
+# target to preprocess a source file
+test_de.cpp.i:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/test_de.cpp.i
+.PHONY : test_de.cpp.i
+
+test_de.s: test_de.cpp.s
+.PHONY : test_de.s
+
+# target to generate assembly for a file
+test_de.cpp.s:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/test_de.cpp.s
+.PHONY : test_de.cpp.s
 
 test_egm.o: test_egm.cpp.o
 .PHONY : test_egm.o
@@ -240,30 +278,6 @@ test_iers.cpp.s:
 	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_iers.dir/build.make oldtests/CMakeFiles/test_iers.dir/test_iers.cpp.s
 .PHONY : test_iers.cpp.s
 
-test_jpl.o: test_jpl.cpp.o
-.PHONY : test_jpl.o
-
-# target to build an object file
-test_jpl.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/test_jpl.cpp.o
-.PHONY : test_jpl.cpp.o
-
-test_jpl.i: test_jpl.cpp.i
-.PHONY : test_jpl.i
-
-# target to preprocess a source file
-test_jpl.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/test_jpl.cpp.i
-.PHONY : test_jpl.cpp.i
-
-test_jpl.s: test_jpl.cpp.s
-.PHONY : test_jpl.s
-
-# target to generate assembly for a file
-test_jpl.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/test_jpl.cpp.s
-.PHONY : test_jpl.cpp.s
-
 test_sp3.o: test_sp3.cpp.o
 .PHONY : test_sp3.o
 
@@ -288,6 +302,30 @@ test_sp3.cpp.s:
 	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_sp3.dir/build.make oldtests/CMakeFiles/test_sp3.dir/test_sp3.cpp.s
 .PHONY : test_sp3.cpp.s
 
+test_srp.o: test_srp.cpp.o
+.PHONY : test_srp.o
+
+# target to build an object file
+test_srp.cpp.o:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/test_srp.cpp.o
+.PHONY : test_srp.cpp.o
+
+test_srp.i: test_srp.cpp.i
+.PHONY : test_srp.i
+
+# target to preprocess a source file
+test_srp.cpp.i:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/test_srp.cpp.i
+.PHONY : test_srp.cpp.i
+
+test_srp.s: test_srp.cpp.s
+.PHONY : test_srp.s
+
+# target to generate assembly for a file
+test_srp.cpp.s:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/test_srp.cpp.s
+.PHONY : test_srp.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -300,22 +338,26 @@ help:
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... test_de"
 	@echo "... test_egm"
 	@echo "... test_iers"
-	@echo "... test_jpl"
 	@echo "... test_sp3"
+	@echo "... test_srp"
+	@echo "... test_de.o"
+	@echo "... test_de.i"
+	@echo "... test_de.s"
 	@echo "... test_egm.o"
 	@echo "... test_egm.i"
 	@echo "... test_egm.s"
 	@echo "... test_iers.o"
 	@echo "... test_iers.i"
 	@echo "... test_iers.s"
-	@echo "... test_jpl.o"
-	@echo "... test_jpl.i"
-	@echo "... test_jpl.s"
 	@echo "... test_sp3.o"
 	@echo "... test_sp3.i"
 	@echo "... test_sp3.s"
+	@echo "... test_srp.o"
+	@echo "... test_srp.i"
+	@echo "... test_srp.s"
 .PHONY : help
 
 

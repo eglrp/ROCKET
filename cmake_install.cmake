@@ -548,6 +548,7 @@ IF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
     "/home/kfkuang/rocket/lib/Geodyn/ReferenceSystem.hpp"
     "/home/kfkuang/rocket/lib/Geodyn/EarthOceanTide.hpp"
     "/home/kfkuang/rocket/lib/Geodyn/ROCKPressure.hpp"
+    "/home/kfkuang/rocket/lib/Geodyn/GNSSOrbit.hpp"
     "/home/kfkuang/rocket/lib/Geodyn/EGM08GravityModel.hpp"
     "/home/kfkuang/rocket/lib/Geodyn/Spacecraft.hpp"
     "/home/kfkuang/rocket/lib/Geodyn/KeplerOrbit.hpp"

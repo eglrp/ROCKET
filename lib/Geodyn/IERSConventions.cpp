@@ -4745,24 +4745,21 @@ namespace gpstk
        try
        {
            double rvState[6] = {0.0};
-           int ret = jplEph.computeState(MJD(TT).mjd+MJD_TO_JD,
+           int ret = jplEph.computeState(JulianDate(TT).jd,
                                          entity,
                                          center,
                                          rvState);
 
-           // km -> m
-           rvState[0] *= 1e3;
-           rvState[1] *= 1e3;
-           rvState[2] *= 1e3;
-           // km/s -> m/s
-           rvState[3] *= 1e3;
-           rvState[4] *= 1e3;
-           rvState[5] *= 1e3;
+           // km/day -> km/s
+           rvState[3] /= 86400.0;
+           rvState[4] /= 86400.0;
+           rvState[5] /= 86400.0;
 
            if(ret == 0)
            {
                rvJ2000 = rvState;
-               return rvJ2000;
+
+               return rvJ2000*1000.0;
            }
        }
        catch(...)

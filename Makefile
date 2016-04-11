@@ -228,6 +228,19 @@ updzap/fast:
 .PHONY : updzap/fast
 
 #=============================================================================
+# Target rules for targets named test_de
+
+# Build rule for target.
+test_de: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_de
+.PHONY : test_de
+
+# fast build rule for target.
+test_de/fast:
+	$(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/build
+.PHONY : test_de/fast
+
+#=============================================================================
 # Target rules for targets named test_egm
 
 # Build rule for target.
@@ -254,19 +267,6 @@ test_iers/fast:
 .PHONY : test_iers/fast
 
 #=============================================================================
-# Target rules for targets named test_jpl
-
-# Build rule for target.
-test_jpl: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 test_jpl
-.PHONY : test_jpl
-
-# fast build rule for target.
-test_jpl/fast:
-	$(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/build
-.PHONY : test_jpl/fast
-
-#=============================================================================
 # Target rules for targets named test_sp3
 
 # Build rule for target.
@@ -278,6 +278,19 @@ test_sp3: cmake_check_build_system
 test_sp3/fast:
 	$(MAKE) -f oldtests/CMakeFiles/test_sp3.dir/build.make oldtests/CMakeFiles/test_sp3.dir/build
 .PHONY : test_sp3/fast
+
+#=============================================================================
+# Target rules for targets named test_srp
+
+# Build rule for target.
+test_srp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_srp
+.PHONY : test_srp
+
+# fast build rule for target.
+test_srp/fast:
+	$(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/build
+.PHONY : test_srp/fast
 
 lib/AppFrame/BasicFramework.o: lib/AppFrame/BasicFramework.cpp.o
 .PHONY : lib/AppFrame/BasicFramework.o
@@ -3350,6 +3363,30 @@ lib/Geodyn/ForceModelList.s: lib/Geodyn/ForceModelList.cpp.s
 lib/Geodyn/ForceModelList.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/ForceModelList.cpp.s
 .PHONY : lib/Geodyn/ForceModelList.cpp.s
+
+lib/Geodyn/GNSSOrbit.o: lib/Geodyn/GNSSOrbit.cpp.o
+.PHONY : lib/Geodyn/GNSSOrbit.o
+
+# target to build an object file
+lib/Geodyn/GNSSOrbit.cpp.o:
+	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/GNSSOrbit.cpp.o
+.PHONY : lib/Geodyn/GNSSOrbit.cpp.o
+
+lib/Geodyn/GNSSOrbit.i: lib/Geodyn/GNSSOrbit.cpp.i
+.PHONY : lib/Geodyn/GNSSOrbit.i
+
+# target to preprocess a source file
+lib/Geodyn/GNSSOrbit.cpp.i:
+	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/GNSSOrbit.cpp.i
+.PHONY : lib/Geodyn/GNSSOrbit.cpp.i
+
+lib/Geodyn/GNSSOrbit.s: lib/Geodyn/GNSSOrbit.cpp.s
+.PHONY : lib/Geodyn/GNSSOrbit.s
+
+# target to generate assembly for a file
+lib/Geodyn/GNSSOrbit.cpp.s:
+	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/GNSSOrbit.cpp.s
+.PHONY : lib/Geodyn/GNSSOrbit.cpp.s
 
 lib/Geodyn/IERSConventions.o: lib/Geodyn/IERSConventions.cpp.o
 .PHONY : lib/Geodyn/IERSConventions.o
@@ -9922,10 +9959,11 @@ help:
 	@echo "... clkupdzap"
 	@echo "... upd"
 	@echo "... updzap"
+	@echo "... test_de"
 	@echo "... test_egm"
 	@echo "... test_iers"
-	@echo "... test_jpl"
 	@echo "... test_sp3"
+	@echo "... test_srp"
 	@echo "... lib/AppFrame/BasicFramework.o"
 	@echo "... lib/AppFrame/BasicFramework.i"
 	@echo "... lib/AppFrame/BasicFramework.s"
@@ -10310,6 +10348,9 @@ help:
 	@echo "... lib/Geodyn/ForceModelList.o"
 	@echo "... lib/Geodyn/ForceModelList.i"
 	@echo "... lib/Geodyn/ForceModelList.s"
+	@echo "... lib/Geodyn/GNSSOrbit.o"
+	@echo "... lib/Geodyn/GNSSOrbit.i"
+	@echo "... lib/Geodyn/GNSSOrbit.s"
 	@echo "... lib/Geodyn/IERSConventions.o"
 	@echo "... lib/Geodyn/IERSConventions.i"
 	@echo "... lib/Geodyn/IERSConventions.s"

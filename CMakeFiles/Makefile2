@@ -338,22 +338,59 @@ clean: apps/network/CMakeFiles/updzap.dir/clean
 # Directory level rules for directory oldtests
 
 # Convenience name for "all" pass in the directory.
+oldtests/all: oldtests/CMakeFiles/test_de.dir/all
 oldtests/all: oldtests/CMakeFiles/test_egm.dir/all
 oldtests/all: oldtests/CMakeFiles/test_iers.dir/all
-oldtests/all: oldtests/CMakeFiles/test_jpl.dir/all
 oldtests/all: oldtests/CMakeFiles/test_sp3.dir/all
+oldtests/all: oldtests/CMakeFiles/test_srp.dir/all
 .PHONY : oldtests/all
 
 # Convenience name for "clean" pass in the directory.
+oldtests/clean: oldtests/CMakeFiles/test_de.dir/clean
 oldtests/clean: oldtests/CMakeFiles/test_egm.dir/clean
 oldtests/clean: oldtests/CMakeFiles/test_iers.dir/clean
-oldtests/clean: oldtests/CMakeFiles/test_jpl.dir/clean
 oldtests/clean: oldtests/CMakeFiles/test_sp3.dir/clean
+oldtests/clean: oldtests/CMakeFiles/test_srp.dir/clean
 .PHONY : oldtests/clean
 
 # Convenience name for "preinstall" pass in the directory.
 oldtests/preinstall:
 .PHONY : oldtests/preinstall
+
+#=============================================================================
+# Target rules for target oldtests/CMakeFiles/test_de.dir
+
+# All Build rule for target.
+oldtests/CMakeFiles/test_de.dir/all: CMakeFiles/rocket.dir/all
+	$(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/depend
+	$(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles 
+	@echo "Built target test_de"
+.PHONY : oldtests/CMakeFiles/test_de.dir/all
+
+# Include target in all.
+all: oldtests/CMakeFiles/test_de.dir/all
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+oldtests/CMakeFiles/test_de.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
+	$(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_de.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
+.PHONY : oldtests/CMakeFiles/test_de.dir/rule
+
+# Convenience name for target.
+test_de: oldtests/CMakeFiles/test_de.dir/rule
+.PHONY : test_de
+
+# clean rule for target.
+oldtests/CMakeFiles/test_de.dir/clean:
+	$(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/clean
+.PHONY : oldtests/CMakeFiles/test_de.dir/clean
+
+# clean rule for target.
+clean: oldtests/CMakeFiles/test_de.dir/clean
+.PHONY : clean
 
 #=============================================================================
 # Target rules for target oldtests/CMakeFiles/test_egm.dir
@@ -426,41 +463,6 @@ clean: oldtests/CMakeFiles/test_iers.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target oldtests/CMakeFiles/test_jpl.dir
-
-# All Build rule for target.
-oldtests/CMakeFiles/test_jpl.dir/all: CMakeFiles/rocket.dir/all
-	$(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/depend
-	$(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles 
-	@echo "Built target test_jpl"
-.PHONY : oldtests/CMakeFiles/test_jpl.dir/all
-
-# Include target in all.
-all: oldtests/CMakeFiles/test_jpl.dir/all
-.PHONY : all
-
-# Build rule for subdir invocation for target.
-oldtests/CMakeFiles/test_jpl.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
-	$(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_jpl.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
-.PHONY : oldtests/CMakeFiles/test_jpl.dir/rule
-
-# Convenience name for target.
-test_jpl: oldtests/CMakeFiles/test_jpl.dir/rule
-.PHONY : test_jpl
-
-# clean rule for target.
-oldtests/CMakeFiles/test_jpl.dir/clean:
-	$(MAKE) -f oldtests/CMakeFiles/test_jpl.dir/build.make oldtests/CMakeFiles/test_jpl.dir/clean
-.PHONY : oldtests/CMakeFiles/test_jpl.dir/clean
-
-# clean rule for target.
-clean: oldtests/CMakeFiles/test_jpl.dir/clean
-.PHONY : clean
-
-#=============================================================================
 # Target rules for target oldtests/CMakeFiles/test_sp3.dir
 
 # All Build rule for target.
@@ -493,6 +495,41 @@ oldtests/CMakeFiles/test_sp3.dir/clean:
 
 # clean rule for target.
 clean: oldtests/CMakeFiles/test_sp3.dir/clean
+.PHONY : clean
+
+#=============================================================================
+# Target rules for target oldtests/CMakeFiles/test_srp.dir
+
+# All Build rule for target.
+oldtests/CMakeFiles/test_srp.dir/all: CMakeFiles/rocket.dir/all
+	$(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/depend
+	$(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/build
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/kfkuang/rocket/CMakeFiles 
+	@echo "Built target test_srp"
+.PHONY : oldtests/CMakeFiles/test_srp.dir/all
+
+# Include target in all.
+all: oldtests/CMakeFiles/test_srp.dir/all
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+oldtests/CMakeFiles/test_srp.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 98
+	$(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_srp.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
+.PHONY : oldtests/CMakeFiles/test_srp.dir/rule
+
+# Convenience name for target.
+test_srp: oldtests/CMakeFiles/test_srp.dir/rule
+.PHONY : test_srp
+
+# clean rule for target.
+oldtests/CMakeFiles/test_srp.dir/clean:
+	$(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/clean
+.PHONY : oldtests/CMakeFiles/test_srp.dir/clean
+
+# clean rule for target.
+clean: oldtests/CMakeFiles/test_srp.dir/clean
 .PHONY : clean
 
 #=============================================================================

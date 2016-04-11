@@ -218,7 +218,7 @@ namespace gpstk
 
          /// Reference epoch
       CommonTime utc0;
-      
+
          /// Spacecraft object
       Spacecraft sc;
 

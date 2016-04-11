@@ -67,19 +67,16 @@ namespace gpstk
    public:
 
          /// Default constructor
-      Spacecraft()
-      {
-          resetState();
-      }
+      Spacecraft() { resetState(); }
 
          /// Default destructor
       ~Spacecraft() {};
 
 
-         /// Set sat id of the spacecraft
+         /// Set satid of the spacecraft
       Spacecraft& setSatID(const SatID& s) { satid = s; return *this; }
 
-         /// Get sat id of the spacecraft
+         /// Get satid of the spacecraft
       SatID getSatID() const { return satid; }
 
          /// Set epoch of the spacecraft

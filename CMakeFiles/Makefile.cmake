@@ -52,8 +52,9 @@ SET(CMAKE_DEPEND_INFO_FILES
   "apps/network/CMakeFiles/clkupdzap.dir/DependInfo.cmake"
   "apps/network/CMakeFiles/upd.dir/DependInfo.cmake"
   "apps/network/CMakeFiles/updzap.dir/DependInfo.cmake"
+  "oldtests/CMakeFiles/test_de.dir/DependInfo.cmake"
   "oldtests/CMakeFiles/test_egm.dir/DependInfo.cmake"
   "oldtests/CMakeFiles/test_iers.dir/DependInfo.cmake"
-  "oldtests/CMakeFiles/test_jpl.dir/DependInfo.cmake"
   "oldtests/CMakeFiles/test_sp3.dir/DependInfo.cmake"
+  "oldtests/CMakeFiles/test_srp.dir/DependInfo.cmake"
   )

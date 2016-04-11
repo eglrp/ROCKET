@@ -73,8 +73,10 @@ namespace gpstk
 
        // sun and moon position in eci, unit: m
        Vector<double> r_Sun(3,0.0), r_Moon(3,0.0);
-       r_Sun = J2kPosition(tt, SolarSystem::Sun);
-       r_Moon = J2kPosition(tt, SolarSystem::Moon);
+//       r_Sun = J2kPosition(tt, SolarSystem::Sun);
+//       r_Moon = J2kPosition(tt, SolarSystem::Moon);
+       r_Sun = SunJ2kPosition(tt);
+       r_Moon = MoonJ2kPosition(tt);
 
        // satellite position in eci, unit: m
        Vector<double> r_Sat(3,0.0);

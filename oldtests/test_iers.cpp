@@ -1,3 +1,8 @@
+/*
+ * Test for the IERSConventions, mainly of the transformation between
+ * ITRS and ICRS.
+ */
+
 #include <iostream>
 #include "IERSConventions.hpp"
 #include "SP3EphemerisStore.hpp"
@@ -14,35 +19,56 @@ using namespace gpstk;
 int main(void)
 {
     // global files
-    LoadIERSERPFile("../tables/finals2000A.all");
-    LoadIERSLSFile("../tables/Leap_Second_History.dat");
-    LoadJPLEphFile("../tables/JPLEPH2000");
+    try
+    {
+        LoadIERSERPFile("../tables/finals2000A.all");
+    }
+    catch(...)
+    {
+        cerr << "IERS Earth Orientation Parameters File Load Error." << endl;
+    }
+    
+    try
+    {
+        LoadIERSLSFile("../tables/Leap_Second_History.dat");
+    }
+    catch(...)
+    {
+        cerr << "IERS Leap Second File Load Error." << endl;
+    }
 
-    // sp3 files
+    try
+    {
+        LoadJPLEphFile("../tables/JPLEPH2000");
+    }
+    catch(...)
+    {
+        cerr << "JPL Ephemeris File Load Error." << endl;
+    }
+
     SP3EphemerisStore sp3Eph;
     sp3Eph.rejectBadPositions(true);
     sp3Eph.rejectBadPositions(true);
     sp3Eph.setPosGapInterval(900+1);
     sp3Eph.setPosMaxInterval(9*900+1);
 
-    try {
-    
+    try
+    {
         sp3Eph.loadFile("../workplace/igs18253.sp3");
         sp3Eph.loadFile("../workplace/igs18254.sp3");
         sp3Eph.loadFile("../workplace/igs18255.sp3");
-
-    } catch (...) {
-
-        cerr << "sp3 file load error." << endl;
+    }
+    catch(...)
+    {
+        cerr << "SP3 File Load Error." << endl;
     }
 
-    // initial epoch
-    CivilTime cv(2015,1,1,12,0,0.0, TimeSystem::GPS);
-    CommonTime GPS( cv.convertToCommonTime() );
+    CivilTime ct(2015,1,1,12,0,0.0, TimeSystem::GPS);
+    CommonTime GPS( ct.convertToCommonTime() );
     CommonTime UTC( GPS2UTC(GPS) );
 
-    cout << fixed << setprecision(6);
-
+    cout << fixed << setprecision(4);
+    cout << ct << endl;
     // UTC
 //    cout << "UTC: " << UTC << endl;
 //    cout << "MJD_UTC: " << MJD(UTC).mjd << endl;
@@ -52,7 +78,7 @@ int main(void)
 //    cout << "MJD_TAI: " << MJD(TAI).mjd << endl;
 
     // TT
-//    CommonTime TT( UTC2TT(UTC) );
+    CommonTime TT( UTC2TT(UTC) );
 //    cout << "TT:  " << TT << endl;
 //    cout << "MJD_TT: " << MJD(TT).mjd << endl;
 
@@ -61,32 +87,38 @@ int main(void)
 //    cout << "UT1: " << UT1 << endl;
 //    cout << "MJD_UT1: " << MJD(UT1).mjd << endl;
 
-    // matrix from ICRS to ITRS
     Matrix<double> C2T( C2TMatrix(UTC) );
 //    cout << "C2T: " << endl << C2T << endl;
-
-    // time dot of matrix from ICRS to ITRS
     Matrix<double> dC2T( dC2TMatrix(UTC) );
 //    cout << "dC2T: " << endl << dC2T << endl;
 
-    // sat
+
     SatID sat(1, SatID::systemGPS);
 
-    // get ECEF position and velocity from sp3 files
-    Vector<double> r_ecef(3,0.0);
-    r_ecef = sp3Eph.getXvt(sat,GPS).x.toVector();
-    Vector<double> v_ecef(3,0.0);
-    v_ecef = sp3Eph.getXvt(sat,GPS).v.toVector();
+    Vector<double> r_ecef(3,0.0), v_ecef(3,0.0);
 
-    // transform ECEF position and velocity to ECI
+    try
+    {
+        r_ecef = sp3Eph.getXvt(sat,GPS).x.toVector();
+        v_ecef = sp3Eph.getXvt(sat,GPS).v.toVector();
+    }
+    catch(...)
+    {
+        cerr << "Get ECEF Position and Velocity from SP3 File Error." << endl;
+    }
+
+    TT = CivilTime(2000,1,1,0,0,0.0, TimeSystem::TT);
     Vector<double> r_eci( transpose(C2T)*r_ecef );
     Vector<double> v_eci( transpose(C2T)*v_ecef + transpose(dC2T)*r_ecef);
-
-    cout << "r_ecef: " << endl << r_ecef << endl;
     cout << "r_eci: " << endl << r_eci << endl;
-
-    cout << "v_ecef: " << endl << v_ecef << endl;
     cout << "v_eci: " << endl << v_eci << endl;
+
+    // Analytical Position
+    Vector<double> r_sun( SunJ2kPosition(TT) );
+    Vector<double> r_moon( MoonJ2kPosition(TT) );
+    cout << "r_sun: " << r_sun << endl;
+    cout << "r_moon: " << r_moon << endl;
+
 
     return 0;
 }

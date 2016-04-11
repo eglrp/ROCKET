@@ -5,6 +5,8 @@
 
 #include "IERSConventions.hpp"
 
+#include "SatDataReader.hpp"
+
 #include "CivilTime.hpp"
 
 using namespace std;
@@ -12,14 +14,19 @@ using namespace gpstk;
 
 int main(void)
 {
-    LoadIERSERPFile("finals.data");
-    LoadIERSLSFile("Leap_Second_History.dat");
-    LoadJPLEphFile("JPLEPH2000");
+    LoadIERSERPFile("../tables/finals2000A.all");
+    LoadIERSLSFile("../tables/Leap_Second_History.dat");
+    LoadJPLEphFile("../tables/JPLEPH2000");
 
+    // sat id
+    SatID satid(1, SatID::systemGPS);
+
+    // time
     CivilTime ct(2015,1,1,12,1,15.0, TimeSystem::GPS);
     CommonTime gps( ct.convertToCommonTime() );
     CommonTime utc( GPS2UTC(gps) );
 
+    // initial conditions
     Vector<double> rv(6,0.0);
     rv[0] =  17253.546071e3;
     rv[1] = -19971.1571565e3;
@@ -41,10 +48,15 @@ int main(void)
 
     EarthBody rb;
 
+    // sat data
+    SatDataReader satData("../tables/SATELLITE");
+
     Spacecraft sc;
     sc.initStateVector(rv, p);
-    sc.setDryMass(1555.3);      // in kg
-    sc.setBlockNum(7);          // BLOCK-IIF
+    sc.setSatID(satid);
+    sc.setEpoch(utc);
+    sc.setBlock(satData.getBlock(satid,utc));
+    sc.setMass(satData.getMass(satid,utc));
 
     CODEPressure code;
     code.doCompute(utc, rb, sc);

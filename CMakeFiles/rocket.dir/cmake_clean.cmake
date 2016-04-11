@@ -350,6 +350,7 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/rocket.dir/lib/Geodyn/EGM08GravityModel.cpp.o"
   "CMakeFiles/rocket.dir/lib/Geodyn/MoonForce.cpp.o"
   "CMakeFiles/rocket.dir/lib/Geodyn/CODEPressure.cpp.o"
+  "CMakeFiles/rocket.dir/lib/Geodyn/GNSSOrbit.cpp.o"
   "CMakeFiles/rocket.dir/lib/Geodyn/RungeKuttaFehlberg7.cpp.o"
   "CMakeFiles/rocket.dir/lib/Geodyn/EGM96GravityModel.cpp.o"
   "CMakeFiles/rocket.dir/lib/Geodyn/SunForce.cpp.o"
