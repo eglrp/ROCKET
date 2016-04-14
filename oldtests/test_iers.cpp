@@ -26,6 +26,8 @@ int main(void)
     catch(...)
     {
         cerr << "IERS Earth Orientation Parameters File Load Error." << endl;
+
+        return 1;
     }
     
     try
@@ -35,6 +37,8 @@ int main(void)
     catch(...)
     {
         cerr << "IERS Leap Second File Load Error." << endl;
+
+        return 1;
     }
 
     try
@@ -44,6 +48,8 @@ int main(void)
     catch(...)
     {
         cerr << "JPL Ephemeris File Load Error." << endl;
+
+        return 1;
     }
 
     SP3EphemerisStore sp3Eph;
