@@ -16,24 +16,16 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
+<<<<<<< HEAD:lib/Geodyn/SimplePressure.hpp
+//  Copyright 
+//
+//  Kaifa Kuang - Wuhan University . 2015
+=======
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
+>>>>>>> d993c1c0ab04e4381aeeec0eca07bd118b301d70:lib/Geodyn/GNSSOrbit.hpp
 //
 //============================================================================
-
-//============================================================================
-//
-//This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
-//Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
-//
-//Pursuant to DoD Directive 523024 
-//
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
-//                           release, distribution is unlimited.
-//
-//=============================================================================
 
 /**
  * @file GNSSOrbit.hpp

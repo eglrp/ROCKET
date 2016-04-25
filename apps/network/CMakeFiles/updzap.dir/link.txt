@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/updzap.dir/updzap.cpp.o  -o updzap -rdynamic ../../librocket.so -Wl,-rpath,/home/kfkuang/rocket::::: 

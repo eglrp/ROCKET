@@ -26,7 +26,7 @@
 //  Copyright 
 //  ---------
 //
-//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2009
+//  Shjzhang, Wuhan University, 2014
 //
 //============================================================================
 //

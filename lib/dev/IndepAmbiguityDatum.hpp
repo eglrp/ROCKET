@@ -26,20 +26,16 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
-//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2009, 2011
+//  Shoujian Zhang
 //
-//============================================================================
+//  revision
 //
-//  History 
-//
-//  2012.06.19   Modify of the Method "getPhiQ()". The gnssRinex is needed to 
+//  2012/06/19   Modify of the Method "getPhiQ()". The gnssRinex is needed to 
 //               'Prepare' the stochastic model. When the variable is 
 //               source-indexed, the gnssRinex can be given by finding the source 
 //               in gdsMap, but when the variable is only satellite-indexed, 
 //               the gnssRinex is the first gnssRinex which "SEE" this 
 //               satellite. ( by shjzhang )
-//
-//  - ....
 //
 //============================================================================
 

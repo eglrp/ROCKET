@@ -165,7 +165,7 @@ namespace gpstk
                    gnssRinex& roverData,
                    const double tol = 1.0 )
          : tolerance(tol), firstTime(true)
-      { setReferenceSource(rinexObs); setRoverData(roverData); };
+      { setReferenceStream(rinexObs); setRoverData(roverData); };
 
 
          /** Common constructor.
@@ -178,7 +178,7 @@ namespace gpstk
                    gnssSatTypeValue& roverData,
                    const double tol = 1.0 )
          : tolerance(tol), firstTime(true)
-      { setReferenceSource(rinexObs); setRoverData(roverData); };
+      { setReferenceStream(rinexObs); setRoverData(roverData); };
 
 
          /** Returns a gnnsSatTypeValue object, adding the new data
@@ -220,7 +220,7 @@ namespace gpstk
           *
           * @param rinexObs      RinexObsStream object of reference data.
           */
-      virtual Synchronize& setReferenceSource(RinexObsStream& rinexObs)
+      virtual Synchronize& setReferenceStream(RinexObsStream& rinexObs)
       { pRinexRef = &rinexObs; firstTime=true; return (*this); }
 
 

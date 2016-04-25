@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/test_de.dir/test_de.cpp.o  -o test_de -rdynamic ../librocket.so -Wl,-rpath,/home/kfkuang/rocket 

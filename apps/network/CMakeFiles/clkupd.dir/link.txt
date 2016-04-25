@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/clkupd.dir/clkupd.cpp.o  -o clkupd -rdynamic ../../librocket.so -Wl,-rpath,/home/kfkuang/rocket::::: 

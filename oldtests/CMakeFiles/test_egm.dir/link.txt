@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/test_egm.dir/test_egm.cpp.o  -o test_egm -rdynamic ../librocket.so -Wl,-rpath,/home/kfkuang/rocket 

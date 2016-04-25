@@ -302,25 +302,47 @@ namespace gpstk
       CommonTime UTC1;
       UTC1  = GPST1 - (leapSec - 19.0);
 
+         ///////////////////////////////////////////////////////////////////
+         //
          // Now, correct the leap second by feeding the utc instead
          // of the 'gpst', if not fix, the following would happen:
          //
-         //  1-JUL-1993 00:00:10 GPS TIME --->  1-JUL-1993 00:00:01 UTC TIME
-         //  1-JUL-1993 00:00:09 GPS TIME --->  1-JUL-1993 00:00:01 UTC TIME
-         //  1-JUL-1993 00:00:08 GPS TIME --->  1-JUL-1993 00:00:00 UTC TIME
-         //  1-JUL-1993 00:00:07 GPS TIME ---> 30-JUN-1993 23:59:59 UTC TIME
+         //  01-JUL-1993 00:00:10 GPS TIME (- 9s) = 01-JUL-1993 00:00:01 UTC TIME
+         //  01-JUL-1993 00:00:09 GPS TIME (- 9s) = 01-JUL-1993 00:00:00 UTC TIME
+         //  01-JUL-1993 00:00:08 GPS TIME (- 9s) = 01-JUL-1993 00:00:59 UTC TIME
+         //  01-JUL-1993 00:00:07 GPS TIME (- 9s) = 30-JUN-1993 23:59:58 UTC TIME
+         //  01-JUL-1993 00:00:06 GPS TIME (- 9s) = 30-JUN-1993 23:59:57 UTC TIME
+         //  01-JUL-1993 00:00:05 GPS TIME (- 9s) = 30-JUN-1993 23:59:56 UTC TIME
+         //  01-JUL-1993 00:00:04 GPS TIME (- 9s) = 30-JUN-1993 23:59:55 UTC TIME
+         //  01-JUL-1993 00:00:03 GPS TIME (- 9s) = 30-JUN-1993 23:59:54 UTC TIME
+         //  01-JUL-1993 00:00:02 GPS TIME (- 9s) = 30-JUN-1993 23:59:53 UTC TIME
+         //  01-JUL-1993 00:00:01 GPS TIME (- 9s) = 30-JUN-1993 23:59:52 UTC TIME
+         //  01-JUL-1993 00:00:00 GPS TIME (- 9s) = 30-JUN-1993 23:59:51 UTC TIME
+         //  30-JUN-1993 23:59:59 GPS TIME (- 8s) = 30-JUN-1993 23:59:51 UTC TIME
+         //
          //  
          //  The fix allows the following conversion: 
-         //  
-         //  1-JUL-1993 00:00:10 GPS TIME --->  1-JUL-1993 00:00:01 UTC TIME
-         //  1-JUL-1993 00:00:09 GPS TIME --->  1-JUL-1993 00:00:00 UTC TIME
-         //  1-JUL-1993 00:00:08 GPS TIME --->  1-JUL-1993 00:00:00 UTC TIME
-         //  1-JUL-1993 00:00:07 GPS TIME ---> 30-JUN-1993 23:59:59 UTC TIME
+         //
+         //  01-JUL-1993 00:00:10 GPS TIME (- 9s) = 01-JUL-1993 00:00:01 UTC TIME
+         //  01-JUL-1993 00:00:09 GPS TIME (- 9s) = 01-JUL-1993 00:00:00 UTC TIME
+         //  01-JUL-1993 00:00:08 GPS TIME (- 8s) = 01-JUL-1993 00:00:00 UTC TIME
+         //  01-JUL-1993 00:00:07 GPS TIME (- 8s) = 30-JUN-1993 23:59:59 UTC TIME
+         //  01-JUL-1993 00:00:06 GPS TIME (- 8s) = 30-JUN-1993 23:59:58 UTC TIME
+         //  01-JUL-1993 00:00:05 GPS TIME (- 8s) = 30-JUN-1993 23:59:57 UTC TIME
+         //  01-JUL-1993 00:00:04 GPS TIME (- 8s) = 30-JUN-1993 23:59:56 UTC TIME
+         //  01-JUL-1993 00:00:03 GPS TIME (- 8s) = 30-JUN-1993 23:59:55 UTC TIME
+         //  01-JUL-1993 00:00:02 GPS TIME (- 8s) = 30-JUN-1993 23:59:54 UTC TIME
+         //  01-JUL-1993 00:00:01 GPS TIME (- 8s) = 30-JUN-1993 23:59:53 UTC TIME
+         //  01-JUL-1993 00:00:00 GPS TIME (- 8s) = 30-JUN-1993 23:59:52 UTC TIME
+         //  30-JUN-1993 23:59:59 GPS TIME (- 8s) = 30-JUN-1993 23:59:51 UTC TIME
          //
          //  \reference Please refer to the subroutine 'gps2utc' in GRACE 
          //  data format converting software from GFZ.
+         //
+         ///////////////////////////////////////////////////////////////////
+         
+         // New leap second
       leapSec = getLeapSec(UTC1);
-
 
       CommonTime UTC;
       UTC = GPST1 -  (leapSec - 19.0);

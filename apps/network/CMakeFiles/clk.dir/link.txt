@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/clk.dir/clk.cpp.o  -o clk -rdynamic ../../librocket.so -Wl,-rpath,/home/kfkuang/rocket::::: 

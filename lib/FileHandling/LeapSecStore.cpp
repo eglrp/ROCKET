@@ -102,7 +102,10 @@ namespace gpstk
                >> day >> month >> year
                >> leapSec;
 
-         if(debug) cout << "time: " << CommonTime( MJD(mjd).convertToCommonTime() ) << " TAI - UTC " << leapSec << endl;
+         if(debug) 
+            cout << "time: " 
+                 << CommonTime( MJD(mjd).convertToCommonTime() ) 
+                 << " TAI - UTC " << leapSec << endl;
 
             // UTC time corresponding to the leap second
          CommonTime time( MJD(mjd).convertToCommonTime() );
