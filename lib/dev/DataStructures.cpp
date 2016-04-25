@@ -3055,6 +3055,73 @@ in matrix and number of types do not match") );
 
    }  // End of stream input for gnssRinex
 
+//    // Stream input for network gnss rinex files
+// NetworkStreams& operator>>( NetworkStreams& networkStreams, gnssDataMap& gData )
+// {
+//
+//       // Read stream for the reference station.
+//    RinexObsStream* pStreamRef = networkStreams.getStreamRef();
+//     
+//       // Store the reference rinex data
+//    gnssRinex gRef;
+//
+//       // Read the rinex data
+//    if( (*pStreamRef) >> gRef )
+//    {
+//          // Insert the rinex data from the reference station.
+//       gData.addGnssRinex(gRef);
+//
+//          // Read rover streams
+//       std::map<SourceID, RinexObsStream*> roverStreamMap;
+//       roverStreamMap = networkStreams.getRoverStreamMap();
+//
+//       std::map<SourceID, RinexObsStream*>::iterator it;
+//       for( it = roverStreamMap.begin(); it != roverStreamMap.end(); ++it )
+//       {
+//             // Warning:
+//             // In the class Synchronize, the reference data is synchronized
+//             // according to the rover data stream.
+//             // However, in this program, the rover stations will be 
+//             // synchronized with the 'MASETER' reference station.
+//             // Thus, the rover/reference is conversely between Synchronize
+//             // and NetworkStreams.
+//          Synchronize sync;
+//          sync.setReferenceStream( (*it).second );
+//          sync.setRoverData( gRef );
+//
+//             // gnssRinex for rover data store.
+//          gnssRinex gRin;
+//             
+//             // read rover data
+//          try
+//          {
+//             gRin >> sync;
+//             gdsMap.addGnssRinex(gRin);
+//          }
+//          catch(...)
+//          {
+//             if(synchronizeException)
+//             {
+//                std::stringstream ss;
+//                ss << "Exception when try to synchronize at epoch: "
+//                   << gRef.header.epoch 
+//                   << "for rover: "
+//                   << (*it).first 
+//                   << std::endl;
+//                SynchronizeException e(ss.str());
+//
+//                   // Throw
+//                GPSTK_THROW(e);
+//             }
+//          }
+//       }
+//    }
+// 
+//    return networkStreams;
+//
+// }  // End of stream input for gnssRinex
+
+
 
    // Stream output for gnssRinex
    std::ostream& operator<<( std::ostream& s,
