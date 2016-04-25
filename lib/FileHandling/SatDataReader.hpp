@@ -1,20 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file SatDataReader.hpp
- * File stream for satellite file data in PRN_GPS-like format.
- */
-
-#ifndef GPSTK_SATDATAREADER_HPP
-#define GPSTK_SATDATAREADER_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -25,13 +15,32 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007, 2009
+//  
+//  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
 
+/**
+ * @file SatDataReader.hpp
+ * File stream for satellite file data in PRN_GPS-like format.
+ */
 
+#ifndef GPSTK_SATDATAREADER_HPP
+#define GPSTK_SATDATAREADER_HPP
 
 #include <string>
 #include <map>
@@ -127,6 +136,19 @@ namespace gpstk
           * @param sat   Satellite ID.
           * @param epoch Epoch of interest.
           *
+          * @return Double containing satellite's mass. If satellite is not
+          * found or epoch is out of proper launch/deactivation bounds, this
+          * method will return 0.0.
+          */
+      virtual double getMass(const SatID& sat,
+                             const CommonTime& epoch) const;
+
+
+         /** Method to get the block type of a given SV at a given epoch.
+          *
+          * @param sat   Satellite ID.
+          * @param epoch Epoch of interest.
+          *
           * @return String containing satellite's block. If satellite is
           * not found or epoch is out of proper launch/deactivation bounds,
           * this method will return an empty string.
@@ -190,12 +212,14 @@ namespace gpstk
          svData() : launchDate(CommonTime::BEGINNING_OF_TIME),
                     deactivationDate(CommonTime::END_OF_TIME),
                     gpsNumber(0),
-                    block("") {};
+                    block(""),
+                    mass(0.0) {};
 
          CommonTime launchDate;         ///< SV launch date.
          CommonTime deactivationDate;   ///< SV deactivation date.
-         int gpsNumber;              ///< GPS number.
-         std::string block;               ///< Block the SV belongs to
+         int gpsNumber;                 ///< SV number.
+         std::string block;             ///< SV block.
+         double mass;                   ///< SV mass.
       };
 
 

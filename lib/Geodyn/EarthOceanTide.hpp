@@ -66,7 +66,7 @@ namespace gpstk
          fileName = "OT_CSRC.TID";
       }
          /// Default destructor
-      ~EarthOceanTide(){}
+      ~EarthOceanTide() {}
 
 
          /// struct to hold Ocean Tide information

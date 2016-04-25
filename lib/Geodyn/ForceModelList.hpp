@@ -49,70 +49,71 @@ namespace gpstk
    public:
 
          /// Default constructor
-      ForceModelList();
-
-         /// Default destructor
-      virtual ~ForceModelList()
-      {};
-
-         /// Clear the force model pointer list
-      void clear()
+      ForceModelList()
       {
-          fmpList.clear();
-//          fmtSet.clear();
+          clear();
       }
 
-         /**
-         * Adds a generic force to the list
-         * @param f Object which implements the ForceModel interface
-         */
-      void addForce(ForceModel* pForce)
-      { fmpList.push_back(pForce); };
+         /// Default destructor
+      virtual ~ForceModelList() {}
 
+         /// Clear the ForceModelList
+      void clear()
+      {
+          fmList.clear();
+//          fmtSet.clear();
+      }
+      
+
+         /**
+         * Add a generic force to the list
+         * @param fm    Object which implements the ForceModel interface
+         */
+      void addForce(ForceModel* fm)
+      { fmList.push_back(fm); }
 
          /**
          * Remove a generic force to the list
-         * @param f Object which implements the ForceModel interface
+         * @param fm    Object which implements the ForceModel interface
          */
-      void removeForce(ForceModel* pForce)
-      { fmpList.remove(pForce); }
+      void removeForce(ForceModel* fm)
+      { fmList.remove(fm); }
 
 
-         /// interface implementation for the 'ForceModel'
+         /// Interface implementation for the 'ForceModel'
       virtual Vector<double> getDerivatives(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
 
-         /// get force model type
+         /// Get force model type
       std::set<ForceModel::ForceModelType> getForceModelType()
       { return fmtSet; }
 
-         /// set force model type
+         /// Set force model type
       void setForceModelType(std::set<ForceModel::ForceModelType> fmt);
 
 
-         /// get force model pointer
+         /// Get force model
       std::list<ForceModel*> getForceModel()
-      { return fmpList; }
+      { return fmList; }
 
-         /// set force model pointer
-      void setForceModel(std::list<ForceModel*> fmp);
+         /// Set force model
+      void setForceModel(std::list<ForceModel*> fm);
 
-         /// return the force model name
-      virtual std::string modelName() const
+         /// Return the force model name
+      virtual std::string forceModelName() const
       { return "ForceModelList"; };
 
-
-         /// return the force model index
-      virtual int forceIndex() const
+         /// Return the force model index
+      virtual int forceModelIndex() const
       { return FMI_LIST; }
 
-         /// Show the exist force model
+         /// Show the existing force model
       void printForceModel(std::ostream& s);
 
    protected:
 
-         /// List of force model pointer
-      std::list<ForceModel*> fmpList;
+         /// List of force model
+      std::list<ForceModel*> fmList;
 
          /// Set of force model type
       std::set<ForceModel::ForceModelType> fmtSet;

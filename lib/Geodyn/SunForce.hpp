@@ -64,7 +64,7 @@ namespace gpstk
 
          /// return the force model index
       virtual int forceIndex() const
-      { return FMI_GEOSUN; }
+      { return FMI_SunGravitation; }
 
    protected:
          /// Gravitational constant for the body. [m^3/s^2]

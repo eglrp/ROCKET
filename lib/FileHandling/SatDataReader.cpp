@@ -1,17 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file SatDataReader.cpp
- * File stream for satellite file data in PRN_GPS-like format.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -22,13 +15,29 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007, 2009
+//  
+//  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
 
-
+/**
+ * @file SatDataReader.cpp
+ * File stream for satellite file data in PRN_GPS-like format.
+ */
 
 #include "SatDataReader.hpp"
 #include "TimeString.hpp"
@@ -95,9 +104,11 @@ namespace gpstk
             string gnumber(StringUtils::stripFirstWord(line));
                // PRN number
             string prn(StringUtils::stripFirstWord(line));
-               // Block tipe
+               // Block type
             string block(StringUtils::upperCase(
                StringUtils::stripFirstWord(line)));
+               // Mass
+            string mass(StringUtils::stripFirstWord(line));
 
                // Get satellite id. If it doesn't fit GPS or Glonass, it is
                // marked as unknown
@@ -120,6 +131,7 @@ namespace gpstk
 
             data.block = block;
             data.gpsNumber = StringUtils::asInt(gnumber);
+            data.mass = StringUtils::asDouble(mass);
 
                // Get launch date in a proper format
             if(ldate[0] != '0')
@@ -201,14 +213,14 @@ namespace gpstk
 
 
 
-      /* Method to get the block type of a given SV at a given epoch.
+      /* Method to get the mass of a given SV at a given epoch.
        *
        * @param sat   Satellite ID.
        * @param epoch Epoch of interest.
        *
-       * @return String containing satellite's block. If satellite is
-       * not found or epoch is out of proper launch/deactivation bounds,
-       * this method will return an empty string.
+       * @return Double containing satellite's mass. If satellite is not
+       * found or epoch is out of proper launch/deactivation bounds, this
+       * method will return an empty string.
        */
    string SatDataReader::getBlock(const SatID& sat,
                                   const CommonTime& epoch) const
@@ -246,6 +258,56 @@ namespace gpstk
 
 
       return ((*iter).second.block);
+
+   }  // End of method 'SatDataReader::getBlock()'
+
+
+
+      /* Method to get the block type of a given SV at a given epoch.
+       *
+       * @param sat   Satellite ID.
+       * @param epoch Epoch of interest.
+       *
+       * @return String containing satellite's block. If satellite is
+       * not found or epoch is out of proper launch/deactivation bounds,
+       * this method will return 0.0.
+       */
+   double SatDataReader::getMass(const SatID& sat,
+                                 const CommonTime& epoch) const
+   {
+
+         // Create a pair of range belonging to this SatID
+      pair<satDataIt, satDataIt> range = SatelliteData.equal_range(sat);
+
+         // If SatID is not found, an empty string is returned
+      if(range.first == range.second)
+      {
+         return 0.0;
+      }
+
+         // Declare an iterator to travel in this range
+      satDataIt iter(range.first);
+
+         // If this epoch is before launch date, return an empty string
+      if( (*iter).second.launchDate > epoch )
+      {
+         return 0.0;
+      }
+
+         // Increment iterator "iter" if we are not yet at proper epoch range
+      while( (*iter).second.deactivationDate < epoch )
+      {
+         ++iter;
+      }
+
+         // Test if epoch is after corresponding launch date
+      if( (*iter).second.launchDate > epoch )
+      {
+         return 0.0;
+      }
+
+
+      return ((*iter).second.mass);
 
    }  // End of method 'SatDataReader::getBlock()'
 

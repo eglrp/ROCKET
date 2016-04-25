@@ -158,8 +158,10 @@ namespace gpstk
        Matrix<double> E = C2TMatrix(UTC);
 
        // Moon and Sun Position in ECI, m
-       Vector<double> moonReci = J2kPosition(TT, SolarSystem::Moon);
-       Vector<double> sunReci = J2kPosition(TT, SolarSystem::Sun);
+//       Vector<double> moonReci = J2kPosition(TT, SolarSystem::Moon);
+//       Vector<double> sunReci = J2kPosition(TT, SolarSystem::Sun);
+       Vector<double> moonReci = MoonJ2kPosition(TT);
+       Vector<double> sunReci = SunJ2kPosition(TT);
 
        // Moon and Sun Position in ECEF, m
        Vector<double> moonR = E * moonReci;
@@ -306,6 +308,7 @@ namespace gpstk
          //         dC[0] += ( ( Argu_C20[i][0] * t_c - Argu_C20[i][1] * t_s ) * 1e-12 );
          dC[0]+=((Argu_C20[i][0]*t_c+Argu_C20[i][1]*t_s)*1e-12);
       }
+
 
       //--------------------------------------------------------------------------------
       // the third step

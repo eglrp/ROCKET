@@ -101,7 +101,7 @@ namespace gpstk
 
          /// return the force model index
       virtual int forceIndex() const
-      { return FMI_GEOEARTH; }
+      { return FMI_EarthGravitation; }
 
    protected:
 

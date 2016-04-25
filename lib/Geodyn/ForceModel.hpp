@@ -25,7 +25,7 @@
 /**
 * @file ForceModel.hpp
 * Force Model is a simple interface which allows uniformity among the various force
-* models 
+* models.
 */
 
 #ifndef GPSTK_FORCE_MODEL_HPP
@@ -43,7 +43,7 @@ namespace gpstk
 
       /**
        * Force Model is a simple interface which allows uniformity among the various force
-       * models 
+       * models.
        */
    class ForceModel
    {
@@ -55,26 +55,26 @@ namespace gpstk
          /// to the force model list
       enum ForceModelIndex
       {
-         FMI_BASE       = 1000,  ///< For This class 'ForceModel'
+         FMI_BASE       = 1000,     ///< For This class 'ForceModel'
 
-         FMI_GEOEARTH,           ///< Geopotential of Earth
-         FMI_GEOSUN,             ///< Geopotential of Sun
-         FMI_GEOMOON,            ///< Geopotential of Moon
-         FMI_DRAG,               ///< Atmospheric Drag
-         FMI_SRP,                ///< Solar Radiation Pressure
-         FMI_RELATIVE,           ///< Relativistic Effect
-         FMT_EMPIRICAL,          ///< Empirical Force
-         
+         FMI_EarthGravitation,      ///< Geopotential of Earth
+         FMI_SunGravitation,        ///< Geopotential of Sun
+         FMI_MoonGravitation,       ///< Geopotential of Moon
+         FMI_AtmosphericDrag,       ///< Atmospheric Drag
+         FMI_SolarRadiationPressure,///< Solar Radiation Pressure
+         FMI_RelativisticEffect,    ///< Relativistic Effect
+         FMI_EmpiricalForce,        ///< Empirical Force
+
          //... add more here
 
-         FMI_LIST   = 2000      ///< For class 'ForceModelList'
+         FMI_LIST       = 2000      ///< For class 'ForceModelList'
       };
 
          /// The force model parameters to be estimated
       enum ForceModelType
       {
-         Cd,            // Coefficient of Drag
-         Cr,            // Coefficient of Reflectivity
+         Cd,            // Coefficient of Atomspheric Drag
+         Cr,            // Coefficient of Solar Radiation Pressure
 
          // added by kfkuang, 2015/09/10
          Gx,            // Scale factor of ROCK-T SRP model, x axis
@@ -86,10 +86,10 @@ namespace gpstk
          Y0,            // Scale factor of CODE SRP model, Y direction
          B0,            // Scale factor of CODE SRP model, B direction
          Dc,            // Scale factor of CODE SRP model, D direction, 1/revolution
-         Ds,            // Scale factor of CODE SRP model, D direction, 1/revolution
          Yc,            // Scale factor of CODE SRP model, Y direciton, 1/revolution
-         Ys,            // Scale factor of CODE SRP model, Y direciton, 1/revolution
          Bc,            // Scale factor of CODE SRP model, B direction, 1/revolution
+         Ds,            // Scale factor of CODE SRP model, D direction, 1/revolution
+         Ys,            // Scale factor of CODE SRP model, Y direciton, 1/revolution
          Bs,            // Scale factor of CODE SRP model, B direction, 1/revolution
 
          // added by kfkuang, 2015/09/10
@@ -101,10 +101,9 @@ namespace gpstk
          /// Default constructor
       ForceModel()
       {
+
          a.resize(3,0.0);
-         da_dr.resize(3,3,0.0);
-         da_dv.resize(3,3,0.0);
-         da_dp.resize(3,0,0.0);      // default np = 0;
+         da_dr.resize(3,3,0.0); da_dv.resize(3,3,0.0); da_dp.resize(3,0,0.0);
 
          // atmospheric drag
          da_dCd.resize(3,0.0);
@@ -113,39 +112,28 @@ namespace gpstk
          da_dCr.resize(3,0.0);
 
          // rock srp model
-         da_dGx.resize(3,0.0);
-         da_dGy.resize(3,0.0);
-         da_dGz.resize(3,0.0);
+         da_dGx.resize(3,0.0); da_dGy.resize(3,0.0); da_dGz.resize(3,0.0);
 
          // code srp model
-         da_dD0.resize(3,0.0);
-         da_dY0.resize(3,0.0);
-         da_dB0.resize(3,0.0);
-         da_dDc.resize(3,0.0);
-         da_dDs.resize(3,0.0);
-         da_dYc.resize(3,0.0);
-         da_dYs.resize(3,0.0);
-         da_dBc.resize(3,0.0);
-         da_dBs.resize(3,0.0);
+         da_dD0.resize(3,0.0); da_dY0.resize(3,0.0); da_dB0.resize(3,0.0);
+         da_dDc.resize(3,0.0); da_dDs.resize(3,0.0);
+         da_dYc.resize(3,0.0); da_dYs.resize(3,0.0);
+         da_dBc.resize(3,0.0); da_dBs.resize(3,0.0);
 
          // empirical force
-         da_dar.resize(3,0.0);
-         da_dat.resize(3,0.0);
-         da_dan.resize(3,0.0);
+         da_dar.resize(3,0.0); da_dat.resize(3,0.0); da_dan.resize(3,0.0);
 
       }
 
          /// Default destructor
-      virtual ~ForceModel(){}
+      virtual ~ForceModel() {}
 
 
          /// this is the real one to do computation
-      virtual void doCompute(CommonTime t, EarthBody& bRef, Spacecraft& sc)
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
       {
          a.resize(3,0.0);
-         da_dr.resize(3,3,0.0);
-         da_dv.resize(3,3,0.0);
-         da_dp.resize(3,0,0.0);      // default np = 0;
+         da_dr.resize(3,3,0.0); da_dv.resize(3,3,0.0); da_dp.resize(3,0,0.0);
 
          // atmospheric drag
          da_dCd.resize(3,0.0);
@@ -154,36 +142,25 @@ namespace gpstk
          da_dCr.resize(3,0.0);
 
          // rock srp model
-         da_dGx.resize(3,0.0);
-         da_dGy.resize(3,0.0);
-         da_dGz.resize(3,0.0);
+         da_dGx.resize(3,0.0); da_dGy.resize(3,0.0); da_dGz.resize(3,0.0);
 
          // code srp model
-         da_dD0.resize(3,0.0);
-         da_dY0.resize(3,0.0);
-         da_dB0.resize(3,0.0);
-         da_dDc.resize(3,0.0);
-         da_dDs.resize(3,0.0);
-         da_dYc.resize(3,0.0);
-         da_dYs.resize(3,0.0);
-         da_dBc.resize(3,0.0);
-         da_dBs.resize(3,0.0);
+         da_dD0.resize(3,0.0); da_dY0.resize(3,0.0); da_dB0.resize(3,0.0);
+         da_dDc.resize(3,0.0); da_dYc.resize(3,0.0); da_dBc.resize(3,0.0);
+         da_dDs.resize(3,0.0); da_dYs.resize(3,0.0); da_dBs.resize(3,0.0);
 
          // empirical force
-         da_dar.resize(3,0.0);
-         da_dat.resize(3,0.0);
-         da_dan.resize(3,0.0);
-
+         da_dar.resize(3,0.0); da_dat.resize(3,0.0); da_dan.resize(3,0.0);
       }
 
 
          /// return the force model name
-      virtual std::string modelName() const
+      virtual std::string forceModelName() const
       { return "ForceModel"; }
 
 
          /// return the force model index
-      virtual int forceIndex() const
+      virtual int forceModelIndex() const
       { return FMI_BASE; }
 
 
@@ -195,7 +172,7 @@ namespace gpstk
       { return a; }
 
          /**
-          * Return the partial derivative of acceleration wrt position
+          * Return the partial derivatives of acceleration wrt position
           * @return Matrix containing the partial derivative of acceleration wrt r
           */
       virtual Matrix<double> partialR() const
@@ -373,61 +350,37 @@ namespace gpstk
 
          const int np = da_dp.cols();
 
-         Matrix<double> A(6+np,6+np,0.0);
+         Matrix<double> AMatrix(6+np,6+np,0.0);
 
          // I
-         A(0,3) = 1.0;
-         A(1,4) = 1.0;
-         A(2,5) = 1.0;
+         AMatrix(0,3) = 1.0; AMatrix(1,4) = 1.0; AMatrix(2,5) = 1.0;
 
          // da_dr
-         A(3,0) = da_dr(0,0);
-         A(3,1) = da_dr(0,1);
-         A(3,2) = da_dr(0,2);
-         A(4,0) = da_dr(1,0);
-         A(4,1) = da_dr(1,1);
-         A(4,2) = da_dr(1,2);
-         A(5,0) = da_dr(2,0);
-         A(5,1) = da_dr(2,1);
-         A(5,2) = da_dr(2,2);
+         for(int i=0; i<3; i++)
+             for(int j=0; j<3; j++)
+             {
+                 AMatrix(i+3,j) = da_dr(i,j);
+             }
 
          // da_dv
-         A(3,3) = da_dv(0,0);
-         A(3,4) = da_dv(0,1);
-         A(3,5) = da_dv(0,2);
-         A(4,3) = da_dv(1,0);
-         A(4,4) = da_dv(1,1);
-         A(4,5) = da_dv(1,2);
-         A(5,3) = da_dv(2,0);
-         A(5,4) = da_dv(2,1);
-         A(5,5) = da_dv(2,2);
+         for(int i=0; i<3; i++)
+             for(int j=0; j<3; j++)
+             {
+                 AMatrix(i+3,j+3) = da_dv(i,j);
+             }
 
          // da_dp
-         for(int i=0;i<np;i++)
-         {
-            A(3,6+i) = da_dp(0,i);
-            A(4,6+i) = da_dp(1,i);
-            A(5,6+i) = da_dp(2,i);
-         }
+         for(int i=0; i<3; i++)
+             for(int j=0; j<np; j++)
+             {
+                 AMatrix(i+3,j+6) = da_dp(i,j);
+             }
 
-         return A;
+         // return
+         return AMatrix;
 
       }  // End of method 'getAMatrix()'
 
-      void test()
-      {
-         /*
-         cout<<"test Force Model"<<endl;
-
-         a.resize(3,2.0);
-         da_dr.resize(3,3,3.0);
-         da_dv.resize(3,3,4.0);
-         da_dp.resize(3,2,5.0);
-         writeToFile("default.fm");
-
-         // it work well
-         */
-      }
 
    protected:
 

@@ -34,48 +34,31 @@ using namespace std;
 namespace gpstk
 {
 
-   ForceModelList::ForceModelList()
-   {
-      clear();
-   }
-
-      // interface implementation for the 'ForceModel'
+      // Interface implementation for the 'ForceModel'
    Vector<double> ForceModelList::getDerivatives(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
 //      cout << sc.P() << endl;
-//      cout << "the size of fmpList " << fmpList.size() << endl;
+//      cout << "the size of fmList " << fmList.size() << endl;
 //      cout << "the size of fmtSet " << fmtSet.size() << endl;
       const int np = fmtSet.size();
 
       a.resize(3,0.0);
-      da_dr.resize(3,3,0.0);
-      da_dv.resize(3,3,0.0);
-      da_dp.resize(3,np,0.0);
+      da_dr.resize(3,3,0.0); da_dv.resize(3,3,0.0); da_dp.resize(3,np,0.0);
 
       da_dCd.resize(3,0.0);
       da_dCr.resize(3,0.0);
 
-      da_dGx.resize(3,0.0);
-      da_dGy.resize(3,0.0);
-      da_dGz.resize(3,0.0);
+      da_dGx.resize(3,0.0); da_dGy.resize(3,0.0); da_dGz.resize(3,0.0);
 
-      da_dD0.resize(3,0.0);
-      da_dDc.resize(3,0.0);
-      da_dDs.resize(3,0.0);
-      da_dY0.resize(3,0.0);
-      da_dYc.resize(3,0.0);
-      da_dYs.resize(3,0.0);
-      da_dB0.resize(3,0.0);
-      da_dBc.resize(3,0.0);
-      da_dBs.resize(3,0.0);
+      da_dD0.resize(3,0.0); da_dDc.resize(3,0.0); da_dDs.resize(3,0.0);
+      da_dY0.resize(3,0.0); da_dYc.resize(3,0.0); da_dYs.resize(3,0.0);
+      da_dB0.resize(3,0.0); da_dBc.resize(3,0.0); da_dBs.resize(3,0.0);
 
-      da_dar.resize(3,0.0);
-      da_dat.resize(3,0.0);
-      da_dan.resize(3,0.0);
+      da_dar.resize(3,0.0); da_dat.resize(3,0.0); da_dan.resize(3,0.0);
 
-      for(list<ForceModel*>::iterator it = fmpList.begin();
-         it != fmpList.end();
-         ++it)
+      for(list<ForceModel*>::iterator it = fmList.begin();
+          it != fmList.end();
+          ++it)
       {
           (*it)->doCompute(utc,rb,sc);
 
@@ -217,7 +200,7 @@ namespace gpstk
          }
          else
          {
-            Exception e("Error in ForceModelList::getDerivatives():Unexpect ForceModelType");
+            Exception e("Error in ForceModelList::getDerivatives():Unexpected ForceModelType");
             GPSTK_THROW(e);
          }
 
@@ -272,30 +255,39 @@ namespace gpstk
       Vector<double> r = sc.R();
       Vector<double> v = sc.V();
 
+      //        |   v    |
+      //        | dv_dr0 |
+      //        | dv_dv0 |
+      //        | dv_dp0 |
+      // dydt = |   a    |
+      //        | da_dr0 |
+      //        | da_dv0 |
+      //        | da_dp0 |
       Vector<double> dydt(42+6*np,0.0);
 
-      dydt(0) = v(0);      // v = dr / dt
-      dydt(1) = v(1);
-      dydt(2) = v(2);
-      dydt(3) = a(0);      // a = dv / dt
-      dydt(4) = a(1);
-      dydt(5) = a(2);
+      // v
+      dydt(0) = v(0); dydt(1) = v(1); dydt(2) = v(2);
+      // a
+      dydt(21+3*np) = a(0); dydt(22+3*np) = a(1); dydt(23+3*np) = a(2);
 
-      for(int i=0;i<3;i++)
-      {
-         for(int j=0;j<3;j++)
-         {
-            dydt(6+i*3+j) = dphi(i,j);            // dv_dr0 = dr_dr0 / dt
-            dydt(15+i*3+j) = dphi(i,j+3);         // dv_dv0 = dr_dv0 / dt
-            dydt(24+3*np+i*3+j) = dphi(i+3,j);    // da_dr0 = dv_dr0 / dt
-            dydt(33+3*np+i*3+j) = dphi(i+3,j+3);  // da_dv0 = dv_dv0 / dt
-         }
-         for(int k=0;k<np;k++)
-         {
-            dydt(24+i*np+k) = dphi(i,6+k);         // dv_dp0 = dr_dp0 / dt
-            dydt(42+3*np+i*np+k) = dphi(i+3,6+k);  // da_dp0 = dv_dp0 / dt
-         }
-      }
+      // dv_dr0, dv_dv0, da_dr0, da_dv0
+      for(int i=0; i<3; i++)
+          for(int j=0; j<3; j++)
+          {
+              dydt( 3+i*3+j)    =   dphi(i,j);
+              dydt(12+i*3+j)    =   dphi(i,j+3);
+
+              dydt(21+3*np+i*3+j)   =   dphi(i+3,j);
+              dydt(30+3*np+i*3+j)   =   dphi(i+3,j+3);
+          }
+
+      // dv_dp0, da_dp0
+      for(int i=0; i<3; i++)
+          for(int j=0; j<np; j++)
+          {
+              dydt(21+i*np+j)   =   dphi(i,j+6);
+              dydt(42+i*np+j)   =   dphi(i+3,j+6);
+          }
 
 //      cout << "dydt: " << endl << dydt << endl << endl;
 
@@ -304,18 +296,19 @@ namespace gpstk
    }  // End of method 'ForceModelList::getDerivatives()'
 
 
+      // Show the existing force model
    void ForceModelList::printForceModel(ostream& s)
    {
       // a counter
       int i(1);
 
-      for(list<ForceModel*>::iterator it = fmpList.begin();
-         it != fmpList.end();
+      for(list<ForceModel*>::iterator it = fmList.begin();
+         it != fmList.end();
          ++it)
       {
          s << setw(3) << i << ' '
-           << (*it)->forceIndex() << ' '
-           << (*it)->modelName() << endl;
+           << (*it)->forceModelIndex() << ' '
+           << (*it)->forceModelName() << endl;
 
          i++;
       }
@@ -323,6 +316,7 @@ namespace gpstk
    }  // End of method 'ForceModelList::printForceModel()'
 
 
+      // Set force model type
    void ForceModelList::setForceModelType(set<ForceModel::ForceModelType> fmt)
    {
       fmtSet.clear();
@@ -337,14 +331,15 @@ namespace gpstk
 
    }  // End of method 'ForceModelList::setForceModelType()'
 
-   void ForceModelList::setForceModel(list<ForceModel*> fmp)
+      // Set force model
+   void ForceModelList::setForceModel(list<ForceModel*> fm)
    {
-       fmpList.clear();
-       for(list<ForceModel*>::iterator it = fmp.begin();
-           it != fmp.end();
+       fmList.clear();
+       for(list<ForceModel*>::iterator it = fm.begin();
+           it != fm.end();
            ++it)
        {
-           fmpList.push_back(*it);
+           fmList.push_back(*it);
        }
 
    }  // End of method 'ForceModelList::setForceModel()'
