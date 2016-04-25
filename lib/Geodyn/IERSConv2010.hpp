@@ -17,7 +17,8 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
@@ -36,12 +37,12 @@
 //=============================================================================
 
 /**
- * @file IERSConventions.hpp
- * IERS Conventions
+ * @file IERSConv2010.hpp
+ * IERS Conventions 2010
  */
 
-#ifndef GPSTK_IERSCONVENTIONS_HPP
-#define GPSTK_IERSCONVENTIONS_HPP
+#ifndef GPSTK_IERSCONV2010_HPP
+#define GPSTK_IERSCONV2010_HPP
 
 #include <iostream>
 #include <cmath>
@@ -69,8 +70,8 @@ namespace gpstk
      *          -14s
      *    -----------------> BDT(Compass Time)
      *    |
-     *    |         +19s             +32.184s           +rel.effects
-     *   GPST ------------> TAI ----------------> TT -----------------> TDB
+     *    |         +19s             +32.184s           +relativity effects
+     *   GPST ------------> TAI ----------------> TT -------------------------> TDB
      *                      T |
      *           -(UT1-TAI) | |    -leap seconds
      *   UT1 ---------------| |--------------------> UTC
@@ -81,6 +82,37 @@ namespace gpstk
      *
      *   Ritrf = POM * Theta * N * P * Ricrf
      */
+
+    class IERSConv2010
+    {
+    public:
+        
+        // Default constructor.
+        IERSConv2010()
+            : pEopStore(NULL), pLeapSecStore(NULL), isPrepared(false)
+        {}
+
+        IERSConv2010(EOPDataStore& eopStore,
+                     LeapSecStore& leapSecStore)
+            : isPrepared(false)
+        {
+            pEopStore = &eopStore;
+            pleapSecStore = &leapSecStore;
+        }
+
+        ~IERSConv2010()
+        {}
+
+        
+
+    private:
+
+        EOPDataStore* peopStore;
+        LeapSecStore* pleapSecStore;
+
+        Prepared false;
+
+    }
 
     // IERS Data Handling
     //--------------------------------------------------------------------------

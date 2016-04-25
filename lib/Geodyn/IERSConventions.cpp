@@ -338,11 +338,21 @@ namespace gpstk
        return UTC;
    }
 
-      // Convert UTC to UT1
+      // Convert UTC to UT1, get UT1mUTC from EOP Data Table
    CommonTime UTC2UT1(const CommonTime& UTC)
    {
        CommonTime UT1;
        UT1 = UTC + UT1mUTC(UTC);
+       UT1.setTimeSystem(TimeSystem::UT1);
+
+       return UT1;
+   }
+
+   // Convert UTC to UT1, given UT1mUTC
+   CommonTime UTC2UT1(const CommonTime& UTC, const double& UT1mUTC)
+   {
+       CommonTime UT1;
+       UT1 = UTC + UT1mUTC;
        UT1.setTimeSystem(TimeSystem::UT1);
 
        return UT1;
@@ -597,7 +607,8 @@ namespace gpstk
          {  1,  0, -2,  2, -1,      0.0179, 0.0000, -0.0344, 0.0000,  0.0290, 0.0000 },
  
          // 41 - 60
-         { -1, -1,  0,  2,  0,     -0.0855, 0.0000,  0.1542, 0.0000, -0.1302, 0.0000 },
+         { -1, -1,  0,  2,  0,     -0.0855, 0.0000,  0.1542, 0.0000, -0.1302, 0.0000 }
+/*
          {  0,  2,  2, -2,  2,     -0.0573, 0.0000,  0.0395, 0.0000, -0.0333, 0.0000 },
          {  0,  1,  2, -2,  1,      0.0329, 0.0000, -0.0173, 0.0000,  0.0146, 0.0000 },
          {  0,  1,  2, -2,  2,     -1.8847, 0.0000,  0.9726, 0.0000, -0.8209, 0.0000 },
@@ -621,6 +632,7 @@ namespace gpstk
          // 61 - 62
          {  0,  0,  0,  0,  2,      7.8998, 0.0000,  0.1460, 0.0000, -0.1232, 0.0000 },
          {  0,  0,  0,  0,  1,  -1617.2681, 0.0000,-14.9471, 0.0000, 12.6153, 0.0000 }
+*/
        };
 
        /* Number of terms in the series */
@@ -1650,7 +1662,7 @@ namespace gpstk
            {  1,   0,   0,   1,   0 },
            {  0,   1,   0,   2,   1 },
 
-   /* 161-170 */
+           /* 161-170 */
            {  1,   0,  -4,   0,  -1 },
            {  1,   0,   0,  -4,  -1 },
            {  2,   0,   2,   2,   1 },
@@ -1662,7 +1674,7 @@ namespace gpstk
            {  0,   0,   2,  -4,   1 },
            {  2,   0,   0,  -2,  -2 },
 
-   /* 171-180 */
+           /* 171-180 */
            {  1,   1,  -2,  -4,  -2 },
            {  0,   1,   0,  -2,  -1 },
            {  0,   0,   0,   4,   1 },
@@ -1674,7 +1686,7 @@ namespace gpstk
            {  2,   1,   0,  -2,  -1 },
            {  0,   2,   0,  -2,   0 },
 
-   /* 181-190 */
+           /* 181-190 */
            {  1,   0,   0,  -1,   1 },
            {  1,   1,   2,   2,   2 },
            {  3,   0,   0,   0,  -1 },
@@ -1686,7 +1698,7 @@ namespace gpstk
            {  0,   0,   2,  -1,   1 },
            {  2,   0,   0,   2,   1 },
 
-   /* 191-200 */
+           /* 191-200 */
            {  1,  -1,  -2,   2,  -1 },
            {  0,   0,   0,   2,  -2 },
            {  2,   0,   0,  -4,   1 },
@@ -1698,7 +1710,7 @@ namespace gpstk
            {  3,   0,   0,  -4,   0 },
            {  1,  -1,   2,   2,   1 },
 
-   /* 201-210 */
+           /* 201-210 */
            {  1,  -1,  -2,   0,  -1 },
            {  0,   2,   0,   0,   1 },
            {  1,   2,  -2,  -2,  -2 },
@@ -1710,7 +1722,7 @@ namespace gpstk
            {  2,  -1,  -2,   0,  -1 },
            {  1,  -1,  -2,  -2,  -1 },
 
-   /* 211-220 */
+           /* 211-220 */
            {  0,   1,  -2,   1,  -2 },
            {  1,   0,  -4,   2,  -2 },
            {  0,   1,   2,   2,   1 },
@@ -1722,7 +1734,7 @@ namespace gpstk
            {  1,  -1,   0,  -2,  -2 },
            {  2,   0,  -2,   2,  -1 },
 
-   /* 221-230 */
+           /* 221-230 */
            {  0,   2,  -2,   0,  -2 },
            {  3,   0,  -2,   0,  -1 },
            {  2,  -1,   2,   0,   1 },
@@ -1734,7 +1746,7 @@ namespace gpstk
            {  0,   2,   2,   0,   2 },
            {  1,  -1,   2,  -2,   2 },
 
-   /* 231-240 */
+           /* 231-240 */
            {  1,  -1,   0,  -2,   1 },
            {  2,   1,   2,   0,   1 },
            {  1,   0,   2,  -4,   2 },
@@ -1746,7 +1758,7 @@ namespace gpstk
            {  2,  -1,   0,  -2,   0 },
            {  4,   0,   0,   0,   0 },
 
-   /* 241-250 */
+           /* 241-250 */
            {  2,   1,  -2,  -2,  -2 },
            {  0,   2,  -2,   2,   0 },
            {  1,   0,   2,   1,   1 },
@@ -1758,7 +1770,7 @@ namespace gpstk
            {  1,   0,   0,   4,   0 },
            {  0,   1,   0,   1,   1 },
 
-   /* 251-260 */
+           /* 251-260 */
            {  1,   0,   2,   2,   0 },
            {  0,   1,   0,   2,  -1 },
            {  0,   1,   0,   1,  -1 },
@@ -1770,7 +1782,7 @@ namespace gpstk
            {  1,  -2,   2,   0,   2 },
            {  1,   0,   2,  -4,   0 },
 
-   /* 261-270 */
+           /* 261-270 */
            {  0,   0,   1,   0,   0 },
            {  1,   0,   2,  -3,   1 },
            {  1,  -2,   0,  -2,   0 },
@@ -1782,7 +1794,7 @@ namespace gpstk
            {  2,   0,   2,   1,   2 },
            {  2,   1,   2,  -2,   1 },
 
-   /* 271-280 */
+           /* 271-280 */
            {  1,   0,   2,  -1,   1 },
            {  1,   0,   4,  -2,   1 },
            {  1,  -1,   2,  -2,   1 },
@@ -1794,7 +1806,7 @@ namespace gpstk
            {  1,   0,   2,  -2,  -1 },
            {  2,   0,  -2,  -6,  -2 },
 
-   /* 281-290 */
+           /* 281-290 */
            {  1,   0,  -2,   1,  -2 },
            {  1,   0,  -2,   2,   1 },
            {  1,  -1,   0,   2,  -1 },
@@ -1806,7 +1818,7 @@ namespace gpstk
            {  0,   0,   0,   4,  -1 },
            {  2,  -1,   0,   0,   1 },
 
-   /* 291-300 */
+           /* 291-300 */
            {  2,   0,   4,  -2,   2 },
            {  0,   0,   2,   3,   2 },
            {  0,   1,   4,  -2,   2 },
@@ -1818,7 +1830,7 @@ namespace gpstk
            {  1,   0,   0,  -1,  -2 },
            {  1,  -2,  -2,  -2,  -2 },
 
-   /* 301-310 */
+           /* 301-310 */
            {  3,   0,   0,   2,   0 },
            {  2,   0,   2,  -4,   2 },
            {  1,   1,  -2,  -4,  -1 },
@@ -1830,7 +1842,7 @@ namespace gpstk
            {  1,   2,   0,  -2,  -1 },
            {  1,   0,   0,   1,  -1 },
 
-   /* 311-320 */
+           /* 311-320 */
            {  0,   0,   1,   0,   2 },
            {  3,   1,   2,  -2,   2 },
            {  1,   0,  -4,  -2,  -2 },
@@ -1842,7 +1854,7 @@ namespace gpstk
            {  2,   1,  -2,   0,   0 },
            {  3,   0,  -2,  -2,  -1 },
 
-   /* 321-330 */
+           /* 321-330 */
            {  2,   0,   2,   4,   2 },
            {  0,   0,   0,   0,   3 },
            {  2,  -1,  -2,  -2,  -2 },
@@ -1854,7 +1866,7 @@ namespace gpstk
            {  2,   1,   0,   0,  -1 },
            {  1,   2,   0,  -2,   1 },
 
-   /* 331-340 */
+           /* 331-340 */
            {  3,   0,   2,   2,   1 },
            {  1,  -1,  -2,   2,  -2 },
            {  1,   1,   0,  -1,   0 },
@@ -1866,7 +1878,7 @@ namespace gpstk
            {  1,  -1,  -2,   2,   0 },
            {  0,   2,  -2,  -2,  -1 },
 
-   /* 341-350 */
+           /* 341-350 */
            {  2,   0,  -2,   0,   2 },
            {  5,   0,   2,   0,   2 },
            {  3,   0,  -2,  -6,  -2 },
@@ -1878,7 +1890,7 @@ namespace gpstk
            {  1,   2,   2,   0,   2 },
            {  0,   1,   0,  -2,  -2 },
 
-   /* 351-360 */
+           /* 351-360 */
            {  0,   0,   2,  -1,   0 },
            {  1,   0,   1,   0,   1 },
            {  0,   2,   0,  -2,   1 },
@@ -1890,7 +1902,7 @@ namespace gpstk
            {  4,   0,   2,  -2,   1 },
            {  2,   0,  -2,   2,   0 },
 
-   /* 361-370 */
+           /* 361-370 */
            {  1,   1,   2,  -2,   0 },
            {  1,   0,  -2,   4,  -1 },
            {  1,   0,  -2,  -2,   1 },
@@ -1902,7 +1914,7 @@ namespace gpstk
            {  3,   0,  -2,   0,  -2 },
            {  0,   1,  -2,  -2,   0 },
 
-   /* 371-380 */
+           /* 371-380 */
            {  3,   0,   0,  -2,  -1 },
            {  1,   0,  -2,  -3,  -1 },
            {  0,   1,   0,  -4,  -1 },
@@ -1914,7 +1926,7 @@ namespace gpstk
            {  1,   2,  -2,  -2,  -1 },
            {  0,   0,   4,  -4,   1 },
 
-   /* 381-390 */
+           /* 381-390 */
            {  0,   1,   2,   4,   2 },
            {  0,   1,  -4,   2,  -2 },
            {  3,   0,  -2,   0,   0 },
@@ -1926,7 +1938,7 @@ namespace gpstk
            {  1,   0,   2,   0,   3 },
            {  3,   1,   0,   0,   0 },
 
-   /* 391-400 */
+           /* 391-400 */
            {  3,   0,   0,  -4,   1 },
            {  1,  -1,   2,   0,   0 },
            {  1,  -1,   0,  -4,   0 },
@@ -1938,7 +1950,7 @@ namespace gpstk
            {  1,   1,   0,  -4,   1 },
            {  1,   0,   0,  -4,  -2 },
 
-   /* 401-410 */
+           /* 401-410 */
            {  0,   0,   0,   1,   2 },
            {  3,   0,   0,   2,   1 },
            {  1,   1,   0,  -4,  -1 },
@@ -1950,7 +1962,7 @@ namespace gpstk
            {  4,   0,  -2,  -2,  -1 },
            {  2,   1,   0,  -4,  -1 },
 
-   /* 411-420 */
+           /* 411-420 */
            {  0,   0,   0,   3,   1 },
            {  1,  -1,  -2,   0,   0 },
            {  0,   0,   2,   1,   0 },
@@ -1962,7 +1974,7 @@ namespace gpstk
            {  0,   1,   0,   2,   2 },
            {  0,   1,  -2,  -1,  -2 },
 
-   /* 421-430 */
+           /* 421-430 */
            {  1,   1,  -2,   0,   0 },
            {  0,   2,   2,  -2,   0 },
            {  3,  -1,  -2,  -1,  -2 },
@@ -1974,7 +1986,7 @@ namespace gpstk
            {  0,   0,   3,   0,   2 },
            {  2,   1,  -2,  -2,  -1 },
 
-   /* 431-440 */
+           /* 431-440 */
            {  1,  -2,   0,   0,   1 },
            {  2,  -1,   0,  -4,   0 },
            {  0,   0,   0,   3,   0 },
@@ -1986,7 +1998,7 @@ namespace gpstk
            {  3,   0,   0,  -6,   0 },
            {  2,   0,   0,   2,   2 },
 
-   /* 441-450 */
+           /* 441-450 */
            {  2,  -2,   2,   0,   2 },
            {  1,   0,   0,  -3,   1 },
            {  1,  -2,  -2,   0,  -2 },
@@ -1998,7 +2010,7 @@ namespace gpstk
            {  4,   0,   0,   0,  -1 },
            {  3,   0,   2,  -1,   2 },
 
-   /* 451-460 */
+           /* 451-460 */
            {  3,  -1,   2,   0,   1 },
            {  2,   0,   2,  -1,   1 },
            {  1,   2,   2,  -2,   1 },
@@ -2010,7 +2022,7 @@ namespace gpstk
            {  1,  -2,   0,  -2,  -1 },
            {  4,   0,   0,  -4,   0 },
 
-   /* 461-470 */
+           /* 461-470 */
            {  2,   1,   0,   2,   0 },
            {  1,  -1,   0,   4,   0 },
            {  0,   1,   0,  -2,   2 },
@@ -2022,7 +2034,7 @@ namespace gpstk
            {  1,  -1,   0,  -3,   0 },
            {  0,   1,   0,   4,   0 },
 
-   /* 471 - 480 */
+           /* 471 - 480 */
            {  0,   1,  -2,   0,   0 },
            {  2,   2,   2,  -2,   2 },
            {  0,   0,   0,   1,  -2 },
@@ -2034,7 +2046,7 @@ namespace gpstk
            {  1,   1,   2,  -4,   2 },
            {  1,   0,   2,   3,   2 },
 
-   /* 481-490 */
+           /* 481-490 */
            {  1,   0,   0,   4,  -1 },
            {  0,   0,   0,   4,   2 },
            {  2,   0,   0,   4,   0 },
@@ -2046,7 +2058,7 @@ namespace gpstk
            {  2,   0,  -2,  -6,  -1 },
            {  2,  -1,   2,  -1,   2 },
 
-   /* 491-500 */
+           /* 491-500 */
            {  1,  -2,   2,   0,   1 },
            {  1,  -2,   0,  -2,   1 },
            {  1,  -1,   0,  -4,  -1 },
@@ -2058,7 +2070,7 @@ namespace gpstk
            {  2,   1,  -2,   0,   1 },
            {  2,   0,   4,  -2,   1 },
 
-   /* 501-510 */
+           /* 501-510 */
            {  2,   0,   0,  -3,  -1 },
            {  2,  -2,   0,  -2,   1 },
            {  2,  -1,   2,  -2,   1 },
@@ -2070,7 +2082,7 @@ namespace gpstk
            {  2,  -1,   0,  -1,   0 },
            {  1,   3,   0,  -2,   0 },
 
-   /* 511-520 */
+           /* 511-520 */
            {  0,   3,   0,  -2,   0 },
            {  2,  -2,   2,  -2,   2 },
            {  0,   0,   4,  -2,   0 },
@@ -2082,7 +2094,7 @@ namespace gpstk
            {  2,   1,  -2,  -6,  -2 },
            {  2,   0,   0,  -1,   1 },
 
-   /* 521-530 */
+           /* 521-530 */
            {  2,  -1,  -2,   2,  -1 },
            {  1,   1,  -2,   2,  -2 },
            {  1,   1,  -2,  -3,  -2 },
@@ -2094,7 +2106,7 @@ namespace gpstk
            {  1,  -1,  -4,   2,  -2 },
            {  0,   3,  -2,  -2,  -2 },
 
-   /* 531-540 */
+           /* 531-540 */
            {  0,   1,   0,   4,   1 },
            {  0,   0,   4,   2,   2 },
            {  3,   0,  -2,  -2,   0 },
@@ -2106,7 +2118,7 @@ namespace gpstk
            {  0,   2,   0,   2,   0 },
            {  0,   0,   2,   4,   0 },
 
-   /* 541-550 */
+           /* 541-550 */
            {  1,   0,   1,   0,   0 },
            {  3,   1,   2,  -2,   1 },
            {  3,   0,   4,  -2,   2 },
@@ -2118,7 +2130,7 @@ namespace gpstk
            {  2,   0,   2,  -3,   2 },
            {  2,   0,   0,   4,   1 },
 
-   /* 551-560 */
+           /* 551-560 */
            {  2,   0,   0,  -3,   1 },
            {  2,   0,  -4,   2,  -1 },
            {  2,   0,  -2,  -2,   1 },
@@ -2130,7 +2142,7 @@ namespace gpstk
            {  1,   1,   0,   1,   1 },
            {  1,   1,   0,   1,  -1 },
 
-   /* 561-570 */
+           /* 561-570 */
            {  1,   1,  -2,  -6,  -2 },
            {  1,   0,   0,  -3,  -1 },
            {  1,   0,  -4,  -2,  -1 },
@@ -2142,7 +2154,7 @@ namespace gpstk
            {  0,   1,   2,  -4,   2 },
            {  0,   1,  -2,   4,  -1 },
 
-   /* 571-580 */
+           /* 571-580 */
            {  5,   0,   0,   0,   0 },
            {  3,   0,   0,  -3,   0 },
            {  2,   2,   0,  -4,   0 },
@@ -2154,7 +2166,7 @@ namespace gpstk
            {  2,   1,   2,   2,   1 },
            {  2,   1,   0,   2,   1 },
 
-   /* 581-590 */
+           /* 581-590 */
            {  2,   0,   2,   4,   1 },
            {  2,   0,   2,  -6,   1 },
            {  2,   0,   2,  -2,  -1 },
@@ -2166,7 +2178,7 @@ namespace gpstk
            {  1,   0,   2,  -6,   1 },
            {  1,   0,   2,  -4,  -1 },
 
-   /* 591-600 */
+           /* 591-600 */
            {  1,   0,  -1,  -2,  -1 },
            {  1,  -1,   2,   4,   1 },
            {  1,  -1,   2,  -3,   1 },
@@ -2178,7 +2190,7 @@ namespace gpstk
            {  0,   2,   0,  -4,   0 },
            {  0,   0,   2,  -4,   0 },
 
-   /* 601-610 */
+           /* 601-610 */
            {  0,   0,   1,  -1,   0 },
            {  0,   0,   0,   6,   0 },
            {  0,   2,   0,   0,  -2 },
@@ -2190,7 +2202,7 @@ namespace gpstk
            {  2,   1,   0,  -6,   0 },
            {  2,  -1,   2,   0,   0 },
 
-   /* 611-620 */
+           /* 611-620 */
            {  1,   0,   2,  -1,   0 },
            {  1,  -1,   0,   1,   0 },
            {  1,  -1,  -2,  -2,   0 },
@@ -2202,7 +2214,7 @@ namespace gpstk
            {  0,   1,   4,  -4,   2 },
            {  0,   0,   0,   3,   2 },
 
-   /* 621-630 */
+           /* 621-630 */
            {  5,   0,   2,   0,   1 },
            {  4,   1,   2,  -2,   2 },
            {  4,   0,  -2,  -2,   0 },
@@ -2214,7 +2226,7 @@ namespace gpstk
            {  3,  -1,   0,  -3,   0 },
            {  3,  -1,   0,  -2,   0 },
 
-   /* 631-640 */
+           /* 631-640 */
            {  2,   1,   2,   0,   0 },
            {  2,   1,   2,  -4,   2 },
            {  2,   1,   2,  -2,   0 },
@@ -4441,57 +4453,95 @@ namespace gpstk
    // CRS to TRS Matrix
    Matrix<double> C2TMatrix(const CommonTime& utc)
    {
-       // UT1
-       CommonTime ut1( UTC2UT1(utc) );
-
        // TT
        CommonTime tt( UTC2TT(utc) );
 
-      // Earth Orientation Parameters
-       double xp = PolarMotionX(utc);   // arcsecond
-       double yp = PolarMotionY(utc);   // arcsecond
-       double dut1 = UT1mUTC(utc);      // second
-       double dX = NutationDPsi(utc);   // arcsecond
-       double dY = NutationDEps(utc);   // arcsecond
+       // day, sod, fsod and timeSystem of utc
+       long day, sod;
+       double fsod;
+       TimeSystem timeSystem;
 
-//       cout << "xp: " << xp << endl
-//            << "yp: " << yp << endl
-//            << "dut1: " << dut1 << endl
-//            << "dX: " << dX << endl
-//            << "dY: " << dY << endl;
+       utc.get(day, sod, fsod, timeSystem);
+
+       // get the epoch before and after utc
+       CommonTime utc1, utc2;
+       utc1.set(day, timeSystem);
+       utc2.set(day+1, timeSystem);
+
+       // get the eop before and after utc
+       EOPDataStore::EOPData eop1, eop2;
+       eop1 = EOPData(utc1);
+       eop2 = EOPData(utc2);
+       cout << "EOP before reduce UT1-UTC to UT1R-UTC:" << endl;
+       cout << CivilTime(utc1) << eop1 << endl;
+       cout << CivilTime(utc2) << eop2 << endl;
 
 
+       // reduce UT1-UTC to UT1R-UTC for interpolation
+       CommonTime tt1(UTC2TT(utc1)), tt2(UTC2TT(utc2));
+
+       Vector<double> cor_zonalTide1( RG_ZONT2(tt1) );
+       Vector<double> cor_zonalTide2( RG_ZONT2(tt2) );
+
+       eop1.UT1mUTC -= cor_zonalTide1(0);
+       eop2.UT1mUTC -= cor_zonalTide2(0);
+
+       cout << "EOP after reduce UT1-UTC to UT1R-UTC (subroutine RG_ZONT2):" << endl;
+       cout << CivilTime(utc1) << eop1 << endl;
+       cout << CivilTime(utc2) << eop2 << endl;
+
+       // interpolation of eop
+       EOPDataStore::EOPData eop;
+       eop.xp       =   eop1.xp + (eop2.xp-eop1.xp) * (utc-utc1)/(utc2-utc1);
+       eop.yp       =   eop1.yp + (eop2.yp-eop1.yp) * (utc-utc1)/(utc2-utc1);
+       eop.UT1mUTC  =   eop1.UT1mUTC + (eop2.UT1mUTC-eop1.UT1mUTC) * (utc-utc1)/(utc2-utc1);
+       eop.dPsi     =   eop1.dPsi + (eop2.dPsi-eop1.dPsi) * (utc-utc1)/(utc2-utc1);
+       eop.dEps     =   eop1.dEps + (eop2.dEps-eop1.dEps) * (utc-utc1)/(utc2-utc1);
+       cout << "EOP interpolation:" << endl;
+       cout << CivilTime(utc) << eop << endl;
+
+       // add subdaily pole model to pole values
        // Tidal variations in the Earth's rotation
        // 1. diurnal/subdiurnal tidal effect on polar motion ("), UT1 (s) and
        //    LOD (s).
        // 2. diurnal lunisolar effect on polar motion (").
-       Vector<double> cor_oceantides = PMUT1_OCEANS(utc);   // xp, yp, ut1, lod
+       Vector<double> cor_oceanTides = PMUT1_OCEANS(utc);   // xp, yp, ut1, lod
        Vector<double> cor_libration1 = PMSDNUT2(utc);       // xp, yp
        Vector<double> cor_libration2 = UTLIBR(utc);         // ut1, lod
 
-//       cout << "OceanTides: " << cor_oceantides << endl;
-//       cout << "Libration1: " << cor_libration1 << endl;
-//       cout << "Libration2: " << cor_libration2 << endl;
+       cout << "OceanTides from PMUT1_OCEANS subroutine: " << endl
+            << setw(12) << cor_oceanTides << endl;
+       cout << "Libration1 from PMSDNUT2     subroutine: " << endl
+            << setw(12) << cor_libration1 << endl;
+       cout << "Libration2 from UTLIBR       subroutine: " << endl
+            << setw(12) << cor_libration2 << endl;
 
-       dut1 += cor_oceantides(2) + cor_libration2(0);
-       xp += cor_oceantides(0) + cor_libration1(0);
-       yp += cor_oceantides(1) + cor_libration1(1);
+       eop.UT1mUTC  +=  cor_oceanTides(2) + cor_libration2(0);
+       eop.xp       +=  cor_oceanTides(0) + cor_libration1(0);
+       eop.yp       +=  cor_oceanTides(1) + cor_libration1(1);
+       cout << "EOP after add subdaily pole model:" << endl;
+       cout << CivilTime(utc) << eop << endl;
 
-//       cout << "dut1: " << dut1 << endl
-//            << "xp: " << xp << endl
-//            << "yp: " << yp << endl;
+       // correct interpolated UT1R-UTC to UT1-UTC
+       Vector<double> cor_zonalTide( RG_ZONT2(tt) );
+       eop.UT1mUTC += cor_zonalTide(0);
+       cout << "EOP after correct interpolated UT1R-UTC to UT1-UTC:" << endl;
+       cout << CivilTime(utc) << eop << endl;
 
-       xp = xp * AS_TO_RAD;
-       yp = yp * AS_TO_RAD;
-       dX = dX * AS_TO_RAD;
-       dY = dY * AS_TO_RAD;
+       eop.xp   *=  AS_TO_RAD;
+       eop.yp   *=  AS_TO_RAD;
+       eop.dPsi *=  AS_TO_RAD;
+       eop.dEps *=  AS_TO_RAD;
+
+       // UT1
+       CommonTime ut1(UTC2UT1(utc, eop.UT1mUTC));
 
        // X,Y and s
        double x,y,s;
        XY06(tt, x, y);
        s = S06(tt, x, y);
-       x = x + dX;
-       y = y + dY;
+       x += eop.dPsi;
+       y += eop.dEps;
 //       cout << "X: " << x << endl
 //            << "Y: " << y << endl
 //            << "S: " << s*RAD_TO_AS << endl;
@@ -4507,7 +4557,7 @@ namespace gpstk
 
        // W
        double sp = SP00(tt);
-       Matrix<double> W = POM00(xp, yp, sp);
+       Matrix<double> W = POM00(eop.xp, eop.yp, sp);
 
        return W * R * Q;
 
