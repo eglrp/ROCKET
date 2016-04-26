@@ -16,14 +16,9 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
-<<<<<<< HEAD:lib/Geodyn/SimplePressure.hpp
 //  Copyright 
 //
-//  Kaifa Kuang - Wuhan University . 2015
-=======
-//  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
->>>>>>> d993c1c0ab04e4381aeeec0eca07bd118b301d70:lib/Geodyn/GNSSOrbit.hpp
 //
 //============================================================================
 
