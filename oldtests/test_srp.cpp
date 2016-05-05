@@ -14,9 +14,9 @@ using namespace gpstk;
 
 int main(void)
 {
-    LoadIERSERPFile("../tables/finals2000A.all");
-    LoadIERSLSFile("../tables/Leap_Second_History.dat");
-    LoadJPLEphFile("../tables/JPLEPH2000");
+    LoadIERSERPFile("../../rocket/tables/finals2000A.all");
+    LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
+    LoadJPLEphFile("../../rocket/tables/JPLEPH2000");
 
     // sat id
     SatID satid(1, SatID::systemGPS);
@@ -49,7 +49,7 @@ int main(void)
     EarthBody rb;
 
     // sat data
-    SatDataReader satData("../tables/SATELLITE");
+    SatDataReader satData("../../rocket/tables/SATELLITE");
 
     Spacecraft sc;
     sc.initStateVector(rv, p);

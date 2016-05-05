@@ -27,12 +27,6 @@
 #include "IERSConventions.hpp"
 #include "SP3EphemerisStore.hpp"
 
-#include "SunPosition.hpp"
-#include "MoonPosition.hpp"
-#include "Epoch.hpp"
-
-#include "GeodeticFrames.hpp"
-
 using namespace std;
 using namespace gpstk;
 

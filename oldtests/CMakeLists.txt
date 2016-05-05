@@ -15,8 +15,5 @@ target_link_libraries(test_iers rocket)
 add_executable(test_de405 test_de405.cpp)
 target_link_libraries(test_de405 rocket)
 
-add_executable(test_eop test_eop.cpp)
-target_link_libraries(test_eop rocket)
-
 add_executable(test_integrator test_integrator.cpp)
 target_link_libraries(test_integrator rocket)

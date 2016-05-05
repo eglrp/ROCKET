@@ -19,9 +19,9 @@ int main(void)
 
 	try
 	{
-        sp3Eph.loadFile("../workplace/igs18253.sp3");
-        sp3Eph.loadFile("../workplace/igs18254.sp3");
-        sp3Eph.loadFile("../workplace/igs18255.sp3");
+        sp3Eph.loadFile("../../rocket/workplace/igs18253.sp3");
+        sp3Eph.loadFile("../../rocket/workplace/igs18254.sp3");
+        sp3Eph.loadFile("../../rocket/workplace/igs18255.sp3");
 
 //        cout << "sp3 file load over." << endl;
 	}
@@ -32,7 +32,7 @@ int main(void)
 
     try
     {
-        LoadIERSERPFile("../tables/finals2000A.all");
+        LoadIERSERPFile("../../rocket/tables/finals2000A.all");
 //        cout << "eop file load over." << endl;
     }
     catch(...)

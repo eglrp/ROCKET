@@ -21,9 +21,9 @@ using namespace gpstk;
 
 int main(void)
 {
-    LoadIERSERPFile("../tables/finals2000A.all");
-    LoadIERSLSFile("../tables/Leap_Second_History.dat");
-    LoadJPLEphFile("../tables/JPLEPH2000");
+    LoadIERSERPFile("../../rocket/tables/finals2000A.all");
+    LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
+    LoadJPLEphFile("../../rocket/tables/JPLEPH2000");
 
     int n;
     cout << "Enter Sat ID: ";
@@ -47,9 +47,9 @@ int main(void)
 
     try {
     
-        sp3Eph.loadFile("../workplace/igs18253.sp3");
-        sp3Eph.loadFile("../workplace/igs18254.sp3");
-        sp3Eph.loadFile("../workplace/igs18255.sp3");
+        sp3Eph.loadFile("../../rocket/workplace/igs18253.sp3");
+        sp3Eph.loadFile("../../rocket/workplace/igs18254.sp3");
+        sp3Eph.loadFile("../../rocket/workplace/igs18255.sp3");
     }
     catch(...) {
     
@@ -81,7 +81,7 @@ int main(void)
     p0.resize(3,0.0);
 
     // sat data
-    SatDataReader satData("../tables/SATELLITE");
+    SatDataReader satData("../../rocket/tables/SATELLITE");
 
     // spacecraft
     Spacecraft sc;

@@ -14,7 +14,7 @@ int main()
     // Load DE405 Planet Ephemeris file
     try
     {
-        LoadJPLEphFile("../tables/JPLEPH2000");
+        LoadJPLEphFile("../../rocket/tables/JPLEPH2000");
     }
     catch(...)
     {
@@ -24,7 +24,7 @@ int main()
     // Load IERS Leap Second file
     try
     {
-        LoadIERSLSFile("../tables/Leap_Second_History.dat");
+        LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
     }
     catch(...)
     {
