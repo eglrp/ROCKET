@@ -165,6 +165,20 @@ test_egm/fast:
 .PHONY : test_egm/fast
 
 # Convenience name for target.
+oldtests/CMakeFiles/test_eop.dir/rule:
+	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_eop.dir/rule
+.PHONY : oldtests/CMakeFiles/test_eop.dir/rule
+
+# Convenience name for target.
+test_eop: oldtests/CMakeFiles/test_eop.dir/rule
+.PHONY : test_eop
+
+# fast build rule for target.
+test_eop/fast:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/build
+.PHONY : test_eop/fast
+
+# Convenience name for target.
 oldtests/CMakeFiles/test_iers.dir/rule:
 	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_iers.dir/rule
 .PHONY : oldtests/CMakeFiles/test_iers.dir/rule
@@ -254,6 +268,30 @@ test_egm.cpp.s:
 	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_egm.dir/build.make oldtests/CMakeFiles/test_egm.dir/test_egm.cpp.s
 .PHONY : test_egm.cpp.s
 
+test_eop.o: test_eop.cpp.o
+.PHONY : test_eop.o
+
+# target to build an object file
+test_eop.cpp.o:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/test_eop.cpp.o
+.PHONY : test_eop.cpp.o
+
+test_eop.i: test_eop.cpp.i
+.PHONY : test_eop.i
+
+# target to preprocess a source file
+test_eop.cpp.i:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/test_eop.cpp.i
+.PHONY : test_eop.cpp.i
+
+test_eop.s: test_eop.cpp.s
+.PHONY : test_eop.s
+
+# target to generate assembly for a file
+test_eop.cpp.s:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/test_eop.cpp.s
+.PHONY : test_eop.cpp.s
+
 test_iers.o: test_iers.cpp.o
 .PHONY : test_iers.o
 
@@ -340,6 +378,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... test_de"
 	@echo "... test_egm"
+	@echo "... test_eop"
 	@echo "... test_iers"
 	@echo "... test_sp3"
 	@echo "... test_srp"
@@ -349,6 +388,9 @@ help:
 	@echo "... test_egm.o"
 	@echo "... test_egm.i"
 	@echo "... test_egm.s"
+	@echo "... test_eop.o"
+	@echo "... test_eop.i"
+	@echo "... test_eop.s"
 	@echo "... test_iers.o"
 	@echo "... test_iers.i"
 	@echo "... test_iers.s"
