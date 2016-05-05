@@ -1,6 +1,26 @@
 /*
  * Test for the functions in IERSConventions.hpp/cpp, mainly the transformation between
  * ITRS and ICRS.
+ *
+ * Test time: 2015/01/01,12h0m0.0s, UTC
+ *
+ * Compared with result from
+ *   http://hpiers.obspm.fr/eop-pc/index.php?index=matrice&lang=en#description
+ *
+ *    0.184438630509  0.982842935794  0.001468038215
+ *   -0.982843980602  0.184438898953 -0.000048456351
+ *   -0.000318388334 -0.001433915300  0.999998921257
+ *
+ * When using the EOP data in final2000A.all, the difference is
+ *   -3.9e-11   0.8e-11  -6.2e-10
+ *   -0.7e-11  -4.0e-11   5.7e-10
+ *    6.8e-10   5.0e-10   0.1e-11
+ *
+ * When using the EOP data in eopc04_08_IAU2000.62-now, the difference is
+ *
+ *   -6.2e-11   1.2e-11  -2.8e-10
+ *   -1.1e-11   6.2e-11   2.3e-10
+ *    2.8e-10   2.3e-10   0.1e-11
  */
 
 #include <iostream>
@@ -74,19 +94,20 @@ int main(void)
     }
 
     // epoch
-    CivilTime ct(2015,1,1,12,0,0.0, TimeSystem::GPS);
-    CommonTime GPS( ct.convertToCommonTime() );
-    CommonTime UTC( GPS2UTC(GPS) );
+    CivilTime ct(2015,1,1,12,0,0.0, TimeSystem::UTC);
+    CommonTime UTC( ct.convertToCommonTime() );
+    CommonTime GPS( UTC2GPS(UTC) );
 
     cout << fixed << setprecision(4);
     cout << ct << endl;
 
-    cout << fixed << setprecision(12);
     // transformation matrix
     Matrix<double> C2T( C2TMatrix(UTC) );
+    cout << fixed << setprecision(12);
     cout << "C2T: " << endl << C2T << endl;
     // transformation matrix time dot
     Matrix<double> dC2T( dC2TMatrix(UTC) );
+    cout << fixed << setprecision(12);
     cout << "dC2T: " << endl << dC2T << endl;
 
     // satid
@@ -109,15 +130,15 @@ int main(void)
     Vector<double> v_eci( transpose(C2T)*v_ecef + transpose(dC2T)*r_ecef);
 
     // output
-    cout << fixed << setprecision(6);
-    cout << "r_ecef: " << endl;
-    cout << setw(12) << r_ecef << endl;
-    cout << "v_ecef: " << endl;
-    cout << setw(12) << v_ecef << endl;
-    cout << "r_eci: " << endl;
-    cout << setw(12) << r_eci << endl;
-    cout << "v_eci: " << endl;
-    cout << setw(12) << v_eci << endl;
+//    cout << fixed << setprecision(6);
+//    cout << "r_ecef: " << endl;
+//    cout << setw(12) << r_ecef << endl;
+//    cout << "v_ecef: " << endl;
+//    cout << setw(12) << v_ecef << endl;
+//    cout << "r_eci: " << endl;
+//    cout << setw(12) << r_eci << endl;
+//    cout << "v_eci: " << endl;
+//    cout << setw(12) << v_eci << endl;
 
     return 0;
 }
