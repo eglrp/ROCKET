@@ -254,6 +254,19 @@ test_egm/fast:
 .PHONY : test_egm/fast
 
 #=============================================================================
+# Target rules for targets named test_eop
+
+# Build rule for target.
+test_eop: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 test_eop
+.PHONY : test_eop
+
+# fast build rule for target.
+test_eop/fast:
+	$(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/build
+.PHONY : test_eop/fast
+
+#=============================================================================
 # Target rules for targets named test_iers
 
 # Build rule for target.
@@ -3172,30 +3185,6 @@ lib/GNSSEph/YumaAlmanacStore.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/GNSSEph/YumaAlmanacStore.cpp.s
 .PHONY : lib/GNSSEph/YumaAlmanacStore.cpp.s
 
-lib/Geodyn/AtmosphericDrag.o: lib/Geodyn/AtmosphericDrag.cpp.o
-.PHONY : lib/Geodyn/AtmosphericDrag.o
-
-# target to build an object file
-lib/Geodyn/AtmosphericDrag.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/AtmosphericDrag.cpp.o
-.PHONY : lib/Geodyn/AtmosphericDrag.cpp.o
-
-lib/Geodyn/AtmosphericDrag.i: lib/Geodyn/AtmosphericDrag.cpp.i
-.PHONY : lib/Geodyn/AtmosphericDrag.i
-
-# target to preprocess a source file
-lib/Geodyn/AtmosphericDrag.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/AtmosphericDrag.cpp.i
-.PHONY : lib/Geodyn/AtmosphericDrag.cpp.i
-
-lib/Geodyn/AtmosphericDrag.s: lib/Geodyn/AtmosphericDrag.cpp.s
-.PHONY : lib/Geodyn/AtmosphericDrag.s
-
-# target to generate assembly for a file
-lib/Geodyn/AtmosphericDrag.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/AtmosphericDrag.cpp.s
-.PHONY : lib/Geodyn/AtmosphericDrag.cpp.s
-
 lib/Geodyn/CODEPressure.o: lib/Geodyn/CODEPressure.cpp.o
 .PHONY : lib/Geodyn/CODEPressure.o
 
@@ -3219,30 +3208,6 @@ lib/Geodyn/CODEPressure.s: lib/Geodyn/CODEPressure.cpp.s
 lib/Geodyn/CODEPressure.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/CODEPressure.cpp.s
 .PHONY : lib/Geodyn/CODEPressure.cpp.s
-
-lib/Geodyn/CiraExponentialDrag.o: lib/Geodyn/CiraExponentialDrag.cpp.o
-.PHONY : lib/Geodyn/CiraExponentialDrag.o
-
-# target to build an object file
-lib/Geodyn/CiraExponentialDrag.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/CiraExponentialDrag.cpp.o
-.PHONY : lib/Geodyn/CiraExponentialDrag.cpp.o
-
-lib/Geodyn/CiraExponentialDrag.i: lib/Geodyn/CiraExponentialDrag.cpp.i
-.PHONY : lib/Geodyn/CiraExponentialDrag.i
-
-# target to preprocess a source file
-lib/Geodyn/CiraExponentialDrag.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/CiraExponentialDrag.cpp.i
-.PHONY : lib/Geodyn/CiraExponentialDrag.cpp.i
-
-lib/Geodyn/CiraExponentialDrag.s: lib/Geodyn/CiraExponentialDrag.cpp.s
-.PHONY : lib/Geodyn/CiraExponentialDrag.s
-
-# target to generate assembly for a file
-lib/Geodyn/CiraExponentialDrag.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/CiraExponentialDrag.cpp.s
-.PHONY : lib/Geodyn/CiraExponentialDrag.cpp.s
 
 lib/Geodyn/EGM08GravityModel.o: lib/Geodyn/EGM08GravityModel.cpp.o
 .PHONY : lib/Geodyn/EGM08GravityModel.o
@@ -3412,54 +3377,6 @@ lib/Geodyn/ForceModelList.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/ForceModelList.cpp.s
 .PHONY : lib/Geodyn/ForceModelList.cpp.s
 
-lib/Geodyn/GNSSOrbit.o: lib/Geodyn/GNSSOrbit.cpp.o
-.PHONY : lib/Geodyn/GNSSOrbit.o
-
-# target to build an object file
-lib/Geodyn/GNSSOrbit.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/GNSSOrbit.cpp.o
-.PHONY : lib/Geodyn/GNSSOrbit.cpp.o
-
-lib/Geodyn/GNSSOrbit.i: lib/Geodyn/GNSSOrbit.cpp.i
-.PHONY : lib/Geodyn/GNSSOrbit.i
-
-# target to preprocess a source file
-lib/Geodyn/GNSSOrbit.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/GNSSOrbit.cpp.i
-.PHONY : lib/Geodyn/GNSSOrbit.cpp.i
-
-lib/Geodyn/GNSSOrbit.s: lib/Geodyn/GNSSOrbit.cpp.s
-.PHONY : lib/Geodyn/GNSSOrbit.s
-
-# target to generate assembly for a file
-lib/Geodyn/GNSSOrbit.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/GNSSOrbit.cpp.s
-.PHONY : lib/Geodyn/GNSSOrbit.cpp.s
-
-lib/Geodyn/HarrisPriesterDrag.o: lib/Geodyn/HarrisPriesterDrag.cpp.o
-.PHONY : lib/Geodyn/HarrisPriesterDrag.o
-
-# target to build an object file
-lib/Geodyn/HarrisPriesterDrag.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/HarrisPriesterDrag.cpp.o
-.PHONY : lib/Geodyn/HarrisPriesterDrag.cpp.o
-
-lib/Geodyn/HarrisPriesterDrag.i: lib/Geodyn/HarrisPriesterDrag.cpp.i
-.PHONY : lib/Geodyn/HarrisPriesterDrag.i
-
-# target to preprocess a source file
-lib/Geodyn/HarrisPriesterDrag.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/HarrisPriesterDrag.cpp.i
-.PHONY : lib/Geodyn/HarrisPriesterDrag.cpp.i
-
-lib/Geodyn/HarrisPriesterDrag.s: lib/Geodyn/HarrisPriesterDrag.cpp.s
-.PHONY : lib/Geodyn/HarrisPriesterDrag.s
-
-# target to generate assembly for a file
-lib/Geodyn/HarrisPriesterDrag.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/HarrisPriesterDrag.cpp.s
-.PHONY : lib/Geodyn/HarrisPriesterDrag.cpp.s
-
 lib/Geodyn/IERSConventions.o: lib/Geodyn/IERSConventions.cpp.o
 .PHONY : lib/Geodyn/IERSConventions.o
 
@@ -3531,30 +3448,6 @@ lib/Geodyn/MoonForce.s: lib/Geodyn/MoonForce.cpp.s
 lib/Geodyn/MoonForce.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/MoonForce.cpp.s
 .PHONY : lib/Geodyn/MoonForce.cpp.s
-
-lib/Geodyn/Msise00Drag.o: lib/Geodyn/Msise00Drag.cpp.o
-.PHONY : lib/Geodyn/Msise00Drag.o
-
-# target to build an object file
-lib/Geodyn/Msise00Drag.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/Msise00Drag.cpp.o
-.PHONY : lib/Geodyn/Msise00Drag.cpp.o
-
-lib/Geodyn/Msise00Drag.i: lib/Geodyn/Msise00Drag.cpp.i
-.PHONY : lib/Geodyn/Msise00Drag.i
-
-# target to preprocess a source file
-lib/Geodyn/Msise00Drag.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/Msise00Drag.cpp.i
-.PHONY : lib/Geodyn/Msise00Drag.cpp.i
-
-lib/Geodyn/Msise00Drag.s: lib/Geodyn/Msise00Drag.cpp.s
-.PHONY : lib/Geodyn/Msise00Drag.s
-
-# target to generate assembly for a file
-lib/Geodyn/Msise00Drag.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/Msise00Drag.cpp.s
-.PHONY : lib/Geodyn/Msise00Drag.cpp.s
 
 lib/Geodyn/PvtStore.o: lib/Geodyn/PvtStore.cpp.o
 .PHONY : lib/Geodyn/PvtStore.o
@@ -3747,30 +3640,6 @@ lib/Geodyn/SatOrbitPropagator.s: lib/Geodyn/SatOrbitPropagator.cpp.s
 lib/Geodyn/SatOrbitPropagator.cpp.s:
 	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SatOrbitPropagator.cpp.s
 .PHONY : lib/Geodyn/SatOrbitPropagator.cpp.s
-
-lib/Geodyn/SimplePressure.o: lib/Geodyn/SimplePressure.cpp.o
-.PHONY : lib/Geodyn/SimplePressure.o
-
-# target to build an object file
-lib/Geodyn/SimplePressure.cpp.o:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SimplePressure.cpp.o
-.PHONY : lib/Geodyn/SimplePressure.cpp.o
-
-lib/Geodyn/SimplePressure.i: lib/Geodyn/SimplePressure.cpp.i
-.PHONY : lib/Geodyn/SimplePressure.i
-
-# target to preprocess a source file
-lib/Geodyn/SimplePressure.cpp.i:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SimplePressure.cpp.i
-.PHONY : lib/Geodyn/SimplePressure.cpp.i
-
-lib/Geodyn/SimplePressure.s: lib/Geodyn/SimplePressure.cpp.s
-.PHONY : lib/Geodyn/SimplePressure.s
-
-# target to generate assembly for a file
-lib/Geodyn/SimplePressure.cpp.s:
-	$(MAKE) -f CMakeFiles/rocket.dir/build.make CMakeFiles/rocket.dir/lib/Geodyn/SimplePressure.cpp.s
-.PHONY : lib/Geodyn/SimplePressure.cpp.s
 
 lib/Geodyn/SolarPressure.o: lib/Geodyn/SolarPressure.cpp.o
 .PHONY : lib/Geodyn/SolarPressure.o
@@ -9649,6 +9518,7 @@ help:
 	@echo "... updzap"
 	@echo "... test_de"
 	@echo "... test_egm"
+	@echo "... test_eop"
 	@echo "... test_iers"
 	@echo "... test_sp3"
 	@echo "... test_srp"
@@ -10012,15 +9882,9 @@ help:
 	@echo "... lib/GNSSEph/YumaAlmanacStore.o"
 	@echo "... lib/GNSSEph/YumaAlmanacStore.i"
 	@echo "... lib/GNSSEph/YumaAlmanacStore.s"
-	@echo "... lib/Geodyn/AtmosphericDrag.o"
-	@echo "... lib/Geodyn/AtmosphericDrag.i"
-	@echo "... lib/Geodyn/AtmosphericDrag.s"
 	@echo "... lib/Geodyn/CODEPressure.o"
 	@echo "... lib/Geodyn/CODEPressure.i"
 	@echo "... lib/Geodyn/CODEPressure.s"
-	@echo "... lib/Geodyn/CiraExponentialDrag.o"
-	@echo "... lib/Geodyn/CiraExponentialDrag.i"
-	@echo "... lib/Geodyn/CiraExponentialDrag.s"
 	@echo "... lib/Geodyn/EGM08GravityModel.o"
 	@echo "... lib/Geodyn/EGM08GravityModel.i"
 	@echo "... lib/Geodyn/EGM08GravityModel.s"
@@ -10042,12 +9906,6 @@ help:
 	@echo "... lib/Geodyn/ForceModelList.o"
 	@echo "... lib/Geodyn/ForceModelList.i"
 	@echo "... lib/Geodyn/ForceModelList.s"
-	@echo "... lib/Geodyn/GNSSOrbit.o"
-	@echo "... lib/Geodyn/GNSSOrbit.i"
-	@echo "... lib/Geodyn/GNSSOrbit.s"
-	@echo "... lib/Geodyn/HarrisPriesterDrag.o"
-	@echo "... lib/Geodyn/HarrisPriesterDrag.i"
-	@echo "... lib/Geodyn/HarrisPriesterDrag.s"
 	@echo "... lib/Geodyn/IERSConventions.o"
 	@echo "... lib/Geodyn/IERSConventions.i"
 	@echo "... lib/Geodyn/IERSConventions.s"
@@ -10057,9 +9915,6 @@ help:
 	@echo "... lib/Geodyn/MoonForce.o"
 	@echo "... lib/Geodyn/MoonForce.i"
 	@echo "... lib/Geodyn/MoonForce.s"
-	@echo "... lib/Geodyn/Msise00Drag.o"
-	@echo "... lib/Geodyn/Msise00Drag.i"
-	@echo "... lib/Geodyn/Msise00Drag.s"
 	@echo "... lib/Geodyn/PvtStore.o"
 	@echo "... lib/Geodyn/PvtStore.i"
 	@echo "... lib/Geodyn/PvtStore.s"
@@ -10084,9 +9939,6 @@ help:
 	@echo "... lib/Geodyn/SatOrbitPropagator.o"
 	@echo "... lib/Geodyn/SatOrbitPropagator.i"
 	@echo "... lib/Geodyn/SatOrbitPropagator.s"
-	@echo "... lib/Geodyn/SimplePressure.o"
-	@echo "... lib/Geodyn/SimplePressure.i"
-	@echo "... lib/Geodyn/SimplePressure.s"
 	@echo "... lib/Geodyn/SolarPressure.o"
 	@echo "... lib/Geodyn/SolarPressure.i"
 	@echo "... lib/Geodyn/SolarPressure.s"
