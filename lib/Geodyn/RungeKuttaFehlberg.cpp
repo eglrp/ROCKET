@@ -599,12 +599,11 @@ namespace gpstk
    Vector<double>  TestEOM::getDerivatives(const double& t,
       const Vector<double>& y)
    {
-      gpstk::Vector<double> dydx(y.size(),0.0);   
-      dydx[0] = std::cos(t); //0.25 * y(0) * ( 1.0 - y(0) / 20.0 ) ;
+      gpstk::Vector<double> dydx(y.size(),0.0);
+      dydx[0] = std::cos(t);
 
       return dydx;
    }
-   
 
 
    void RungeKuttaFehlberg::test()
@@ -617,7 +616,6 @@ namespace gpstk
       gpstk::Vector<double> y(1,0.0);   // = {0.0};
       
       this->setStepSize(0.01);
-      //this->setAdaptive(true);
 
       for(int i=0;i<1000000;i++)
       {
@@ -625,11 +623,10 @@ namespace gpstk
          double t = t0 + h;
          double err = std::sin(t)-y[0];
 
-         //cout<<fixed<<setprecision(8)<<setw(18);
-         cout<<fixed;
-         cout<<setw(18)<<setprecision(8)<< t << " "
-            <<setw(18)<<setprecision(8)<<y[0] << " "
-            <<setw(18)<<setprecision(12)<<err<<endl;
+         cout << fixed;
+         cout << setw(18) << setprecision(8) << t << " "
+              << setw(18) << setprecision(8) << y[0] << " "
+              << setw(18) << setprecision(12) << err << endl;
 
          t0 += h;
          y0[0] = y[0];
