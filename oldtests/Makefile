@@ -137,18 +137,32 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-oldtests/CMakeFiles/test_de.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_de.dir/rule
-.PHONY : oldtests/CMakeFiles/test_de.dir/rule
+oldtests/CMakeFiles/test_conf.dir/rule:
+	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_conf.dir/rule
+.PHONY : oldtests/CMakeFiles/test_conf.dir/rule
 
 # Convenience name for target.
-test_de: oldtests/CMakeFiles/test_de.dir/rule
-.PHONY : test_de
+test_conf: oldtests/CMakeFiles/test_conf.dir/rule
+.PHONY : test_conf
 
 # fast build rule for target.
-test_de/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/build
-.PHONY : test_de/fast
+test_conf/fast:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_conf.dir/build.make oldtests/CMakeFiles/test_conf.dir/build
+.PHONY : test_conf/fast
+
+# Convenience name for target.
+oldtests/CMakeFiles/test_de405.dir/rule:
+	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_de405.dir/rule
+.PHONY : oldtests/CMakeFiles/test_de405.dir/rule
+
+# Convenience name for target.
+test_de405: oldtests/CMakeFiles/test_de405.dir/rule
+.PHONY : test_de405
+
+# fast build rule for target.
+test_de405/fast:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de405.dir/build.make oldtests/CMakeFiles/test_de405.dir/build
+.PHONY : test_de405/fast
 
 # Convenience name for target.
 oldtests/CMakeFiles/test_egm.dir/rule:
@@ -165,20 +179,6 @@ test_egm/fast:
 .PHONY : test_egm/fast
 
 # Convenience name for target.
-oldtests/CMakeFiles/test_eop.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_eop.dir/rule
-.PHONY : oldtests/CMakeFiles/test_eop.dir/rule
-
-# Convenience name for target.
-test_eop: oldtests/CMakeFiles/test_eop.dir/rule
-.PHONY : test_eop
-
-# fast build rule for target.
-test_eop/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/build
-.PHONY : test_eop/fast
-
-# Convenience name for target.
 oldtests/CMakeFiles/test_iers.dir/rule:
 	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_iers.dir/rule
 .PHONY : oldtests/CMakeFiles/test_iers.dir/rule
@@ -191,6 +191,34 @@ test_iers: oldtests/CMakeFiles/test_iers.dir/rule
 test_iers/fast:
 	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_iers.dir/build.make oldtests/CMakeFiles/test_iers.dir/build
 .PHONY : test_iers/fast
+
+# Convenience name for target.
+oldtests/CMakeFiles/test_integrator.dir/rule:
+	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_integrator.dir/rule
+.PHONY : oldtests/CMakeFiles/test_integrator.dir/rule
+
+# Convenience name for target.
+test_integrator: oldtests/CMakeFiles/test_integrator.dir/rule
+.PHONY : test_integrator
+
+# fast build rule for target.
+test_integrator/fast:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_integrator.dir/build.make oldtests/CMakeFiles/test_integrator.dir/build
+.PHONY : test_integrator/fast
+
+# Convenience name for target.
+oldtests/CMakeFiles/test_oi.dir/rule:
+	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 oldtests/CMakeFiles/test_oi.dir/rule
+.PHONY : oldtests/CMakeFiles/test_oi.dir/rule
+
+# Convenience name for target.
+test_oi: oldtests/CMakeFiles/test_oi.dir/rule
+.PHONY : test_oi
+
+# fast build rule for target.
+test_oi/fast:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_oi.dir/build.make oldtests/CMakeFiles/test_oi.dir/build
+.PHONY : test_oi/fast
 
 # Convenience name for target.
 oldtests/CMakeFiles/test_sp3.dir/rule:
@@ -220,29 +248,53 @@ test_srp/fast:
 	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_srp.dir/build.make oldtests/CMakeFiles/test_srp.dir/build
 .PHONY : test_srp/fast
 
-test_de.o: test_de.cpp.o
-.PHONY : test_de.o
+test_conf.o: test_conf.cpp.o
+.PHONY : test_conf.o
 
 # target to build an object file
-test_de.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/test_de.cpp.o
-.PHONY : test_de.cpp.o
+test_conf.cpp.o:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_conf.dir/build.make oldtests/CMakeFiles/test_conf.dir/test_conf.cpp.o
+.PHONY : test_conf.cpp.o
 
-test_de.i: test_de.cpp.i
-.PHONY : test_de.i
+test_conf.i: test_conf.cpp.i
+.PHONY : test_conf.i
 
 # target to preprocess a source file
-test_de.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/test_de.cpp.i
-.PHONY : test_de.cpp.i
+test_conf.cpp.i:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_conf.dir/build.make oldtests/CMakeFiles/test_conf.dir/test_conf.cpp.i
+.PHONY : test_conf.cpp.i
 
-test_de.s: test_de.cpp.s
-.PHONY : test_de.s
+test_conf.s: test_conf.cpp.s
+.PHONY : test_conf.s
 
 # target to generate assembly for a file
-test_de.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de.dir/build.make oldtests/CMakeFiles/test_de.dir/test_de.cpp.s
-.PHONY : test_de.cpp.s
+test_conf.cpp.s:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_conf.dir/build.make oldtests/CMakeFiles/test_conf.dir/test_conf.cpp.s
+.PHONY : test_conf.cpp.s
+
+test_de405.o: test_de405.cpp.o
+.PHONY : test_de405.o
+
+# target to build an object file
+test_de405.cpp.o:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de405.dir/build.make oldtests/CMakeFiles/test_de405.dir/test_de405.cpp.o
+.PHONY : test_de405.cpp.o
+
+test_de405.i: test_de405.cpp.i
+.PHONY : test_de405.i
+
+# target to preprocess a source file
+test_de405.cpp.i:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de405.dir/build.make oldtests/CMakeFiles/test_de405.dir/test_de405.cpp.i
+.PHONY : test_de405.cpp.i
+
+test_de405.s: test_de405.cpp.s
+.PHONY : test_de405.s
+
+# target to generate assembly for a file
+test_de405.cpp.s:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_de405.dir/build.make oldtests/CMakeFiles/test_de405.dir/test_de405.cpp.s
+.PHONY : test_de405.cpp.s
 
 test_egm.o: test_egm.cpp.o
 .PHONY : test_egm.o
@@ -268,30 +320,6 @@ test_egm.cpp.s:
 	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_egm.dir/build.make oldtests/CMakeFiles/test_egm.dir/test_egm.cpp.s
 .PHONY : test_egm.cpp.s
 
-test_eop.o: test_eop.cpp.o
-.PHONY : test_eop.o
-
-# target to build an object file
-test_eop.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/test_eop.cpp.o
-.PHONY : test_eop.cpp.o
-
-test_eop.i: test_eop.cpp.i
-.PHONY : test_eop.i
-
-# target to preprocess a source file
-test_eop.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/test_eop.cpp.i
-.PHONY : test_eop.cpp.i
-
-test_eop.s: test_eop.cpp.s
-.PHONY : test_eop.s
-
-# target to generate assembly for a file
-test_eop.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_eop.dir/build.make oldtests/CMakeFiles/test_eop.dir/test_eop.cpp.s
-.PHONY : test_eop.cpp.s
-
 test_iers.o: test_iers.cpp.o
 .PHONY : test_iers.o
 
@@ -315,6 +343,54 @@ test_iers.s: test_iers.cpp.s
 test_iers.cpp.s:
 	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_iers.dir/build.make oldtests/CMakeFiles/test_iers.dir/test_iers.cpp.s
 .PHONY : test_iers.cpp.s
+
+test_integrator.o: test_integrator.cpp.o
+.PHONY : test_integrator.o
+
+# target to build an object file
+test_integrator.cpp.o:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_integrator.dir/build.make oldtests/CMakeFiles/test_integrator.dir/test_integrator.cpp.o
+.PHONY : test_integrator.cpp.o
+
+test_integrator.i: test_integrator.cpp.i
+.PHONY : test_integrator.i
+
+# target to preprocess a source file
+test_integrator.cpp.i:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_integrator.dir/build.make oldtests/CMakeFiles/test_integrator.dir/test_integrator.cpp.i
+.PHONY : test_integrator.cpp.i
+
+test_integrator.s: test_integrator.cpp.s
+.PHONY : test_integrator.s
+
+# target to generate assembly for a file
+test_integrator.cpp.s:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_integrator.dir/build.make oldtests/CMakeFiles/test_integrator.dir/test_integrator.cpp.s
+.PHONY : test_integrator.cpp.s
+
+test_oi.o: test_oi.cpp.o
+.PHONY : test_oi.o
+
+# target to build an object file
+test_oi.cpp.o:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_oi.dir/build.make oldtests/CMakeFiles/test_oi.dir/test_oi.cpp.o
+.PHONY : test_oi.cpp.o
+
+test_oi.i: test_oi.cpp.i
+.PHONY : test_oi.i
+
+# target to preprocess a source file
+test_oi.cpp.i:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_oi.dir/build.make oldtests/CMakeFiles/test_oi.dir/test_oi.cpp.i
+.PHONY : test_oi.cpp.i
+
+test_oi.s: test_oi.cpp.s
+.PHONY : test_oi.s
+
+# target to generate assembly for a file
+test_oi.cpp.s:
+	cd /home/kfkuang/rocket && $(MAKE) -f oldtests/CMakeFiles/test_oi.dir/build.make oldtests/CMakeFiles/test_oi.dir/test_oi.cpp.s
+.PHONY : test_oi.cpp.s
 
 test_sp3.o: test_sp3.cpp.o
 .PHONY : test_sp3.o
@@ -376,24 +452,32 @@ help:
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... test_de"
+	@echo "... test_conf"
+	@echo "... test_de405"
 	@echo "... test_egm"
-	@echo "... test_eop"
 	@echo "... test_iers"
+	@echo "... test_integrator"
+	@echo "... test_oi"
 	@echo "... test_sp3"
 	@echo "... test_srp"
-	@echo "... test_de.o"
-	@echo "... test_de.i"
-	@echo "... test_de.s"
+	@echo "... test_conf.o"
+	@echo "... test_conf.i"
+	@echo "... test_conf.s"
+	@echo "... test_de405.o"
+	@echo "... test_de405.i"
+	@echo "... test_de405.s"
 	@echo "... test_egm.o"
 	@echo "... test_egm.i"
 	@echo "... test_egm.s"
-	@echo "... test_eop.o"
-	@echo "... test_eop.i"
-	@echo "... test_eop.s"
 	@echo "... test_iers.o"
 	@echo "... test_iers.i"
 	@echo "... test_iers.s"
+	@echo "... test_integrator.o"
+	@echo "... test_integrator.i"
+	@echo "... test_integrator.s"
+	@echo "... test_oi.o"
+	@echo "... test_oi.i"
+	@echo "... test_oi.s"
 	@echo "... test_sp3.o"
 	@echo "... test_sp3.i"
 	@echo "... test_sp3.s"

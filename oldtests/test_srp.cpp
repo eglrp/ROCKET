@@ -14,7 +14,7 @@ using namespace gpstk;
 
 int main(void)
 {
-    LoadIERSERPFile("../../rocket/tables/finals2000A.all");
+    LoadIERSEOPFile("../../rocket/tables/finals2000A.all");
     LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
     LoadJPLEphFile("../../rocket/tables/JPLEPH2000");
 

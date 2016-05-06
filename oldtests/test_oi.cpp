@@ -1,6 +1,12 @@
+/* Test for Orbit Integration. */
+
 #include <iostream>
 
 #include "IERSConventions.hpp"
+
+#include "SP3EphemerisStore.hpp"
+
+#include "SatDataReader.hpp"
 
 #include "EGM96GravityModel.hpp"
 #include "EGM08GravityModel.hpp"
@@ -12,6 +18,7 @@
 #include "CODEPressure.hpp"
 
 #include "RelativityEffect.hpp"
+
 
 #include "SatOrbit.hpp"
 
@@ -28,217 +35,179 @@ using namespace gpstk;
 
 int main(void)
 {
+    // IERS EOP file
+    try
+    {
+        LoadIERSEOPFile("../../rocket/tables/finals2000A.all");
+    }
+    catch(...)
+    {
+        cerr << "IERS EOP File Load Error." << endl;
 
-    LoadIERSERPFile("finals.data");
-    LoadIERSLSFile("Leap_Second_History.dat");
-    LoadJPLEphFile("JPLEPH2000");
+        return 1;
+    }
 
-    CivilTime cv0(2014,1,1,0,0,0.0, TimeSystem::GPS);
+    // IERS LeapSecond file
+    try
+    {
+        LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
+    }
+    catch(...)
+    {
+        cerr << "IERS LeapSecond File Load Error." << endl;
+
+        return 1;
+    }
+
+    // JPL Ephemeris file
+    try
+    {
+        LoadJPLEphFile("../../rocket/tables/JPLEPH2000");
+    }
+    catch(...)
+    {
+        cerr << "JPL Ephemeris File Load Error." << endl;
+
+        return 1;
+    }
+
+
+    // Initial time
+    CivilTime cv0(2015,1,1,12,0,0.0, TimeSystem::GPS);
     CommonTime gps0( cv0.convertToCommonTime() );
     CommonTime utc0( GPS2UTC(gps0) );
 
-    // G01, BLOCK IIF
+    // Satellite ID
+    SatID sat(1, SatID::systemGPS);
+
+    // IGS SP3 file
+    SP3EphemerisStore sp3Eph;
+    sp3Eph.rejectBadPositions(true);
+    sp3Eph.setPosGapInterval(900+1);
+    sp3Eph.setPosMaxInterval(9*900+1);
+
+    try
+    {
+        sp3Eph.loadFile("../../rocket/workplace/igs18253.sp3");
+        sp3Eph.loadFile("../../rocket/workplace/igs18254.sp3");
+        sp3Eph.loadFile("../../rocket/workplace/igs18255.sp3");
+    }
+    catch(...)
+    {
+        cerr << "SP3 File Load Error." << endl;
+
+        return 1;
+    }
+
+    // r0, v0 in ITRS
+    Vector<double> r0_itrs, v0_itrs;
+    try
+    {
+        r0_itrs = sp3Eph.getXvt(sat, gps0).x.toVector();
+        v0_itrs = sp3Eph.getXvt(sat, gps0).v.toVector();
+    }
+    catch(...)
+    {
+        cerr << "Get r0 and v0 from SP3 file error." << endl;
+
+        return 1;
+    }
+
+    // Transform matrix between ICRS and ITRS
+    Matrix<double> c2t( C2TMatrix(utc0) );
+    Matrix<double> dc2t( dC2TMatrix(utc0) );
+
+    // r0, v0 in ICRS
+    Vector<double> r0_icrs, v0_icrs;
+    r0_icrs = transpose(c2t) * r0_itrs;
+    v0_icrs = transpose(c2t) * v0_itrs + transpose(dc2t) * r0_itrs;
+
+
+    // Initial state: r0, v0
     Vector<double> rv0(6,0.0);
-    rv0(0) = -20507847.810;
-    rv0(1) = - 9658703.459;
-    rv0(2) =  13899930.594;
-    rv0(3) = - 957.429;
-    rv0(4) = -1499.537;
-    rv0(5) = -2437.047;
+    rv0(0) = r0_icrs(0); rv0(1) = r0_icrs(1); rv0(2) = r0_icrs(2);
+    rv0(3) = v0_icrs(0); rv0(4) = v0_icrs(1); rv0(5) = v0_icrs(2);
 
+    cout << fixed << setprecision(6);
+    cout << rv0 << endl;
 
-    // force mdoel parameters
-    Vector<double> p0;
+    // Intial state: p0
+    Vector<double> p0(9,0.0);
+    p0[0] = 0.999989506;
+    p0[1] = -0.000367154;
+    p0[2] = -0.003625165;
+    p0[3] = 0.015272206;
+    p0[4] = 0.000216184;
+    p0[5] = -0.000701573;
+    p0[6] = 0.000985358;
+    p0[7] = 0.009091403;
+    p0[8] = -0.001752761;
 
-    // srp = 0, ROCK srp model
-    // srp = 1, CODE srp model
-    bool srp(0);
-
-    cerr << "select SRP model (0 - ROCK model, 1 - CODE model): ";
-
-    cin >> srp;
-
-    if(srp)
+    // SatData file
+    SatDataReader satData;
+    try
     {
-        // CODE srp model, include 9 parameters (D0, Y0, B0, Dc, Ds, Yc, Ys, Bc, Bs)
-        p0.resize(9,0.0);
-//        cerr << "input CODE SRP coeffients: " << endl;
-//        cin >> p0[0] >> p0[1] >> p0[2]
-//            >> p0[3] >> p0[4] >> p0[5]
-//            >> p0[6] >> p0[7] >> p0[8];
-        p0[0] = 0.999989506;
-        p0[1] = -0.000367154;
-        p0[2] = -0.003625165;
-        p0[3] = 0.015272206;
-        p0[4] = 0.000216184;
-        p0[5] = -0.000701573;
-        p0[6] = 0.000985358;
-        p0[7] = 0.009091403;
-        p0[8] = -0.001752761;
-
+        satData.open("../../rocket/tables/satellites.txt");
     }
-    else
+    catch(...)
     {
-        // ROCK srp model, include 3 parameters (Gx, Gy, Gz)
-        p0.resize(3,0.0);
-//        cerr << "input ROCK SRP coeffients: " << endl;
-//        cin >> p0[0] >> p0[1] >> p0[2];
-        p0[0] = -0.06890;
-        p0[1] =  0.00352;
-        p0[2] = -0.01866;
+        cerr << "SatData file open error." << endl;
+
+        return 1;
     }
 
-    
-    EarthBody rb;
-
-    // Spacecraft settings
+    // Spacecraft
     Spacecraft sc;
+    sc.setSatID(sat);
+    sc.setEpoch(utc0);
+    sc.setBlock(satData.getBlock(sat,utc0));
+    sc.setMass(satData.getMass(sat,utc0));
     sc.initStateVector(rv0, p0);
-    sc.setDryMass(1555.3);
-    sc.setBlockNum(7);
-
-/*
-    // Earth gravitation
-    EGM96GravityModel egm96(12,12);
-    egm96.enableSolidTide(true);
-    egm96.setOceanTideFile("OT_CSRC.TID");
-    egm96.enableOceanTide(true);
-    egm96.enablePoleTide(true);
-    egm96.doCompute(utc0, rb, sc);
-
-    Vector<double> Gearth( egm96.getAccel() );
-    double Tearth( norm(Gearth) );
-
-    cout << setprecision(12);
-    cout << "Earth gravity: " << endl
-         << setw(16) << Gearth << ' '
-         << setw(16) << Tearth << endl;
-
-    // Sun gravitation
-    SunForce sun;
-    sun.doCompute(utc0, rb, sc);
-
-    Vector<double> Gsun( sun.getAccel() );
-    double Tsun( norm(Gsun) );
-
-    cout << "Sun gravity: " << endl
-         << setw(16) << Gsun << ' '
-         << setw(16) << Tsun << endl;
-
-    // Moon gravitation
-    MoonForce moon;
-    moon.doCompute(utc0, rb, sc);
-
-    Vector<double> Gmoon( moon.getAccel() );
-    double Tmoon( norm(Gmoon) );
-
-    cout << "Moon gravity: " << endl
-         << setw(16) << Gmoon << ' '
-         << setw(16) << Tmoon << endl;
 
 
-    Vector<double> Fsrp(3,0.0);
-    // Solar radiation pressure
-    if(srp)     // CODE SRP model
-    {
-        CODEPressure code;
-        code.doCompute(utc0, rb, sc);
-
-        Fsrp = code.getAccel();
-        double Tsrp( norm(Fsrp) );
-
-        cout << "Solar radiation pressure: " << endl
-             << setw(16) << Fsrp << ' '
-             << setw(16) << Tsrp << endl;
-    }
-    else        // ROCK SRP model
-    {
-        ROCKPressure rock;
-        rock.doCompute(utc0, rb, sc);
-
-        Fsrp = rock.getAccel();
-        double Tsrp( norm(Fsrp) );
-
-        cout << "Solar radiation pressure: " << endl
-             << setw(16) << Fsrp << ' '
-             << setw(16) << Tsrp << endl;
-    }
-
-    // Relativity effect
-    RelativityEffect rel;
-    rel.doCompute(utc0, rb, sc);
-
-    Vector<double> Frel( rel.getAccel() );
-    double Trel( norm(Frel) );
-
-    cout << "Relativity effect: " << endl
-         << setw(16) << Frel << ' '
-         << setw(16) << Trel << endl;
-
-
-    cout << "Total force: " << endl
-         << setw(16) << (Gearth+Gsun+Gmoon+Fsrp+Frel) << endl;
-*/
-
-
+    // Configurations
     SatOrbit so;
     so.setRefEpoch(utc0);
     so.setSpacecraft(sc);
 
-    so.enableGeopotential(SatOrbit::GM_EGM96, 12, 12, true, false, false);
+    so.enableGeopotential(SatOrbit::GM_EGM08, 12, 12, true, false, false);
     so.enableThirdBodyPerturbation(true, true);
-    if(srp)
-    {
-        so.enableSolarRadiationPressure(SatOrbit::SRPM_CODE, true);
-    }
-    else
-    {
-        so.enableSolarRadiationPressure(SatOrbit::SRPM_ROCK, true);
-    }
+    so.enableSolarRadiationPressure(SatOrbit::SRPM_CODE, true);
     so.enableRelativeEffect(true);
 
-    // force model type to be estimated
+    // State to be estimated: p0
     set<ForceModel::ForceModelType> fmt;
-
-    if(srp)
-    {
-        fmt.insert(ForceModel::D0);
-        fmt.insert(ForceModel::Y0);
-        fmt.insert(ForceModel::B0);
-        fmt.insert(ForceModel::Dc);
-        fmt.insert(ForceModel::Ds);
-        fmt.insert(ForceModel::Yc);
-        fmt.insert(ForceModel::Ys);
-        fmt.insert(ForceModel::Bc);
-        fmt.insert(ForceModel::Bs);
-    }
-    else
-    {
-        fmt.insert(ForceModel::Gx);
-        fmt.insert(ForceModel::Gy);
-        fmt.insert(ForceModel::Gz);
-    }
-
+    fmt.insert(ForceModel::D0);
+    fmt.insert(ForceModel::Y0);
+    fmt.insert(ForceModel::B0);
+    fmt.insert(ForceModel::Dc);
+    fmt.insert(ForceModel::Ds);
+    fmt.insert(ForceModel::Yc);
+    fmt.insert(ForceModel::Ys);
+    fmt.insert(ForceModel::Bc);
+    fmt.insert(ForceModel::Bs);
 
     so.setForceModelType(fmt);
 
 //    cout << so.getSpacecraft().P() << endl;
 
-    // rkf78 integrator
+    // Integrator
     RungeKuttaFehlberg rkf78;
     rkf78.setStepSize(30.0);
 
 
+    // Temp variables
     Vector<double> state;
 
     double t(0.0);
     double tt(12*3600.0);
     double step(30.0);
 
+    // Out file
     ofstream outfile("myorbit.txt");
 
     int i=0;
-
+/*
     while(t < tt)
     {
         state = rkf78.integrateTo(t, sc.getStateVector(), &so, t+step);
@@ -284,7 +253,7 @@ int main(void)
 //        if(i>1) break;
 
     }
-
+*/
     cerr << endl;
 
     outfile.close();

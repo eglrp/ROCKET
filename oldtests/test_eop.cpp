@@ -10,11 +10,11 @@ int main(void)
 {
     try
     {
-        LoadIERSERPFile("../../rocket/tables/finals2000A.all");
+        LoadIERSEOPFile("../../rocket/tables/finals2000A.all");
     }
     catch(...)
     {
-        cerr << "Load IERS ERP File error." << endl;
+        cerr << "Load IERS EOP File error." << endl;
 
         return 0;
     }
