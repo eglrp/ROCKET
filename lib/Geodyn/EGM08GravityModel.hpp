@@ -151,11 +151,6 @@ namespace gpstk
 
        } gmData;
 
-
-       // normalized gravity model coefficients, not include order 0 and 1
-       //    (n+1)(n+2)/2 - 3 = 13*14/2 - 3 = 88
-       static const double gmcs[88][2];
-
    }; // End of class 'EGM08GravityModel'
 
       // @}

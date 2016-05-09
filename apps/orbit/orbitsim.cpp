@@ -147,7 +147,7 @@ int main(void)
    ConfDataReader confReader;
    try
    {
-      confReader.open("orbitsim.conf");
+      confReader.open("../../../rocket/workplace/orbitsim.conf");
    }
    catch(...)
    {
@@ -233,7 +233,14 @@ int main(void)
 
    OrbitEOM orbit;
    orbit.setRefEpoch(utc0);
-   orbit.setEGM(egmFile, degree, order);
+   try
+   {
+      orbit.setEGM(egmFile, degree, order);
+   }
+   catch(...)
+   {
+      cerr << "EGM Set Error." << endl;
+   }
 
    // Orbit integrator
    RungeKuttaFehlberg rkf;
@@ -261,6 +268,7 @@ int main(void)
       return 1;
    }
 
+   cout << "Start of Integration." << endl;
    // Loop
    for(int i=0; i<=int(length*3600/stepSize); ++i)
    {
@@ -304,13 +312,9 @@ int main(void)
       // Update
       t0 += 10.0;
       rv0_icrs = rv_icrs;
-
-      if(i%100 == 0) cout << ".";
-//      if(i >= 1) break;
-
    }
 
-   cout << endl;
+   cout << "End of Integration." << endl;
 
    fout.close();
 
