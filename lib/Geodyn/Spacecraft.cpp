@@ -80,7 +80,7 @@ namespace gpstk
 
 
    // get State Vector 6 + 6*(6+np)
-   Vector<double> Spacecraft::getStateVector()
+   Vector<double> Spacecraft::getStateVector() const
    {
       const int np=p.size();
       Vector<double> y(6*np+42,0.0);
@@ -164,7 +164,7 @@ namespace gpstk
 
 
    // get Transition Matrix
-   Matrix<double> Spacecraft::getTransitionMatrix()
+   Matrix<double> Spacecraft::getTransitionMatrix() const
    {
       /* Transition Matrix
           |                          |
@@ -254,7 +254,7 @@ namespace gpstk
 
 
    // get State Transition Matrix 6*6
-   Matrix<double> Spacecraft::getStateTransitionMatrix()
+   Matrix<double> Spacecraft::getStateTransitionMatrix() const
    {
       /* State Transition Matrix
           |                  |
@@ -283,7 +283,7 @@ namespace gpstk
 
 
    // get Sensitivity Matrix 6*np
-   Matrix<double> Spacecraft::getSensitivityMatrix()
+   Matrix<double> Spacecraft::getSensitivityMatrix() const
    {
       /* Sensitivity Matrix
           |        |

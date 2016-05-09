@@ -83,7 +83,6 @@ int main(void)
     CivilTime ct(2015,1,1,12,1,15.0, TimeSystem::GPS);
     CommonTime gps( ct.convertToCommonTime() );
     CommonTime utc( GPS2UTC(gps) );
-    cout << ct << endl;
 
     // IGS SP3 file
     SP3EphemerisStore sp3Eph;
@@ -169,13 +168,14 @@ int main(void)
     // Earth Gravitation
     cout << fixed << setprecision(15);
 
-    EGM08GravityModel egm08(12,12);
-    egm08.enableSolidTide(true);
-    egm08.enableOceanTide(true);
-    egm08.enablePoleTide(true);
-    egm08.doCompute(utc, eb, sc);
+    EGM08GravityModel egm(100,100);
+    egm.loadFile("../../rocket/tables/EGM2008_SMALL.");
+//    egm.enableSolidTide(true);
+//    egm.enableOceanTide(true);
+//    egm.enablePoleTide(true);
+    egm.doCompute(utc, eb, sc);
 
-    cout << "EGM08: " << egm08.getAccel() << endl;
+    cout << "EGM08: " << egm.getAccel() << endl;
 
     return 0;
 }

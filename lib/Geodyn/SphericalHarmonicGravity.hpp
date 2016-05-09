@@ -80,15 +80,13 @@ namespace gpstk
          /// Default destructor
       virtual ~SphericalHarmonicGravity() {};
 
-
          /** Call the relevant methods to compute the acceleration.
           * @param utc Time reference class
           * @param rb  Reference body class
           * @param sc  Spacecraft parameters and state
           * @return the acceleration [m/s^2]
           */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
-      {}
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc) {};
 
 
       SphericalHarmonicGravity& setDesiredDegree(const int& n, const int& m)

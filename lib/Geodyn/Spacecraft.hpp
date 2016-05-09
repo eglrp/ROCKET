@@ -105,18 +105,18 @@ namespace gpstk
       void initStateVector(const Vector<double>& rv, const Vector<double>& dp);
 
          /// Methods to handle SC state vector 6 + 6*(6+np)
-      Vector<double> getStateVector();
+      Vector<double> getStateVector() const;
       void setStateVector(Vector<double> y);
 
          /// Methods to handle SC transition matrix 6*(6+np)
-      Matrix<double> getTransitionMatrix();
+      Matrix<double> getTransitionMatrix() const;
       void setTransitionMatrix(Matrix<double> phiMatrix);
 
          /// Method to get SC state transition matrix 6*6
-      Matrix<double> getStateTransitionMatrix();
+      Matrix<double> getStateTransitionMatrix() const;
 
          /// Method to get SC sensitivity matrix 6*np
-      Matrix<double> getSensitivityMatrix();
+      Matrix<double> getSensitivityMatrix() const;
 
 
    private:

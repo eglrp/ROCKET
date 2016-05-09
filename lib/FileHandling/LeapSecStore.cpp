@@ -124,7 +124,7 @@ namespace gpstk
             finalTime = time;
          }
 
-      };
+      }
 
       inpf.close();
 

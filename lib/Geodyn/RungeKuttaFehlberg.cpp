@@ -187,62 +187,12 @@ namespace gpstk
                                                          EquationOfMotion*       peom,
                                                          const double&           tf )
    {
-/*
-      // for debug, only valid for CODE SRP model
-//////////////////////////////////////////////////////////////////////////////
-      cout << "t: " << t << endl;
-
-      cout << "r: " << y(0) << ' ' << y(1) << ' ' << y(2) << endl;
-      cout << "v: " << y(3) << ' ' << y(4) << ' ' << y(5) << endl;
-
-      cout << "dr/dr0: " << endl
-           << y(6) << ' ' << y(7) << ' ' << y(8) << endl
-           << y(9) << ' ' << y(10) << ' ' << y(11) << endl
-           << y(12) << ' ' << y(13) << ' ' << y(14) << endl;
-      cout << "dr/dv0: " << endl
-           << y(15) << ' ' << y(16) << ' ' << y(17) << endl
-           << y(18) << ' ' << y(19) << ' ' << y(20) << endl
-           << y(21) << ' ' << y(22) << ' ' << y(23) << endl;
-      cout << "dr/dp0: " << endl;
-      for(int i=0; i<3; i++)
-      {
-          for(int j=0; j<9; j++)
-          {
-              cout << y(24+i*9+j) << ' ';
-          }
-          cout << endl;
-      }
-
-      cout << "dv/dr0: " << endl
-           << y(51) << ' ' << y(52) << ' ' << y(53) << endl
-           << y(54) << ' ' << y(55) << ' ' << y(56) << endl
-           << y(57) << ' ' << y(58) << ' ' << y(59) << endl;
-      cout << "dv/dv0: " << endl
-           << y(60) << ' ' << y(61) << ' ' << y(62) << endl
-           << y(63) << ' ' << y(64) << ' ' << y(65) << endl
-           << y(66) << ' ' << y(67) << ' ' << y(68) << endl;
-      cout << "dv/dp0: " << endl;
-      for(int i=0; i<3; i++)
-      {
-          for(int j=0; j<9; j++)
-          {
-              cout << y(69+i*9+j) << ' ';
-          }
-          cout << endl;
-      }
-
-      cout << "tf: " << tf << endl;
-//////////////////////////////////////////////////////////////////////////////
-*/
       Vector<double> yout,yerr;
 
       Vector<double> oldState = y;
 
       double dt = stepSize;
 
-//      cout << "dt: " << dt << endl;
-
-//      cout << "come to RKF::integrateFixedStep()" << endl;
       double tt = t;
       while(t <= tf)
       {
@@ -263,6 +213,8 @@ namespace gpstk
 
       dt = tf - tt;
 
+//      cout << "before rkfs78()" << endl;
+//      cout << tt << " " << oldState << " " << dt << endl;
       rkfs78(tt,oldState,dt,peom,yout,yerr);
 
       return yout;
@@ -360,53 +312,6 @@ namespace gpstk
 
 //      cout << "before peom->getDerivatives()" << endl;
       Vector<double> dydx = peom->getDerivatives(x, y);  // ak1
-
-//      dydx(3) = -3.6368908031933240E-1;
-//      dydx(4) =  4.2096939115567533E-1;
-//      dydx(5) = -7.6865787936242501E-2;
-/*
-//////////////////////////////////////////////////////////////////////////////
-      // for debug, only valid for CODE SRP model
-      cout << "v: " << dydx(0) << ' ' << dydx(1) << ' ' << dydx(2) << endl;
-      cout << "a: " << dydx(3) << ' ' << dydx(4) << ' ' << dydx(5) << endl;
-
-      cout << "dv/dr0: " << endl
-           << dydx(6) << ' ' << dydx(7) << ' ' << dydx(8) << endl
-           << dydx(9) << ' ' << dydx(10) << ' ' << dydx(11) << endl
-           << dydx(12) << ' ' << dydx(13) << ' ' << dydx(14) << endl;
-      cout << "dv/dv0: " << endl
-           << dydx(15) << ' ' << dydx(16) << ' ' << dydx(17) << endl
-           << dydx(18) << ' ' << dydx(19) << ' ' << dydx(20) << endl
-           << dydx(21) << ' ' << dydx(22) << ' ' << dydx(23) << endl;
-      cout << "dv/dp0: " << endl;
-      for(int i=0; i<3; i++)
-      {
-          for(int j=0; j<9; j++)
-          {
-              cout << dydx(24+i*9+j) << ' ';
-          }
-          cout << endl;
-      }
-
-      cout << "da/dr0: " << endl
-           << dydx(51) << ' ' << dydx(52) << ' ' << dydx(53) << endl
-           << dydx(54) << ' ' << dydx(55) << ' ' << dydx(56) << endl
-           << dydx(57) << ' ' << dydx(58) << ' ' << dydx(59) << endl;
-      cout << "da/dv0: " << endl
-           << dydx(60) << ' ' << dydx(61) << ' ' << dydx(62) << endl
-           << dydx(63) << ' ' << dydx(64) << ' ' << dydx(65) << endl
-           << dydx(66) << ' ' << dydx(67) << ' ' << dydx(68) << endl;
-      cout << "da/dp0: " << endl;
-      for(int i=0; i<3; i++)
-      {
-          for(int j=0; j<9; j++)
-          {
-              cout << dydx(69+i*9+j) << ' ';
-          }
-          cout << endl;
-      }
-//////////////////////////////////////////////////////////////////////////////
-*/
 //      cout << "after peom->getDerivatives()" << endl;
 
       Vector<double> ytemp(n,0.0);
@@ -617,7 +522,7 @@ namespace gpstk
       
       this->setStepSize(0.01);
 
-      for(int i=0;i<1000000;i++)
+      for(int i=0;i<10000;i++)
       {
          y = integrateTo(t0, y0, &eom, t0 + h);
          double t = t0 + h;
@@ -630,7 +535,7 @@ namespace gpstk
 
          t0 += h;
          y0[0] = y[0];
-         y[0] = 0.0;
+//         y[0] = 0.0;
       }
       
    }  // End of method 'RungeKuttaFehlberg::test()'
