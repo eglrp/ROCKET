@@ -296,8 +296,13 @@ int main(void)
 
       fout << CivilTime(utc) << " "
            << fixed << setprecision(6)
-           << r_itrs << " "
-           << v_itrs << endl;
+           << setw(18) << r_itrs(0)
+           << setw(18) << r_itrs(1)
+           << setw(18) << r_itrs(2)
+           << setw(14) << v_itrs(0)
+           << setw(14) << v_itrs(1)
+           << setw(14) << v_itrs(2)
+           << endl;
 
       // Spacecraft settings
       sc.setEpoch(utc);
