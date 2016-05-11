@@ -147,7 +147,7 @@ int main(void)
    ConfDataReader confReader;
    try
    {
-      confReader.open("../../../rocket/workplace/orbit/orbitsim.conf");
+      confReader.open("../../../ROCKET/workplace/orbit/orbitsim.conf");
    }
    catch(...)
    {
