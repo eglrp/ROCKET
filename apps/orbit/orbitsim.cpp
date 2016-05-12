@@ -255,15 +255,30 @@ int main(void)
    double t0(0.0);
 
    // Outfile
-   string outFile   = confReader.getValue("Outfile", "DEFAULT");
-   ofstream fout;
+   string outFile_ECEF  = confReader.getValue("OutFile_ECEF", "DEFAULT");
+   string outFile_ECI   = confReader.getValue("OutFile_ECI", "DEFAULT");
+
+   ofstream fout_ECEF;
+
    try
    {
-      fout.open(outFile.c_str(), ios::out);
+      fout_ECEF.open(outFile_ECEF.c_str(), ios::out);
    }
    catch(...)
    {
-      cerr << "Out File Open Error." << endl;
+      cerr << "Out File for ECEF Open Error." << endl;
+
+      return 1;
+   }
+
+   ofstream fout_ECI;
+   try
+   {
+      fout_ECI.open(outFile_ECI.c_str(), ios::out);
+   }
+   catch(...)
+   {
+      cerr << "Out File for ECI Open Error." << endl;
 
       return 1;
    }
@@ -294,15 +309,25 @@ int main(void)
       r_itrs = c2t * r_icrs;
       v_itrs = c2t * v_icrs + dc2t * r_icrs;
 
-      fout << CivilTime(utc) << " "
-           << fixed << setprecision(6)
-           << setw(18) << r_itrs(0)
-           << setw(18) << r_itrs(1)
-           << setw(18) << r_itrs(2)
-           << setw(14) << v_itrs(0)
-           << setw(14) << v_itrs(1)
-           << setw(14) << v_itrs(2)
-           << endl;
+      fout_ECEF << CivilTime(utc) << " "
+                << fixed << setprecision(6)
+                << setw(18) << r_itrs(0)
+                << setw(18) << r_itrs(1)
+                << setw(18) << r_itrs(2)
+                << setw(14) << v_itrs(0)
+                << setw(14) << v_itrs(1)
+                << setw(14) << v_itrs(2)
+                << endl;
+
+      fout_ECI  << CivilTime(utc) << " "
+                << fixed << setprecision(6)
+                << setw(18) << r_icrs(0)
+                << setw(18) << r_icrs(1)
+                << setw(18) << r_icrs(2)
+                << setw(14) << v_icrs(0)
+                << setw(14) << v_icrs(1)
+                << setw(14) << v_icrs(2)
+                << endl;
 
       // Spacecraft settings
       sc.setEpoch(utc);
@@ -321,7 +346,8 @@ int main(void)
 
    cout << "End of Integration." << endl;
 
-   fout.close();
+   fout_ECEF.close();
+   fout_ECI.close();
 
    return 0;
 }
