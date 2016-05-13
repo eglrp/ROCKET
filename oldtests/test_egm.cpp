@@ -1,9 +1,24 @@
 /*
- * Test for earth gravitation model.
+ * Test for Earth Gravitation Model.
+ *
+ * Test Time: 2015/01/01, 12h, 1m, 15s, GPS
+ *
+ * Test Satellite: GPS PRN 01
+ *
+ * Earth Gravitation Model: EGM2008 (12*12)
+ *
+ * Solid Tide: IERS 2003
+ * Ocean Tide: CSR TIDE
+ * Pole  Tide: IERS 2003
+ *
+ * Earth Gravitation:
+ *    -0.363686527222444 0.420970296488611 -0.076863995695723
  *
  */
 
 #include <iostream>
+
+#include "ConfDataReader.hpp"
 
 #include "EGM96GravityModel.hpp"
 #include "EGM08GravityModel.hpp"
@@ -21,87 +36,146 @@ using namespace gpstk;
 
 int main(void)
 {
-    LoadIERSERPFile("../../rocket/tables/finals2000A.all");
-    LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
-    LoadJPLEphFile("../../rocket/tables/JPLEPH2000");
+    // Configuration file
+    ConfDataReader confReader;
+    try
+    {
+        confReader.open("../../rocket/oldtests/testconf.txt");
+    }
+    catch(...)
+    {
+        cerr << "Configuration file open error." << endl;
 
-    int n;
-    cout << "Enter Sat ID: ";
-    cin >> n;
+        return 1;
+    }
 
-    // SatID
-    SatID satid(n,SatID::systemGPS);
+    
+    // IERS EOP file
+    string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
+    try
+    {
+        LoadIERSEOPFile(eopFile);
+    }
+    catch(...)
+    {
+        cerr << "IERS Earth Orientation Parameters File Load Error." << endl;
 
-    // time
-    CivilTime ct(2015,1,1,12,0,0.0, TimeSystem::GPS);
+        return 1;
+    }
+    
+    // IERS LeapSecond file
+    string lsFile  = confReader.getValue("IERSLSFile", "DEFAULT");
+    try
+    {
+        LoadIERSLSFile(lsFile);
+    }
+    catch(...)
+    {
+        cerr << "IERS Leap Second File Load Error." << endl;
+
+        return 1;
+    }
+
+    // Satellite ID
+    SatID sat(1,SatID::systemGPS);
+
+    // Time
+    CivilTime ct(2015,1,1,12,1,15.0, TimeSystem::GPS);
     CommonTime gps( ct.convertToCommonTime() );
     CommonTime utc( GPS2UTC(gps) );
-    cout << ct << endl;
 
-    // sp3 file
+    // IGS SP3 file
     SP3EphemerisStore sp3Eph;
     sp3Eph.rejectBadPositions(true);
-    sp3Eph.rejectBadClocks(true);
     sp3Eph.setPosGapInterval(900+1);
     sp3Eph.setPosMaxInterval(9*900+1);
 
-    try {
+    string sp3File;
+    while( (sp3File = confReader.fetchListValue("IGSSP3List", "DEFAULT")) != "" )
+    {
     
-        sp3Eph.loadFile("../../rocket/workplace/igs18253.sp3");
-        sp3Eph.loadFile("../../rocket/workplace/igs18254.sp3");
-        sp3Eph.loadFile("../../rocket/workplace/igs18255.sp3");
+        try
+        {
+            sp3Eph.loadFile(sp3File);
+        }
+        catch(...)
+        {
+            cerr << "IGS SP3 File Load Error." << endl;
+
+            return 1;
+        }
     }
-    catch(...) {
     
-        cerr << "sp3 file load error." << endl;
+
+    // Position and velocity in ITRS
+    Vector<double> r_itrs, v_itrs;
+
+    try
+    {
+        r_itrs = sp3Eph.getXvt(sat, gps).x.toVector();
+        v_itrs = sp3Eph.getXvt(sat, gps).v.toVector();
+    }
+    catch(...)
+    {
+        cerr << "Get Position and Velocity from SP3 File Error." << endl;
+
+        return 1;
     }
 
-    Vector<double> r_ecef = sp3Eph.getXvt(satid, gps).x.toVector();
-    Vector<double> v_ecef = sp3Eph.getXvt(satid, gps).v.toVector();
-
+    // Transform matrix
     Matrix<double> c2t( C2TMatrix(utc) );
+    // Transform matrix time dot
     Matrix<double> dc2t( dC2TMatrix(utc) );
 
-    Vector<double> r_eci = transpose(c2t) * r_ecef;
-    Vector<double> v_eci = transpose(dc2t) * r_ecef + transpose(c2t) * v_ecef;
+    // Position and velocity in ICRS
+    Vector<double> r_icrs = transpose(c2t) * r_itrs;
+    Vector<double> v_icrs = transpose(c2t) * v_itrs + transpose(dc2t) * r_itrs;
 
-    cout << fixed << setprecision(6);
-    cout << "r_eci: " << r_eci << endl;
-    cout << "v_eci: " << v_eci << endl;
 
-    // initial conditions
+    // Initial state: r0, v0
     Vector<double> rv0(6,0.0);
-    rv0[0] = r_eci(0); rv0[1] = r_eci(1); rv0[2] = r_eci(2);
-    rv0[3] = v_eci(0); rv0[4] = v_eci(1); rv0[5] = v_eci(2);
+    rv0(0) = r_icrs(0); rv0(1) = r_icrs(1); rv0(2) = r_icrs(2);
+    rv0(3) = v_icrs(0); rv0(4) = v_icrs(1); rv0(5) = v_icrs(2);
 
-    // earth body
+    // Reference body
     EarthBody eb;
 
+    // Initial state: p0
     Vector<double> p0;
-    p0.resize(3,0.0);
 
-    // sat data
-    SatDataReader satData("../../rocket/tables/SATELLITE");
+    // SatData file
+    SatDataReader satReader;
+    string satDataFile = confReader.getValue("SatDataFile", "DEFAULT");
+    try
+    {
+        satReader.open(satDataFile);
+    }
+    catch(...)
+    {
+        cerr << "SatData File Open Error." << endl;
 
-    // spacecraft
+        return 1;
+    }
+
+    // Spacecraft
     Spacecraft sc;
-    sc.setSatID(satid);
+    sc.setSatID(sat);
     sc.setEpoch(utc);
-    sc.setBlock(satData.getBlock(satid,utc));
-    sc.setMass(satData.getMass(satid,utc));
-
+    sc.setBlock(satReader.getBlock(sat,utc));
+    sc.setMass(satReader.getMass(sat,utc));
     sc.initStateVector(rv0, p0);
 
+    // Earth Gravitation
     cout << fixed << setprecision(15);
 
-    EGM08GravityModel egm08(12,12);
-    egm08.enableSolidTide(true);
-    egm08.enableOceanTide(true);
-    egm08.enablePoleTide(true);
-    egm08.doCompute(utc, eb, sc);
+    EGM08GravityModel egm(100,100);
+    egm.loadFile("../../rocket/tables/EGM2008_SMALL.");
+//    egm.enableSolidTide(true);
+//    egm.enableOceanTide(true);
+//    egm.enablePoleTide(true);
+    egm.doCompute(utc, eb, sc);
 
-    cout << "EGM08: " << egm08.getAccel() << endl;
-
+    cout << "EGM08: " << egm.getAccel() << endl;
 
     return 0;
 }

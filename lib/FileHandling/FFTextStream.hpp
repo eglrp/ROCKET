@@ -197,7 +197,7 @@ namespace gpstk
                                         const bool expectEOF )
          throw(EndOfFile, FFStreamError, gpstk::StringUtils::StringException)
    {
-
+ 
       try
       {
             // The following constant used to be 256, but with the change to

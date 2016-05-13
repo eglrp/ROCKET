@@ -38,8 +38,8 @@ namespace gpstk
    // IERS Data Handling
    //--------------------------------------------------------------------------
 
-      // ERP data file from IERS
-   void LoadIERSERPFile(const std::string& fileName)
+      // EOP data file from IERS
+   void LoadIERSEOPFile(const std::string& fileName)
    {
        eopDataTable.clear();
 
@@ -49,12 +49,12 @@ namespace gpstk
        }
        catch(...)
        {
-           GPSTK_THROW(Exception("Failed to load IERS ERP File " + fileName));
+           GPSTK_THROW(Exception("Failed to load IERS EOP File " + fileName));
        }
    }
 
-      // ERP data file from IGS
-   void LoadIGSERPFile(const std::string& fileName)
+      // EOP data file from IGS
+   void LoadIGSEOPFile(const std::string& fileName)
    {
       eopDataTable.clear();
 
@@ -64,12 +64,12 @@ namespace gpstk
       }
       catch(...)
       {
-          GPSTK_THROW(Exception("Failed to load IGS ERP File " + fileName));
+          GPSTK_THROW(Exception("Failed to load IGS EOP File " + fileName));
       }
    }
 
-      // ERP data file from STK 
-   void LoadSTKERPFile(const std::string& fileName)
+      // EOP data file from STK
+   void LoadSTKEOPFile(const std::string& fileName)
    {
        eopDataTable.clear();
 
@@ -79,7 +79,7 @@ namespace gpstk
        }
        catch(...)
        {
-           GPSTK_THROW(Exception("Failed to load STK ERP File " + fileName));
+           GPSTK_THROW(Exception("Failed to load STK EOP File " + fileName));
        }
    }
 

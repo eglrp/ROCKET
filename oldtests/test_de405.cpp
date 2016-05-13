@@ -1,6 +1,8 @@
-/* Test for DE405 Planet Ephemeris. */
+/* Test for DE 405 Planet Ephemeris. */
 
 #include <iostream>
+
+#include "ConfDataReader.hpp"
 
 #include "IERSConventions.hpp"
 
@@ -11,27 +13,46 @@ using namespace gpstk;
 
 int main()
 {
-    // Load DE405 Planet Ephemeris file
+
+    // Configuration file
+    ConfDataReader confReader;
+
     try
     {
-        LoadJPLEphFile("../../rocket/tables/JPLEPH2000");
+        confReader.open("../../rocket/oldtests/testconf.txt");
+    }
+    catch(...)
+    {
+        cerr << "Configuration file open error." << endl;
+
+        return 1;
+    }
+
+
+    // JPL Ephemeris file
+    string ephFile = confReader.getValue("JPLEPHFile", "DEFAULT");
+    try
+    {
+        LoadJPLEphFile(ephFile);
     }
     catch(...)
     {
         cerr << "JPL Ephemeris File load error." << endl;
     }
 
-    // Load IERS Leap Second file
+
+    // IERS LeapSecond file
+    string lsFile  = confReader.getValue("IERSLSFile", "DEFAULT");
     try
     {
-        LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
+        LoadIERSLSFile(lsFile);
     }
     catch(...)
     {
         cerr << "IERS Leap Second File load error." << endl;
     }
 
-    // Time to compute
+    // Time
     CivilTime ct(2010,1,1,12,0,0.0, TimeSystem::UTC);
     CommonTime utc( ct.convertToCommonTime() );
     CommonTime tt( UTC2TT(utc) );
@@ -41,11 +62,11 @@ int main()
     cout << fixed << setprecision(4);
 
     // Position, Velocity of Sun and Moon, from DE 405 Planet Ephemeris
-    Vector<double> r_sun( J2kPosVel(tt, SolarSystem::Sun) );
-    Vector<double> r_moon( J2kPosVel(tt, SolarSystem::Moon) );
+    Vector<double> rv_sun( J2kPosVel(tt, SolarSystem::Sun) );
+    Vector<double> rv_moon( J2kPosVel(tt, SolarSystem::Moon) );
 
-    cout << "r_sun: " << r_sun << endl;
-    cout << "r_moon: " << r_moon << endl;
+    cout << "rv_sun: " << rv_sun << endl;
+    cout << "rv_moon: " << rv_moon << endl;
 
     // Position of Sun and Moon, from Analytical Formulas
     Vector<double> r_sun2( SunJ2kPosition(tt) );

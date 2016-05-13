@@ -13,7 +13,6 @@ int main(void)
     // sp3 files
 	SP3EphemerisStore sp3Eph;
     sp3Eph.rejectBadPositions(true);
-    sp3Eph.rejectBadClocks(true);
 	sp3Eph.setPosGapInterval(901);
 	sp3Eph.setPosMaxInterval(8101);
 
@@ -32,7 +31,7 @@ int main(void)
 
     try
     {
-        LoadIERSERPFile("../../rocket/tables/finals2000A.all");
+        LoadIERSEOPFile("../../rocket/tables/finals2000A.all");
 //        cout << "eop file load over." << endl;
     }
     catch(...)

@@ -1,0 +1,9 @@
+# The file directories should be relative to ~/build/oldtests/
+
+IERSEOPFile = ../../rocket/tables/finals2000A.all
+IERSLSFile  = ../../rocket/tables/Leap_Second_History.dat
+JPLEPHFile  = ../../rocket/tables/JPLEPH2000
+SatDataFile = ../../rocket/tables/Satellites.txt
+
+IGSSP3List = ../../rocket/workplace/igs18253.sp3 ../../rocket/workplace/igs18254.sp3 ../../rocket/workplace/igs18255.sp3
+

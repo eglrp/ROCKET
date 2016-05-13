@@ -95,7 +95,7 @@ namespace gpstk
          // line length is actually 185
          if(inpf.bad() || line.size() < 70) { ok = false; break; }
 
-         double mjd = StringUtils::asDouble(line.substr(7,8));      
+         double mjd = StringUtils::asDouble(line.substr(7,8));
          double xp = StringUtils::asDouble(line.substr(18,9));      // arcseconds
          double yp = StringUtils::asDouble(line.substr(37,9));      // arcseconds
          double UT1mUTC = StringUtils::asDouble(line.substr(58,10));// arcseconds

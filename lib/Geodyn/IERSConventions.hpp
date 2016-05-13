@@ -78,12 +78,12 @@ namespace gpstk
     /// Leap Second Store
     static LeapSecStore lsDataTable;
 
-    /// ERP data file from IERS
-    void LoadIERSERPFile(const std::string& fileName);
-    /// ERP data file from IGS
-    void LoadIGSERPFile(const std::string& fileName);
-    /// ERP data file from STK
-    void LoadSTKERPFile(const std::string& fileName);
+    /// EOP data file from IERS
+    void LoadIERSEOPFile(const std::string& fileName);
+    /// EOP data file from IGS
+    void LoadIGSEOPFile(const std::string& fileName);
+    /// EOP data file from STK
+    void LoadSTKEOPFile(const std::string& fileName);
 
     /// LS data file from IERS
     void LoadIERSLSFile(const std::string& fileName);
