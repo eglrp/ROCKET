@@ -1,0 +1,21 @@
+# readme for orbit simulation program
+
+The program source file is in the directory apps/orbsim/.
+The program default configuration file is in the directoty workplace/orbsim/.
+
+When put the executable file(orbsim), the configuration file(orbsim.conf) and
+the related tables(finals2000A.all, et al.) in the same directory, we may run
+the program as follows:
+1) ./orbsim
+2) the terminator will display:
+   Start of Integration.
+   End of Integration.
+3) the results are writed into two files, named orbsim.ecef and orbsim.eci
+
+If there is any question about this program, please contact
+
+                                          Kaifa Kuang
+                                          Wuhan University
+                                          kfkuang@whu.edu.cn
+
+Regards!
