@@ -11,6 +11,7 @@ target_link_libraries(test_sp3 rocket)
 
 add_executable(test_iers test_iers.cpp)
 target_link_libraries(test_iers rocket)
+install (TARGETS test_iers DESTINATION bin)
 
 add_executable(test_de405 test_de405.cpp)
 target_link_libraries(test_de405 rocket)

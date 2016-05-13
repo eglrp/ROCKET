@@ -32,6 +32,7 @@ using namespace gpstk;
 
 int main(void)
 {
+    cout << "load iers erp file" << endl;
     // load IERS ERP file
     try
     {
@@ -44,6 +45,7 @@ int main(void)
         return 1;
     }
     
+    cout << "load iers leapsec file" << endl;
     // load IERS LeapSecond file
     try
     {
@@ -56,6 +58,7 @@ int main(void)
         return 1;
     }
 
+    cout << "load jpl eph" << endl;
     // load JPL Ephemeris file
     try
     {
@@ -68,6 +71,8 @@ int main(void)
         return 1;
     }
 
+
+    cout << "sp3" << endl;
 
     SP3EphemerisStore sp3Eph;
     sp3Eph.rejectBadPositions(true);
@@ -86,6 +91,8 @@ int main(void)
     {
         cerr << "SP3 File Load Error." << endl;
     }
+
+    cout << "transformation matrix" << endl;
 
     // epoch
     CivilTime ct(2015,1,1,12,0,0.0, TimeSystem::UTC);
