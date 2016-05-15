@@ -90,8 +90,8 @@ public:
    // Set EGM
    inline OrbitEOM& setEGM(string file, int degree, int order)
    {
-      egm.loadFile(file);
-      egm.setDesiredDegree(degree, order);
+      egm.loadEGMFile(file);
+      egm.setDesiredDegreeOrder(degree, order);
 
       return (*this);
    }

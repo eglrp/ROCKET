@@ -37,10 +37,10 @@ using namespace std;
 namespace gpstk
 {
    // For dC21 and dS21
-   // The coefficients we choose are in-phase(ip) amplitudes and out-of-phase amplitudes of the
-   // corrections for frequency dependence, and multipliers of the Delaunay variables
-   // Refers to Table 6.3a in IERS Conventions 2003
-
+   // The in-phase (ip) amplitudes and the out-of-phase (op) amplitudes of the
+   // corrections for frequency dependence of k21(0), taking the nominal value
+   // k21 for the diurnal tides as (0.29830 - i*0.00144). Unitis: 10^-12.
+   // see IERS Conventions 2010, Table 6.5a
    const double EarthSolidTide::Argu_C21[48][7]=
    {
 //      Amp.    Amp.    l   l'  F   D   Omega
@@ -95,9 +95,44 @@ namespace gpstk
       {-0.1,    0,      -1,    0, -2,  0, -1}
    };
 
+   // For dC20
+   // Corrections for frequency dependence of k20(0) of the zonal tides due to
+   // anelasticity. Units: 10^-12. The nominal value k20 for the zonal tides is
+   // taken as 0.30190.
+   // see IERS Conventions 2010, Table 6.5b
+   const double EarthSolidTide::Argu_C20[21][7]=
+   {
+
+//      Amp.  Amp.    l   l'  F   D   Omega
+//      (ip)  (op)
+      {  16.6,  -6.7,  0,  0,  0,  0,  1 },
+      {  -0.1,   0.1,  0,  0,  0,  0,  2 },
+      {  -1.2,   0.8,  0, -1,  0,  0,  0 },
+      {  -5.5,   4.3,  0,  0, -2,  2, -2 }, 
+      {   0.1,  -0.1,  0,  0, -2,  2, -1 },
+      {  -0.3,   0.2,  0, -1, -2,  2, -2 },
+      {  -0.3,   0.7,  1,  0,  0, -2,  0 },
+      {   0.1,  -0.2, -1,  0,  0,  0, -1 },
+      {  -1.2,   3.7, -1,  0,  0,  0,  0 },
+      {   0.1,  -0.2, -1,  0,  0,  0,  1 },
+      {   0.1,  -0.2,  1,  0, -2,  0, -2 },
+      {   0.0,   0.6,  0,  0,  0, -2,  0 }, 
+      {   0.0,   0.3, -2,  0,  0,  0,  0 },
+      {   0.6,   6.3,  0,  0, -2,  0, -2 },
+      {   0.2,   2.6,  0,  0, -2,  0, -1 }, 
+      {   0.0,   0.2,  0,  0, -2,  0,  0 },
+      {   0.1,   0.2,  1,  0, -2, -2, -2 },
+      {   0.4,   1.1, -1,  0, -2,  0, -2 },
+      {   0.2,   0.5, -1,  0, -2,  0, -1 },
+      {   0.1,   0.2,  0,  0, -2, -2, -2 },
+      {   0.1,   0.1, -2,  0, -2,  0, -2 }
+   };
+
    // For dC22 and dS22
-   // Refers to Table 6.3c in IERS Conventions 2003
-   // (0.30102 . i 0.00130).
+   // Amplitudes of the corrections for frequency dependence of k22, taking the
+   // nominal value k22 for the sectorial tides as (0.30102 - i*0.00130).
+   // Units: 10^-12. The corrections are only to the real part.
+   // see IERS Conventions 2010, Table 6.5c
    const double EarthSolidTide::Argu_C22[2][6] = 
    {
 //        Amp.   l   l'  F   D   Omega
@@ -105,35 +140,6 @@ namespace gpstk
        {  -1.2,  0,  0,  2,  0,  2  }
    };
 
-   // For dC20
-   // Refer to Table 6.3b in IERS2003
-   // The nominal value k20 for the zonal tides is taken as 0.30190
-   const double EarthSolidTide::Argu_C20[21][7]=
-   {
-//        Amp.  Amp.    l   l'  F   D   Omega
-//        (ip)  (op)
-       {  16.6,  -6.7,  0,  0,  0,  0,  1   },
-       {  -0.1,   0.1,  0,  0,  0,  0,  2   },
-      {-1.2,   0.8,  0, -1,  0,  0,  0},
-      {-5.5,   4.3,  0,  0, -2,  2, -2},
-       {0.1,  -0.1,  0,  0, -2,  2, -1},
-      {-0.3,   0.2,  0, -1, -2,  2, -2},
-      {-0.3,   0.7,  1,  0,  0, -2,  0},
-       {0.1,  -0.2, -1,  0,  0,  0, -1},
-      {-1.2,   3.7, -1,  0,  0,  0,  0},
-       {0.1,  -0.2, -1,  0,  0,  0,  1},
-       {0.1,  -0.2,  1,  0, -2,  0, -2},
-       {0,     0.6,  0,  0,  0, -2,  0},
-       {0,     0.3, -2,  0,  0,  0,  0},
-       {0.6,   6.3,  0,  0, -2,  0, -2},
-       {0.2,   2.6,  0,  0, -2,  0, -1},
-       {0,     0.2,  0,  0, -2,  0,  0},
-       {0.1,   0.2,  1,  0, -2, -2, -2},
-       {0.4,   1.1, -1,  0, -2,  0, -2},
-       {0.2,   0.5, -1,  0, -2,  0, -1},
-       {0.1,   0.2,  0,  0, -2, -2, -2},
-       {0.1,   0.1, -2,  0, -2,  0, -2}
-   };
 
       /**
        * Solid tide to normalized earth potential coefficients

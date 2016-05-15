@@ -57,12 +57,11 @@ using namespace gpstk;
 
 int main(void)
 {
-    // load IERS ERP file
     // Configuration file
     ConfDataReader confReader;
     try
     {
-        confReader.open("../../rocket/oldtests/testconf.txt");
+        confReader.open("../../ROCKET/oldtests/test.conf");
     }
     catch(...)
     {
@@ -72,7 +71,6 @@ int main(void)
     }
 
     
-    // load IERS LeapSecond file
     // IERS EOP file
     string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
     try
@@ -85,7 +83,7 @@ int main(void)
 
         return 1;
     }
-    // load JPL Ephemeris file
+    
     // IERS LeapSecond file
     string lsFile  = confReader.getValue("IERSLSFile", "DEFAULT");
     try

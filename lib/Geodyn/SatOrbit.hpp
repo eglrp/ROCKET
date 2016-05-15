@@ -34,7 +34,7 @@
 #include "Spacecraft.hpp"
 #include "ForceModelList.hpp"
 
-#include "SphericalHarmonicGravity.hpp"
+#include "EarthGravitation.hpp"
 #include "SunForce.hpp"
 #include "MoonForce.hpp"
 #include "SolarPressure.hpp"
@@ -89,7 +89,7 @@ namespace gpstk
          // We'll allocate memory in the heap for some of the models are memory
          // consuming
          
-         SphericalHarmonicGravity* pGeoEarth;
+         EarthGravitation* pGeoEarth;
          
          SunForce* pGeoSun;
          
