@@ -231,7 +231,7 @@ namespace gpstk
       {
          double dC[10] = {0.0};
          double dS[10] = {0.0};
-         solidTide.getSolidTide(MJD_UTC, dC, dS);
+         solidTide.getSolidTide(utc, dC, dS);
 
 //         cout << "solid tide: " << endl;
 //         for(int i=0; i<10; i++)

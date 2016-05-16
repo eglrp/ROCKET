@@ -28,7 +28,6 @@
 
 #include "SatOrbit.hpp"
 
-#include "EGM96GravityModel.hpp"
 #include "EGM08GravityModel.hpp"
 
 #include "ROCKPressure.hpp"
@@ -65,7 +64,7 @@ namespace gpstk
 
    void SatOrbit::init()
    {
-      enableGeopotential(GM_EGM96,1,1,false,false,false);
+      enableGeopotential(GM_EGM08,1,1,false,false,false);
       enableThirdBodyPerturbation(false,false);
       enableSolarRadiationPressure(SRPM_CODE,false);
       enableRelativeEffect(false);
@@ -146,11 +145,7 @@ namespace gpstk
       //
 
       // GeoEarth
-      if(fmc.grvModel == GM_EGM96)
-      {
-         fmc.pGeoEarth = new EGM96GravityModel();
-      }
-      else if (fmc.grvModel == GM_EGM08)
+      if(fmc.grvModel == GM_EGM08)
       {
          fmc.pGeoEarth = new EGM08GravityModel();
       }
@@ -221,15 +216,10 @@ namespace gpstk
       // GeoEarth
       if(fmc.pGeoEarth)
       {
-         if(fmc.grvModel == GM_EGM96)
+         if(fmc.grvModel == GM_EGM08)
          {
-            delete (EGM96GravityModel*) fmc.pGeoEarth;
+            delete (EGM08GravityModel*) fmc.pGeoEarth;
             fmc.pGeoEarth = NULL;
-         }
-         else if(fmc.grvModel == GM_EGM08)
-         {
-             delete (EGM08GravityModel*) fmc.pGeoEarth;
-             fmc.pGeoEarth = NULL;
          }
          else
          {

@@ -8,7 +8,6 @@
 
 #include "SatDataReader.hpp"
 
-#include "EGM96GravityModel.hpp"
 #include "EGM08GravityModel.hpp"
 
 #include "SunForce.hpp"
@@ -38,7 +37,7 @@ int main(void)
     // IERS EOP file
     try
     {
-        LoadIERSEOPFile("../../rocket/tables/finals2000A.all");
+        LoadIERSEOPFile("../../ROCKET/tables/finals2000A.all");
     }
     catch(...)
     {
@@ -50,7 +49,7 @@ int main(void)
     // IERS LeapSecond file
     try
     {
-        LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
+        LoadIERSLSFile("../../ROCKET/tables/Leap_Second_History.dat");
     }
     catch(...)
     {
@@ -62,7 +61,7 @@ int main(void)
     // JPL Ephemeris file
     try
     {
-        LoadJPLEphFile("../../rocket/tables/JPLEPH2000");
+        LoadJPLEphFile("../../ROCKET/tables/1980_2040.405");
     }
     catch(...)
     {
@@ -88,9 +87,9 @@ int main(void)
 
     try
     {
-        sp3Eph.loadFile("../../rocket/workplace/igs18253.sp3");
-        sp3Eph.loadFile("../../rocket/workplace/igs18254.sp3");
-        sp3Eph.loadFile("../../rocket/workplace/igs18255.sp3");
+        sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18253.sp3");
+        sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18254.sp3");
+        sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18255.sp3");
     }
     catch(...)
     {
@@ -147,7 +146,7 @@ int main(void)
     SatDataReader satData;
     try
     {
-        satData.open("../../rocket/tables/satellites.txt");
+        satData.open("../../ROCKET/tables/SatInfo.txt");
     }
     catch(...)
     {

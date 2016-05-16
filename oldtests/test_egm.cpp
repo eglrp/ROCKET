@@ -20,7 +20,6 @@
 
 #include "ConfDataReader.hpp"
 
-#include "EGM96GravityModel.hpp"
 #include "EGM08GravityModel.hpp"
 
 #include "IERSConventions.hpp"
@@ -40,7 +39,7 @@ int main(void)
     ConfDataReader confReader;
     try
     {
-        confReader.open("../../rocket/oldtests/test.conf");
+        confReader.open("../../ROCKET/oldtests/test.conf");
     }
     catch(...)
     {
@@ -74,6 +73,18 @@ int main(void)
         cerr << "IERS Leap Second File Load Error." << endl;
 
         return 1;
+    }
+
+    string ephFile = confReader.getValue("JPLEPHFile", "DEFAULT");
+    try
+    {
+       LoadJPLEphFile(ephFile);
+    }
+    catch(...)
+    {
+       cerr << "JPL Ephemeris File Load Error." << endl;
+
+       return 1;
     }
 
     // Satellite ID
@@ -136,6 +147,8 @@ int main(void)
     Vector<double> rv0(6,0.0);
     rv0(0) = r_icrs(0); rv0(1) = r_icrs(1); rv0(2) = r_icrs(2);
     rv0(3) = v_icrs(0); rv0(4) = v_icrs(1); rv0(5) = v_icrs(2);
+    rv0(0) = 17253546.071; rv0(1) = -19971157.156; rv0(2) = 3645801.329;
+    rv0(3) = 1973.209292;  rv0(4) = 1123.311389;   rv0(5) = -3124.145454;
 
     // Reference body
     EarthBody eb;
@@ -186,9 +199,9 @@ int main(void)
     int order  = confReader.getValueAsInt("EGMOrder",  "DEFAULT");
     egm.setDesiredDegreeOrder(degree, order);
 
-//    egm.enableSolidTide(true);
-//    egm.enableOceanTide(true);
-//    egm.enablePoleTide(true);
+    egm.setCorrectSolidTide(true);
+//    egm.setCorrectOceanTide(true);
+//    egm.setCorrectPoleTide(true);
     egm.doCompute(utc, eb, sc);
 
     cout << "EGM08: " << egm.getAccel() << endl;

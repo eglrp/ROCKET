@@ -38,8 +38,6 @@ int main()
     catch(...)
     {
         cerr << "JPL Ephemeris File load error." << endl;
-
-        return 1;
     }
 
 
@@ -52,8 +50,6 @@ int main()
     catch(...)
     {
         cerr << "IERS Leap Second File load error." << endl;
-
-        return 1;
     }
 
     // Time

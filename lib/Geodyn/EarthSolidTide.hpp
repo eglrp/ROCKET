@@ -29,13 +29,16 @@
 #ifndef GPSTK_SOLID_TIDE_HPP
 #define GPSTK_SOLID_TIDE_HPP
 
+#include "CommonTime.hpp"
+#include "Vector.hpp"
+
 namespace gpstk
 {
       /** @addtogroup GeoDynamics */
       //@{
 
       /**Class to do Earth Solid Tide correction
-       * reference: IERS Conventions 2003
+       * see IERS Conventions 2010
        */
    class EarthSolidTide
    {
@@ -50,23 +53,39 @@ namespace gpstk
          /**
           * Solid tide to normalized earth potential coefficients
           *
-          * @param MJD_UTC  UTC in MJD
-          * @param dC       correction to normalized coefficients dC
-          * @param dS       correction to normalized coefficients dS
+          * @param utc     time in UTC
+          * @param dC      correction to normalized coefficients dC
+          * @param dS      correction to normalized coefficients dS
           */
-      void getSolidTide(double MJD_UTC, double dC[], double dS[] );
+      void getSolidTide(CommonTime utc, double dC[], double dS[]);
 
 
-      void test();
+         /** Translate degree and order (n,m) from 2-D to 1-D.
+          * @param n    Degree
+          * @param m    Order
+          *
+          * For example:
+          * (n,m) = (0,0) <===> return = 1
+          * (n,m) = (1,0) <===>        = 2
+          * (n,m) = (1,1) <===>        = 3
+          * (n,m) = (2,0) <===>        = 4
+          *          ...                ...
+          */
+      inline int index(int n, int m)
+      {
+         return n*(n+1)/2 + (m+1);
+      }
+
+         /** Evaluate the fnALF.
+          * @param deg  Desired degree
+          * @param lat  Geocentric latitude in radians
+          * @param leg  Fully nomalized associated legendre functions
+          */
+      void legendre(const int& deg, const double& lat, Vector<double>& leg);
+      
 
    protected:
 
-         ///  Legendre polynomial
-         //  relevant formula can be found in "satellite orbits"(3.23,3.24,3.25 in chapter 3.2.4)
-      static double legendrePoly(int n,int m,double u);
-
-      double normFactor (int n, int m);
-      
          /// Objects to hold parameters
       static const double Argu_C20[21][7];
       static const double Argu_C21[48][7];

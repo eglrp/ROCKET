@@ -10,7 +10,7 @@ the program as follows:
 2) the terminator will display:
    Start of Integration.
    End of Integration.
-3) the results are writed into two files, named orbsim.ecef and orbsim.eci
+3) the results will be wrote into two files, named orbsim.ecef and orbsim.eci
 
 If there is any question about this program, please contact
 
