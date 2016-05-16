@@ -194,10 +194,10 @@ namespace gpstk
       }
 
       // At last, prepare the force model list
-      fmc.pGeoEarth->setDesiredDegree(fmc.grvDegree,fmc.grvOrder);
-      fmc.pGeoEarth->enableSolidTide(fmc.solidTide);
-      fmc.pGeoEarth->enableOceanTide(fmc.oceanTide);
-      fmc.pGeoEarth->enablePoleTide(fmc.poleTide);
+      fmc.pGeoEarth->setDesiredDegreeOrder(fmc.grvDegree,fmc.grvOrder);
+      fmc.pGeoEarth->setCorrectSolidTide(fmc.solidTide);
+      fmc.pGeoEarth->setCorrectOceanTide(fmc.oceanTide);
+      fmc.pGeoEarth->setCorrectPoleTide(fmc.poleTide);
 
       fml.clear();
 

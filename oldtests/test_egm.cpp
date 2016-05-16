@@ -40,7 +40,7 @@ int main(void)
     ConfDataReader confReader;
     try
     {
-        confReader.open("../../rocket/oldtests/testconf.txt");
+        confReader.open("../../rocket/oldtests/test.conf");
     }
     catch(...)
     {
@@ -168,8 +168,24 @@ int main(void)
     // Earth Gravitation
     cout << fixed << setprecision(15);
 
-    EGM08GravityModel egm(100,100);
-    egm.loadFile("../../rocket/tables/EGM2008_SMALL.");
+    EGM08GravityModel egm;
+
+    string egmFile = confReader.getValue("EGMFile", "DEFAULT");
+    try
+    {
+       egm.loadEGMFile(egmFile);
+    }
+    catch(...)
+    {
+       cerr << "EGM File Load Error." << endl;
+
+       return 1;
+    }
+
+    int degree = confReader.getValueAsInt("EGMDegree", "DEFAULT");
+    int order  = confReader.getValueAsInt("EGMOrder",  "DEFAULT");
+    egm.setDesiredDegreeOrder(degree, order);
+
 //    egm.enableSolidTide(true);
 //    egm.enableOceanTide(true);
 //    egm.enablePoleTide(true);

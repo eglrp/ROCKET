@@ -25,31 +25,30 @@
 
 /**
  * @file EGM96GravityModel.hpp
- * EGM96 gravity model
  */
 
 #ifndef GPSTK_EGM96_GRAVITY_MODEL_HPP
 #define GPSTK_EGM96_GRAVITY_MODEL_HPP
 
-#include "SphericalHarmonicGravity.hpp"
+#include "EarthGravitation.hpp"
 
 namespace gpstk
 {
       /** @addtogroup GeoDynamics */
       //@{
 
-      /** EGM96 gravity model
+      /** EGM96 Gravity Model.
        *
        */
-   class EGM96GravityModel : public SphericalHarmonicGravity
+   class EGM96GravityModel : public EarthGravitation
    {
    public:
        /** Constructor.
         * @param n  Desired degree
         * @param m  Desired order
         */
-       EGM96GravityModel(int n=12, int m=12)
-           : SphericalHarmonicGravity(n, m)
+       EGM96GravityModel(int n=0, int m=0)
+           : EarthGravitation(n, m)
        {
            gmData.modelName = "EGM96";
 

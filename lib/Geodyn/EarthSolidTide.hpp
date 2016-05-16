@@ -65,7 +65,7 @@ namespace gpstk
          //  relevant formula can be found in "satellite orbits"(3.23,3.24,3.25 in chapter 3.2.4)
       static double legendrePoly(int n,int m,double u);
 
-      double normFactor (int n, int m) ;
+      double normFactor (int n, int m);
       
          /// Objects to hold parameters
       static const double Argu_C20[21][7];

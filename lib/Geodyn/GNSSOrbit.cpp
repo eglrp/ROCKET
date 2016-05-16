@@ -59,10 +59,10 @@ namespace gpstk
        // force model parameters to be estimated
        const int np(9);
 
-       egm.setDesiredDegree(12,12);
-       egm.enableSolidTide(true);
-       egm.enableOceanTide(true);
-       egm.enablePoleTide(true);
+       egm.setDesiredDegreeOrder(12,12);
+       egm.setCorrectSolidTide(true);
+       egm.setCorrectOceanTide(true);
+       egm.setCorrectPoleTide(true);
 
        egm.doCompute(utc,eb,sc);
        sun.doCompute(utc,eb,sc);

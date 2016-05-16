@@ -35,8 +35,6 @@
 #include "Spacecraft.hpp"
 #include "ForceModelList.hpp"
 
-#include "SphericalHarmonicGravity.hpp"
-#include "EGM96GravityModel.hpp"
 #include "EGM08GravityModel.hpp"
 #include "SunForce.hpp"
 #include "MoonForce.hpp"

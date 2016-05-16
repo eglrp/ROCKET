@@ -12,7 +12,7 @@ int main(void)
 {
     // sp3 files
 	SP3EphemerisStore sp3Eph;
-    sp3Eph.rejectBadPositions(true);
+   sp3Eph.rejectBadPositions(true);
 	sp3Eph.setPosGapInterval(901);
 	sp3Eph.setPosMaxInterval(8101);
 
@@ -21,72 +21,81 @@ int main(void)
         sp3Eph.loadFile("../../rocket/workplace/igs18253.sp3");
         sp3Eph.loadFile("../../rocket/workplace/igs18254.sp3");
         sp3Eph.loadFile("../../rocket/workplace/igs18255.sp3");
-
-//        cout << "sp3 file load over." << endl;
 	}
 	catch(...)
 	{
-		cerr << "sp3 file load error." << endl;
+      cerr << "sp3 file load error." << endl;
+      return 1;
 	}
 
     try
     {
         LoadIERSEOPFile("../../rocket/tables/finals2000A.all");
-//        cout << "eop file load over." << endl;
     }
     catch(...)
     {
         cerr << "eop file load error." << endl;
+        return 1;
     }
 
-//    CivilTime ct0(2014,1,1,0,0,0.0, TimeSystem::GPS);
-    CivilTime ct0(2015,1,1,0,0,0.0, TimeSystem::GPS);
-    YDSTime yds0( ct0.convertToCommonTime() );
+    try
+    {
+       LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
+    }
+    catch(...)
+    {
+       cerr << "ls file load error." << endl;
+       return 1;
+    }
 
-	SatID sat(1,SatID::systemGPS);
+    CivilTime ct0(2015,1,1,0,0,0.0, TimeSystem::GPS);
+    CommonTime gps0( ct0.convertToCommonTime() );
+
+    SatID sat(1,SatID::systemGPS);
 
     ofstream outfile("sp3orbit.txt");
 
-    double dt = 75.0;
+    gps0 += 22.0;
+    Vector<double> ecefPos = sp3Eph.getXvt(sat, gps0).x.toVector();
 
-    for(int i=0; i<=3600/int(dt)*12; i++)
+    cout << fixed;
+    cout << ecefPos << endl;
+
+    double dt = 5.0;
+
+    for(int i=0; i<=60/int(dt); i++)
     {
-        YDSTime tmp(yds0);
-        int day = int(i*dt+tmp.sod) / 86400;
-        double sec = i*dt - 86400.0*day;
-        tmp.doy = tmp.doy + day;
-        tmp.sod = tmp.sod + sec;
-        cout << tmp << endl;
+        CommonTime utc( GPS2UTC(gps0) );
+        Matrix<double> c2t(C2TMatrix(utc));
+        Matrix<double> dc2t(dC2TMatrix(utc));
 
-        CommonTime gps( tmp.convertToCommonTime() );
-
-//        gRin.header.epoch = ct;
-
-        Vector<double> sp3Pos(3,0.0), sp3Vel(3,0.0), ecefPosVel(6,0.0);
+        Vector<double> sp3Pos(3,0.0), sp3Vel(3,0.0);
+        Vector<double> eciPos(3,0.0), eciVel(3,0.0);
 
         try
         {
-            sp3Pos = sp3Eph.getXvt(sat, gps).x.toVector();
-            sp3Vel = sp3Eph.getXvt(sat, gps).v.toVector();
+            sp3Pos = sp3Eph.getXvt(sat, gps0).x.toVector();
+            sp3Vel = sp3Eph.getXvt(sat, gps0).v.toVector();
 
-            ecefPosVel[0] = sp3Pos[0]; ecefPosVel[1] = sp3Pos[1]; ecefPosVel[2] = sp3Pos[2];
-            ecefPosVel[3] = sp3Vel[0]; ecefPosVel[4] = sp3Vel[1]; ecefPosVel[5] = sp3Vel[2];
+            eciPos = transpose(c2t) * sp3Pos;
+            eciVel = transpose(c2t) * sp3Vel + transpose(dc2t) * sp3Pos;
 
 //            if(yds.sod>=3600 && yds.sod<=7200)
 //            {
                 outfile << fixed << setprecision(3);
-                outfile << setw(9)  << i*dt+yds0.sod
-                        << setw(12) << sp3Pos
-                        << setw(12)  << sp3Vel
+                outfile << setw(9)  << gps0.getSecondOfDay()
+                        << setw(12) << eciPos
+//                        << setw(12) << eciVel
                         << endl;
 //            }
         }
         catch(...)
         {
-            cerr << tmp.doy << ' ' << tmp.sod << endl;
             break;
 //            continue;
         }
+
+        gps0 += dt;
     }
 
     outfile.close();
