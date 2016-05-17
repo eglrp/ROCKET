@@ -148,7 +148,7 @@ namespace gpstk
        * @param dC      correction to normalized coefficients dC
        * @param dS      correction to normalized coefficients dS
        */
-   void EarthSolidTide::getSolidTide(CommonTime utc, double dC[], double dS[])
+   void EarthSolidTide::getSolidTide(const CommonTime& utc, double dC[], double dS[])
    {
        // TT
        CommonTime tt( UTC2TT(utc) );
