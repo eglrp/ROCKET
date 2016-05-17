@@ -57,7 +57,7 @@ namespace gpstk
           * @param dC      correction to normalized coefficients dC
           * @param dS      correction to normalized coefficients dS
           */
-      void getSolidTide(const CommonTime& utc, double dC[], double dS[]);
+      void getSolidTide(CommonTime utc, double dC[], double dS[]);
 
 
          /** Translate degree and order (n,m) from 2-D to 1-D.
