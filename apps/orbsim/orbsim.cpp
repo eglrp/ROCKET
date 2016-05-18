@@ -282,6 +282,8 @@ void orbsim::process()
 
       // LeapSecond file
    string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
+   cout << "orb initialTime: " << lsDataTable.getInitialTime() << endl;
+   cout << "orb finalTime: " << lsDataTable.getFinalTime() << endl;
    try
    {
       LoadIERSLSFile (lsFile);
@@ -294,14 +296,14 @@ void orbsim::process()
    }
 
       // Initial time
-   int    yea = confReader.getValueAsInt("Year", "DEFAULT");
-   int    mon = confReader.getValueAsInt("Month", "DEFAULT");
-   int    day = confReader.getValueAsInt("Day", "DEFAULT");
-   int    hou = confReader.getValueAsInt("Hour", "DEFAULT");
-   int    min = confReader.getValueAsInt("Minute", "DEFAULT");
-   double sec = confReader.getValueAsDouble("Second", "DEFAULT");
+   int    year = confReader.getValueAsInt("Year", "DEFAULT");
+   int    mon  = confReader.getValueAsInt("Month", "DEFAULT");
+   int    day  = confReader.getValueAsInt("Day", "DEFAULT");
+   int    hour = confReader.getValueAsInt("Hour", "DEFAULT");
+   int    min  = confReader.getValueAsInt("Minute", "DEFAULT");
+   double sec  = confReader.getValueAsDouble("Second", "DEFAULT");
 
-   CivilTime ct(yea,mon,day,hou,min,sec, TimeSystem::UTC);
+   CivilTime ct(year,mon,day,hour,min,sec, TimeSystem::UTC);
    CommonTime utc0( ct.convertToCommonTime() );
  
       // Transform matrix at utc0
