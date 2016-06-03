@@ -349,7 +349,7 @@ namespace gpstk
       Vector<double> r_Sat_ECI = sc.R();
 
       // transformation matrixs between ECI and ECEF
-      Matrix<double> C2T = C2TMatrix(utc);
+      Matrix<double> C2T = pRefSys->C2TMatrix(utc);
       Matrix<double> T2C = transpose(C2T);
 
       // satellite position in ECEF

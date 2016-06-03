@@ -48,12 +48,14 @@
 
 #include "ConfDataReader.hpp"
 
-#include "IERSConventions.hpp"
+#include "ReferenceSystem.hpp"
 
 #include "SP3EphemerisStore.hpp"
 
+
 using namespace std;
 using namespace gpstk;
+
 
 int main(void)
 {
@@ -70,12 +72,15 @@ int main(void)
         return 1;
     }
 
+
+    // EOP Data Store
+    EOPDataStore eopDataStore;
     
     // IERS EOP file
     string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
     try
     {
-        LoadIERSEOPFile(eopFile);
+        eopDataStore.loadIERSFile(eopFile);
     }
     catch(...)
     {
@@ -84,11 +89,15 @@ int main(void)
         return 1;
     }
     
+
+    // Leap Sec Store
+    LeapSecStore leapSecStore;
+
     // IERS LeapSecond file
     string lsFile  = confReader.getValue("IERSLSFile", "DEFAULT");
     try
     {
-        LoadIERSLSFile(lsFile);
+        leapSecStore.loadFile(lsFile);
     }
     catch(...)
     {
@@ -96,6 +105,13 @@ int main(void)
 
         return 1;
     }
+
+
+    // Reference System
+    ReferenceSystem rs;
+    rs.setEOPDataStore(eopDataStore);
+    rs.setLeapSecStore(leapSecStore);
+
 
     // IGS SP3 file
     SP3EphemerisStore sp3Eph;
@@ -121,17 +137,17 @@ int main(void)
     // Time
     CivilTime ct(2015,1,1,12,0,0.0, TimeSystem::UTC);
     CommonTime UTC( ct.convertToCommonTime() );
-    CommonTime GPS( UTC2GPS(UTC) );
+    CommonTime GPS( rs.UTC2GPS(UTC) );
 
     cout << fixed << setprecision(4);
     cout << ct << endl;
 
     // Transform matrix
-    Matrix<double> C2T( C2TMatrix(UTC) );
+    Matrix<double> C2T( rs.C2TMatrix(UTC) );
     cout << fixed << setprecision(12);
     cout << "C2T: " << endl << C2T << endl;
     // Transform matrix time dot
-    Matrix<double> dC2T( dC2TMatrix(UTC) );
+    Matrix<double> dC2T( rs.dC2TMatrix(UTC) );
     cout << fixed << setprecision(12);
     cout << "dC2T: " << endl << dC2T << endl;
 

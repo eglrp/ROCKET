@@ -47,6 +47,7 @@
 #include "EarthSolidTide.hpp"
 #include "EarthOceanTide.hpp"
 #include "EarthPoleTide.hpp"
+#include "ReferenceSystem.hpp"
 
 
 namespace gpstk
@@ -153,6 +154,20 @@ namespace gpstk
          return correctPoleTide;
       }
 
+      /// Set reference system
+      inline EarthGravitation& setReferenceSystem(ReferenceSystem& refSys)
+      {
+         pRefSys = &refSys;
+
+         return (*this);
+      }
+
+      /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
+
 
       /** Call the relevant methods to compute the acceleration.
        * @param utc Time reference class
@@ -215,6 +230,9 @@ namespace gpstk
       EarthSolidTide  solidTide;
       EarthPoleTide   poleTide;
       EarthOceanTide  oceanTide;
+
+      /// Reference System
+      ReferenceSystem* pRefSys;
 
 
    }; // End of namespace 'gpstk'

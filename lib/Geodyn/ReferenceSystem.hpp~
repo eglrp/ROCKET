@@ -64,7 +64,7 @@ namespace gpstk
        *     -----------------> BDT(Compass Time)
        *     |
        *     |         +19s             +32.184s           +rel.effects
-       *    GPS -------------> TAI ----------------> TT -----------------> TDB
+       *    GPST ------------> TAI ----------------> TT -----------------> TDB
        *                       T |
        *            -(UT1-TAI) | |    -leap seconds
        *    UT1 ---------------| |--------------------> UTC
@@ -169,8 +169,8 @@ namespace gpstk
          throw(InvalidRequest);
 
 
-         /// Get the value of (TAI - GPS) (= -19s).
-      double getTAImGPS(void)
+         /// Get the value of (TAI - GPST) (= -19s).
+      double getTAImGPST(void)
          throw(InvalidRequest);
 
 
@@ -178,12 +178,12 @@ namespace gpstk
       ///------ Methods to convert between different time systems ------//
 
 
-         /// Convert GPS to UTC.
-      CommonTime GPS2UTC(const CommonTime& GPS);
+         /// Convert GPST to UTC.
+      CommonTime GPST2UTC(const CommonTime& GPST);
 
 
-         /// Convert UTC to GPS.
-      CommonTime UTC2GPS(const CommonTime& UTC);
+         /// Convert UTC to GPST.
+      CommonTime UTC2GPST(const CommonTime& UTC);
 
 
          /// Convert UT1 to UTC.
@@ -192,7 +192,6 @@ namespace gpstk
 
          /// Convert UTC to UT1.
       CommonTime UTC2UT1(const CommonTime& UTC);
-      CommonTime UTC2UT1(const CommonTime& UTC, const double& UT1mUTC);
 
 
          /// Convert TAI to UTC.
@@ -232,11 +231,6 @@ namespace gpstk
       Vector<double> PMUT1_OCEANS(const CommonTime& UTC);
 
 
-         /// Provide the diurnal lunisolar effect on polar motion ("), in time
-         /// domain.
-      Vector<double> PMSDNUT2(const CommonTime& UTC);
-
-
          /// Evaluate the model of subdiurnal libration in the axial component
          /// of rotation, expressed by UT1 and LOD.
       Vector<double> UTLIBR(const CommonTime& UTC);
@@ -244,10 +238,6 @@ namespace gpstk
 
 
       ///------ Methods to compute reference system transformation ------//
-
-
-         /// Universal Time to Greenwich mean sidereal time (IAU 1982 model)
-      double GMST82(const CommonTime& UT1);
 
 
          /// X,Y coordinates of celestial intermediate pole from series based
@@ -292,9 +282,6 @@ namespace gpstk
 
          /// Earth rotation angle first order rate
       double EarthRotationAngleRate1(const CommonTime& UT1);
-
-         /// Earth rotation angle first order rate
-      double dERA(const CommonTime& UT1);
 
          /// Time derivative of transformation matrix from CRS to TRS coordinates
          /// for a given date
