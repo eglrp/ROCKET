@@ -155,9 +155,9 @@ namespace gpstk
       }
 
       /// Set reference system
-      inline EarthGravitation& setReferenceSystem(ReferenceSystem& refSys)
+      inline EarthGravitation& setReferenceSystem(ReferenceSystem& ref)
       {
-         pRefSys = &refSys;
+         pRefSys = &ref;
 
          return (*this);
       }

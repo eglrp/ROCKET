@@ -1003,41 +1003,8 @@ namespace gpstk
    }
 
 
-      // Universal Time to Greenwich mean sidereal time (IAU 1982 model)
-   double ReferenceSystem::GMST82(const CommonTime& UT1)
-   {
-       /* Coefficients of IAU 1982 GMST-UT1 model */
-       double A = 24110.54841  -  DAY_TO_SEC / 2.0;
-       double B = 8640184.812866;
-       double C = 0.093104;
-       double D =  -6.2e-6;
-
-       long day, sod; double fsod;
-       UT1.get(day, sod, fsod);
-
-       /* Note: the first constant, A, has to be adjusted by 12 hours */
-       /* because the UT1 is supplied as a Julian date, which begins  */
-       /* at noon.                                                    */
-       double dj1, dj2, d1, d2, t, f, gmst;
-       dj1 = double(day-0.5);       // Julian Date, Integer Part
-       dj2 = (sod+fsod) / 86400.0;  // Julian Date, Fractional Part
-       d1 = dj2;
-       d2 = dj1;
-
-       /* Julian centuries since fundamental epoch. */
-       t = (d1 + (d2 - JD_J2000)) / JC;
-
-       /* Fractional part of JD(UT1), in seconds. */
-       f = DAY_TO_SEC * (fmod(d1,1.0) + fmod(d2,1.0));
-
-       /* GMST at this UT1. */
-       gmst = Anp(SEC_TO_RAD * ((A + (B + (C + D * t) * t) * t) + f));
-
-       return gmst;
-
-   }
-
-
+   // X,Y coordinates of celestial intermediate pole from series based on IAU
+   // 2006 precession and IAU 2006 nutation.
    void ReferenceSystem::XY06(const CommonTime& TT, double& x, double& y)
    {
        /* Maximum power of T in the polynomials for X and Y */
@@ -3972,10 +3939,6 @@ namespace gpstk
        rc2i(0,0) = 1.0; rc2i(1,1) = 1.0; rc2i(2,2) = 1.0;
        rc2i = rotation(-(e+s),3) * rotation(d,2) * rotation(e,3);
 
-//       Rz(e, rc2i);
-//       Ry(d, rc2i);
-//       Rz(-(e+s), rc2i);
-
        return rc2i;
    }
 
@@ -4035,10 +3998,6 @@ namespace gpstk
 
        /* Construct the matrix. */
        rpom = rotation(-yp,1) * rotation(-xp,2) * rotation(sp,3);
-
-//       Rz(sp, rpom);
-//       Ry(-xp, rpom);
-//       Rx(-yp, rpom);
 
        return rpom;
    }
@@ -4175,37 +4134,8 @@ namespace gpstk
    }
 
 
-   // Earth rotation angle (IAU 2000 model)
-   double ReferenceSystem::EarthRotationAngle(const CommonTime& UT1)
-   {
-       // Days since fundamental epoch
-       const double t(MJD(UT1).mjd - MJD_J2000);
-
-       // Fractional part of T (days)
-       const double f(std::fmod(double(MJD(UT1).mjd),1.0) + std::fmod(JD_TO_MJD,1.0));
-
-       // Earth rotation angle at this UT1
-       double theta = Anp(TWO_PI*(f+ 0.7790572732640 + 0.00273781191135448*t));
-
-       return theta;
-   }
-
-
-   // Earth rotation angle first order rate
-   double ReferenceSystem::EarthRotationAngleRate1(const CommonTime& UT1)
-   {
-       //
-       const double t( (MJD(UT1).mjd - MJD_J2000) / JC );
-
-       // 
-       double dtheta = (1.002737909350795 + 5.9006e-11*t - 5.9e-15*t*t) * TWO_PI / DAY_TO_SEC;
-
-       return dtheta;
-   }
-
-
-   // Earth rotation angle rate
-   double ReferenceSystem::dERA(const CommonTime& UT1)
+   // Earth rotation angle rate (IAU 2000 model)
+   double ReferenceSystem::dERA00(const CommonTime& UT1)
    {
        //
        const double t( (MJD(UT1).mjd - MJD_J2000) / JC );
@@ -4271,15 +4201,16 @@ namespace gpstk
        // Q
        Matrix<double> Q = C2IXYS(x,y,s);
 
-       // R
-       double era = ERA00(ut1);
-       double dera = dERA(ut1);
+       // ERA, dERA
+       double era    = ERA00(ut1);
+       double dera   = dERA00(ut1);
+
+       // dR
        Matrix<double> dR(3,3,0.0);
        dR(0,0) = -std::sin(era);
        dR(0,1) =  std::cos(era);
        dR(1,0) = -std::cos(era);
        dR(1,1) = -std::sin(era);
-
        dR = dR * dera;
 
        // W
@@ -4298,6 +4229,27 @@ namespace gpstk
    }
 
 
+   // Greenwich mean sidereal time (consistent with IAU 2006 precession)
+   double ReferenceSystem::GMST06(const CommonTime& UT1, const CommonTime& TT)
+   {
+      double t, t2, t3, t4, t5, gmst;
+
+      // TT Julian centuries since J2000.0.
+      t = (MJD(TT).mjd - MJD_J2000) / JC;
+      t2 = t*t;
+      t3 = t2*t;
+      t4 = t3*t;
+      t5 = t4*t;
+
+      // Greenwich mean sidereal time, IAU 2006.
+      gmst = Anp(ERA00(UT1) + (0.014506 + 4612.156534*t + 1.3915817*t2
+            - 0.00000044*t3 - 0.000029956*t4 - 0.0000000368*t5)*AS_TO_RAD);
+
+      return gmst;
+
+   }
+
+
    // Doodson fundamental arguments
    void ReferenceSystem::DoodsonArguments(const CommonTime& UT1,
                                           const CommonTime& TT, 
@@ -4305,7 +4257,7 @@ namespace gpstk
                                           double FNUT[5]         )
    {
       // GMST, IAU 1980 model
-      double THETA = GMST82(UT1);
+      double THETA = GMST06(UT1,TT);
 
       // Fundamental Arguments
       //-----------------------------------------------------

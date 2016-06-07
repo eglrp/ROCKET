@@ -36,8 +36,8 @@
 #include "ForceModelList.hpp"
 
 #include "EGM08GravityModel.hpp"
-#include "SunForce.hpp"
-#include "MoonForce.hpp"
+#include "MoonGravitation.hpp"
+#include "SunGravitation.hpp"
 #include "SolarPressure.hpp"
 #include "ROCKPressure.hpp"
 #include "CODEPressure.hpp"
@@ -92,8 +92,8 @@ namespace gpstk
 
          /// Force models
       EGM08GravityModel egm;
-      SunForce          sun;
-      MoonForce         moon;
+      SunGravitation    sun;
+      MoonGravitation   moon;
       CODEPressure      srp;
       RelativityEffect  rel;
 

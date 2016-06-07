@@ -40,9 +40,9 @@
  */
 
 #include "EGM08GravityModel.hpp"
-#include "IERSConventions.hpp"
 #include "GNSSconstants.hpp"
 #include "StringUtils.hpp"
+#include "MJD.hpp"
 
 using namespace std;
 using namespace gpstk::StringUtils;

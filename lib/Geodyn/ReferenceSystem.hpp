@@ -34,12 +34,12 @@
 
 #include <string>
 #include "GNSSconstants.hpp"
-#include "Exception.hpp"
-#include "Matrix.hpp"
 #include "Vector.hpp"
+#include "Matrix.hpp"
 #include "CommonTime.hpp"
 #include "EOPDataStore.hpp"
 #include "LeapSecStore.hpp"
+#include "Exception.hpp"
 
 namespace gpstk
 {
@@ -246,10 +246,6 @@ namespace gpstk
       ///------ Methods to compute reference system transformation ------//
 
 
-         /// Universal Time to Greenwich mean sidereal time (IAU 1982 model)
-      double GMST82(const CommonTime& UT1);
-
-
          /// X,Y coordinates of celestial intermediate pole from series based
          /// on IAU 2006 precession and IAU 2000A nutation.
       void XY06(const CommonTime& tt, double& x, double& y);
@@ -287,14 +283,8 @@ namespace gpstk
       Matrix<double> T2CMatrix(const CommonTime& UTC);
 
 
-         /// Earth rotation angle (IAU 2000 model)
-      double EarthRotationAngle(const CommonTime& UT1);
-
          /// Earth rotation angle first order rate
-      double EarthRotationAngleRate1(const CommonTime& UT1);
-
-         /// Earth rotation angle first order rate
-      double dERA(const CommonTime& UT1);
+      double dERA00(const CommonTime& UT1);
 
          /// Time derivative of transformation matrix from CRS to TRS coordinates
          /// for a given date
@@ -304,6 +294,10 @@ namespace gpstk
          /// Time derivative of transformation matrix from TRS to CRS coordinates
          /// for a given date
       Matrix<double> dT2CMatrix(const CommonTime& UTC);
+
+
+         /// Greenwich mean sidereal time (consistent with IAU 2006 precession)
+      double GMST06(const CommonTime& UT1, const CommonTime& TT);
 
 
          /// Compute doodson's fundamental arguments (BETA)
@@ -353,6 +347,7 @@ namespace gpstk
       virtual ~ReferenceSystem() {};
 
 
+   private:
 
          /// Pointer to the EOPDataStore
       EOPDataStore* pEopStore;

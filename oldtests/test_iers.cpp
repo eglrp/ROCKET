@@ -112,6 +112,9 @@ int main(void)
     rs.setEOPDataStore(eopDataStore);
     rs.setLeapSecStore(leapSecStore);
 
+//    cout << "sizeof(eopDataStore): " << sizeof(eopDataStore) << endl;
+//    cout << "sizeof(leapSecStore): " << sizeof(leapSecStore) << endl;
+//    cout << "sizeof(rs): " << sizeof(rs) << endl;
 
     // IGS SP3 file
     SP3EphemerisStore sp3Eph;
