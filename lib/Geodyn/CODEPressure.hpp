@@ -57,12 +57,8 @@ namespace gpstk
       virtual void doCompute(CommonTime t, EarthBody& bRef, Spacecraft& sc);
 
          /// Return the force model name
-      virtual std::string modelName() const
+      inline virtual std::string modelName() const
       { return "CODEPressure"; }
-
-   protected:
-
-      // some local variables
 
    }; // End of class 'CODEPressure'
 

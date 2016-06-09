@@ -22,7 +22,7 @@
 //============================================================================
 
 /**
- * @file AtmosphericDrag.hpp
+ * @file SolarPressure.hpp
  * This class computes the acceleration due to solar pressure on a satellite.
  */
 
@@ -31,6 +31,8 @@
 
 #include "ForceModel.hpp"
 #include "GNSSconstants.hpp"
+#include "ReferenceSystem.hpp"
+#include "SolarSystem.hpp"
 
 namespace gpstk
 {
@@ -74,16 +76,55 @@ namespace gpstk
       virtual ~SolarPressure() {};
 
 
+         /// Set reference system
+      inline SolarPressure& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
+
+
+         /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
+
+
+         /// Set solar system
+      inline SolarPressure& setSolarSystem(SolarSystem& sol)
+      {
+         pSolSys = &sol;
+      }
+
+
+         /// Get solar system
+      inline SolarSystem* getSolarSystem() const
+      {
+         return pSolSys;
+      }
+
+
          /// Return force model name
-      virtual std::string modelName() const
+      inline virtual std::string modelName() const
       {return "SolarPressure";}
 
-         /// return the force model index
-      virtual int forceIndex() const
+         /// Return the force model index
+      inline virtual int forceIndex() const
       { return FMI_SolarRadiationPressure; }
        
-         /// this is the real one
+         /// This is the real one
       virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc) = 0;
+
+
+   protected:
+
+         /// Reference System
+      ReferenceSystem* pRefSys;
+
+         /// Solar System
+      SolarSystem* pSolSys;
 
    }; // End of class 'SolarPressure'
 

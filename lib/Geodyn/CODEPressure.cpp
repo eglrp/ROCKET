@@ -29,7 +29,6 @@
  */
 
 #include "CODEPressure.hpp"
-#include "IERSConventions.hpp"
 #include "GNSSconstants.hpp"
 
 using namespace std;
@@ -56,26 +55,43 @@ namespace gpstk
        Ds = p(6); Ys = p(7); Bs = p(8);
 
        // time in TT
-       CommonTime tt( UTC2TT(utc) );
+       double tt = JulianDate(pRefSys->UTC2TT(utc)).jd;
 
+
+       // sun and moon position and velocity in eci, unit: km, km/day
+       double rv_sun[6] = {0.0};
+       pSolSys->computeState(tt,
+                             SolarSystem::Sun,
+                             SolarSystem::Earth,
+                             rv_sun);
+       double rv_moon[6] = {0.0};
+       pSolSys->computeState(tt,
+                             SolarSystem::Moon,
+                             SolarSystem::Earth,
+                             rv_moon);
        // sun and moon position in eci, unit: m
-       Vector<double> r_Sun(3,0.0), r_Moon(3,0.0);
-//       r_Sun = J2kPosition(tt, SolarSystem::Sun);
-//       r_Moon = J2kPosition(tt, SolarSystem::Moon);
-       r_Sun = SunJ2kPosition(tt);
-       r_Moon = MoonJ2kPosition(tt);
+       Vector<double> r_sun(3,0.0);
+       r_sun(0) = rv_sun[0];
+       r_sun(1) = rv_sun[1];
+       r_sun(2) = rv_sun[2];
+       r_sun *= 1000.0;
+       Vector<double> r_moon(3,0.0);
+       r_moon(0) = rv_moon[0];
+       r_moon(1) = rv_moon[1];
+       r_moon(2) = rv_moon[2];
+       r_moon *= 1000.0;
 
        // satellite position in eci, unit: m
-       Vector<double> r_Sat(3,0.0);
-       r_Sat = sc.R();
+       Vector<double> r_sat(3,0.0);
+       r_sat = sc.R();
 
        // satellite velocity in eci, unit: m/s
-       Vector<double> v_Sat(3,0.0);
-       v_Sat = sc.V();
+       Vector<double> v_sat(3,0.0);
+       v_sat = sc.V();
 
        // satellite position wrt sun in eci, unit: m
-       Vector<double> r_SunSat(3,0.0);
-       r_SunSat = r_Sat - r_Sun;
+       Vector<double> r_sunsat(3,0.0);
+       r_sunsat = r_sat - r_sun;
 
         /// CODE model, GAMIT 10.5 ertorb.f
 
@@ -117,11 +133,11 @@ namespace gpstk
        //           plane (spvec) and the satellite's node.
        //   u-u0    is the elongation of the satellite from the sun's
        //           projection in the orbital plane.
-       Vector<double> rvec = r_Sat / norm(r_Sat);       // +R direction
-       Vector<double> vvec = v_Sat / norm(v_Sat);       // +T direction
+       Vector<double> rvec = r_sat / norm(r_sat);       // +R direction
+       Vector<double> vvec = v_sat / norm(v_sat);       // +T direction
        Vector<double> zvec = -rvec;                     // +Z direction
-       Vector<double> ssvec = r_SunSat / norm(r_SunSat);// -D direction
-       Vector<double> esvec = r_Sun / norm(r_Sun);      // 
+       Vector<double> ssvec = r_sunsat / norm(r_sunsat);// -D direction
+       Vector<double> esvec = r_sun / norm(r_sun);      // 
 
        Vector<double> hvec = cross(rvec, vvec);         // +N direction
        hvec = normalize(hvec);
@@ -176,7 +192,7 @@ namespace gpstk
        cos4beta = std::cos(4*beta);
 
        // compute the distance factor for the radiation force
-       double dmag2 = norm(r_SunSat) * norm(r_SunSat);
+       double dmag2 = norm(r_sunsat) * norm(r_sunsat);
        double au2 = AU * AU;
        double distfct = au2/dmag2;
 
@@ -233,7 +249,7 @@ namespace gpstk
 */
        // shadow factor
        double lambda(1.0);
-       lambda = getShadowFunction(r_Sat, r_Sun, r_Moon, SM_CONICAL);
+       lambda = getShadowFunction(r_sat, r_sun, r_moon, SM_CONICAL);
 
 /*
        // D(u), Y(u), B(u)
@@ -249,8 +265,8 @@ namespace gpstk
        radprs = radprs + (lambda*(D0*d0+dt)*ssvec + (Y0*d0+yt)*yvec + (B0*d0+bt)*bvec)*distfct;
 
        radprs = radprs + (Dc*d0*cosu*ssvec + Ds*d0*sinu*ssvec
-                        + Yc*d0*cosu*yvec + Ys*d0*sinu*yvec
-                        + Bc*d0*cosu*bvec + Bs*d0*sinu*bvec)*distfct;
+                        + Yc*d0*cosu* yvec + Ys*d0*sinu*yvec
+                        + Bc*d0*cosu* bvec + Bs*d0*sinu*bvec)*distfct;
 //       radprs = radprs + (xt1*sinuu0*xvec + xt3*sin3uu0*xvec + zt*sin3uu0*zvec)*distfct;
 
        // srp acceleration

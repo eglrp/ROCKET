@@ -26,11 +26,11 @@
 * Class to do Earth Solid Tide correction
 */
 
-#ifndef GPSTK_SOLID_TIDE_HPP
-#define GPSTK_SOLID_TIDE_HPP
+#ifndef GPSTK_EARTH_SOLID_TIDE_HPP
+#define GPSTK_EARTH_SOLID_TIDE_HPP
 
-#include "CommonTime.hpp"
-#include "Vector.hpp"
+#include "ReferenceSystem.hpp"
+#include "SolarSystem.hpp"
 
 namespace gpstk
 {
@@ -49,6 +49,38 @@ namespace gpstk
 
          /// Default destructor
       ~EarthSolidTide(){}
+
+
+         /// Set reference system
+      inline EarthSolidTide& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
+
+
+         /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
+
+
+         /// Set solar system
+      inline EarthSolidTide& setSolarSystem(SolarSystem& sol)
+      {
+         pSolSys = &sol;
+
+         return (*this);
+      }
+
+
+         /// Get solar system
+      inline SolarSystem* getSolarSystem() const
+      {
+         return pSolSys;
+      }
 
          /**
           * Solid tide to normalized earth potential coefficients
@@ -86,10 +118,17 @@ namespace gpstk
 
    protected:
 
-         /// Objects to hold parameters
+         /// Parameters
       static const double Argu_C20[21][7];
       static const double Argu_C21[48][7];
       static const double Argu_C22[2][6];
+
+         /// Reference System
+      ReferenceSystem* pRefSys;
+
+
+         /// Solar System
+      SolarSystem* pSolSys;
       
    }; // End of class 'EarthSolidTide'
 
@@ -97,4 +136,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   //GPSTK_SOLID_TIDE_HPP
+#endif   //GPSTK_EARTH_SOLID_TIDE_HPP

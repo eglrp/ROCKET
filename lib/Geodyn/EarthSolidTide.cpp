@@ -29,7 +29,6 @@
 #include <complex>
 
 #include "EarthSolidTide.hpp"
-#include "IERSConventions.hpp"
 #include "GNSSconstants.hpp"
 
 using namespace std;
@@ -151,17 +150,38 @@ namespace gpstk
    void EarthSolidTide::getSolidTide(CommonTime utc, double dC[], double dS[])
    {
        // TT
-       CommonTime tt( UTC2TT(utc) );
+       CommonTime tt( pRefSys->UTC2TT(utc) );
 
        // UT1
-       CommonTime ut1( UTC2UT1(utc) );
+       CommonTime ut1( pRefSys->UTC2UT1(utc) );
 
        // C2T Matrix
-       Matrix<double> c2t = C2TMatrix(utc);
+       Matrix<double> c2t( pRefSys->C2TMatrix(utc) );
+
+       // sun and moon position and velocity in eci, unit: km, km/day
+       double jd = JulianDate(tt).jd;
+       double rv_moon[6] = {0.0};
+       pSolSys->computeState(jd,
+                             SolarSystem::Moon,
+                             SolarSystem::Earth,
+                             rv_moon);
+       double rv_sun[6] = {0.0};
+       pSolSys->computeState(jd,
+                             SolarSystem::Sun,
+                             SolarSystem::Earth,
+                             rv_sun);
 
        // Moon and Sun Position in ECI, unit: m
-       Vector<double> rm_eci = J2kPosition(tt, SolarSystem::Moon);
-       Vector<double> rs_eci = J2kPosition(tt, SolarSystem::Sun);
+       Vector<double> rm_eci(3,0.0);
+       rm_eci(0) = rv_moon[0];
+       rm_eci(1) = rv_moon[1];
+       rm_eci(2) = rv_moon[2];
+       rm_eci *= 1000.0;
+       Vector<double> rs_eci(3,0.0);
+       rs_eci(0) = rv_sun[0];
+       rs_eci(1) = rv_sun[1];
+       rs_eci(2) = rv_sun[2];
+       rs_eci *= 1000.0;
 //       cout << "rm_eci: " << rm_eci << endl;
 //       cout << "rs_eci: " << rs_eci << endl;
 
@@ -285,8 +305,8 @@ namespace gpstk
        // Doodson arguments
        double BETA[6] = {0.0};
        double FNUT[5] = {0.0};
-       DoodsonArguments(ut1, tt, BETA, FNUT);
-       double GMST = GMST82(ut1);
+       pRefSys->DoodsonArguments(ut1, tt, BETA, FNUT);
+       double GMST = pRefSys->GMST06(ut1, tt);
 
        // C20
        // see IERS Conventions 2010, Equation 6.8a

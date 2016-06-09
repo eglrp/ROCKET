@@ -169,6 +169,21 @@ namespace gpstk
       }
 
 
+      /// Set solar system
+      inline EarthGravitation& setSolarSystem(SolarSystem& sol)
+      {
+         pSolSys = &sol;
+
+         return (*this);
+      }
+
+      /// Get solar system
+      inline SolarSystem* getSolarSystem() const
+      {
+         return pSolSys;
+      }
+
+
       /** Call the relevant methods to compute the acceleration.
        * @param utc Time reference class
        * @param rb  Earth body class
@@ -233,6 +248,9 @@ namespace gpstk
 
       /// Reference System
       ReferenceSystem* pRefSys;
+
+      /// Solar System
+      SolarSystem* pSolSys;
 
 
    }; // End of namespace 'gpstk'

@@ -229,6 +229,9 @@ namespace gpstk
       // correct solid tide
       if(correctSolidTide)
       {
+         solidTide.setReferenceSystem(*pRefSys);
+         solidTide.setSolarSystem(*pSolSys);
+
          double dC[10] = {0.0};
          double dS[10] = {0.0};
          solidTide.getSolidTide(utc, dC, dS);
