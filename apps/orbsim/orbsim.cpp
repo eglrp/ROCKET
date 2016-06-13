@@ -43,6 +43,8 @@
 // Class to do Runge-Kutta-Fehlberg integrator
 #include "RungeKuttaFehlberg.hpp"
 
+#include "LeapSecStore.hpp"
+
 
 using namespace std;
 using namespace gpstk;
@@ -280,11 +282,22 @@ void orbsim::process()
       return;
    }
 
+   cout << "IERS LS File" << endl;
+
       // LeapSecond file
    string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
+
+   cout << lsFile << endl;
+   cout << "orb initialTime: " << lsDataTable.getInitialTime() << endl;
+   cout << "orb finalTime: " << lsDataTable.getFinalTime() << endl;
+
    try
    {
-      LoadIERSLSFile (lsFile);
+      LoadIERSLSFile(lsFile);
+
+   cout << "orb initialTime: " << lsDataTable.getInitialTime() << endl;
+   cout << "orb finalTime: " << lsDataTable.getFinalTime() << endl;
+
    }
    catch(...)
    {
@@ -293,15 +306,17 @@ void orbsim::process()
       return;
    }
 
-      // Initial time
-   int    yea = confReader.getValueAsInt("Year", "DEFAULT");
-   int    mon = confReader.getValueAsInt("Month", "DEFAULT");
-   int    day = confReader.getValueAsInt("Day", "DEFAULT");
-   int    hou = confReader.getValueAsInt("Hour", "DEFAULT");
-   int    min = confReader.getValueAsInt("Minute", "DEFAULT");
-   double sec = confReader.getValueAsDouble("Second", "DEFAULT");
+   cout << "time" << endl;
 
-   CivilTime ct(yea,mon,day,hou,min,sec, TimeSystem::UTC);
+      // Initial time
+   int    year  = confReader.getValueAsInt("Year", "DEFAULT");
+   int    month = confReader.getValueAsInt("Month", "DEFAULT");
+   int    day   = confReader.getValueAsInt("Day", "DEFAULT");
+   int    hour  = confReader.getValueAsInt("Hour", "DEFAULT");
+   int    min   = confReader.getValueAsInt("Minute", "DEFAULT");
+   double sec   = confReader.getValueAsDouble("Second", "DEFAULT");
+
+   CivilTime ct(year,month,day,hour,min,sec, TimeSystem::UTC);
    CommonTime utc0( ct.convertToCommonTime() );
  
       // Transform matrix at utc0
@@ -369,6 +384,8 @@ void orbsim::process()
       // Outfile
    string outFile_ECEF  = confReader.getValue("OutFile_ECEF", "DEFAULT");
    string outFile_ECI   = confReader.getValue("OutFile_ECI", "DEFAULT");
+
+   cout << "out file" << endl;
 
    ofstream fout_ECEF;
 

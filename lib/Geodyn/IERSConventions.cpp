@@ -85,7 +85,12 @@ namespace gpstk
 
    void LoadIERSLSFile(const std::string& fileName)
    {
-       lsDataTable.clear();
+  //   lsDataTable.clear();
+
+       cout << "IERS initialTime: " << lsDataTable.getInitialTime() << endl;
+       cout << "IERS finalTime: " << lsDataTable.getFinalTime() << endl;
+       cout << "initialTime of commontime:" << CommonTime::END_OF_TIME << endl;
+       cout << CommonTime::BEGINNING_OF_TIME << endl;
        
        try
        {
