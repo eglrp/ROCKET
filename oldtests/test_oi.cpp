@@ -10,8 +10,8 @@
 
 #include "EGM08GravityModel.hpp"
 
-#include "SunForce.hpp"
-#include "MoonForce.hpp"
+#include "MoonGravitation.hpp"
+#include "SunGravitation.hpp"
 
 #include "ROCKPressure.hpp"
 #include "CODEPressure.hpp"

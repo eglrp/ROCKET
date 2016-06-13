@@ -339,7 +339,7 @@ namespace gpstk
        return UT1;
    }
 
-   // Convert UTC to UT1, given UT1mUTC
+      // Convert UTC to UT1, given UT1mUTC
    CommonTime UTC2UT1(const CommonTime& UTC, const double& UT1mUTC)
    {
        CommonTime UT1;

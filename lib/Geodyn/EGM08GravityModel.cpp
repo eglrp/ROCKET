@@ -40,9 +40,9 @@
  */
 
 #include "EGM08GravityModel.hpp"
-#include "IERSConventions.hpp"
 #include "GNSSconstants.hpp"
 #include "StringUtils.hpp"
+#include "MJD.hpp"
 
 using namespace std;
 using namespace gpstk::StringUtils;
@@ -229,6 +229,9 @@ namespace gpstk
       // correct solid tide
       if(correctSolidTide)
       {
+         solidTide.setReferenceSystem(*pRefSys);
+         solidTide.setSolarSystem(*pSolSys);
+
          double dC[10] = {0.0};
          double dS[10] = {0.0};
          solidTide.getSolidTide(utc, dC, dS);
@@ -349,7 +352,7 @@ namespace gpstk
       Vector<double> r_Sat_ECI = sc.R();
 
       // transformation matrixs between ECI and ECEF
-      Matrix<double> C2T = C2TMatrix(utc);
+      Matrix<double> C2T = pRefSys->C2TMatrix(utc);
       Matrix<double> T2C = transpose(C2T);
 
       // satellite position in ECEF

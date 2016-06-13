@@ -34,12 +34,12 @@
 
 #include <string>
 #include "GNSSconstants.hpp"
-#include "Exception.hpp"
-#include "Matrix.hpp"
 #include "Vector.hpp"
+#include "Matrix.hpp"
 #include "CommonTime.hpp"
 #include "EOPDataStore.hpp"
 #include "LeapSecStore.hpp"
+#include "Exception.hpp"
 
 namespace gpstk
 {
@@ -64,7 +64,7 @@ namespace gpstk
        *     -----------------> BDT(Compass Time)
        *     |
        *     |         +19s             +32.184s           +rel.effects
-       *    GPST ------------> TAI ----------------> TT -----------------> TDB
+       *    GPS -------------> TAI ----------------> TT -----------------> TDB
        *                       T |
        *            -(UT1-TAI) | |    -leap seconds
        *    UT1 ---------------| |--------------------> UTC
@@ -80,11 +80,6 @@ namespace gpstk
    class ReferenceSystem
    {
    public:
-
-
-         /// Modified Julian Date of J2000.0
-      static const double MJD_J2000;
-
 
          /// Default constructor.
       ReferenceSystem()
@@ -174,8 +169,8 @@ namespace gpstk
          throw(InvalidRequest);
 
 
-         /// Get the value of (TAI - GPST) (= -19s).
-      double getTAImGPST(void)
+         /// Get the value of (TAI - GPS) (= -19s).
+      double getTAImGPS(void)
          throw(InvalidRequest);
 
 
@@ -183,190 +178,135 @@ namespace gpstk
       ///------ Methods to convert between different time systems ------//
 
 
-         /// Convert GPST to UTC.
-      CommonTime convertGPST2UTC(const CommonTime& GPST);
+         /// Convert GPS to UTC.
+      CommonTime GPS2UTC(const CommonTime& GPS);
 
 
-         /// Convert UTC to GPST.
-      CommonTime convertUTC2GPST(const CommonTime& UTC);
+         /// Convert UTC to GPS.
+      CommonTime UTC2GPS(const CommonTime& UTC);
 
 
          /// Convert UT1 to UTC.
-      CommonTime convertUT12UTC(const CommonTime& UT1);
+      CommonTime UT12UTC(const CommonTime& UT1);
 
 
          /// Convert UTC to UT1.
-      CommonTime convertUTC2UT1(const CommonTime& UTC);
+      CommonTime UTC2UT1(const CommonTime& UTC);
+      CommonTime UTC2UT1(const CommonTime& UTC, const double& UT1mUTC);
 
 
          /// Convert TAI to UTC.
-      CommonTime convertTAI2UTC(const CommonTime& TAI);
+      CommonTime TAI2UTC(const CommonTime& TAI);
 
 
          /// Convert UTC to TAI.
-      CommonTime convertUTC2TAI(const CommonTime& UTC);
+      CommonTime UTC2TAI(const CommonTime& UTC);
 
 
          /// Convert TT to UTC.
-      CommonTime convertTT2UTC(const CommonTime& TT);
+      CommonTime TT2UTC(const CommonTime& TT);
 
 
          /// Convert UTC to TT.
-      CommonTime convertUTC2TT(const CommonTime& UTC);
+      CommonTime UTC2TT(const CommonTime& UTC);
 
 
 
          /// Convert TDB to UTC.
-//    CommonTime convertTDB2UTC(const CommonTime& TDB);
+//    CommonTime TDB2UTC(const CommonTime& TDB);
 
 
          /// Convert UTC to TDB.
-//    CommonTime convertUTC2TDB(const CommonTime& UTC);
+//    CommonTime UTC2TDB(const CommonTime& UTC);
+
+
+      ///------ Methods to compute eop corrections for tide effects ------//
+
+         /// Evaluate the effects of zonal earth tides on the rotation of the
+         /// earth, see IERS Conventions 2010.
+      Vector<double> RG_ZONT2(const CommonTime& TT);
+
+
+         /// Provide the diurnal/subdiurnal tidal effects on polar motions ("),
+         /// UT1 (s) and LOD (s), in time domain.
+      Vector<double> PMUT1_OCEANS(const CommonTime& UTC);
+
+
+         /// Provide the diurnal lunisolar effect on polar motion ("), in time
+         /// domain.
+      Vector<double> PMSDNUT2(const CommonTime& UTC);
+
+
+         /// Evaluate the model of subdiurnal libration in the axial component
+         /// of rotation, expressed by UT1 and LOD.
+      Vector<double> UTLIBR(const CommonTime& UTC);
 
 
 
       ///------ Methods to compute reference system transformation ------//
 
 
-         /**Computes the mean obliquity of the ecliptic.
-          *
-          * @param   Mjd_TT    Modified Julian Date (Terrestrial Time)
-          * @return            Mean obliquity of the ecliptic
-          */
-      double MeanObliquity(double Mjd_TT);
+         /// X,Y coordinates of celestial intermediate pole from series based
+         /// on IAU 2006 precession and IAU 2000A nutation.
+      void XY06(const CommonTime& tt, double& x, double& y);
 
 
-         /**Transformation of equatorial to ecliptical coordinates.
-          *
-          *@param Mjd_TT    Modified Julian Date (Terrestrial Time)
-          *@return          Transformation matrix
-          */
-      Matrix<double> EclMatrix(double Mjd_TT);
+         /// The CIO locator s, positioning the Celestial Intermediate Origin on
+         /// the equator of the Celestial Intermediate Pole, given the CIP's X,Y
+         /// coordinates. Compatible with IAU 2006/2000A precession-nutation.
+      double S06(const CommonTime& tt, const double& x, const double& y);
 
 
-         /**Precession transformation of equatorial coordinates.
-          *
-          *@param Mjd_1     Epoch given (Modified Julian Date TT)
-          *@param MjD_2     Epoch to precess to (Modified Julian Date TT)
-          *@return          Precession transformation matrix
-          */
-      Matrix<double> PrecMatrix(double Mjd_1, double Mjd_2);
+         /// Form the celestial to intermediate-frame-of-date matrix given the CIP
+         /// X,Y and the CIO locator s.
+      Matrix<double> C2IXYS(const double& x, const double& y, const double& s);
 
 
-         /**Nutation in longitude and obliquity.
-          *
-          *@param  Mjd_TT    Modified Julian Date (Terrestrial Time)
-          *@return           Nutation matrix
-          */
-      void NutAngles(double Mjd_TT, double& dpsi, double& deps);
+         /// Earth rotation angle (IAU 2000 model).
+      double ERA00(const CommonTime& ut1);
 
 
-         /**Transformation from mean to true equator and equinox.
-          *
-          *@param Mjd_TT    Modified Julian Date (Terrestrial Time)
-          *@return          Nutation matrix
-          */
-      Matrix<double> NutMatrix(double Mjd_TT);
+         /// The TIO locator s', positioning the Terrestrial Intermediate Origin
+         /// on the equator of the Celestial Intermediate Pole.
+      double SP00(const CommonTime& tt);
 
 
-         /**Computation of the equation of the equinoxes.
-          *
-          *@param  Mjd_TT    Modified Julian Date (Terrestrial Time)
-          *@return           Equation of the equinoxes
-
-          * \warning
-          * The equation of the equinoxes dpsi*cos(eps) is the right ascension of the 
-          * mean equinox referred to the true equator and equinox and is equal to the 
-          * difference between apparent and mean sidereal time.
-          */
-      double EqnEquinox(double Mjd_TT);
+         /// Form the matrix of polar motion for a given date, IAU 2000.
+      Matrix<double> POM00(const double& xp, const double& yp, const double& sp);
 
 
-         /**Greenwich Mean Sidereal Time.
-          *
-          *@param  Mjd_UT1   Modified Julian Date UT1
-          *@return           GMST in [rad]
-          */
-      double GMST(double Mjd_UT1);
+         /// Transformation matrix from CRS to TRS coordinates for a given date
+      Matrix<double> C2TMatrix(const CommonTime& UTC);
+
+   
+         /// Transformation matrix form TRS to CRS coordinates for a given date
+      Matrix<double> T2CMatrix(const CommonTime& UTC);
 
 
-         /**Greenwich Apparent Sidereal Time.
-          *
-          *@paam  Mjd_UT1   Modified Julian Date UT1
-          *@return          GMST in [rad]
-          */
-      double GAST(double Mjd_UT1);
+         /// Earth rotation angle first order rate
+      double dERA00(const CommonTime& UT1);
+
+         /// Time derivative of transformation matrix from CRS to TRS coordinates
+         /// for a given date
+      Matrix<double> dC2TMatrix(const CommonTime& UTC);
+
+   
+         /// Time derivative of transformation matrix from TRS to CRS coordinates
+         /// for a given date
+      Matrix<double> dT2CMatrix(const CommonTime& UTC);
 
 
-         /* Transformation from true equator and equinox to Earth equator and
-          * Greenwich meridian system.
-          *
-          *@param Mjd_UT1   Modified Julian Date UT1
-          *@return          Greenwich Hour Angle matrix
-          */
-      Matrix<double> GHAMatrix(double Mjd_UT1);
+         /// Greenwich mean sidereal time (consistent with IAU 2006 precession)
+      double GMST06(const CommonTime& UT1, const CommonTime& TT);
 
 
-         /**Transformation from pseudo Earth-fixed to Earth-fixed coordinates
-          * for a given date.
-          *
-          *@param  Mjd_UTC   Modified Julian Date UTC
-          *@return           Pole matrix
-          */
-      Matrix<double> PoleMatrix(double Mjd_UTC);
+         /// Compute doodson's fundamental arguments (BETA)
+         /// and fundamental arguments for nutation (FNUT)
+      void DoodsonArguments(const  CommonTime& UT1,
+                            const  CommonTime& TT,
+                            double BETA[6],
+                            double FNUT[5]         );
 
-
-         /**Transformation from ICRS to ITRS coordinates for a given time.
-          *
-          *@param  GPST      GPS Time
-          *@return           Rotation matrix
-          */
-      Matrix<double> getC2TMatrix(CommonTime& GPST);
-
-
-         /**Transformation from ITRS to ICRS coordinates for a given time.
-          *
-          *@param  GPST      GPS Time
-          *@return           Rotation matrix
-          */
-      Matrix<double> getT2CMatrix(CommonTime& GPST);
-
-
-
-         /**Get the precession matrix.
-          *
-          * \warning You must call 'getC2TMatrix' or, 'getT2CMatrix'
-          * firstly, otherwise, this method will throw 'InvalidRequest'
-          */
-      Matrix<double> getPrecMatrix( void )
-         throw(InvalidRequest);
-
-
-         /**Get the Nutation matrix.
-          *
-          * \warning You must call 'getC2TMatrix' or, 'getT2CMatrix'
-          * firstly, otherwise, this method will throw 'InvalidRequest'
-          */
-      Matrix<double> getNutMatrix( void )
-         throw(InvalidRequest);
-
-
-         /**Get the Nutation matrix.
-          *
-          * \warning You must call 'getC2TMatrix' or, 'getT2CMatrix'
-          * firstly, otherwise, this method will throw 'InvalidRequest'
-          */
-      Matrix<double> getThetaMatrix( void )
-         throw(InvalidRequest);
-
-
-         /**Get the Nutation matrix.
-          *
-          * \warning You must call 'getC2TMatrix' or, 'getT2CMatrix'
-          * firstly, otherwise, this method will throw 'InvalidRequest'
-          */
-      Matrix<double> getPiMatrix( void )
-         throw(InvalidRequest);
 
         /**Normalize angle into the range -PI <= a <= +PI.
          *
@@ -407,6 +347,7 @@ namespace gpstk
       virtual ~ReferenceSystem() {};
 
 
+   private:
 
          /// Pointer to the EOPDataStore
       EOPDataStore* pEopStore;
@@ -414,22 +355,6 @@ namespace gpstk
 
          /// Pointer to the leap second store 
       LeapSecStore* pLeapSecStore;
-
-
-         /// Precession Matrix
-      Matrix<double> P;
-
-
-         /// Nutation Matrix
-      Matrix<double> N;
-
-
-         /// Rotation Matrix
-      Matrix<double> Theta;
-
-
-         /// Polar motion matrix
-      Matrix<double> Pi;
 
 
          /// whether the transformation matrix is prepared

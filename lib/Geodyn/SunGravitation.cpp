@@ -17,36 +17,30 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
 /**
- * @file MoonForce.cpp
- * This class calculate the gravitational effect of the moon.
+ * @file SunGravitation.cpp
+ * This class calculate the gravitational effect of the Sun.
  */
 
-#include "MoonForce.hpp"
-#include "IERSConventions.hpp"
+#include "SunGravitation.hpp"
 #include "GNSSconstants.hpp"
 
 using namespace std;
 
 namespace gpstk
 {
-
-   MoonForce::MoonForce()
-      : mu(GM_MOON)
-   {}
-
-
+   
       /* Call the relevant methods to compute the acceleration.
-      * @param utc  Time reference class
-      * @param rb   Body reference class
-      * @param sc   Spacecraft parameters and state
-      * @return the acceleration [m/s^s]
-      */
-   void MoonForce::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
+       * @param utc Time reference class
+       * @param rb  Body reference class
+       * @param sc  Spacecraft parameters and state
+       * @return the acceleration [m/s^s]
+       */
+   void SunGravitation::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
       /* Oliver P69 and P248
        * a = GM*( (s-r)/norm(s-r)^3 - s/norm(s)^3 )
@@ -56,25 +50,36 @@ namespace gpstk
 
       Vector<double> r_sat = sc.R();
 
-      // Geocentric position of moon
-      Vector<double> r_moon = J2kPosition(UTC2TT(utc), SolarSystem::Moon);
-      double m( norm(r_moon) );
-      double m3( m*m*m );
+      // Geocentric position of sun
+      double rv_sun[6] = {0.0};     // unit: km, km/day
+      double tt = JulianDate( pRefSys->UTC2TT(utc) ).jd;
+      pSolSys->computeState(tt,
+                            SolarSystem::Sun,
+                            SolarSystem::Earth,
+                            rv_sun);
+      Vector<double> r_sun(3,0.0);  // unit: km
+      r_sun(0) = rv_sun[0];
+      r_sun(1) = rv_sun[1];
+      r_sun(2) = rv_sun[2];
+      r_sun *= 1000.0;              // unit: m
 
-      // Distance from satellite to moon
-      Vector<double> dist(r_moon-r_sat);
+      double s( norm(r_sun) );
+      double s3( s*s*s );
+
+      // Distance from satellite to sun
+      Vector<double> dist(r_sun-r_sat);
       double d( norm(dist) );
       double d3( d*d*d );
       double d5( d3*d*d );
 
       // a
-      a = mu * (dist/d3 - r_moon/m3);
+      a = GM_SUN * (dist/d3 - r_sun/s3);
 
       // da_dr
       Matrix<double> I = ident<double>(3);
-      da_dr = -mu * (I/d3 - 3.0*outer(dist,dist)/d5);
+      da_dr = -GM_SUN * (I/d3 - 3.0*outer(dist,dist)/d5);
 
-//      cout << "df_moon/dr: " << endl;
+//      cout << "df_sun/dr: " << endl;
 //      cout << setprecision(15) << da_dr << endl;
 
       // da_dv
@@ -82,7 +87,6 @@ namespace gpstk
 
       // da_dp
       
-   }  // End of method 'MoonForce::doCompute()'
-
+   }  // End of method 'SunGravitation::doCompute()'
 
 }  // End of namespace 'gpstk'

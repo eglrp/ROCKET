@@ -154,11 +154,11 @@ namespace gpstk
          // Unexpected, never go here
       }
 
-      // GeoSun
-      fmc.pGeoSun = new SunForce();
-
       // GeoMoon
-      fmc.pGeoMoon = new MoonForce();
+      fmc.pGeoMoon = new MoonGravitation();
+
+      // GeoSun
+      fmc.pGeoSun = new SunGravitation();
 
       // SRP
       if(fmc.srpModel == SRPM_ROCK)

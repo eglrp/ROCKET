@@ -35,8 +35,8 @@
 #include "ForceModelList.hpp"
 
 #include "EarthGravitation.hpp"
-#include "SunForce.hpp"
-#include "MoonForce.hpp"
+#include "MoonGravitation.hpp"
+#include "SunGravitation.hpp"
 #include "SolarPressure.hpp"
 #include "RelativityEffect.hpp"
 
@@ -56,7 +56,6 @@ namespace gpstk
          /// Valid gravity models
       enum GravityModel
       {
-         GM_EGM96,
          GM_EGM08
       };
 
@@ -90,11 +89,11 @@ namespace gpstk
          // consuming
          
          EarthGravitation* pGeoEarth;
-         
-         SunForce* pGeoSun;
-         
-         MoonForce* pGeoMoon;
-         
+
+         MoonGravitation* pGeoMoon;
+
+         SunGravitation* pGeoSun;
+
          SolarPressure* pSolarPressure;
 
          RelativityEffect* pRelEffect;
@@ -106,7 +105,7 @@ namespace gpstk
             solarPressure = false;
             relEffect = false;
 
-            grvModel = GM_EGM96;
+            grvModel = GM_EGM08;
             grvDegree = 1;
             grvOrder = 1;
 
@@ -154,7 +153,7 @@ namespace gpstk
          // Methods to configure the orbit perturbation force models
          // call 'reset()' before call these methods
 
-      SatOrbit& enableGeopotential(SatOrbit::GravityModel model = SatOrbit::GM_EGM96,
+      SatOrbit& enableGeopotential(SatOrbit::GravityModel model = SatOrbit::GM_EGM08,
                                    const int& maxDegree = 1,
                                    const int& maxOrder = 1,
                                    const bool& solidTide = false,

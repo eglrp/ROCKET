@@ -34,8 +34,8 @@
 // Class to deal with civil time
 #include "CivilTime.hpp"
 
-// Functions to deal with IERS Conventions
-#include "IERSConventions.hpp"
+// Class to deal with reference system
+#include "ReferenceSystem.hpp"
 
 // Class to deal with EGM08 gravity model
 #include "EGM08GravityModel.hpp"
@@ -90,10 +90,20 @@ public:
    }
 
    // Set EGM
-   inline OrbitEOM& setEGM(string file, int degree, int order)
+   inline OrbitEOM& setEGM(const string& file,
+                           const int& degree,
+                           const int& order)
    {
       egm.loadEGMFile(file);
       egm.setDesiredDegreeOrder(degree, order);
+
+      return (*this);
+   }
+
+   // Set ReferenceSystem
+   inline OrbitEOM& setReferenceSystem(ReferenceSystem& refSys)
+   {
+      egm.setReferenceSystem(refSys);
 
       return (*this);
    }
@@ -269,11 +279,14 @@ void orbsim::spinUp()
 
 void orbsim::process()
 {
+      // EOP Data Store
+   EOPDataStore eopDataStore;
+
       // EOP file
    string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
    try
    {
-      LoadIERSEOPFile(eopFile);
+      eopDataStore.loadIERSFile(eopFile);
    }
    catch(...)
    {
@@ -282,9 +295,10 @@ void orbsim::process()
       return;
    }
 
-   cout << "IERS LS File" << endl;
+      // Leap Sec Store
+   LeapSecStore leapSecStore;
 
-      // LeapSecond file
+      // Leap Second file
    string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
 
    cout << lsFile << endl;
@@ -293,11 +307,7 @@ void orbsim::process()
 
    try
    {
-      LoadIERSLSFile(lsFile);
-
-   cout << "orb initialTime: " << lsDataTable.getInitialTime() << endl;
-   cout << "orb finalTime: " << lsDataTable.getFinalTime() << endl;
-
+      leapSecStore.loadFile(lsFile);
    }
    catch(...)
    {
@@ -306,24 +316,30 @@ void orbsim::process()
       return;
    }
 
-   cout << "time" << endl;
+      // Reference System
+   ReferenceSystem rs;
+   rs.setEOPDataStore(eopDataStore);
+   rs.setLeapSecStore(leapSecStore);
 
       // Initial time
-   int    year  = confReader.getValueAsInt("Year", "DEFAULT");
-   int    month = confReader.getValueAsInt("Month", "DEFAULT");
-   int    day   = confReader.getValueAsInt("Day", "DEFAULT");
-   int    hour  = confReader.getValueAsInt("Hour", "DEFAULT");
-   int    min   = confReader.getValueAsInt("Minute", "DEFAULT");
-   double sec   = confReader.getValueAsDouble("Second", "DEFAULT");
+   int    year = confReader.getValueAsInt("Year",     "DEFAULT");
+   int    mon  = confReader.getValueAsInt("Month",    "DEFAULT");
+   int    day  = confReader.getValueAsInt("Day",      "DEFAULT");
+   int    hour = confReader.getValueAsInt("Hour",     "DEFAULT");
+   int    min  = confReader.getValueAsInt("Minute",   "DEFAULT");
+   double sec  = confReader.getValueAsDouble("Second","DEFAULT");
 
-   CivilTime ct(year,month,day,hour,min,sec, TimeSystem::UTC);
+   CivilTime ct(year,mon,day,hour,min,sec, TimeSystem::UTC);
+
    CommonTime utc0( ct.convertToCommonTime() );
- 
+
       // Transform matrix at utc0
-   Matrix<double> c2t( C2TMatrix(utc0) );
+   Matrix<double> c2t( rs.C2TMatrix(utc0) );
    Matrix<double> t2c( transpose(c2t) );
-   Matrix<double> dc2t( dC2TMatrix(utc0) );
+   Matrix<double> dc2t( rs.dC2TMatrix(utc0) );
    Matrix<double> dt2c( transpose(dc2t) );
+
+//   cout << c2t << endl;
 
       // Initial state in ITRS
    double rx = confReader.getValueAsDouble("Rx", "DEFAULT");
@@ -352,9 +368,9 @@ void orbsim::process()
    Spacecraft sc;
 
       // Orbit configuration
-   string egmFile = confReader.getValue("EGM08File", "DEFAULT");
-   int    degree  = confReader.getValueAsInt("EGM_Degree", "DEFAULT");
-   int    order   = confReader.getValueAsInt("EGM_Order", "DEFAULT");
+   string egmFile = confReader.getValue("EGM08File",        "DEFAULT");
+   int    degree  = confReader.getValueAsInt("EGM_Degree",  "DEFAULT");
+   int    order   = confReader.getValueAsInt("EGM_Order",   "DEFAULT");
 
    OrbitEOM orbit;
    orbit.setRefEpoch(utc0);
@@ -368,6 +384,8 @@ void orbsim::process()
 
       return;
    }
+
+   orbit.setReferenceSystem(rs);
 
       // Orbit integrator
    RungeKuttaFehlberg rkf;
@@ -421,8 +439,8 @@ void orbsim::process()
       CommonTime utc(utc0+t0);
 
          // Current transform matrix
-      c2t = C2TMatrix(utc);
-      dc2t = dC2TMatrix(utc);
+      c2t = rs.C2TMatrix(utc);
+      dc2t = rs.dC2TMatrix(utc);
 
          // Current state in ICRS
       Vector<double> rv_icrs(rv0_icrs);
