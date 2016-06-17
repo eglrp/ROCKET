@@ -143,7 +143,7 @@ int main(void)
     }
 
     // Transform matrix
-    Matrix<double> c2t ( refSys.C2TMatrix(utc) );
+    Matrix<double> c2t ( refSys.C2TMatrix(utc)  );
     // Transform matrix time dot
     Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
 

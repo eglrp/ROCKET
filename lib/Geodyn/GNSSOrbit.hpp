@@ -87,7 +87,7 @@ namespace gpstk
          /// Spacecraft object
       Spacecraft sc;
 
-         /// Earth Body
+         /// EarthBody object
       EarthBody eb;
 
          /// Force models

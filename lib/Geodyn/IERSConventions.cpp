@@ -22,8 +22,8 @@
 //============================================================================
 
 /**
- * @file IERSConventions2003.cpp
- * IERS Conventions 2003
+ * @file IERSConventions.cpp
+ * IERS Conventions
  */
 
 #include "IERSConventions.hpp"
