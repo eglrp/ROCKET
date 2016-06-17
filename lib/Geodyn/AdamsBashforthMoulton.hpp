@@ -92,8 +92,8 @@ namespace gpstk
       /// Real implementation of abm8
       void integrateTo(std::vector< double >&         currentTime,
                        std::vector< Vector<double> >& currentState,
-                       EquationOfMotion*         peom,
-                       double                    nextTime);
+                       EquationOfMotion*              peom,
+                       double                         nextTime);
 
 
    private:
