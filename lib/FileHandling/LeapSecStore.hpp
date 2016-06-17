@@ -39,6 +39,7 @@
 #include <map>
 #include "CommonTime.hpp"
 
+using namespace std;
 
 namespace gpstk
 {
@@ -71,10 +72,14 @@ namespace gpstk
 
 
          /// Default constructor
-      LeapSecStore()
-         : initialTime(CommonTime::END_OF_TIME),
-           finalTime(CommonTime::BEGINNING_OF_TIME)
-      {}
+      LeapSecStore(CommonTime iniTime = CommonTime::END_OF_TIME,
+                   CommonTime finTime = CommonTime::BEGINNING_OF_TIME)
+         : initialTime(iniTime),
+           finalTime(finTime)
+      {
+         cout << "constructor initi:"<< initialTime << endl;
+         cout << "constructor final:"<< finalTime << endl;
+      }
 
 
          /// Load the leap second data from input file

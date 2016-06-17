@@ -59,100 +59,108 @@ namespace gpstk
 	 * A typical way to use this class follows:
 	 *
 	 * @code
-	 * rnssRinex gRin;
+    *
+	 * gnssRinex gRin;
 	 * CC2NONCC cc2noncc;
 	 * cc2noncc.setRecType("TRIMBLE 4000SSE");
-	 * cc2noncc.setDCBFile("P1C11001.DCB");
+	 * cc2noncc.loadDCBFile("P1C11001.DCB");
 	 * cc2noncc.setRecTypeFile("receiver_bernese.lis");
 	 *
 	 * while(rin >> gRin)
 	 * {
-	 *	 gRin >> cc2noncc;
+	 *	   gRin >> cc2noncc;
 	 * }
-	 *
+    *
 	 * @endcode
+    *
+    * @sa 
+    *
 	 */
 	class CC2NONCC : public ProcessingClass
 	{
-		public :
+	   public :
 
-			  // Default constructr
-			CC2NONCC()
-            :copyC1ToP1(false)
+	        // Default constructr
+	      CC2NONCC()
+            :copyC1ToP1(false)                          
          {};
 
-			
-			  /** Sets type of receiver
-			   * @param  rectype    Type of receiver
-			   */
-			virtual CC2NONCC& setRecType(const std::string& rectype);
+	      
+	        /** Sets type of receiver
+	         * @param  rectype    Type of receiver
+	         */
+	      virtual CC2NONCC& setRecType(const std::string& rectype);
 
-			  /** Sets name of file containing DCBs data.
-			   * @param  fileP1C1    Name of the file containing DCB(P1-C1)
-			   */
-			virtual CC2NONCC& setDCBFile(const std::string& fileP1C1);
+	        /** Sets name of file containing DCBs data.
+	         * @param  fileP1C1    Name of the file containing DCB(P1-C1)
+	         */
+	      virtual CC2NONCC& loadDCBFile(const std::string& fileP1C1)
+	      	throw(FileMissingException);
 
-			  /** Sets name of file containing DCBs data.
-			   * @param  fileP1C1    Name of the file containing DCB(P1-C1)
-			   */
-			virtual CC2NONCC& setCopyC1ToP1(bool copy)
+	        /** Sets whether to create P1 .
+	         * @param copy    boolean to indiate whether copy P1
+	         */
+	      virtual CC2NONCC& setCopyC1ToP1(bool copy)
          { copyC1ToP1 = copy; return (*this); }
 
-			  
-			  /** Sets name of file containing DCBs data.
-			   * @param  recfile    Name of the file containing receiver information
-			   * observable type(C1/P2, C1/X2, or P1/P2)
-			   */
-			virtual CC2NONCC& setRecTypeFile(const std::string& recfile);
+	        
+	        /** Sets name of file containing DCBs data.
+	         * @param  recfile    Name of the file containing receiver information
+	         * observable type(C1/P2, C1/X2, or P1/P2)
+	         */
+	      virtual CC2NONCC& setRecTypeFile(const std::string& recfile);
 
-			  /** Returns a satTypeValueMap object, adding the new data generated
-			   *  when calling this object.
-			   *
-			   * @param  time     Epoch corresponding to the data.
-			   * @param  gData    Data object holding the data.
-			   */
-			virtual satTypeValueMap& Process( const CommonTime& time,
-					                          satTypeValueMap& gData)
-				throw(ProcessingException);
+	        /** Returns a satTypeValueMap object, adding the new data generated
+	         *  when calling this object.
+	         *
+	         * @param  time     Epoch corresponding to the data.
+	         * @param  gData    Data object holding the data.
+	         */
+	      virtual satTypeValueMap& Process( const CommonTime& time,
+	      		                            satTypeValueMap& gData)
+	      	throw(ProcessingException);
 
-			  /** Returns a gnssSatTypeValue object, adding the new data
-			   *  generated when calling this object.
-			   *
-			   * @param gData     Data object holding the data.
-			   */
-			virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-				throw(ProcessingException)
-				{ Process(gData.header.epoch, gData.body); return gData; };
+	        /** Returns a gnssSatTypeValue object, adding the new data
+	         *  generated when calling this object.
+	         *
+	         * @param gData     Data object holding the data.
+	         */
+	      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
+	      	throw(ProcessingException)
+	      { Process(gData.header.epoch, gData.body); return gData; };
 
-			  /** Returns a gnssRinex object, adding the new data generated
-			   *  when calling this object.
-			   *
-			   * @param gData     Data object holding the data.
-			   */
-			virtual gnssRinex& Process(gnssRinex& gData)
-				throw(ProcessingException)
-				{ Process(gData.header.epoch, gData.body); return gData; };
-
-
-			  // Returns a string identifying this object.
-			virtual std::string getClassName () const;
+	        /** Returns a gnssRinex object, adding the new data generated
+	         *  when calling this object.
+	         *
+	         * @param gData     Data object holding the data.
+	         */
+	      virtual gnssRinex& Process(gnssRinex& gData)
+	      	throw(ProcessingException)
+	      { Process(gData.header.epoch, gData.body); return gData; };
 
 
-			  // Default deconstructr
-			~CC2NONCC(){};
+	        // Returns a string identifying this object.
+	      virtual std::string getClassName () const;
 
-		private:
 
+	        // Default deconstructr
+	      ~CC2NONCC(){};
+
+
+	   private:
+
+			  // The choice if copy the C1 to P1,if it's true,we will
+			  // copy C1 to P1
          bool copyC1ToP1;
 
-			  // Object to acess DCB data from CODE
-			DCBDataReader dcbP1C1;
+	        // Object to acess DCB data from CODE
+	      DCBDataReader dcbP1C1;
 
-			  // Object to acess receiver code observable type
-			RecTypeDataReader recTypeData;
+	        // Object to acess receiver code observable type
+	      RecTypeDataReader recTypeData;
 
-			std::string recType;
-			
+	      std::string recType;
+	      
 	}; // End of class 'CC2NONCC'
 
 	   // @}

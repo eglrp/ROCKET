@@ -43,6 +43,8 @@
 // Class to do Runge-Kutta-Fehlberg integrator
 #include "RungeKuttaFehlberg.hpp"
 
+#include "LeapSecStore.hpp"
+
 
 using namespace std;
 using namespace gpstk;
@@ -293,12 +295,16 @@ void orbsim::process()
       return;
    }
 
-
       // Leap Sec Store
    LeapSecStore leapSecStore;
 
       // Leap Second file
    string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
+
+   cout << lsFile << endl;
+   cout << "orb initialTime: " << lsDataTable.getInitialTime() << endl;
+   cout << "orb finalTime: " << lsDataTable.getFinalTime() << endl;
+
    try
    {
       leapSecStore.loadFile(lsFile);
@@ -309,7 +315,6 @@ void orbsim::process()
 
       return;
    }
-
 
       // Reference System
    ReferenceSystem rs;
@@ -325,6 +330,7 @@ void orbsim::process()
    double sec  = confReader.getValueAsDouble("Second","DEFAULT");
 
    CivilTime ct(year,mon,day,hour,min,sec, TimeSystem::UTC);
+
    CommonTime utc0( ct.convertToCommonTime() );
 
       // Transform matrix at utc0
@@ -397,6 +403,8 @@ void orbsim::process()
       // Outfile
    string outFile_ECEF  = confReader.getValue("OutFile_ECEF", "DEFAULT");
    string outFile_ECI   = confReader.getValue("OutFile_ECI", "DEFAULT");
+
+   cout << "out file" << endl;
 
    ofstream fout_ECEF;
 
