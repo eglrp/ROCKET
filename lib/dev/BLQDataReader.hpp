@@ -38,6 +38,7 @@
 #include "FFTextStream.hpp"
 #include "StringUtils.hpp"
 #include "Matrix.hpp"
+#include "Exception.hpp"
 
 
 namespace gpstk
@@ -136,6 +137,13 @@ namespace gpstk
       virtual BLQDataReader& clearData()
       { OceanTidesData.clear(); return (*this); };
 
+         /** Method to check whether current station is computed in the data.
+          *
+          * @param station   Station name (case is NOT relevant).
+          *
+          * @return bool whether this station can be found in the data 
+          */
+      virtual bool isValid(const std::string& station);
 
          /** Method to get the ocean tide harmonics corresponding to a
           *  given station.
@@ -148,7 +156,8 @@ namespace gpstk
           * phases (radial, west, south, in degrees). If station is 
           * not found, this method will return a matrix full of zeros.
           */
-      virtual Matrix<double> getTideHarmonics(const std::string& station);
+      virtual Matrix<double> getTideHarmonics(const std::string& station)
+         throw(InvalidRequest);
 
 
          /// Destructor

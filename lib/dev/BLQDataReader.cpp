@@ -191,6 +191,27 @@ namespace gpstk
    }  // End of method 'BLQDataReader::open()'
 
 
+      /** Method to check whether current station is computed in the data.
+       *
+       * @param station   Station name (case is NOT relevant).
+       *
+       * @return bool whether this station can be found in the data 
+       */
+   bool BLQDataReader::isValid(const std::string& station)
+   {
+         // First, look if such station exist in data map
+      tideDataIt iter( OceanTidesData.find( StringUtils::upperCase(station) ) );
+      if ( iter != OceanTidesData.end() )
+      {
+            // if found, return true;
+         return true ;
+      }
+      else
+      {
+         return false;
+      };
+   }
+         
 
       /* Method to get the ocean tide harmonics corresponding to a
        * given station.
@@ -204,6 +225,7 @@ namespace gpstk
        * not found, this method will return a matrix full of zeros.
        */
    Matrix<double> BLQDataReader::getTideHarmonics(const std::string& station)
+      throw(InvalidRequest)
    {
 
          // First, look if such station exist in data map
@@ -215,9 +237,9 @@ namespace gpstk
       }
       else
       {
-            // If not, return an empty harmonics matrix
-         Matrix<double> dummy(6,11,0.0);
-         return dummy;
+         
+         InvalidRequest e("can't find this station in current data table!");
+         GPSTK_THROW(e);
       };
 
    }  // End of method 'BLQDataReader::getTideHarmonics()'

@@ -96,6 +96,7 @@ namespace gpstk
       inline SolarPressure& setSolarSystem(SolarSystem& sol)
       {
          pSolSys = &sol;
+         return (*this);
       }
 
 

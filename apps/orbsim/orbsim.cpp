@@ -302,8 +302,6 @@ void orbsim::process()
    string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
 
    cout << lsFile << endl;
-   cout << "orb initialTime: " << lsDataTable.getInitialTime() << endl;
-   cout << "orb finalTime: " << lsDataTable.getFinalTime() << endl;
 
    try
    {

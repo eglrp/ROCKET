@@ -30,6 +30,14 @@
 //  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007, 2008
 //
 //============================================================================
+//
+//  Revision
+// 
+//  2016/06/12
+//  Change the default and common constructor.
+//  Throw InvalidRequest if station is not found in the data table.
+//
+//============================================================================
 
 
 
@@ -61,8 +69,11 @@ namespace gpstk
        *      // Object to store results
        *   Triple tides;
        *
+       *      // Read and store the ocean loading BLQ data
+       *   BLQDataReader blqStore;
+       *
        *      // Load ocean loading object with ocean tides harmonics data
-       *   OceanLoading ocean("EBRE.BLQ");
+       *   OceanLoading ocean();
        *
        *      // Compute ocean loading effect in Up-East-North [UEN]
        *      // reference frame
@@ -80,16 +91,19 @@ namespace gpstk
    {
    public:
 
-         /** Common constructor
-          *
-          * @param filename  Name of BLQ file containing ocean tide
-          *                  harmonics data.
-          *
-          * @warning If filename is not given, this class will look for
-          * a file named "oceanloading.blq" in the current directory.
+         /** Default constructor
           */
-      OceanLoading(std::string filename="oceanloading.blq")
-         : blqData(filename), fileData(filename) {};
+      OceanLoading()
+         : pBLQStore(NULL)
+      {};
+
+         /** Common Constructor
+          *
+          * @param blqDataStore  Object to store the OceanLoading data
+          */
+      OceanLoading(BLQDataReader& blqStore)
+         : pBLQStore(&blqStore)
+      {};
 
 
          /** Returns the effect of ocean tides loading (meters) at the given
@@ -110,18 +124,6 @@ namespace gpstk
          throw(InvalidRequest);
 
 
-         /// Returns the name of BLQ file containing ocean tides harmonics data.
-      virtual std::string getFilename(void) const
-      { return fileData; };
-
-
-         /** Sets the name of BLQ file containing ocean tides harmonics data.
-          *
-          * @param name      Name of BLQ tides harmonics data file.
-          */
-      virtual OceanLoading& setFilename(const std::string& name);
-
-
          /// Destructor
       virtual ~OceanLoading() {};
 
@@ -130,11 +132,7 @@ namespace gpstk
 
 
          /// Object to read BLQ ocean tides harmonics data file
-      BLQDataReader blqData;
-
-
-         /// Name of BLQ file containing ocean tides harmonics data.
-      std::string fileData;
+      BLQDataReader *pBLQStore;
 
 
          /** Compute the value of the corresponding astronomical arguments,

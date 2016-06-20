@@ -48,7 +48,7 @@ namespace gpstk
  
       /// Default constructor
       SunGravitation()
-         : pSolSys(NULL), pRefSys(NULL), isPrepared(NULL)
+         : pSolSys(NULL), pRefSys(NULL), isPrepared(false)
       {}
 
 
