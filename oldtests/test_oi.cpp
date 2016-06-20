@@ -2,7 +2,8 @@
 
 #include <iostream>
 
-#include "IERSConventions.hpp"
+#include "ReferenceSystem.hpp"
+#include "SolarSystem.hpp"
 
 #include "SP3EphemerisStore.hpp"
 
@@ -23,8 +24,6 @@
 
 #include "RungeKuttaFehlberg.hpp"
 
-#include "SatOrbitPropagator.hpp"
-
 #include "Epoch.hpp"
 
 
@@ -33,179 +32,194 @@ using namespace gpstk;
 
 
 int main(void)
-{
-    // IERS EOP file
-    try
-    {
-        LoadIERSEOPFile("../../ROCKET/tables/finals2000A.all");
-    }
-    catch(...)
-    {
-        cerr << "IERS EOP File Load Error." << endl;
+{ 
+   // EOP Data
+   EOPDataStore eopDataStore;
 
-        return 1;
-    }
+   string eopFile("../../ROCKET/tables/finals2000A.all");
 
-    // IERS LeapSecond file
-    try
-    {
-        LoadIERSLSFile("../../ROCKET/tables/Leap_Second_History.dat");
-    }
-    catch(...)
-    {
-        cerr << "IERS LeapSecond File Load Error." << endl;
+   try
+   {
+      eopDataStore.loadIERSFile(eopFile); 
+   }
+   catch(...)
+   {
+      cerr << "IERS EOP File Load Error." << endl;
 
-        return 1;
-    }
+      return 1;
+   }
+ 
+   // LeapSecond Data
+   LeapSecStore leapSecStore;
 
-    // JPL Ephemeris file
-    try
-    {
-        LoadJPLEphFile("../../ROCKET/tables/1980_2040.405");
-    }
-    catch(...)
-    {
-        cerr << "JPL Ephemeris File Load Error." << endl;
+   string lsFile("../../ROCKET/tables/Leap_Second_History.dat");
 
-        return 1;
-    }
+   try
+   {
+      leapSecStore.loadFile(lsFile);
+   }
+   catch(...)
+   {
+      cerr << "IERS LeapSecond File Load Error." << endl;
 
+      return 1;
+   }
 
-    // Initial time
-    CivilTime cv0(2015,1,1,12,0,0.0, TimeSystem::GPS);
-    CommonTime gps0( cv0.convertToCommonTime() );
-    CommonTime utc0( GPS2UTC(gps0) );
+   // Reference System
+   ReferenceSystem refSys;
+   refSys.setEOPDataStore(eopDataStore);
+   refSys.setLeapSecStore(leapSecStore);
 
-    // Satellite ID
-    SatID sat(1, SatID::systemGPS);
+   // Ephemeris Data
+   SolarSystem solSys;
 
-    // IGS SP3 file
-    SP3EphemerisStore sp3Eph;
-    sp3Eph.rejectBadPositions(true);
-    sp3Eph.setPosGapInterval(900+1);
-    sp3Eph.setPosMaxInterval(9*900+1);
+   string ephFile("../../ROCKET/tables/1980_2040.405");
+   try
+   {
+      solSys.initializeWithBinaryFile(ephFile);
+   }
+   catch(...)
+   {
+      cerr << "JPL Ephemeris File Load Error." << endl;
 
-    try
-    {
-        sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18253.sp3");
-        sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18254.sp3");
-        sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18255.sp3");
-    }
-    catch(...)
-    {
-        cerr << "SP3 File Load Error." << endl;
-
-        return 1;
-    }
-
-    // r0, v0 in ITRS
-    Vector<double> r0_itrs, v0_itrs;
-    try
-    {
-        r0_itrs = sp3Eph.getXvt(sat, gps0).x.toVector();
-        v0_itrs = sp3Eph.getXvt(sat, gps0).v.toVector();
-    }
-    catch(...)
-    {
-        cerr << "Get r0 and v0 from SP3 file error." << endl;
-
-        return 1;
-    }
-
-    // Transform matrix between ICRS and ITRS
-    Matrix<double> c2t( C2TMatrix(utc0) );
-    Matrix<double> dc2t( dC2TMatrix(utc0) );
-
-    // r0, v0 in ICRS
-    Vector<double> r0_icrs, v0_icrs;
-    r0_icrs = transpose(c2t) * r0_itrs;
-    v0_icrs = transpose(c2t) * v0_itrs + transpose(dc2t) * r0_itrs;
+      return 1;
+   }
 
 
-    // Initial state: r0, v0
-    Vector<double> rv0(6,0.0);
-    rv0(0) = r0_icrs(0); rv0(1) = r0_icrs(1); rv0(2) = r0_icrs(2);
-    rv0(3) = v0_icrs(0); rv0(4) = v0_icrs(1); rv0(5) = v0_icrs(2);
+   // Initial time
+   CivilTime cv0(2015,1,1,12,0,0.0, TimeSystem::GPS);
+   CommonTime gps0( cv0.convertToCommonTime() );
+   CommonTime utc0( refSys.GPS2UTC(gps0) );
 
-    cout << fixed << setprecision(6);
-    cout << rv0 << endl;
+   // Satellite ID
+   SatID sat(1, SatID::systemGPS);
 
-    // Intial state: p0
-    Vector<double> p0(9,0.0);
-    p0[0] = 0.999989506;
-    p0[1] = -0.000367154;
-    p0[2] = -0.003625165;
-    p0[3] = 0.015272206;
-    p0[4] = 0.000216184;
-    p0[5] = -0.000701573;
-    p0[6] = 0.000985358;
-    p0[7] = 0.009091403;
-    p0[8] = -0.001752761;
+   // IGS SP3 file
+   SP3EphemerisStore sp3Eph;
+   sp3Eph.rejectBadPositions(true);
+   sp3Eph.setPosGapInterval(900+1);
+   sp3Eph.setPosMaxInterval(9*900+1);
 
-    // SatData file
-    SatDataReader satData;
-    try
-    {
-        satData.open("../../ROCKET/tables/SatInfo.txt");
-    }
-    catch(...)
-    {
-        cerr << "SatData file open error." << endl;
+   try
+   {
+      sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18253.sp3");
+      sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18254.sp3");
+      sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18255.sp3");
+   }
+   catch(...)
+   {
+      cerr << "SP3 File Load Error." << endl;
 
-        return 1;
-    }
+      return 1;
+   }
 
-    // Spacecraft
-    Spacecraft sc;
-    sc.setSatID(sat);
-    sc.setEpoch(utc0);
-    sc.setBlock(satData.getBlock(sat,utc0));
-    sc.setMass(satData.getMass(sat,utc0));
-    sc.initStateVector(rv0, p0);
+   // r0, v0 in ITRS
+   Vector<double> r0_itrs, v0_itrs;
+   try
+   {
+      r0_itrs = sp3Eph.getXvt(sat, gps0).x.toVector();
+      v0_itrs = sp3Eph.getXvt(sat, gps0).v.toVector();
+   }
+   catch(...)
+   {
+      cerr << "Get r0 and v0 from SP3 file error." << endl;
 
+      return 1;
+   }
 
-    // Configurations
-    SatOrbit so;
-    so.setRefEpoch(utc0);
-    so.setSpacecraft(sc);
+   // Transform matrix between ICRS and ITRS
+   Matrix<double> c2t ( refSys.C2TMatrix(utc0)  );
+   Matrix<double> dc2t( refSys.dC2TMatrix(utc0) );
 
-    so.enableGeopotential(SatOrbit::GM_EGM08, 12, 12, true, false, false);
-    so.enableThirdBodyPerturbation(true, true);
-    so.enableSolarRadiationPressure(SatOrbit::SRPM_CODE, true);
-    so.enableRelativeEffect(true);
-
-    // State to be estimated: p0
-    set<ForceModel::ForceModelType> fmt;
-    fmt.insert(ForceModel::D0);
-    fmt.insert(ForceModel::Y0);
-    fmt.insert(ForceModel::B0);
-    fmt.insert(ForceModel::Dc);
-    fmt.insert(ForceModel::Ds);
-    fmt.insert(ForceModel::Yc);
-    fmt.insert(ForceModel::Ys);
-    fmt.insert(ForceModel::Bc);
-    fmt.insert(ForceModel::Bs);
-
-    so.setForceModelType(fmt);
-
-//    cout << so.getSpacecraft().P() << endl;
-
-    // Integrator
-    RungeKuttaFehlberg rkf78;
-    rkf78.setStepSize(30.0);
+   // r0, v0 in ICRS
+   Vector<double> r0_icrs, v0_icrs;
+   r0_icrs = transpose(c2t) * r0_itrs;
+   v0_icrs = transpose(c2t) * v0_itrs + transpose(dc2t) * r0_itrs;
 
 
-    // Temp variables
-    Vector<double> state;
+   // Initial state: r0, v0
+   Vector<double> rv0(6,0.0);
+   rv0(0) = r0_icrs(0); rv0(1) = r0_icrs(1); rv0(2) = r0_icrs(2);
+   rv0(3) = v0_icrs(0); rv0(4) = v0_icrs(1); rv0(5) = v0_icrs(2);
 
-    double t(0.0);
-    double tt(12*3600.0);
-    double step(30.0);
+   cout << fixed << setprecision(6);
+   cout << rv0 << endl;
 
-    // Out file
-    ofstream outfile("myorbit.txt");
+   // Intial state: p0
+   Vector<double> p0(9,0.0);
+   p0[0] = 0.999989506;
+   p0[1] = -0.000367154;
+   p0[2] = -0.003625165;
+   p0[3] = 0.015272206;
+   p0[4] = 0.000216184;
+   p0[5] = -0.000701573;
+   p0[6] = 0.000985358;
+   p0[7] = 0.009091403;
+   p0[8] = -0.001752761;
 
-    int i=0;
+   // SatData file
+   SatDataReader satData;
+
+   try
+   {
+      satData.open("../../ROCKET/tables/SatInfo.txt"); 
+   }
+   catch(...) 
+   {
+      cerr << "SatData file open error." << endl;
+
+      return 1;
+   }
+
+   // Spacecraft
+   Spacecraft sc;
+   sc.setSatID(sat);
+   sc.setEpoch(utc0);
+   sc.setBlock(satData.getBlock(sat,utc0));
+   sc.setMass(satData.getMass(sat,utc0));
+   sc.initStateVector(rv0, p0);
+
+   // Configurations
+   SatOrbit so;
+   so.setRefEpoch(utc0);
+   so.setSpacecraft(sc);
+
+   so.enableGeopotential(SatOrbit::GM_EGM08, 12, 12, true, false, false);
+   so.enableThirdBodyPerturbation(true, true);
+   so.enableSolarRadiationPressure(SatOrbit::SRPM_CODE, true);
+   so.enableRelativeEffect(true);
+
+   // State to be estimated: p0
+   set<ForceModel::ForceModelType> fmt;
+   fmt.insert(ForceModel::D0);
+   fmt.insert(ForceModel::Y0);
+   fmt.insert(ForceModel::B0);
+   fmt.insert(ForceModel::Dc);
+   fmt.insert(ForceModel::Ds);
+   fmt.insert(ForceModel::Yc);
+   fmt.insert(ForceModel::Ys);
+   fmt.insert(ForceModel::Bc);
+   fmt.insert(ForceModel::Bs);
+
+   so.setForceModelType(fmt);
+
+//   cout << so.getSpacecraft().P() << endl;
+
+   // Integrator
+   RungeKuttaFehlberg rkf78;
+   rkf78.setStepSize(30.0);
+
+   // Temp variables
+   Vector<double> state;
+
+   double t(0.0);
+   double tt(12*3600.0);
+   double step(30.0);
+
+   // Out file
+   ofstream outfile("myorbit.txt");
+
+   int i=0;
 /*
     while(t < tt)
     {
@@ -253,9 +267,10 @@ int main(void)
 
     }
 */
-    cerr << endl;
 
-    outfile.close();
+   cerr << endl;
 
-    return 0;
+   outfile.close();
+
+   return 0;
 }

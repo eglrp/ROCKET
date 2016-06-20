@@ -388,13 +388,14 @@ void orbsim::process()
       // Orbit integrator
    RungeKuttaFehlberg rkf;
 
-      // Stepsize, unit: second
+      // StepSize, unit: second
    double stepSize = confReader.getValueAsDouble("StepSize", "DEFAULT");
    rkf.setStepSize(stepSize);
 
       // Length, unit: hour
    double length    = confReader.getValueAsDouble("Length", "DEFAULT");
 
+      // t0
    double t0(0.0);
 
       // Outfile
@@ -431,7 +432,7 @@ void orbsim::process()
    cout << "Start of Integration." << endl;
 
       // Loop
-   for(int i=0; i<=int(length*3600/stepSize); ++i)
+   for(int i=0; i<=int(length*3600/900); ++i)
    {
          // Current time
       CommonTime utc(utc0+t0);
@@ -483,11 +484,11 @@ void orbsim::process()
       orbit.setSpacecraft(sc);
 
          // Integration
-      rv_icrs = rkf.integrateTo(t0, rv0_icrs, &orbit, t0+10.0);
+      rkf.integrateTo(t0, rv0_icrs, &orbit, t0+900);
 
          // Update
-      t0 += 10.0;
-      rv0_icrs = rv_icrs;
+//      t0 += stepSize;
+//      rv0_icrs = rv_icrs;
    }
 
    cout << "End of Integration." << endl;

@@ -42,8 +42,7 @@
 */
 
 #include "EarthBody.hpp"
-#include "IERSConventions.hpp"
-#include "GNSSconstants.hpp"
+#include "Epoch.hpp"
 
 namespace gpstk
 {
@@ -52,11 +51,11 @@ namespace gpstk
    double EarthBody::getSpinRate(CommonTime utc)
    {
        // UT1
-       CommonTime ut1( UTC2UT1(utc) );
+       CommonTime ut1( pRefSys->UTC2UT1(utc) );
        // UT1 in MJD
        double MJD_UT1( MJD(ut1).mjd );
 
-       double MJD_T0 = std::floor(MJD_UT1);;
+       double MJD_T0 = std::floor(MJD_UT1);
 
        double Tu   = (MJD_T0  - MJD_J2000) / 36525.0;
 

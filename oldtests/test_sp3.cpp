@@ -1,104 +1,136 @@
 #include <iostream>
 #include <iomanip>
 
+#include "ConfDataReader.hpp"
+
 #include "SP3EphemerisStore.hpp"
-#include "DataStructures.hpp"
-#include "IERSConventions.hpp"
+
+#include "ReferenceSystem.hpp"
 
 using namespace std;
 using namespace gpstk;
 
 int main(void)
 {
-    // sp3 files
-	SP3EphemerisStore sp3Eph;
+   ConfDataReader confReader;
+
+   try
+   {
+      confReader.open("../../ROCKET/oldtests/test.conf");
+   }
+   catch(...)
+   {
+      cerr << "Configuration file open error." << endl;
+
+      return 1;
+   }
+
+   // sp3 files
+   SP3EphemerisStore sp3Eph;
    sp3Eph.rejectBadPositions(true);
 	sp3Eph.setPosGapInterval(901);
 	sp3Eph.setPosMaxInterval(8101);
 
-	try
-	{
-        sp3Eph.loadFile("../../rocket/workplace/igs18253.sp3");
-        sp3Eph.loadFile("../../rocket/workplace/igs18254.sp3");
-        sp3Eph.loadFile("../../rocket/workplace/igs18255.sp3");
-	}
-	catch(...)
-	{
-      cerr << "sp3 file load error." << endl;
+   string sp3File;
+   while( (sp3File=confReader.fetchListValue("IGSSP3List", "DEFAULT")) != "" )
+   {
+      try
+      {
+         sp3Eph.loadFile(sp3File);
+      }
+      catch(...)
+      {
+         cerr << "SP3 File Load Error." << endl;
+
+         return 1;
+      }
+   }
+
+
+   // EOP Data
+   EOPDataStore eopDataStore;
+
+   string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
+   try
+   {
+      eopDataStore.loadIERSFile(eopFile);
+   }
+   catch(...)
+   {
+      cerr << "IERS EOP File Load Error." << endl;
+
       return 1;
-	}
+   }
 
-    try
-    {
-        LoadIERSEOPFile("../../rocket/tables/finals2000A.all");
-    }
-    catch(...)
-    {
-        cerr << "eop file load error." << endl;
-        return 1;
-    }
+   // Leap Second Data
+   LeapSecStore leapSecStore;
 
-    try
-    {
-       LoadIERSLSFile("../../rocket/tables/Leap_Second_History.dat");
-    }
-    catch(...)
-    {
-       cerr << "ls file load error." << endl;
-       return 1;
-    }
+   string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
+   try
+   {
+      leapSecStore.loadFile(lsFile);
+   }
+   catch(...) 
+   {
+      cerr << "IERS LeapSecond File Load Error." << endl;
 
-    CivilTime ct0(2015,1,1,0,0,0.0, TimeSystem::GPS);
-    CommonTime gps0( ct0.convertToCommonTime() );
+      return 1;
+   }
 
-    SatID sat(1,SatID::systemGPS);
+   // Reference System
+   ReferenceSystem refSys;
+   refSys.setEOPDataStore(eopDataStore);
+   refSys.setLeapSecStore(leapSecStore);
 
-    ofstream outfile("sp3orbit.txt");
+   CivilTime ct0(2015,1,1,0,0,0.0, TimeSystem::GPS);
+   CommonTime gps0( ct0.convertToCommonTime() );
 
-    gps0 += 22.0;
-    Vector<double> ecefPos = sp3Eph.getXvt(sat, gps0).x.toVector();
+   SatID sat(1,SatID::systemGPS);
 
-    cout << fixed;
-    cout << ecefPos << endl;
+   ofstream outfile("sp3orbit.txt");
 
-    double dt = 5.0;
+   gps0 += 22.0;
+   Vector<double> ecefPos = sp3Eph.getXvt(sat, gps0).x.toVector();
 
-    for(int i=0; i<=60/int(dt); i++)
-    {
-        CommonTime utc( GPS2UTC(gps0) );
-        Matrix<double> c2t(C2TMatrix(utc));
-        Matrix<double> dc2t(dC2TMatrix(utc));
+   double dt = 5.0;
 
-        Vector<double> sp3Pos(3,0.0), sp3Vel(3,0.0);
-        Vector<double> eciPos(3,0.0), eciVel(3,0.0);
+   for(int i=0; i<=60/int(dt); i++)
+   {
+      CommonTime utc( refSys.GPS2UTC(gps0) );
+      Matrix<double> c2t( refSys.C2TMatrix(utc) );
+      Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
 
-        try
-        {
-            sp3Pos = sp3Eph.getXvt(sat, gps0).x.toVector();
-            sp3Vel = sp3Eph.getXvt(sat, gps0).v.toVector();
+      Vector<double> sp3Pos(3,0.0), sp3Vel(3,0.0);
+      Vector<double> eciPos(3,0.0), eciVel(3,0.0);
 
-            eciPos = transpose(c2t) * sp3Pos;
-            eciVel = transpose(c2t) * sp3Vel + transpose(dc2t) * sp3Pos;
+      try
+      {
+         sp3Pos = sp3Eph.getXvt(sat, gps0).x.toVector();
+         sp3Vel = sp3Eph.getXvt(sat, gps0).v.toVector();
 
-//            if(yds.sod>=3600 && yds.sod<=7200)
-//            {
-                outfile << fixed << setprecision(3);
-                outfile << setw(9)  << gps0.getSecondOfDay()
-                        << setw(12) << eciPos
-//                        << setw(12) << eciVel
-                        << endl;
-//            }
-        }
-        catch(...)
-        {
-            break;
-//            continue;
-        }
+         eciPos = transpose(c2t) * sp3Pos;
+         eciVel = transpose(c2t) * sp3Vel + transpose(dc2t) * sp3Pos;
 
-        gps0 += dt;
-    }
+//         if(yds.sod>=3600 && yds.sod<=7200)
+//         {
+            outfile << fixed << setprecision(3);
+            outfile << setw(9)  << gps0.getSecondOfDay()
+                    << setw(12) << eciPos
+//                    << setw(12) << eciVel
+                    << endl;
+//         }
+      }
+      catch(...)
+      {
+         break;
+//         continue;
+      }
 
-    outfile.close();
+      gps0 += dt;
+
+   }
+
+   outfile.close();
 
 	return 0;
 }

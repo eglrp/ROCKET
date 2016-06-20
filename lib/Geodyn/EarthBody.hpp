@@ -45,6 +45,7 @@
 #define GPSTK_EARTH_BODY_HPP
 
 #include "CommonTime.hpp"
+#include "ReferenceSystem.hpp"
 
 namespace gpstk
 {
@@ -62,12 +63,29 @@ namespace gpstk
 
          /// Default destructor
       virtual ~EarthBody() {}
+
+         /// Set reference system
+      inline EarthBody& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
+
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
       
          /**
           * Returnts the dynamic Earth rotation rate. 
           * @param utc  Time in UTC
           */
       virtual double getSpinRate(CommonTime utc);
+
+   private:
+
+      ReferenceSystem* pRefSys;
 
    }; // End of class 'EarthBody'
 

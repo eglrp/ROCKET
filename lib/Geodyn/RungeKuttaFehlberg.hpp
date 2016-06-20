@@ -17,20 +17,20 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
 /**
 * @file RungeKuttaFehlberg.hpp
-* This class do integrations with Runge Kutta Fehlberg algorithm.
+* This class implements Runge Kutta Fehlberg 7(8)-th order algorithm.
 */
 
 
 #ifndef GPSTK_RUNGE_KUTTA_FEHLBERG_HPP
 #define GPSTK_RUNGE_KUTTA_FEHLBERG_HPP
 
-#include "Integrator.hpp"
+#include "EquationOfMotion.hpp"
 
 
 namespace gpstk
@@ -39,136 +39,133 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /** This class do integrations with Runge Kutta Fehlberg algorithm.
+      /** This class implements Runge Kutta Fehlberg 7(8)-th order algorithm.
        *
-       *  References:
-       *
-       *     NASA Technical Report TR R-352
-       *     Some Experimental Results Concerning The Error Propagation in
-       *     Runge-Kutta type integration formulas
-       *     by Erwin Fehlberg
-       *     October 1970
-       *
-       *@warning  The adaptive have not been finished!!!
        */
-   class RungeKuttaFehlberg : public Integrator
+   class RungeKuttaFehlberg
    {
    public:
-         // Parametera for RKF78
-      struct RKF78Param
+
+      /// Default constructor
+      RungeKuttaFehlberg()
+         : stepSize(75.0),
+           errorTol(1.0e-12)
+      {}
+
+
+      /// Default destructor
+      ~RungeKuttaFehlberg() {}
+
+
+      /// Set step size
+      inline RungeKuttaFehlberg& setStepSize(const double& size)
       {
-         double a[13] ;
-         double b[13][12] ;
-         double c1[13] ;
-         double c2[13] ;
-      };
+         stepSize = size;
 
-   public:
-
-         /// Default constructor
-      RungeKuttaFehlberg();
-
-         /// Default destructor
-      virtual ~RungeKuttaFehlberg()
-      {};
-
-         /// Some test
-      void test();
-
-         /** Take a single integration step.
-          * @param t     tindependent variable (usually the time)
-          * @param y     inputs (usually the state)
-          * @param peom  Object containing the Equations of Motion
-          * @param tf    next time
-          * @return      containing the new state
-          */
-      virtual Vector<double> integrateTo(const double&           t, 
-                                         const Vector<double>&   y, 
-                                         EquationOfMotion*       peom,
-                                         const double&           tf );
-      
-         /// Set accuracy
-      RungeKuttaFehlberg& setAccuracy(const double& accuracy)
-      { accuracyEps = accuracy; return (*this);}
-
-         /// Set minimum stepsize
-      RungeKuttaFehlberg& setMinStepSize(const double& step)
-      { minStepSize = step; return (*this ); }
-      
-         /// Set isAdaptive
-      RungeKuttaFehlberg& setAdaptive(const bool& adaptive = true)
-      { isAdaptive = adaptive; return (*this); }
+         return (*this);
+      }
 
 
-   protected:
+      /// Get step size
+      inline double getStepSize() const
+      {
+         return stepSize;
+      }
 
 
-      Vector<double> integrateFixedStep(const double&           t, 
-                                        const Vector<double>&   y, 
-                                        EquationOfMotion*       peom,
-                                        const double&           tf );
+      /// Set error tolerance
+      inline RungeKuttaFehlberg& setErrorTolerance(const double& tol)
+      {
+         errorTol = tol;
 
-      Vector<double> integrateAdaptive(const double&           t, 
-                                       const Vector<double>&   y, 
-                                       EquationOfMotion*       peom,
-                                       const double&           tf );
-      
+         return (*this);
+      }
 
-         // takes one "quality-controlled" Runge-Kutta-Fehlberg step 
-         // 0 = Success
-         // 1 = Unable to allocate workspace memory
-         // 2 = Stepsize underflow
-      int rkfqcs(double&           x,
-                 Vector<double>&   y,
-                 const double&     htry,
-                 const double&     accuracy,
-                 EquationOfMotion* peom,
-                 Vector<double>&   yscal,
-                 double& hdid,
-                 double& hnext);
-         
-         // RKF78 single step
-         // 0 = Success
-         // 1 = Failed to allocate memory
-      int rkfs78(const double&          x,
-                 const Vector<double>&  y,
-                 const double&          h,
-                 EquationOfMotion*      peom,
-                 Vector<double>&        yout,
-                 Vector<double>&        yerr);
 
-   protected:
-      
-         /// Accuracy
-      double accuracyEps;
+      /// Get error tolerance
+      inline double getErrorTolerance() const
+      {
+         return errorTol;
+      }
 
-         /// Minimum step-size
-      double minStepSize;
 
-         /// Flag if adaptive is used
-      bool isAdaptive;
+      /// Set equation of motion
+//      inline RungeKuttaFehlberg& setEquationOfMotion(EquationOfMotion& eom)
+//      {
+//         peom = &eom;
 
-         ///
-      static const double RKF_EPS;
+//         return (*this);
+//      }
 
-         /// Max step
-      static const double RKF_MAXSTEP;
+
+      /// Get equation of motion
+//      inline EquationOfMotion* getEquationOfMotion() const
+//      {
+//         return peom;
+//      }
+
+
+      /// Set current time
+//      inline RungeKuttaFehlberg& setCurrentTime(const double& time)
+//      {
+//         currentTime = time;
+
+//         return (*this);
+//      }
+
+
+      /// Get current time
+//      inline double getCurrentTime() const
+//      {
+//         return currentTime;
+//      }
+
+
+      /// Set current state
+//      inline RungeKuttaFehlberg& setCurrentState(const Vector<double>& state)
+//      {
+//         currentState = state;
+
+//         return (*this);
+//      }
+
+
+      /// Get current state
+//      inline Vector<double> getCurrentState() const
+//      {
+//         return currentState;
+//      }
+
+
+      /// Real implementation of rkf78
+      void integrateTo(double& currentTime,
+                       Vector<double>& currentState,
+                       EquationOfMotion* peom,
+                       double nextTime);
+
 
    private:
-     
-      /// Object holding all parameters for rkf78
-      const static struct RKF78Param rkf78_param;
-      
-         // Easy accessing RKF78 parameters
-      double A(int i){ return rkf78_param.a[i]; }
 
-      double B(int i, int j){ return rkf78_param.b[i][j]; }
-      
-      double C1(int i){ return rkf78_param.c1[i]; }
+      /// Coefficients of rkf78
+      const static double a[13];
+      const static double b[13][12];
+      const static double c1[11], c2[13];
 
-      double C2(int i){ return rkf78_param.c2[i]; }
-      
-      double DC(int i){ return (rkf78_param.c1[i]-rkf78_param.c2[i]); }
+
+      /// Step size
+      double stepSize;
+
+      /// Error tolerance
+      double errorTol;
+
+      /// Pointer to EquationOfMotion
+//      EquationOfMotion* peom;
+
+      /// Current time
+//      double currentTime;
+
+      /// Current state
+//      Vector<double> currentState;
 
 
    }; // End of class 'RungeKuttaFehlberg'
