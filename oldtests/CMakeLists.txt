@@ -12,15 +12,15 @@ target_link_libraries(test_sp3 rocket)
 add_executable(test_iers test_iers.cpp)
 target_link_libraries(test_iers rocket)
 
-add_executable(test_de405 test_de405.cpp)
-target_link_libraries(test_de405 rocket)
+#add_executable(test_de405 test_de405.cpp)
+#target_link_libraries(test_de405 rocket)
 
-add_executable(test_oi test_oi.cpp)
-target_link_libraries(test_oi rocket)
+#add_executable(test_oi test_oi.cpp)
+#target_link_libraries(test_oi rocket)
 
 add_executable(test_jpl test_jpl.cpp)
 target_link_libraries(test_jpl rocket)
 
-add_executable(test_thirdbody test_thirdbody.cpp)
-target_link_libraries(test_thirdbody rocket)
+#add_executable(test_thirdbody test_thirdbody.cpp)
+#target_link_libraries(test_thirdbody rocket)
 

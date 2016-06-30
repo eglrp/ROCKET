@@ -24,8 +24,7 @@
 
 /**
  * @file CODEPressure.cpp
- * This class provides a CODE model for the influence
- * of solar radiation pressure on a satellite.
+ * Class to do CODE Pressure calculation.
  */
 
 #include "CODEPressure.hpp"
@@ -36,6 +35,12 @@ using namespace std;
 namespace gpstk
 {
 
+      /** Compute acceleration (and related partial derivatives) of CODE
+       *  Pressure.
+       * @param utc     time in UTC
+       * @param rb      earth body
+       * @param sc      spacecraft
+       */
    void CODEPressure::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
        // get satellite block type

@@ -58,7 +58,7 @@ namespace gpstk
       /* Sets name of file containing DCBs data.
        * @param name      Name of the file containing DCB(P1-C1)
        */
-   CC2NONCC& CC2NONCC::setDCBFile(const string& fileP1C1)
+   CC2NONCC& CC2NONCC::loadDCBFile(const string& fileP1C1)
       throw(FileMissingException)
    {
       try

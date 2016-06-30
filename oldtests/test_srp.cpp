@@ -135,7 +135,7 @@ int main(void)
    Spacecraft sc;
    sc.initStateVector(rv, p);
    sc.setSatID(satid);
-   sc.setEpoch(utc);
+   sc.setCurrentTime(utc);
    sc.setBlock( satReader.getBlock(satid,utc) );
    sc.setMass( satReader.getMass(satid,utc) );
 

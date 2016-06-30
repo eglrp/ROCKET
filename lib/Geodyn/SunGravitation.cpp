@@ -23,7 +23,7 @@
 
 /**
  * @file SunGravitation.cpp
- * This class calculate the gravitational effect of the Sun.
+ * Class to do Sun Gravitation calculation.
  */
 
 #include "SunGravitation.hpp"
@@ -34,11 +34,11 @@ using namespace std;
 namespace gpstk
 {
    
-      /* Call the relevant methods to compute the acceleration.
-       * @param utc Time reference class
-       * @param rb  Body reference class
-       * @param sc  Spacecraft parameters and state
-       * @return the acceleration [m/s^s]
+      /** Compute acceleration (and related partial derivatives) of Sun
+       *  Gravitation.
+       * @param utc     time in UTC
+       * @param rb      earth body
+       * @param sc      spacecraft
        */
    void SunGravitation::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {

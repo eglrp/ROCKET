@@ -12,7 +12,7 @@
  * Pole  Tide: IERS 2010
  *
  * Earth Gravitation:
- *    -0.360570588840239 0.422750533046874 -0.081804961226428
+ *    -0.363686534504459 0.420970292801331 -0.076863979498236
  *
  */
 
@@ -111,7 +111,7 @@ int main(void)
     sp3Eph.setPosMaxInterval(9*900+1);
 
     string sp3File;
-    while( (sp3File = confReader.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
+    while( (sp3File = confReader.fetchListValue("IGSSP3List", "DEFAULT")) != "" )
     {
         try
         {

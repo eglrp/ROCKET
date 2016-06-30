@@ -16,19 +16,20 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
-//  Copyright 2004, The University of Texas at Austin
+//  Copyright 
 //
 //  Kaifa Kuang - Wuhan University . 2015
 //
 //============================================================================
 
 /**
- * @file CODEPressure.hpp
- * Class to do CODE Pressure calculation.
+ * @file ROCKPressure.hpp
+ * This class provides a ROCK model for the influence
+ * of solar radiation pressure on a satellite.
  */
 
-#ifndef GPSTK_CODE_PRESSURE_HPP
-#define GPSTK_CODE_PRESSURE_HPP
+#ifndef GPSTK_ROCK_PRESSURE_HPP
+#define GPSTK_ROCK_PRESSURE_HPP
 
 #include "SolarPressure.hpp"
 
@@ -38,33 +39,31 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /** Class to do CODE Pressure calculation.
+      /**
+       * This class provides a ROCK model for the influence
+       * of solar radiation pressure on a satellite.
+       * 
        */
-   class CODEPressure : public SolarPressure
+   class ROCKPressure : public SolarPressure
    {
    public:
          /// Default constructor
-      CODEPressure() {}
+      ROCKPressure() {}
 
          /// Default destructor
-      virtual ~CODEPressure() {}
+      virtual ~ROCKPressure() {}
 
-         /** Compute acceleration (and related partial derivatives) of CODE
-          *  Pressure.
-          * @param utc     time in UTC
-          * @param rb      earth body
-          * @param sc      spacecraft
-          */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+         /// This is the real one do computation
+      virtual void doCompute(CommonTime t, EarthBody& bRef, Spacecraft& sc);
 
          /// Return the force model name
-      inline virtual std::string modelName() const
-      { return "CODEPressure"; }
+      virtual std::string modelName() const
+      { return "ROCKPressure"; }
 
-   }; // End of class 'CODEPressure'
+   }; // End of class 'ROCKPressure'
 
       // @}
 
-}  // End of namespace 'gpstk'
+}  // End of namespace 'gsptk'
 
-#endif   // GPSTK_CODE_PRESSURE_HPP
+#endif   // GPSTK_ROCK_PRESSURE_HPP

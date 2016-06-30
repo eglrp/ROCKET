@@ -23,7 +23,7 @@
 
 /**
 * @file Spacecraft.hpp
-* The Spacecraft class encapsulates physical parameters.
+* Class to encapsulate Spacecraft related paramenters.
 */
 
 #ifndef GPSTK_SPACECRAFT_HPP
@@ -44,9 +44,7 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**
-       * The Spacecraft class encapsulates physical parameters.
-       * 
+      /** Class to encapsulate Spacecraft related parameters.
        */
    class Spacecraft
    {
@@ -59,17 +57,51 @@ namespace gpstk
       ~Spacecraft() {};
 
 
-         /// Set satid of the spacecraft
-      Spacecraft& setSatID(const SatID& s) { satid = s; return *this; }
+         /// Set SatID of Spacecraft
+      Spacecraft& setSatID(const SatID& si)
+      {
+         satid = si;
+         return (*this);
+      }
 
-         /// Get satid of the spacecraft
-      SatID getSatID() const { return satid; }
+         /// Get SatID of Spacecraft
+      SatID getSatID() const
+      {
+         return satid;
+      }
 
-         /// Set epoch of the spacecraft
-      Spacecraft& setEpoch(const CommonTime& t) { epoch = t; return *this; }
 
-         /// Get epoch of the spacecraft
-      CommonTime getEpoch() const { return epoch; }
+         /// Set current time of Spacecraft
+      Spacecraft& setCurrentTime(const CommonTime& utc)
+      {
+         curTime = utc;
+
+         return (*this);
+      }
+
+         /// Get current time of Spacecraft
+      CommonTime getCurrentTime() const
+      {
+         return curTime;
+      }
+
+
+/*
+         /// Set sat data reader
+      Spacecraft& setSatDataReader(SatDataReader& sat)
+      {
+         pSatReader = &sat;
+
+         return (*this);
+      }
+
+
+         /// Get sat data reader
+      SatDataReader* getSatDataReader() const
+      {
+         return pSatReader;
+      }
+*/
 
          /// Set block of the spacecraft
       Spacecraft& setBlock(const std::string& b) { block = b; return *this; }
@@ -101,16 +133,16 @@ namespace gpstk
       int getNumOfP()
       { return p.size(); }
 
-         /// initialize the state vector with position, velocity and force model parameters
+         /// Initialize state vector with position, velocity and force model parameters
       void initStateVector(const Vector<double>& rv, const Vector<double>& dp);
 
          /// Methods to handle SC state vector 6 + 6*(6+np)
       Vector<double> getStateVector() const;
-      void setStateVector(Vector<double> y);
+      void setStateVector(const Vector<double>& y);
 
          /// Methods to handle SC transition matrix 6*(6+np)
       Matrix<double> getTransitionMatrix() const;
-      void setTransitionMatrix(Matrix<double> phiMatrix);
+      void setTransitionMatrix(const Matrix<double>& phiMatrix);
 
          /// Method to get SC state transition matrix 6*6
       Matrix<double> getStateTransitionMatrix() const;
@@ -125,14 +157,22 @@ namespace gpstk
       void resetState();
 
 
-         /// SatID of the spacecraft
+         /// SatID of Spacecraft
       SatID satid;
-         /// Epoch of the spacecraft
-      CommonTime epoch;
+
+         /// Current time of Spacecraft
+      CommonTime curTime;
+
+/*
+         /// Sat data reader
+      SatDataReader* pSatReader;
+*/
+
          /// Block of the spacecraft
       std::string block;
          /// Mass of the spacecraft
       double mass;
+
 
          /// State vector     6*n + 42
       Vector<double> r;       // 3 Position

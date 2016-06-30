@@ -1,15 +1,11 @@
-/**
- * @file ReferenceSystem.cpp
- * This class ease handling Reference System transformation.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
+//  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,494 +14,546 @@
 //
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
-//  Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-//  Last Modified:
-//
-//  create this file, 2013/05/29
-//
-//  Shoujian Zhang, Wuhan University
+//  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
+//  
+//  Copyright 2004, The University of Texas at Austin
+//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
-#include "ReferenceSystem.hpp"
-#include <string>
-#include <fstream>
-#include <cmath>
-#include <iomanip>
+/**
+ * @file IERSConventions.cpp
+ * IERS Conventions
+ */
 
+#include "IERSConventions.hpp"
+#include "CommonTime.hpp"
 #include "Epoch.hpp"
+#include "GNSSconstants.hpp"
 
 using namespace std;
 
 namespace gpstk
 {
+   // IERS Data Handling
+   //--------------------------------------------------------------------------
 
-      /// Method from EOPDataStore     
-
-      /// Get the x pole displacement parameter, in arcseconds.
-   double ReferenceSystem::getXPole(const CommonTime& UTC) const
-      throw (InvalidRequest)
+      // EOP data file from IERS
+   void LoadIERSEOPFile(const std::string& fileName)
    {
-      double xpole;
+       eopDataTable.clear();
+
+       try
+       {
+           eopDataTable.loadIERSFile(fileName);
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Failed to load IERS EOP File " + fileName));
+       }
+   }
+
+      // EOP data file from IGS
+   void LoadIGSEOPFile(const std::string& fileName)
+   {
+      eopDataTable.clear();
 
       try
       {
-            // Get the x pole from EOPDataStore
-         if( pEopStore != NULL )
-         {
-//            xpole = (*pEopStore).getXPole( UTC );
-            xpole = (*pEopStore).getEOPData( UTC ).xp;
-         }
-
+          eopDataTable.loadIGSFile(fileName);
       }
-      catch(InvalidRequest& ire) 
+      catch(...)
       {
-         GPSTK_RETHROW(ire);
+          GPSTK_THROW(Exception("Failed to load IGS EOP File " + fileName));
       }
+   }
 
-         // return
-      return xpole;
-
-   } // End of method 'ReferenceSystem::getXPole()'
-
-
-      /// Get the y pole displacement parameter, in arcseconds.
-   double ReferenceSystem::getYPole(const CommonTime& UTC) const
-      throw (InvalidRequest)
+      // EOP data file from STK
+   void LoadSTKEOPFile(const std::string& fileName)
    {
-      double ypole;
+       eopDataTable.clear();
 
-      try
-      {
-            // Get the x pole from EOPDataStore
-         if( pEopStore != NULL )
-         {
-//            ypole = (*pEopStore).getYPole( UTC );
-            ypole = (*pEopStore).getEOPData( UTC ).yp;
-         }
+       try
+       {
+           eopDataTable.loadSTKFile(fileName);
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Failed to load STK EOP File " + fileName));
+       }
+   }
 
-      }
-      catch(InvalidRequest& ire) 
-      {
-         GPSTK_RETHROW(ire);
-      }
-
-         // return
-      return ypole;
-
-   } // End of method 'ReferenceSystem::getYPole()'
-
-
-      /// Get the value of UT1mUTC, in seconds.
-   double ReferenceSystem::getUT1mUTC(const CommonTime& UTC) const
-      throw (InvalidRequest) 
+   void LoadIERSLSFile(const std::string& fileName)
    {
-      double UT1mUTC;
+  //   lsDataTable.clear();
 
-      try
-      {
-            // Get the UT1mUTC from EOPDataStore
-         if( pEopStore != NULL )
-         {
-//            UT1mUTC = (*pEopStore).getUT1mUTC( UTC );
-            UT1mUTC = (*pEopStore).getEOPData( UTC ).UT1mUTC;
-         }
+       cout << "IERS initialTime: " << lsDataTable.getInitialTime() << endl;
+       cout << "IERS finalTime: " << lsDataTable.getFinalTime() << endl;
+       cout << "initialTime of commontime:" << CommonTime::END_OF_TIME << endl;
+       cout << CommonTime::BEGINNING_OF_TIME << endl;
+       
+       try
+       {
+           lsDataTable.loadFile(fileName);
+       }
+       catch(...)
+       {
+            GPSTK_THROW(Exception("Failed to load IERS LS File " + fileName));
+       }
+   }
 
-      }
-      catch(InvalidRequest& ire) 
-      {
-         GPSTK_RETHROW(ire);
-      }
+      // Request EOP Data
+   EOPDataStore::EOPData EOPData(const CommonTime& UTC)
+   {
+       EOPDataStore::EOPData eopData;
+       try
+       {
+           eopData = eopDataTable.getEOPData( UTC );
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Faile to get EOP Data." + CivilTime(UTC).asString()));
+       }
 
-         // return
-      return UT1mUTC;
+       return eopData;
+   }
 
-   } // End of method 'ReferenceSystem::getUT1mUTC()'
+      // Request Leap Second
+   double LeapSec(const CommonTime& UTC)
+   {
+       double leapSec;
+       try
+       {
+           leapSec = lsDataTable.getLeapSec( UTC );
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Faile to get Leap Second." + CivilTime(UTC).asString()));
+       }
 
+       return leapSec;
+   }
 
-      /// Get the value of dPsi, in arcseconds.
-   double ReferenceSystem::getDPsi(const CommonTime& UTC) const
-       throw(InvalidRequest)
+      // xp, in arcsecond
+   double PolarMotionX(const CommonTime& UTC)
+   {
+       double xp;
+    
+       try
+       {
+           xp = EOPData(UTC).xp;
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Failed to get xp data on" + CivilTime(UTC).asString()));
+       }
+
+       return xp;
+   }
+
+      // yp, in arcsecond
+   double PolarMotionY(const CommonTime& UTC)
+   {
+       double yp;
+
+       try
+       {
+           return EOPData(UTC).yp;
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Failed to get xp data on " + CivilTime(UTC).asString()));
+       }
+
+       return yp;
+   }
+
+      // UT1 - UTC, in second
+   double UT1mUTC(const CommonTime& UTC)
+   {
+       double dut1;
+       try
+       {
+           dut1 = EOPData(UTC).UT1mUTC;
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Failed to get UT1mUTC data on " + CivilTime(UTC).asString()));
+       }
+
+       return dut1;
+   }
+
+      // dPsi, in arcsecond
+   double NutationDPsi(const CommonTime& UTC)
    {
        double dPsi;
-
        try
        {
-           // Get the dPsi from EOPDataStore
-           if( pEopStore != NULL )
-           {
-               dPsi = (*pEopStore).getEOPData( UTC ).dPsi;
-           }
+           dPsi = EOPData(UTC).dPsi;
        }
-       catch(InvalidRequest& ire) 
+       catch(...)
        {
-           GPSTK_RETHROW(ire);
+           GPSTK_THROW(Exception("Failed to get dPsi data on "+CivilTime(UTC).asString()));
        }
 
-       // return
        return dPsi;
+   }
 
-   } // End of method 'ReferenceSystem::getDPsi()'
-
-
-      /// Get the value of dEps, in arcseconds.
-   double ReferenceSystem::getDEps(const CommonTime& UTC) const
-       throw(InvalidRequest)
+      // dEps, in arcsecond
+   double NutationDEps(const CommonTime& UTC)
    {
        double dEps;
-
        try
        {
-           // Get the dEps from EOPDataStore
-           if( pEopStore != NULL )
-           {
-               dEps = (*pEopStore).getEOPData( UTC ).dEps;
-           }
+           dEps = EOPData(UTC).dEps;
        }
-       catch(InvalidRequest& ire) 
+       catch(...)
        {
-           GPSTK_RETHROW(ire);
+
+           GPSTK_THROW(Exception("Failed to get dEps data on "+CivilTime(UTC).asString()));
        }
 
-       // return
        return dEps;
+   }
 
-   } // End of method 'ReferenceSystem::getDEps()'
-
-
-      /// Get the EOP data at the given UTC time.
-   EOPDataStore::EOPData ReferenceSystem::getEOPData(const CommonTime& UTC) const
-      throw(InvalidRequest)
+   // Time System Handling
+   //--------------------------------------------------------------------------
+ 
+      // TAI - UTC, in second
+   double TAImUTC(const CommonTime& UTC)
    {
-      EOPDataStore::EOPData eopData;
+       double res;
+       try
+       {
+           res = LeapSec( UTC );
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Fail to get TAI-UTC data on" + CivilTime(UTC).asString()));
+       }
 
-      try
-      {
-            // Get the EOP data from EOPDataStore
-         if( pEopStore != NULL )
-         {
-            eopData = (*pEopStore).getEOPData( UTC );
-         }
+       return res;
+   }
 
-      }
-      catch(InvalidRequest& ire) 
-      {
-         GPSTK_RETHROW(ire);
-      }
-
-         // return
-      return eopData;
-
-   } // End of method 'ReferenceSystem::getEOPData()'
-   
-
-      /// Method from LeapSecondStore
-
-      /// Get the leap second at the given UTC time.
-   double ReferenceSystem::getLeapSec(const CommonTime& UTC) const
-      throw(InvalidRequest)
+      // TT - TAI, in second
+   double TTmTAI(void)
    {
-      double leapSec;
+       return 32.184;
+   }
 
-      try
-      {
-            // Get the leap second from EOPDataStore
-         if( pLeapSecStore!= NULL )
-         {
-            leapSec = (*pLeapSecStore).getLeapSec( UTC );
-         }
-
-      }
-      catch(InvalidRequest& ire)
-      {
-         GPSTK_RETHROW(ire);
-      }
-
-         // return
-      return leapSec;
-
-   } // End of method 'ReferenceSystem::getLeapSec()'
-
-
-      /// Method to get the difference between time systems
-
-      /// Return the value of (TAI - UTC) (= leapsec).
-   double ReferenceSystem::getTAImUTC(const CommonTime& UTC)
-      throw(InvalidRequest)
+      // TAI - GPS, in second
+   double TAImGPS(void)
    {
-          // Leap second = TAI - UTC
-       return getLeapSec(UTC);
-
-   } // End of method 'ReferenceSystem::getTAImUTC()
-
-
-      /// Get the value of (TT - TAI)
-   double ReferenceSystem::getTTmTAI( void )
-      throw(InvalidRequest)
-   {
-         // The difference is constant : 32.184 second
-      return 32.184;
-
-   } // End of method 'ReferenceSystem::getTTmTAI()
-
-
-      /// Get the value of (TT - UTC)
-   double ReferenceSystem::getTTmUTC(const CommonTime& UTC)
-      throw(InvalidRequest)
-   {
-         // TT - TAI
-      double TTmTAI ( getTTmTAI() );
-
-         // TAI - UTC
-      double TAImUTC( getTAImUTC(UTC) );
-
-         // TT - UTC
-      double TTmUTC( TTmTAI + TAImUTC );
-
-         // return
-      return TTmUTC;
-
-   } // End of method 'ReferenceSystem::getTTmTAI()
-
-
-      /// Get the value of (TAI - GPS)
-   double ReferenceSystem::getTAImGPS(void)
-      throw(InvalidRequest)
-   {
-         // The difference is constant : 19.0 second
-      return 19.0;
-
-   } // End of method 'ReferenceSystem::getTAImGPS()
-
-
-      /// Methods to convert between different time systems
-
-
-      /// Convert GPS to UTC.
-   CommonTime ReferenceSystem::GPS2UTC(const CommonTime& GPS)
-   {
-
-         // The input time of 'getLeapSec' should be 'UTC'
-         // if the input is GPS, you should amends it.
-      CommonTime GPS1(GPS);
-      GPS1.setTimeSystem(TimeSystem::UTC);
-
-      double leapSec = getLeapSec( GPS1 );
-//      cout << leapSec << endl;
-
-         // The formula of GPS and UTC equals with:
-         // GPS = UTC + ( leapSec - 19.0s );
-
-      CommonTime UTC1;
-      UTC1  = GPS1 - (leapSec - 19.0);
-
-         ///////////////////////////////////////////////////////////////////
-         //
-         // Now, correct the leap second by feeding the utc instead
-         // of the 'gps', if not fix, the following would happen:
-         //
-         //  01-JUL-1993 00:00:10 GPS TIME (- 9s) = 01-JUL-1993 00:00:01 UTC TIME
-         //  01-JUL-1993 00:00:09 GPS TIME (- 9s) = 01-JUL-1993 00:00:00 UTC TIME
-         //  01-JUL-1993 00:00:08 GPS TIME (- 9s) = 01-JUL-1993 00:00:59 UTC TIME
-         //  01-JUL-1993 00:00:07 GPS TIME (- 9s) = 30-JUN-1993 23:59:58 UTC TIME
-         //  01-JUL-1993 00:00:06 GPS TIME (- 9s) = 30-JUN-1993 23:59:57 UTC TIME
-         //  01-JUL-1993 00:00:05 GPS TIME (- 9s) = 30-JUN-1993 23:59:56 UTC TIME
-         //  01-JUL-1993 00:00:04 GPS TIME (- 9s) = 30-JUN-1993 23:59:55 UTC TIME
-         //  01-JUL-1993 00:00:03 GPS TIME (- 9s) = 30-JUN-1993 23:59:54 UTC TIME
-         //  01-JUL-1993 00:00:02 GPS TIME (- 9s) = 30-JUN-1993 23:59:53 UTC TIME
-         //  01-JUL-1993 00:00:01 GPS TIME (- 9s) = 30-JUN-1993 23:59:52 UTC TIME
-         //  01-JUL-1993 00:00:00 GPS TIME (- 9s) = 30-JUN-1993 23:59:51 UTC TIME
-         //  30-JUN-1993 23:59:59 GPS TIME (- 8s) = 30-JUN-1993 23:59:51 UTC TIME
-         //
-         //  
-         //  The fix allows the following conversion: 
-         //
-         //  01-JUL-1993 00:00:10 GPS TIME (- 9s) = 01-JUL-1993 00:00:01 UTC TIME
-         //  01-JUL-1993 00:00:09 GPS TIME (- 9s) = 01-JUL-1993 00:00:00 UTC TIME
-         //  01-JUL-1993 00:00:08 GPS TIME (- 8s) = 01-JUL-1993 00:00:00 UTC TIME
-         //  01-JUL-1993 00:00:07 GPS TIME (- 8s) = 30-JUN-1993 23:59:59 UTC TIME
-         //  01-JUL-1993 00:00:06 GPS TIME (- 8s) = 30-JUN-1993 23:59:58 UTC TIME
-         //  01-JUL-1993 00:00:05 GPS TIME (- 8s) = 30-JUN-1993 23:59:57 UTC TIME
-         //  01-JUL-1993 00:00:04 GPS TIME (- 8s) = 30-JUN-1993 23:59:56 UTC TIME
-         //  01-JUL-1993 00:00:03 GPS TIME (- 8s) = 30-JUN-1993 23:59:55 UTC TIME
-         //  01-JUL-1993 00:00:02 GPS TIME (- 8s) = 30-JUN-1993 23:59:54 UTC TIME
-         //  01-JUL-1993 00:00:01 GPS TIME (- 8s) = 30-JUN-1993 23:59:53 UTC TIME
-         //  01-JUL-1993 00:00:00 GPS TIME (- 8s) = 30-JUN-1993 23:59:52 UTC TIME
-         //  30-JUN-1993 23:59:59 GPS TIME (- 8s) = 30-JUN-1993 23:59:51 UTC TIME
-         //
-         //  \reference Please refer to the subroutine 'gps2utc' in GRACE 
-         //  data format converting software from GFZ.
-         //
-         ///////////////////////////////////////////////////////////////////
-         
-         // New leap second
-      leapSec = getLeapSec(UTC1);
-
-      CommonTime UTC;
-      UTC = GPS1 -  (leapSec - 19.0);
-
-      // The TimeSystem of UTC is already set to TimeSystem::UTC.
-      return UTC;
-
-   } // End of method 'ReferenceSystem::GPS2UTC()'
-
-
-      /// Convert UTC to GPS.
-   CommonTime ReferenceSystem::UTC2GPS(const CommonTime& UTC)
-   {
-         // Now, set gpst with utc
-      CommonTime TAI;
-
-         // Convert the UTC time to TAI time by correcting the leap second
-      TAI = UTC + getTAImUTC(UTC);
-
-      CommonTime GPS;
-
-         // Convert the TAI time to GPS time
-      GPS = TAI - getTAImGPS();
-      GPS.setTimeSystem(TimeSystem::GPS);
-
-         // return gps
-      return GPS;
-
-   } // End of method 'ReferenceSystem::UTC2GPS()'
-
-
-      /// Convert UT1 to UTC.
-   CommonTime ReferenceSystem::UT12UTC(const CommonTime& UT1)
-   {
-
-         // Warnging the input time should be utc, so
-         // you must amends it
-      CommonTime UTC1( UT1 );
-      UTC1.setTimeSystem(TimeSystem::UTC);
-      UTC1 = UT1 -  getUT1mUTC(UTC1);
-      UTC1.setTimeSystem(TimeSystem::UTC);
-
-         // Correct utc by computing new UT1mUTC with utc1
-      CommonTime UTC2;
-      UTC2 = UT1 -  getUT1mUTC(UTC1);
-      UTC2.setTimeSystem(TimeSystem::UTC);
-
-         // Corrent utc by computing new UT1mUTC with utc2
-      CommonTime UTC;
-      UTC  = UT1 -  getUT1mUTC(UTC2);
-      UTC.setTimeSystem(TimeSystem::UTC);
-
-      return UTC;
-
-   }  // End of method 'ReferenceSystem::UT12UTC()'
-
-
-      /// Convert UTC to UT1.
-   CommonTime ReferenceSystem::UTC2UT1(const CommonTime& UTC)
-   {
-
-      CommonTime UT1;
-      UT1 =  UTC + getUT1mUTC(UTC);
-      UT1.setTimeSystem(TimeSystem::UT1);
-
-      return UT1;
-
-   }  // End of method 'ReferenceSystem::UTC2UT1()'
-
-
-   CommonTime ReferenceSystem::UTC2UT1(const CommonTime& UTC, const double& UT1mUTC)
-   {
-      CommonTime UT1;
-      UT1 = UTC + UT1mUTC;
-      UT1.setTimeSystem(TimeSystem::UT1);
-
-      return UT1;
+       return 19.0;
    }
 
 
-      /// Convert TAI to UTC.
-   CommonTime ReferenceSystem::TAI2UTC(const CommonTime& TAI)
+      // Convert GPS to UTC
+   CommonTime GPS2UTC(const CommonTime& GPS)
    {
-       // Initial UTC1.
-       CommonTime UTC1( TAI );
+       // The input time for "LeapSec" should be "UTC"
+       // if the input is GPS, you should amends it.
+       CommonTime GPS1(GPS);
+       GPS1.setTimeSystem(TimeSystem::UTC);
+
+       double leapSec( LeapSec(GPS1) );
+
+       // The formula of GPS and UTC equals with:
+       // GPS = UTC + (leapSec - 19.0)
+       CommonTime UTC1;
+       UTC1 = GPS1 - (leapSec - 19.0);
+
+       // Now, correct the leap second by feeding the utc instead
+       // of the 'gpst', if not fix, the following would happen:
+       //
+       //  1-JUL-1993 00:00:10 GPS TIME --->  1-JUL-1993 00:00:01 UTC TIME
+       //  1-JUL-1993 00:00:09 GPS TIME --->  1-JUL-1993 00:00:01 UTC TIME
+       //  1-JUL-1993 00:00:08 GPS TIME --->  1-JUL-1993 00:00:00 UTC TIME
+       //  1-JUL-1993 00:00:07 GPS TIME ---> 30-JUN-1993 23:59:59 UTC TIME
+       //  
+       //  The fix allows the following conversion: 
+       //  
+       //  1-JUL-1993 00:00:10 GPS TIME --->  1-JUL-1993 00:00:01 UTC TIME
+       //  1-JUL-1993 00:00:09 GPS TIME --->  1-JUL-1993 00:00:00 UTC TIME
+       //  1-JUL-1993 00:00:08 GPS TIME --->  1-JUL-1993 00:00:00 UTC TIME
+       //  1-JUL-1993 00:00:07 GPS TIME ---> 30-JUN-1993 23:59:59 UTC TIME
+       //
+       //  \reference Please refer to the subroutine 'gps2utc' in GRACE 
+       //  data format converting software from GFZ.
+       leapSec = LeapSec(UTC1);
+
+       CommonTime UTC;
+       UTC = GPS1 -  (leapSec - 19.0);
+
+       // The TimeSystem of UTC is already set to TimeSystem::UTC.
+       return UTC;
+   }
+
+      // Convert UTC to GPS
+   CommonTime UTC2GPS(const CommonTime& UTC)
+   {
+       // Now, set GPS with UTC
+       CommonTime TAI;
+
+       // Convert UTC to TAI by correcting the LeapSec
+       TAI = UTC + TAImUTC(UTC);
+
+       // Convert TAI to GPS
+       CommonTime GPS;
+       GPS = TAI - TAImGPS();
+       GPS.setTimeSystem(TimeSystem::GPS);
+
+       return GPS;
+   }
+
+      // Convert UT1 to UTC
+   CommonTime UT12UTC(const CommonTime& UT1)
+   {
+       // The input time should be UTC
+       CommonTime UTC1(UT1);
+       UTC1.setTimeSystem(TimeSystem::UTC);
+       UTC1 = UT1 - UT1mUTC(UTC1);
        UTC1.setTimeSystem(TimeSystem::UTC);
 
-       // Get leapSec.
-       double leapSec( getLeapSec(UTC1) );
+       // Correct UTC by computing new UT1mUTC with UTC1
+       CommonTime UTC2;
+       UTC2 = UT1 - UT1mUTC(UTC1);
+       UTC2.setTimeSystem(TimeSystem::UTC);
 
-       // Update UTC1.
-       UTC1 = UTC1 - leapSec;
-
-       // Update leapSec.
-       leapSec = getLeapSec(UTC1);
-
-       // Get UTC.
-       CommonTime UTC( TAI - leapSec );
+       // Correct UTC by computing new UT1mUTC with UTC2
+       CommonTime UTC;
+       UTC = UT1 - UT1mUTC(UTC2);
        UTC.setTimeSystem(TimeSystem::UTC);
 
-       // return UTC.
        return UTC;
+   }
 
-   }  // End of method 'ReferenceSystem::TAI2UTC()'
-
-
-      /// Convert UTC to TAI.
-   CommonTime ReferenceSystem::UTC2TAI(const CommonTime& UTC)
+      // Convert UTC to UT1, get UT1mUTC from EOP Data Table
+   CommonTime UTC2UT1(const CommonTime& UTC)
    {
-       // Get leapSec.
-       double leapSec( getLeapSec(UTC) );
+       CommonTime UT1;
+       UT1 = UTC + UT1mUTC(UTC);
+       UT1.setTimeSystem(TimeSystem::UT1);
 
-       // Get TAI.
-       CommonTime TAI( UTC + leapSec );
+       return UT1;
+   }
+
+      // Convert UTC to UT1, given UT1mUTC
+   CommonTime UTC2UT1(const CommonTime& UTC, const double& UT1mUTC)
+   {
+       CommonTime UT1;
+       UT1 = UTC + UT1mUTC;
+       UT1.setTimeSystem(TimeSystem::UT1);
+
+       return UT1;
+   }
+
+      // Convert TAI to UTC
+   CommonTime TAI2UTC(const CommonTime& TAI)
+   {
+       // Initial UTC1
+       CommonTime UTC1(TAI);
+       UTC1.setTimeSystem(TimeSystem::UTC);
+
+       // Get leapSec
+       double leapSec( LeapSec(UTC1) );
+
+       // Update UTC1
+       UTC1 = UTC1 - leapSec;
+
+       // Update leapSec
+       leapSec = LeapSec(UTC1);
+
+       // Get UTC
+       CommonTime UTC(TAI-leapSec);
+       UTC.setTimeSystem(TimeSystem::UTC);
+
+       return UTC;
+   }
+
+      // Convert UTC to TAI
+   CommonTime UTC2TAI(const CommonTime& UTC)
+   {
+       // Get leapSec
+       double leapSec( LeapSec(UTC) );
+
+       // Get TAI
+       CommonTime TAI(UTC + leapSec);
        TAI.setTimeSystem(TimeSystem::TAI);
 
-       // Return TAI.
        return TAI;
+   }
 
-   }  // End of method 'ReferenceSystem::UTC2TAI()'
-
-
-      /// Convert TT to UTC.
-   CommonTime ReferenceSystem::TT2UTC(const CommonTime& TT)
+      // Convert TT to UTC
+   CommonTime TT2UTC(const CommonTime& TT)
    {
-       // Convert TT to TAI.
-       CommonTime TAI( TT - getTTmTAI() );
+       // Convert TT to TAI
+       CommonTime TAI( TT - TTmTAI() );
        TAI.setTimeSystem(TimeSystem::TAI);
 
-       // Convert TAI to UTC.
+       // Convert TAI to UTC
        CommonTime UTC( TAI2UTC(TAI) );
 
-
-       // Return UTC.
        return UTC;
+   }
 
-   }  // End of method 'ReferenceSystem::TT2UTC()'
-
-
-      /// Convert UTC to TT.
-   CommonTime ReferenceSystem::UTC2TT(const CommonTime& UTC)
+      // Convert UTC to TT
+   CommonTime UTC2TT(const CommonTime& UTC)
    {
-       // Convert UTC to TAI.
+       // Convert UTC to TAI
        CommonTime TAI( UTC2TAI(UTC) );
-       // Convert TAI to TT.
-       CommonTime TT( TAI + getTTmTAI() );
+
+       // Convert TAI to TT
+       CommonTime TT( TAI + TTmTAI() );
        TT.setTimeSystem(TimeSystem::TT);
 
-       // Return TT.
        return TT;
+   }
 
-   }  // End of method 'ReferenceSystem::UTC2TT()'
+
+      // Convert BDT to UTC
+   CommonTime BDT2UTC(const CommonTime& BDT)
+   {
+       // Convert BDT to GPS
+       CommonTime GPS(BDT + 14.0);
+       GPS.setTimeSystem(TimeSystem::GPS);
+
+       // Convert GPS to UTC
+       CommonTime UTC( GPS2UTC(GPS) );
+
+       return UTC;
+   }
+
+      // Convert UTC to BDT
+   CommonTime UTC2BDT(const CommonTime& UTC)
+   {
+       // Convert UTC to GPS
+       CommonTime GPS( UTC2GPS(UTC) );
+
+       // Convert GPS to BDT
+       CommonTime BDT(GPS - 14.0);
+       BDT.setTimeSystem(TimeSystem::BDT);
+
+       return BDT;
+   }
 
 
-      /// Evaluate the effects of zonal Earth tides on the rotation of the Earth.
-      /// IERS Conventions 2010
-   Vector<double>  ReferenceSystem::RG_ZONT2(const CommonTime& TT)
-   { 
-      static const struct {
-         int nl,nlp,nf,nd,nom;    // Luni-Solar argument multipliers
-         double s1, c1;           // sine and cosine of DUT
-         double c2, s2;           // cosine and sine of DLOD
-         double c3, s3;           // cosine and sine of DOMEGA
-      } x[] = {
-            // 0 - 20
+   // Reference System Handling
+   //--------------------------------------------------------------------------
+
+      // Normalize angle into the range 0 <= a <= 2PI
+   double Anp(double a)
+   {
+       double w = std::fmod(a, TWO_PI);
+       if(fabs(w) >= PI)
+       {
+           if(a > 0.0)  w -=  TWO_PI;
+           else         w -= -TWO_PI;
+       }
+
+       return w;
+   }
+
+      // Normalize angle into the range -PI <= a <= +PI
+   double Anpm(double a)
+   {
+       double w = std::fmod(a, TWO_PI);
+       if(fabs(w) >= PI)
+       {
+           if(a > 0.0)  w -=  TWO_PI;
+           else         w -= -TWO_PI;
+       }
+
+       return w;
+   }
+
+
+   // Rotate an r-matrix about the x-axis.
+   void Rx(const double& phi, Matrix<double>& r)
+   {
+       double s, c, a10, a11, a12, a20, a21, a22;
+
+       s = std::sin(phi);
+       c = std::cos(phi);
+
+       a10 =   c*r(1,0) + s*r(2,0);
+       a11 =   c*r(1,1) + s*r(2,1);
+       a12 =   c*r(1,2) + s*r(2,2);
+       a20 = - s*r(1,0) + c*r(2,0);
+       a21 = - s*r(1,1) + c*r(2,1);
+       a22 = - s*r(1,2) + c*r(2,2);
+
+       r(1,0) = a10;
+       r(1,1) = a11;
+       r(1,2) = a12;
+       r(2,0) = a20;
+       r(2,1) = a21;
+       r(2,2) = a22;
+   }
+
+
+   // Rotate an r-matrix about the y-axis.
+   void Ry(const double& theta, Matrix<double>& r)
+   {
+       double s, c, a00, a01, a02, a20, a21, a22;
+
+       s = std::sin(theta);
+       c = std::cos(theta);
+
+       a00 = c*r(0,0) - s*r(2,0);
+       a01 = c*r(0,1) - s*r(2,1);
+       a02 = c*r(0,2) - s*r(2,2);
+       a20 = s*r(0,0) + c*r(2,0);
+       a21 = s*r(0,1) + c*r(2,1);
+       a22 = s*r(0,2) + c*r(2,2);
+
+       r(0,0) = a00;
+       r(0,1) = a01;
+       r(0,2) = a02;
+       r(2,0) = a20;
+       r(2,1) = a21;
+       r(2,2) = a22;
+
+   }
+
+
+   // Rotate an r-matrix about the z-axis.
+   void Rz(const double& psi, Matrix<double>& r)
+   {
+       double s, c, a00, a01, a02, a10, a11, a12;
+
+       s = std::sin(psi);
+       c = std::cos(psi);
+
+       a00 =   c*r(0,0) + s*r(1,0);
+       a01 =   c*r(0,1) + s*r(1,1);
+       a02 =   c*r(0,2) + s*r(1,2);
+       a10 = - s*r(0,0) + c*r(1,0);
+       a11 = - s*r(0,1) + c*r(1,1);
+       a12 = - s*r(0,2) + c*r(1,2);
+
+       r(0,0) = a00;
+       r(0,1) = a01;
+       r(0,2) = a02;
+       r(1,0) = a10;
+       r(1,1) = a11;
+       r(1,2) = a12;
+   }
+
+
+   // Evaluate the effects of zonal Earth tides on the rotation of the Earth.
+   // IERS Conventions 2010
+   Vector<double>  RG_ZONT2(const CommonTime& TT)
+   {
+
+       static const struct {
+           int nl,nlp,nf,nd,nom;    // Luni-Solar argument multipliers
+           double s1, c1;           // sine and cosine of DUT
+           double c2, s2;           // cosine and sine of DLOD
+           double c3, s3;           // cosine and sine of DOMEGA
+       } x[] = {
+           // 0 - 20
          {  1,  0,  2,  2,  2,     -0.0235, 0.0000, 0.2617, 0.0000, -0.2209, 0.0000 },
          {  2,  0,  2,  0,  1,     -0.0404, 0.0000, 0.3706, 0.0000, -0.3128, 0.0000 },
          {  2,  0,  2,  0,  2,     -0.0987, 0.0000, 0.9041, 0.0000, -0.7630, 0.0000 },
@@ -527,7 +575,7 @@ namespace gpstk
          {  2,  0,  0,  0,  0,     -0.3384, 0.0000, 1.5433, 0.0000, -1.3025, 0.0000 },
          {  2,  0,  0,  0,  1,      0.0179, 0.0000,-0.0813, 0.0000,  0.0686, 0.0000 },
 
-            // 21 - 40
+           // 21 - 40
          {  0, -1,  2,  0,  2,     -0.0244, 0.0000,  0.1082, 0.0000, -0.0913, 0.0000 },
          {  0,  0,  0,  2, -1,      0.0470, 0.0000, -0.2004, 0.0000,  0.1692, 0.0000 },
          {  0,  0,  0,  2,  0,     -0.7341, 0.0000,  3.1240, 0.0000, -2.6367, 0.0000 },
@@ -549,7 +597,7 @@ namespace gpstk
          { -1,  0,  0,  2,  1,      0.1316, 0.0000, -0.2587, 0.0000,  0.2183, 0.0000 },
          {  1,  0, -2,  2, -1,      0.0179, 0.0000, -0.0344, 0.0000,  0.0290, 0.0000 },
  
-            // 41 - 60
+         // 41 - 60
          { -1, -1,  0,  2,  0,     -0.0855, 0.0000,  0.1542, 0.0000, -0.1302, 0.0000 }
 /*
          {  0,  2,  2, -2,  2,     -0.0573, 0.0000,  0.0395, 0.0000, -0.0333, 0.0000 },
@@ -572,91 +620,90 @@ namespace gpstk
          { -2,  0,  2,  0,  1,      0.4211, 0.0000, -0.0203, 0.0000,  0.0171, 0.0000 },
          { -1,  1,  0,  1,  0      -0.0404, 0.0000,  0.0008, 0.0000, -0.0007, 0.0000 },
    
-            // 61 - 62
+         // 61 - 62
          {  0,  0,  0,  0,  2,      7.8998, 0.0000,  0.1460, 0.0000, -0.1232, 0.0000 },
          {  0,  0,  0,  0,  1,  -1617.2681, 0.0000,-14.9471, 0.0000, 12.6153, 0.0000 }
 */
-      };
+       };
 
-      /* Number of terms in the series */
-      const int NT = (int) (sizeof(x) / sizeof(x[0]));
+       /* Number of terms in the series */
+       const int NT = (int) (sizeof(x) / sizeof(x[0]));
 
-      double el, elp, f, d, om;
+       double el, elp, f, d, om;
 
-      /* Interval between fundamental epoch J2000.0 and given date (JC). */
-      double t = (MJD(TT).mjd - MJD_J2000) / JC;
+       /* Interval between fundamental epoch J2000.0 and given date (JC). */
+       double t = (MJD(TT).mjd - MJD_J2000) / JC;
 
-      /* --------------------- */
-      /* Fundamental arguments */
-      /* --------------------- */
+       /* --------------------- */
+       /* Fundamental arguments */
+       /* --------------------- */
 
-      /* Mean longitude of Moon minus mean longitude of Moon's perigee. */
-      el = Anpm(
-            (485866.733 + (715922.633 + (31.310 + 0.064 * t) * t) * t)
-            * AS_TO_RAD + fmod(1325.0 * t, 1.0) * TWO_PI);
+       /* Mean longitude of Moon minus mean longitude of Moon's perigee. */
+       el = Anpm(
+               (485866.733 + (715922.633 + (31.310 + 0.064 * t) * t) * t)
+               * AS_TO_RAD + fmod(1325.0 * t, 1.0) * TWO_PI);
 
-      /* Mean longitude of Sun minus mean longitude of Sun's perigee. */
-      elp = Anpm(
-            (1287099.804 + (1292581.224 + (-0.577 - 0.012 * t) * t) * t)
-            * AS_TO_RAD + fmod(99.0 * t, 1.0) * TWO_PI);
+       /* Mean longitude of Sun minus mean longitude of Sun's perigee. */
+       elp = Anpm(
+               (1287099.804 + (1292581.224 + (-0.577 - 0.012 * t) * t) * t)
+               * AS_TO_RAD + fmod(99.0 * t, 1.0) * TWO_PI);
 
-      /* Mean longitude of Moon minus mean longitude of Moon's node. */
-      f = Anpm(
-            (335778.877 + (295263.137 + (-13.257 + 0.011 * t) * t) * t)
-            * AS_TO_RAD + fmod(1342.0 * t, 1.0) * TWO_PI);
+       /* Mean longitude of Moon minus mean longitude of Moon's node. */
+       f = Anpm(
+               (335778.877 + (295263.137 + (-13.257 + 0.011 * t) * t) * t)
+               * AS_TO_RAD + fmod(1342.0 * t, 1.0) * TWO_PI);
 
-      /* Mean elongation of Moon from Sun. */
-      d = Anpm(
-            (1072261.307 + (1105601.328 + (-6.891 + 0.019 * t) * t) * t)
-            * AS_TO_RAD + fmod(1236.0 * t, 1.0) * TWO_PI);
+       /* Mean elongation of Moon from Sun. */
+       d = Anpm(
+               (1072261.307 + (1105601.328 + (-6.891 + 0.019 * t) * t) * t)
+               * AS_TO_RAD + fmod(1236.0 * t, 1.0) * TWO_PI);
 
-      /* Longitude of the mean ascending node of the lunar orbit on the */
-      /* ecliptic, measured from the mean equinox of date. */
-      om = Anpm(
-            (450160.280 + (-482890.539 + (7.455 + 0.008 * t) * t) * t)
-            * AS_TO_RAD + fmod(-5.0 * t, 1.0) * TWO_PI);
+       /* Longitude of the mean ascending node of the lunar orbit on the */
+       /* ecliptic, measured from the mean equinox of date. */
+       om = Anpm(
+               (450160.280 + (-482890.539 + (7.455 + 0.008 * t) * t) * t)
+               * AS_TO_RAD + fmod(-5.0 * t, 1.0) * TWO_PI);
 
-      double arg;
-      double dut(0.0), dlod(0.0), domega(0.0);
-      for(int i=0; i<NT; i++)
-      {
-         arg = 0.0;
-
-         // Formation of multiples of arguments.
-         arg = x[i].nl*el
+       double arg;
+       double dut(0.0), dlod(0.0), domega(0.0);
+       for(int i=0; i<NT; i++)
+       {
+           arg = 0.0;
+           // Formation of multiples of arguments.
+           arg = x[i].nl*el
                + x[i].nlp*elp
                + x[i].nf*f
                + x[i].nd*d
                + x[i].nom*om;
 
-         arg = std::fmod(arg, TWO_PI);
-         if(arg < 0.0) arg += TWO_PI;
+           arg = std::fmod(arg, TWO_PI);
+           if(arg < 0.0) arg += TWO_PI;
 
-         // Evaluate zonal tidal terms.
-         dut    += x[i].s1*std::sin(arg) + x[i].c1*std::cos(arg);
-         dlod   += x[i].c2*std::cos(arg) + x[i].s2*std::sin(arg);
-         domega += x[i].c3*std::cos(arg) + x[i].s3*std::sin(arg);
-      }
+           // Evaluate zonal tidal terms.
+           dut    += x[i].s1*std::sin(arg) + x[i].c1*std::cos(arg);
+           dlod   += x[i].c2*std::cos(arg) + x[i].s2*std::sin(arg);
+           domega += x[i].c3*std::cos(arg) + x[i].s3*std::sin(arg);
+       }
 
-      // Rescale corrections so that they are in units involving seconds.
-      dut    = dut    * 1.0e-4;
-      dlod   = dlod   * 1.0e-5;
-      domega = domega * 1.0e-14;
+       // Rescale corrections so that they are in units involving seconds.
+       dut    = dut    * 1.0e-4;
+       dlod   = dlod   * 1.0e-5;
+       domega = domega * 1.0e-14;
 
-      // return
-      Vector<double> ret(3,0.0);
-      ret(0) = dut;
-      ret(1) = dlod;
-      ret(2) = domega;
+       // return
+       Vector<double> ret(3,0.0);
+       ret(0) = dut;
+       ret(1) = dlod;
+       ret(2) = domega;
 
-      return ret;
+       return ret;
 
-   }  // End of method 'ReferenceSystem::RG_ZONT2()'
+   }
 
 
    // Provide the diurnal/subdiurnal tidal effects on polar motion ("), UT1 (s)
    // and LOD (s), in time domain. IERS Conventions 2010
-   Vector<double> ReferenceSystem::PMUT1_OCEANS(const CommonTime& UTC)
+   Vector<double> PMUT1_OCEANS(const CommonTime& UTC)
    {
        static const struct {
            int nchi;            // coefficients of GMST + PI
@@ -829,13 +876,12 @@ namespace gpstk
        ret(3) = cor_lod;
 
        return ret;
+   }
 
-   }  // End of method 'ReferenceSystem::PMUT1_OCEANS()'
 
-
-      /// Provide the diurnal lunisolar effect on polar motion ("), in time domain.
-      /// IERS Conventions 2010.
-   Vector<double> ReferenceSystem::PMSDNUT2(const CommonTime& UTC)
+   // Provide the diurnal lunisolar effect on polar motion ("), in time domain.
+   // IERS Conventions 2010.
+   Vector<double> PMSDNUT2(const CommonTime& UTC)
    {
        static const struct {
            int nchi;            // coefficients of GMST+PI
@@ -915,13 +961,12 @@ namespace gpstk
        ret(1) = cor_y;
 
        return ret;
+   }
 
-   }  // End of method 'ReferenceSystem::PMSDNUT2()'
 
-
-      /// Evaluate the model of subdiurnal libration in the axial component of
-      /// rotation, expressed by UT1 and LOD.
-   Vector<double> ReferenceSystem::UTLIBR(const CommonTime& UTC)
+   // Evaluate the model of subdiurnal libration in the axial component of
+   // rotation, expressed by UT1 and LOD.
+   Vector<double> UTLIBR(const CommonTime& UTC)
    {
        static const struct {
            int nchi;            // coefficients of GMST+PI
@@ -1002,33 +1047,415 @@ namespace gpstk
        ret(1) = dlod;
 
        return ret;
+   }
 
-   }  // End of method 'ReferenceSystem::UTLIBR()'
+
+      // Mean obliquity of the ecliptic, IAU 1980 model
+   double MeanObliquity80(const CommonTime& TT)
+   {
+       double t, eps0;
+
+       /* Interval between fundamental epoch J2000.0 and given date (JC). */
+       t = (MJD(TT).mjd - MJD_J2000) / JC;
+
+       /* Mean obliquity of date. */
+       eps0 = AS_TO_RAD * (84381.448  +
+                          (-46.8150   +
+                          (-0.00059   +
+                          ( 0.001813) * t) * t) * t);
+
+       return eps0;
+
+   }
+
+      // Precession, IAU 1976 model
+   void PreAngles76(const CommonTime& TT, double& zeta, double& z, double& theta)
+   {
+       double t0, t, tas2r, w;
+
+       /* Interval between fundamental epoch J2000.0 and start date (JC). */
+       t0 = 0.0;
+
+       /* Interval over which precession required (JC). */
+       t = ( MJD(TT).mjd - MJD_J2000 ) / JC;
+
+       /* Euler angles. */
+       tas2r = t * AS_TO_RAD;
+       w = 2306.2181 + (1.39656 - 0.000139 * t0) * t0;
+
+       zeta = (w + ((0.30188 - 0.000344 * t0) + 0.017998 * t) * t) * tas2r;
+
+       z = (w + ((1.09468 + 0.000066 * t0) + 0.018203 * t) * t) * tas2r;
+
+       theta = ((2004.3109 + (-0.85330 - 0.000217 * t0) * t0)
+               + ((-0.42665 - 0.000217 * t0) - 0.041833 * t) * t) * tas2r;
+   }
+
+      // Precession matrix from J2000.0 to a specified date, IAU 1976 model
+   Matrix<double> PreMatrix76(const CommonTime& TT)
+   {
+       double zeta, z, theta;
+       PreAngles76(TT, zeta, z, theta);
+
+       return ( rotation(-z,3) * rotation(theta,2) * rotation(-zeta,3) );
+
+   }
+
+      // Nutation, IAU 1980 model
+   void NutAngles80(const CommonTime& TT, double& dpsi,double& deps)
+   {
+       double t, el, elp, f, d, om, dp, de, arg, s, c;
+       int j;
 
 
-      /// X,Y coordinates of celestial intermediate pole from series based on IAU
-      /// 2006 precession and IAU 2006 nutation.
-   void ReferenceSystem::XY06(const CommonTime& TT, double& x, double& y)
+       /* Units of 0.1 milliarcsecond to radians */
+       const double U2R = AS_TO_RAD / 1e4;
+
+
+       /* ------------------------------------------------ */
+       /* Table of multiples of arguments and coefficients */
+       /* ------------------------------------------------ */
+
+       /* The units for the sine and cosine coefficients are 0.1 mas and */
+       /* the same per Julian century */
+
+       static const struct {
+           int nl,nlp,nf,nd,nom; /* coefficients of l,l',F,D,Om */
+           double sp,spt;        /* longitude sine, 1 and t coefficients */
+           double ce,cet;        /* obliquity cosine, 1 and t coefficients */
+       } x[] = {
+
+           /* 1-10 */
+           {  0,  0,  0,  0,  1, -171996.0, -174.2,  92025.0,    8.9 },
+           {  0,  0,  0,  0,  2,    2062.0,    0.2,   -895.0,    0.5 },
+           { -2,  0,  2,  0,  1,      46.0,    0.0,    -24.0,    0.0 },
+           {  2,  0, -2,  0,  0,      11.0,    0.0,      0.0,    0.0 },
+           { -2,  0,  2,  0,  2,      -3.0,    0.0,      1.0,    0.0 },
+           {  1, -1,  0, -1,  0,      -3.0,    0.0,      0.0,    0.0 },
+           {  0, -2,  2, -2,  1,      -2.0,    0.0,      1.0,    0.0 },
+           {  2,  0, -2,  0,  1,       1.0,    0.0,      0.0,    0.0 },
+           {  0,  0,  2, -2,  2,  -13187.0,   -1.6,   5736.0,   -3.1 },
+           {  0,  1,  0,  0,  0,    1426.0,   -3.4,     54.0,   -0.1 },
+
+           /* 11-20 */
+           {  0,  1,  2, -2,  2,    -517.0,    1.2,    224.0,   -0.6 },
+           {  0, -1,  2, -2,  2,     217.0,   -0.5,    -95.0,    0.3 },
+           {  0,  0,  2, -2,  1,     129.0,    0.1,    -70.0,    0.0 },
+           {  2,  0,  0, -2,  0,      48.0,    0.0,      1.0,    0.0 },
+           {  0,  0,  2, -2,  0,     -22.0,    0.0,      0.0,    0.0 },
+           {  0,  2,  0,  0,  0,      17.0,   -0.1,      0.0,    0.0 },
+           {  0,  1,  0,  0,  1,     -15.0,    0.0,      9.0,    0.0 },
+           {  0,  2,  2, -2,  2,     -16.0,    0.1,      7.0,    0.0 },
+           {  0, -1,  0,  0,  1,     -12.0,    0.0,      6.0,    0.0 },
+           { -2,  0,  0,  2,  1,      -6.0,    0.0,      3.0,    0.0 },
+
+           /* 21-30 */
+           {  0, -1,  2, -2,  1,      -5.0,    0.0,      3.0,    0.0 },
+           {  2,  0,  0, -2,  1,       4.0,    0.0,     -2.0,    0.0 },
+           {  0,  1,  2, -2,  1,       4.0,    0.0,     -2.0,    0.0 },
+           {  1,  0,  0, -1,  0,      -4.0,    0.0,      0.0,    0.0 },
+           {  2,  1,  0, -2,  0,       1.0,    0.0,      0.0,    0.0 },
+           {  0,  0, -2,  2,  1,       1.0,    0.0,      0.0,    0.0 },
+           {  0,  1, -2,  2,  0,      -1.0,    0.0,      0.0,    0.0 },
+           {  0,  1,  0,  0,  2,       1.0,    0.0,      0.0,    0.0 },
+           { -1,  0,  0,  1,  1,       1.0,    0.0,      0.0,    0.0 },
+           {  0,  1,  2, -2,  0,      -1.0,    0.0,      0.0,    0.0 },
+
+           /* 31-40 */
+           {  0,  0,  2,  0,  2,   -2274.0,   -0.2,    977.0,   -0.5 },
+           {  1,  0,  0,  0,  0,     712.0,    0.1,     -7.0,    0.0 },
+           {  0,  0,  2,  0,  1,    -386.0,   -0.4,    200.0,    0.0 },
+           {  1,  0,  2,  0,  2,    -301.0,    0.0,    129.0,   -0.1 },
+           {  1,  0,  0, -2,  0,    -158.0,    0.0,     -1.0,    0.0 },
+           { -1,  0,  2,  0,  2,     123.0,    0.0,    -53.0,    0.0 },
+           {  0,  0,  0,  2,  0,      63.0,    0.0,     -2.0,    0.0 },
+           {  1,  0,  0,  0,  1,      63.0,    0.1,    -33.0,    0.0 },
+           { -1,  0,  0,  0,  1,     -58.0,   -0.1,     32.0,    0.0 },
+           { -1,  0,  2,  2,  2,     -59.0,    0.0,     26.0,    0.0 },
+
+           /* 41-50 */
+           {  1,  0,  2,  0,  1,     -51.0,    0.0,     27.0,    0.0 },
+           {  0,  0,  2,  2,  2,     -38.0,    0.0,     16.0,    0.0 },
+           {  2,  0,  0,  0,  0,      29.0,    0.0,     -1.0,    0.0 },
+           {  1,  0,  2, -2,  2,      29.0,    0.0,    -12.0,    0.0 },
+           {  2,  0,  2,  0,  2,     -31.0,    0.0,     13.0,    0.0 },
+           {  0,  0,  2,  0,  0,      26.0,    0.0,     -1.0,    0.0 },
+           { -1,  0,  2,  0,  1,      21.0,    0.0,    -10.0,    0.0 },
+           { -1,  0,  0,  2,  1,      16.0,    0.0,     -8.0,    0.0 },
+           {  1,  0,  0, -2,  1,     -13.0,    0.0,      7.0,    0.0 },
+           { -1,  0,  2,  2,  1,     -10.0,    0.0,      5.0,    0.0 },
+
+           /* 51-60 */
+           {  1,  1,  0, -2,  0,      -7.0,    0.0,      0.0,    0.0 },
+           {  0,  1,  2,  0,  2,       7.0,    0.0,     -3.0,    0.0 },
+           {  0, -1,  2,  0,  2,      -7.0,    0.0,      3.0,    0.0 },
+           {  1,  0,  2,  2,  2,      -8.0,    0.0,      3.0,    0.0 },
+           {  1,  0,  0,  2,  0,       6.0,    0.0,      0.0,    0.0 },
+           {  2,  0,  2, -2,  2,       6.0,    0.0,     -3.0,    0.0 },
+           {  0,  0,  0,  2,  1,      -6.0,    0.0,      3.0,    0.0 },
+           {  0,  0,  2,  2,  1,      -7.0,    0.0,      3.0,    0.0 },
+           {  1,  0,  2, -2,  1,       6.0,    0.0,     -3.0,    0.0 },
+           {  0,  0,  0, -2,  1,      -5.0,    0.0,      3.0,    0.0 },
+
+           /* 61-70 */
+           {  1, -1,  0,  0,  0,       5.0,    0.0,      0.0,    0.0 },
+           {  2,  0,  2,  0,  1,      -5.0,    0.0,      3.0,    0.0 },
+           {  0,  1,  0, -2,  0,      -4.0,    0.0,      0.0,    0.0 },
+           {  1,  0, -2,  0,  0,       4.0,    0.0,      0.0,    0.0 },
+           {  0,  0,  0,  1,  0,      -4.0,    0.0,      0.0,    0.0 },
+           {  1,  1,  0,  0,  0,      -3.0,    0.0,      0.0,    0.0 },
+           {  1,  0,  2,  0,  0,       3.0,    0.0,      0.0,    0.0 },
+           {  1, -1,  2,  0,  2,      -3.0,    0.0,      1.0,    0.0 },
+           { -1, -1,  2,  2,  2,      -3.0,    0.0,      1.0,    0.0 },
+           { -2,  0,  0,  0,  1,      -2.0,    0.0,      1.0,    0.0 },
+
+           /* 71-80 */
+           {  3,  0,  2,  0,  2,      -3.0,    0.0,      1.0,    0.0 },
+           {  0, -1,  2,  2,  2,      -3.0,    0.0,      1.0,    0.0 },
+           {  1,  1,  2,  0,  2,       2.0,    0.0,     -1.0,    0.0 },
+           { -1,  0,  2, -2,  1,      -2.0,    0.0,      1.0,    0.0 },
+           {  2,  0,  0,  0,  1,       2.0,    0.0,     -1.0,    0.0 },
+           {  1,  0,  0,  0,  2,      -2.0,    0.0,      1.0,    0.0 },
+           {  3,  0,  0,  0,  0,       2.0,    0.0,      0.0,    0.0 },
+           {  0,  0,  2,  1,  2,       2.0,    0.0,     -1.0,    0.0 },
+           { -1,  0,  0,  0,  2,       1.0,    0.0,     -1.0,    0.0 },
+           {  1,  0,  0, -4,  0,      -1.0,    0.0,      0.0,    0.0 },
+
+           /* 81-90 */
+           { -2,  0,  2,  2,  2,       1.0,    0.0,     -1.0,    0.0 },
+           { -1,  0,  2,  4,  2,      -2.0,    0.0,      1.0,    0.0 },
+           {  2,  0,  0, -4,  0,      -1.0,    0.0,      0.0,    0.0 },
+           {  1,  1,  2, -2,  2,       1.0,    0.0,     -1.0,    0.0 },
+           {  1,  0,  2,  2,  1,      -1.0,    0.0,      1.0,    0.0 },
+           { -2,  0,  2,  4,  2,      -1.0,    0.0,      1.0,    0.0 },
+           { -1,  0,  4,  0,  2,       1.0,    0.0,      0.0,    0.0 },
+           {  1, -1,  0, -2,  0,       1.0,    0.0,      0.0,    0.0 },
+           {  2,  0,  2, -2,  1,       1.0,    0.0,     -1.0,    0.0 },
+           {  2,  0,  2,  2,  2,      -1.0,    0.0,      0.0,    0.0 },
+
+           /* 91-100 */
+           {  1,  0,  0,  2,  1,      -1.0,    0.0,      0.0,    0.0 },
+           {  0,  0,  4, -2,  2,       1.0,    0.0,      0.0,    0.0 },
+           {  3,  0,  2, -2,  2,       1.0,    0.0,      0.0,    0.0 },
+           {  1,  0,  2, -2,  0,      -1.0,    0.0,      0.0,    0.0 },
+           {  0,  1,  2,  0,  1,       1.0,    0.0,      0.0,    0.0 },
+           { -1, -1,  0,  2,  1,       1.0,    0.0,      0.0,    0.0 },
+           {  0,  0, -2,  0,  1,      -1.0,    0.0,      0.0,    0.0 },
+           {  0,  0,  2, -1,  2,      -1.0,    0.0,      0.0,    0.0 },
+           {  0,  1,  0,  2,  0,      -1.0,    0.0,      0.0,    0.0 },
+           {  1,  0, -2, -2,  0,      -1.0,    0.0,      0.0,    0.0 },
+
+           /* 101-106 */
+           {  0, -1,  2,  0,  1,      -1.0,    0.0,      0.0,    0.0 },
+           {  1,  1,  0, -2,  1,      -1.0,    0.0,      0.0,    0.0 },
+           {  1,  0, -2,  2,  0,      -1.0,    0.0,      0.0,    0.0 },
+           {  2,  0,  0,  2,  0,       1.0,    0.0,      0.0,    0.0 },
+           {  0,  0,  2,  4,  2,      -1.0,    0.0,      0.0,    0.0 },
+           {  0,  1,  0,  1,  0,       1.0,    0.0,      0.0,    0.0 }
+       };
+
+       /* Number of terms in the series */
+       const int NT = (int) (sizeof x / sizeof x[0]);
+
+       /*--------------------------------------------------------------------*/
+
+       /* Interval between fundamental epoch J2000.0 and given date (JC). */
+       t = (MJD(TT).mjd - MJD_J2000) / JC;
+
+       /* --------------------- */
+       /* Fundamental arguments */
+       /* --------------------- */
+
+       /* Mean longitude of Moon minus mean longitude of Moon's perigee. */
+       el = Anpm(
+               (485866.733 + (715922.633 + (31.310 + 0.064 * t) * t) * t)
+               * AS_TO_RAD + fmod(1325.0 * t, 1.0) * TWO_PI);
+
+       /* Mean longitude of Sun minus mean longitude of Sun's perigee. */
+       elp = Anpm(
+               (1287099.804 + (1292581.224 + (-0.577 - 0.012 * t) * t) * t)
+               * AS_TO_RAD + fmod(99.0 * t, 1.0) * TWO_PI);
+
+       /* Mean longitude of Moon minus mean longitude of Moon's node. */
+       f = Anpm(
+               (335778.877 + (295263.137 + (-13.257 + 0.011 * t) * t) * t)
+               * AS_TO_RAD + fmod(1342.0 * t, 1.0) * TWO_PI);
+
+       /* Mean elongation of Moon from Sun. */
+       d = Anpm(
+               (1072261.307 + (1105601.328 + (-6.891 + 0.019 * t) * t) * t)
+               * AS_TO_RAD + fmod(1236.0 * t, 1.0) * TWO_PI);
+
+       /* Longitude of the mean ascending node of the lunar orbit on the */
+       /* ecliptic, measured from the mean equinox of date. */
+       om = Anpm(
+               (450160.280 + (-482890.539 + (7.455 + 0.008 * t) * t) * t)
+               * AS_TO_RAD + fmod(-5.0 * t, 1.0) * TWO_PI);
+
+       /* --------------- */
+       /* Nutation series */
+       /* --------------- */
+
+       /* Initialize nutation components. */
+       dp = 0.0;
+       de = 0.0;
+
+       /* Sum the nutation terms, ending with the biggest. */
+       for (j = NT-1; j >= 0; j--) {
+
+           /* Form argument for current term. */
+           arg = (double)x[j].nl  * el
+               + (double)x[j].nlp * elp
+               + (double)x[j].nf  * f
+               + (double)x[j].nd  * d
+               + (double)x[j].nom * om;
+
+           /* Accumulate current nutation term. */
+           s = x[j].sp + x[j].spt * t;
+           c = x[j].ce + x[j].cet * t;
+           if (s != 0.0) dp += s * std::sin(arg);
+           if (c != 0.0) de += c * std::cos(arg);
+       }
+
+       /* Convert results from 0.1 mas units to radians. */
+       dpsi = dp * U2R;
+       deps = de * U2R;
+
+   }
+
+
+      // Form the matrix of nutation for a given date, IAU 1980 model
+   Matrix<double> NutMatrix80(const CommonTime& TT)
+   {
+       double dpsi, deps, epsa;
+
+       /* Nutation components and mean obliquity. */
+       NutAngles80(TT, dpsi, deps);
+       epsa = MeanObliquity80(TT);
+
+       // Correct dpsi and deps with IERS products
+       //   dpsi += ddpsi;
+       //   deps += ddeps;
+
+       /* Build the rotation matrix. */
+       return rotation(-(epsa+deps),1) * rotation(-dpsi,3) * rotation(epsa,1);
+
+   }
+
+      // Equation of the equinoxes, IAU 1994 model
+   double EqnEquinox94(const CommonTime& TT)
+   {
+       double t,  om,  dpsi,  deps,  eps0, ee;
+
+       /* Interval between fundamental epoch J2000.0 and given date (JC). */
+       t = ( MJD(TT).mjd - MJD_J2000 ) / JC;
+
+       /* Longitude of the mean ascending node of the lunar orbit on the */
+       /* ecliptic, measured from the mean equinox of date. */
+       om = Anpm((450160.280 + (-482890.539
+            + (7.455 + 0.008 * t) * t) * t) * AS_TO_RAD
+            + fmod(-5.0 * t, 1.0) * TWO_PI);
+
+       /* Nutation components and mean obliquity. */
+       NutAngles80(TT, dpsi, deps);
+       eps0 = MeanObliquity80(TT);
+
+       /* Equation of the equinoxes. */
+       ee = dpsi * std::cos(eps0) + AS_TO_RAD * (0.00264 * std::sin(om) + 0.000063 * std::sin(om + om));
+
+
+       return ee;
+
+   }
+
+      // Universal Time to Greenwich mean sidereal time (IAU 1982 model)
+   double GMST82(const CommonTime& UT1)
+   {
+       /* Coefficients of IAU 1982 GMST-UT1 model */
+       double A = 24110.54841  -  DAY_TO_SEC / 2.0;
+       double B = 8640184.812866;
+       double C = 0.093104;
+       double D =  -6.2e-6;
+
+       long day, sod; double fsod;
+       UT1.get(day, sod, fsod);
+
+       /* Note: the first constant, A, has to be adjusted by 12 hours */
+       /* because the UT1 is supplied as a Julian date, which begins  */
+       /* at noon.                                                    */
+       double dj1, dj2, d1, d2, t, f, gmst;
+       dj1 = double(day-0.5);       // Julian Date, Integer Part
+       dj2 = (sod+fsod) / 86400.0;  // Julian Date, Fractional Part
+       d1 = dj2;
+       d2 = dj1;
+
+       /* Julian centuries since fundamental epoch. */
+       t = (d1 + (d2 - JD_J2000)) / JC;
+
+       /* Fractional part of JD(UT1), in seconds. */
+       f = DAY_TO_SEC * (fmod(d1,1.0) + fmod(d2,1.0));
+
+       /* GMST at this UT1. */
+       gmst = Anp(SEC_TO_RAD * ((A + (B + (C + D * t) * t) * t) + f));
+
+       return gmst;
+
+   }
+
+
+      // Greenwich apparent sidereal time (consistent with IAU 1982/94
+      // resolutions)
+   double GAST94(const CommonTime& UT1)
+   {
+       double gmst82, eqeq94, gst;
+
+       gmst82 = GMST82(UT1);
+       eqeq94 = EqnEquinox94(UT1);
+       gst = Anp(gmst82 + eqeq94);
+
+       return gst;
+   }
+
+
+      // Greenwich Hour Angle Matrix
+   Matrix<double> GHAMatrix(const CommonTime& UT1)
+   {
+       return rotation( GAST94(UT1), 3 );
+   }
+
+   
+      // Pole Matrix
+   Matrix<double> PoleMatrix(const CommonTime& UTC)
+   {
+       double xp, yp;
+       xp = PolarMotionX(UTC) * AS_TO_RAD;
+       yp = PolarMotionY(UTC) * AS_TO_RAD;
+
+       return rotation(-xp, 2) * rotation(-yp, 1);
+   }
+
+
+   void XY06(const CommonTime& tt, double& x, double& y)
    {
        /* Maximum power of T in the polynomials for X and Y */
        enum { MAXPT = 5 };
 
        /* Polynomial coefficients (arcsec, X then Y). */
        static const double xyp[2][MAXPT+1] = {
-          {    -0.016617,
-             2004.191898,
-               -0.4297829,
-               -0.19861834,
-                0.000007578,
-                0.0000059285
-          },
-          {    -0.006951,
-               -0.025896,
-              -22.4072747,
-                0.00190059,
-                0.001112526,
-                0.0000001358
-          }
+           {    -0.016617,
+              2004.191898,
+              -0.4297829,
+              -0.19861834,
+               0.000007578,
+               0.0000059285
+           },
+           {    -0.006951,
+                -0.025896,
+               -22.4072747,
+                 0.00190059,
+                 0.001112526,
+                 0.0000001358
+           }
        };
 
        /* Fundamental-argument multipliers:  luni-solar terms */
@@ -3497,7 +3924,7 @@ namespace gpstk
        /*--------------------------------------------------------------------*/
 
        /* Interval between fundamental date J2000.0 and given date (JC). */
-       t = (MJD(TT).mjd - MJD_J2000) / JC;
+       t = (MJD(tt).mjd - MJD_J2000) / JC;
 
        /* Powers of T. */
        w = 1.0;
@@ -3660,13 +4087,13 @@ namespace gpstk
        x = AS_TO_RAD * (xypr[0] + (xyls[0] + xypl[0]) / 1e6);
        y = AS_TO_RAD * (xypr[1] + (xyls[1] + xypl[1]) / 1e6);
 
-   }  // End of method 'ReferenceSystem::XY06()'
+   }
 
 
-      /// The CIO locator s, positioning the Celestial Intermediate Origin on
-      /// the equator of the Celestial Intermediate Pole, given the CIP's X,Y
-      /// coordinates.  Compatible with IAU 2006/2000A precession-nutation.
-   double ReferenceSystem::S06(const CommonTime& TT, const double& x, const double& y)
+   // The CIO locator s, positioning the Celestial Intermediate Origin on
+   // the equator of the Celestial Intermediate Pole, given the CIP's X,Y
+   // coordinates.  Compatible with IAU 2006/2000A precession-nutation.
+   double S06(const CommonTime& tt, const double& x, const double& y)
    {
        /* Time since J2000.0, in Julian centuries */
        double t;
@@ -3818,7 +4245,7 @@ namespace gpstk
        /*--------------------------------------------------------------------*/
 
        /* Interval between fundamental epoch J2000.0 and current date (JC). */
-       t = (MJD(TT).mjd - MJD_J2000) / JC;
+       t = (MJD(tt).mjd - MJD_J2000) / JC;
 
        /* Fundamental Arguments (from IERS Conventions 2003) */
 
@@ -3923,13 +4350,12 @@ namespace gpstk
             w5 * t) * t) * t) * t) * t) * AS_TO_RAD - x*y/2.0;
 
        return s;
+   }
 
-   }  // End of method 'ReferenceSystem::S06()'
 
-
-      /// Form the celestial to intermediate-frame-of-date matrix given the CIP
-      /// X,Y and CIO locator s.
-   Matrix<double> ReferenceSystem::C2IXYS(const double& x, const double& y, const double& s)
+   // Form the celestial to intermediate-frame-of-date matrix given the CIP
+   // X,Y and CIO locator s.
+   Matrix<double> C2IXYS(const double& x, const double& y, const double& s)
    {
        double r2, e, d;
 
@@ -3941,15 +4367,18 @@ namespace gpstk
        /* Form the matrix. */
        Matrix<double> rc2i(3,3,0.0);
        rc2i(0,0) = 1.0; rc2i(1,1) = 1.0; rc2i(2,2) = 1.0;
-       rc2i = rotation(-(e+s),3) * rotation(d,2) * rotation(e,3);
+//       rc2i = rotation(-(e+s),3) * rotation(d,2) * rotation(e,3);
+
+       Rz(e, rc2i);
+       Ry(d, rc2i);
+       Rz(-(e+s), rc2i);
 
        return rc2i;
+   }
 
-   }  // End of method 'ReferenceSystem::C2IXYS()'
 
-
-      /// Earth rotation angle (IAU 2000 model).
-   double ReferenceSystem::ERA00(const CommonTime& UT1)
+   // Earth rotation angle (IAU 2000 model).
+   double ERA00(const CommonTime& ut1)
    {
        double d1, d2, t, f, theta;
 
@@ -3966,7 +4395,7 @@ namespace gpstk
 
        t = d1 + (d2 - JD_J2000);
 */
-       t = (MJD(UT1).mjd - MJD_J2000);
+       t = (MJD(ut1).mjd - MJD_J2000);
 
        /* Fractional part of T (days). */
 //       f = std::fmod(d1,1.0) + std::fmod(d2,1.0);
@@ -3977,43 +4406,43 @@ namespace gpstk
                                + 0.00273781191135448 * t));
 
        return theta;
-
-   }  // End of method 'ReferenceSystem::ERA00()'
-
+   }
 
    // The TIO locator s', positioning the Terrestrial Intermediate Origin
    // on the equator of the Celestial Intermediate Pole.
-   double ReferenceSystem::SP00(const CommonTime& TT)
+   double SP00(const CommonTime& tt)
    {
        double t, sp;
 
        /* Interval between fundamental epoch J2000.0 and current date (JC). */
-       t = (MJD(TT).mjd - MJD_J2000) / JC;
+       t = (MJD(tt).mjd - MJD_J2000) / JC;
 
        /* Approximate s'. */
        sp = -47e-6 * t * AS_TO_RAD;
 
        return sp;
+   }
 
-   }  // End of method 'ReferenceSystem::SP00()'
 
-
-      /// Form the matrix of polar motion for a given date, IAU 2000.
-   Matrix<double> ReferenceSystem::POM00(const double& xp, const double& yp, const double& sp)
+   // Form the matrix of polar motion for a given date, IAU 2000.
+   Matrix<double> POM00(const double& xp, const double& yp, const double& sp)
    {
        Matrix<double> rpom(3,3,0.0);
        rpom(0,0) = 1.0; rpom(1,1) = 1.0; rpom(2,2) = 1.0;
 
        /* Construct the matrix. */
-       rpom = rotation(-yp,1) * rotation(-xp,2) * rotation(sp,3);
+//       rpom = rotation(-yp,1) * rotation(-xp,2) * rotation(sp,3);
+
+       Rz(sp, rpom);
+       Ry(-xp, rpom);
+       Rx(-yp, rpom);
 
        return rpom;
+   }
 
-   }  // End of method 'ReferenceSystem::POM00()'
 
-
-      /// Transformation matrix from ICRS to ITRS.
-   Matrix<double> ReferenceSystem::C2TMatrix(const CommonTime& utc)
+   // CRS to TRS Matrix
+   Matrix<double> C2TMatrix(const CommonTime& utc)
    {
        // TT
        CommonTime tt( UTC2TT(utc) );
@@ -4032,8 +4461,8 @@ namespace gpstk
 
        // get the eop before and after utc
        EOPDataStore::EOPData eop1, eop2;
-       eop1 = getEOPData(utc1);
-       eop2 = getEOPData(utc2);
+       eop1 = EOPData(utc1);
+       eop2 = EOPData(utc2);
 /*
        cout << eop1 << endl;
        cout << eop2 << endl;
@@ -4123,9 +4552,8 @@ namespace gpstk
        // R
        double era = ERA00(ut1);
        Matrix<double> R(3,3,0.0);
-//       R(0,0) = 1.0; R(1,1) = 1.0; R(2,2) = 1.0;
-//       Rz(era, R);
-       R = rotation(era,3);
+       R(0,0) = 1.0; R(1,1) = 1.0; R(2,2) = 1.0;
+       Rz(era, R);
 
        // W
        double sp = SP00(tt);
@@ -4133,35 +4561,59 @@ namespace gpstk
 
        return W * R * Q;
 
-   }  // End of method 'ReferenceSystem::C2TMatrix()'
+   }
  
-
-      /// Transformation matrix from ITRS to ICRS.
-   Matrix<double> ReferenceSystem::T2CMatrix(const CommonTime& UTC)
+   // TRS to CRS Matrix
+   Matrix<double> T2CMatrix(const CommonTime& UTC)
    {
-
        return transpose( C2TMatrix(UTC) );
+   }
 
-   }  // End of method 'ReferenceSystem::T2CMatrix()'
+
+   // Earth rotation angle (IAU 2000 model)
+   double EarthRotationAngle(const CommonTime& UT1)
+   {
+       // Days since fundamental epoch
+       const double t(MJD(UT1).mjd - MJD_J2000);
+
+       // Fractional part of T (days)
+       const double f(std::fmod(double(MJD(UT1).mjd),1.0) + std::fmod(JD_TO_MJD,1.0));
+
+       // Earth rotation angle at this UT1
+       double theta = Anp(TWO_PI*(f+ 0.7790572732640 + 0.00273781191135448*t));
+
+       return theta;
+   }
 
 
-      /// Earth rotation angle rate (IAU 2000 model)
-   double ReferenceSystem::dERA00(const CommonTime& UT1)
+      // Earth rotation angle first order rate
+   double EarthRotationAngleRate1(const CommonTime& UT1)
    {
        //
        const double t( (MJD(UT1).mjd - MJD_J2000) / JC );
 
        // 
+       double dtheta = (1.002737909350795 + 5.9006e-11*t - 5.9e-15*t*t) * TWO_PI / DAY_TO_SEC;
+
+       return dtheta;
+   }
+
+   // Earth rotation angle rate
+   double dERA(const CommonTime& ut1)
+   {
+       //
+       const double t( (MJD(ut1).mjd - MJD_J2000) / JC );
+
+       // 
        double dtheta = 1.00273781191135448 * TWO_PI / DAY_TO_SEC;
 
        return dtheta;
+   }
 
-   }  // End of method 'ReferenceSystem::dERA00()'
 
-
-      /// Time derivative of transformation matrix from CRS to TRS coordinates
-      /// for a given date
-   Matrix<double> ReferenceSystem::dC2TMatrix(const CommonTime& utc)
+      // Time derivative of transformation matrix from CRS to TRS coordinates
+      // for a given date
+   Matrix<double> dC2TMatrix(const CommonTime& utc)
    {
        // UT1
        CommonTime ut1( UTC2UT1(utc) );
@@ -4170,11 +4622,11 @@ namespace gpstk
        CommonTime tt( UTC2TT(utc) );
 
        // Earth Orientation Parameters
-       double xp     =  getXPole(utc);    // arcsecond
-       double yp     =  getYPole(utc);    // arcsecond
-       double dut1   =  getUT1mUTC(utc);  // second
-       double dX     =  getDPsi(utc);     // arcsecond
-       double dY     =  getDEps(utc);     // arcsecond
+       double xp = PolarMotionX(utc);   // arcsecond
+       double yp = PolarMotionY(utc);   // arcsecond
+       double dut1 = UT1mUTC(utc);      // second
+       double dX = NutationDPsi(utc);   // arcsecond
+       double dY = NutationDEps(utc);   // arcsecond
 
        // Tidal variations in the Earth's rotation
        // 1. diurnal/subdiurnal tidal effect on polar motion ("), UT1 (s) and
@@ -4189,8 +4641,8 @@ namespace gpstk
 //       cout << "Libration2: " << cor_libration2 << endl;
 
        dut1 += cor_oceantides(2) + cor_libration2(0);
-       xp   += cor_oceantides(0) + cor_libration1(0);
-       yp   += cor_oceantides(1) + cor_libration1(1);
+       xp += cor_oceantides(0) + cor_libration1(0);
+       yp += cor_oceantides(1) + cor_libration1(1);
 
 //       cout << "dut1: " << dut1 << endl
 //            << "xp: " << xp << endl
@@ -4213,16 +4665,15 @@ namespace gpstk
        // Q
        Matrix<double> Q = C2IXYS(x,y,s);
 
-       // ERA, dERA
-       double era    = ERA00(ut1);
-       double dera   = dERA00(ut1);
-
-       // dR
+       // R
+       double era = ERA00(ut1);
+       double dera = dERA(ut1);
        Matrix<double> dR(3,3,0.0);
        dR(0,0) = -std::sin(era);
        dR(0,1) =  std::cos(era);
        dR(1,0) = -std::cos(era);
        dR(1,1) = -std::sin(era);
+
        dR = dR * dera;
 
        // W
@@ -4230,49 +4681,24 @@ namespace gpstk
        Matrix<double> W = POM00(xp, yp, sp);
 
        return W * dR * Q;
+   }
 
-   }  // End of method 'ReferenceSystem::dC2TMatrix()'
 
-
-      /// Time derivative of transformation matrix from TRS to CRS coordinates
-      /// for a given date
-   Matrix<double> ReferenceSystem::dT2CMatrix(const CommonTime& UTC)
+      // Time derivative of transformation matrix from TRS to CRS coordinates
+      // for a given date
+   Matrix<double> dT2CMatrix(const CommonTime& UTC)
    {
-
        return transpose( dC2TMatrix(UTC) );
+   }
 
-   }  // End of method 'ReferenceSystem::dT2CMatrix()'
-
-
-      /// Greenwich mean sidereal time (consistent with IAU 2006 precession)
-   double ReferenceSystem::GMST06(const CommonTime& UT1, const CommonTime& TT)
-   {
-      double t, t2, t3, t4, t5, gmst;
-
-      // TT Julian centuries since J2000.0.
-      t = (MJD(TT).mjd - MJD_J2000) / JC;
-      t2 = t*t;
-      t3 = t2*t;
-      t4 = t3*t;
-      t5 = t4*t;
-
-      // Greenwich mean sidereal time, IAU 2006.
-      gmst = Anp(ERA00(UT1) + (0.014506 + 4612.156534*t + 1.3915817*t2
-            - 0.00000044*t3 - 0.000029956*t4 - 0.0000000368*t5)*AS_TO_RAD);
-
-      return gmst;
-
-   }  // End of method 'ReferenceSystem::GMST06()'
-
-
-      /// Doodson fundamental arguments
-   void ReferenceSystem::DoodsonArguments(const CommonTime& UT1,
-                                          const CommonTime& TT, 
-                                          double BETA[6],
-                                          double FNUT[5]         )
+      // Doodson fundamental arguments
+   void DoodsonArguments(const CommonTime& UT1,
+                         const CommonTime& TT,
+                         double BETA[6],
+                         double FNUT[5]         )
    {
       // GMST, IAU 1980 model
-      double THETA = GMST06(UT1,TT);
+      double THETA = GMST82(UT1);
 
       // Fundamental Arguments
       //-----------------------------------------------------
@@ -4341,8 +4767,166 @@ namespace gpstk
       BETA[4] = -F5;
       BETA[5] = S - F4 - F2;
 
-   }  // End of method 'ReferenceSystem::DoodsonArguments()'
+   }
 
 
+   // JPL Ephemeris Data Handling
+   //-------------------------------------------------------------------------
 
-}  // End of namespace 'gpstk'
+      // JPL Ephemeris File
+   void LoadJPLEphFile(std::string fileName)
+   {
+       jplEph.clearStorage();
+
+       int rc = jplEph.initializeWithBinaryFile(fileName);
+       if(rc != 0)
+       {
+           GPSTK_THROW( Exception("Failed to load JPL EPH File " + fileName) );
+       }
+   }
+
+      // Planet position and velocity in J2000, in m and m/s
+   Vector<double> J2kPosVel(const CommonTime&   TT,
+                            SolarSystem::Planet entity,
+                            SolarSystem::Planet center)
+   {
+       Vector<double> rvJ2000(6,0.0);
+
+       try
+       {
+           double rvState[6] = {0.0};
+           int ret = jplEph.computeState(JulianDate(TT).jd,
+                                         entity,
+                                         center,
+                                         rvState);
+
+           // km/day -> km/s
+           rvState[3] /= 86400.0;
+           rvState[4] /= 86400.0;
+           rvState[5] /= 86400.0;
+
+           if(ret == 0)
+           {
+               rvJ2000 = rvState;
+
+               return rvJ2000*1000.0;
+           }
+       }
+       catch(...)
+       {
+           GPSTK_THROW(Exception("Fail to compute planet position and velocity"));
+       }
+
+       return rvJ2000;
+   }
+
+
+      // Planet position in J2000, in m
+   Vector<double> J2kPosition(const CommonTime&   TT,
+                              SolarSystem::Planet entity)
+   {
+       Vector<double> rvJ2k = J2kPosVel(TT, entity);
+
+       Vector<double> rJ2k(3,0.0);
+       for(int i=0; i<3; i++)
+       {
+           rJ2k[i] = rvJ2k[i];
+       }
+
+       return rJ2k;
+   }
+
+
+      // Planet velocity in J2000, in m/s
+   Vector<double> J2kVelocity(const CommonTime&   TT,
+                              SolarSystem::Planet entity)
+   {
+       Vector<double> rvJ2k = J2kPosVel(TT, entity);
+
+       Vector<double> vJ2k(3,0.0);
+       for(int i=0; i<3; i++)
+       {
+           vJ2k[i] = rvJ2k[i+3];
+       }
+
+       return vJ2k;
+   }
+
+
+      // Sun position in J2000
+   Vector<double> SunJ2kPosition(const CommonTime& TT)
+   {
+
+       // Number of Julian centuries since J2000
+       const double T( (MJD(TT).mjd - MJD_J2000) / JC );
+
+       // Appropriate mean orbital elements
+       double Oo, M, eps;
+       Oo   = 282.9400 * DEG_TO_RAD;
+       M    = std::fmod(357.5256 + 35999.049*T, 360.0) * DEG_TO_RAD;
+       eps  = 23.43929111 * DEG_TO_RAD;
+
+       // The Sun's ecliptic longitude and distance, the ecliptic latitude
+       // vanishes within an accuracy of 1'
+       double l = Oo + M + (6892*std::sin(M) + 72*std::sin(M+M)) * AS_TO_RAD;
+       double r = (149.619 - 2.499*std::cos(M) - 0.021*std::cos(M+M)) * 1e9;
+
+       Vector<double> res(3,0.0);
+       res[0] = r * std::cos(l) * 1.0;
+       res[1] = r * std::sin(l) * 1.0;
+       res[2] = r * 0.0;
+
+       res = rotation(-eps,1) * res;
+
+       return res;
+   }
+
+      // Moon position in J2000
+   Vector<double> MoonJ2kPosition(const CommonTime& TT)
+   {
+       // Number of Julian centuries since J2000
+       const double T( (MJD(TT).mjd - MJD_J2000) / JC );
+
+       // Appropriate mean orbital elements
+       double L0, l, lp, F, D, eps;
+       L0 = std::fmod(218.31617 + 481267.88088*T - 1.3972*T, 360.0) * DEG_TO_RAD;
+       l  = std::fmod(134.96292 + 477198.86753*T, 360.0) * DEG_TO_RAD;
+       lp = std::fmod(357.52543 + 35999.04944*T, 360.0) * DEG_TO_RAD;
+       F  = std::fmod(93.27283 + 483202.01873*T, 360.0) * DEG_TO_RAD;
+       D  = std::fmod(297.85027 + 445267.11135*T, 360.0) * DEG_TO_RAD;
+       eps  = 23.43929111 * DEG_TO_RAD;
+
+       // The Moon's ecliptic longitude, latitude and distance
+       double lon, lat, rad;
+       double dlon =  (22640*std::sin(l) + 769*std::sin(l+l)
+                    -  4586*std::sin(l-D-D) + 2370*std::sin(D+D)
+                    -  668*std::sin(lp) - 412*std::sin(F+F)
+                    -  212*std::sin(l+l-D-D) - 206*std::sin(l+lp-D-D)
+                    +  192*std::sin(l+D+D) - 165*std::sin(lp-D-D)
+                    +  148*std::sin(l-lp) - 125*std::sin(D)
+                    -  110*std::sin(l+lp) - 55*std::sin(F+F-D-D)) * AS_TO_RAD;
+
+       lon = L0 + dlon;
+       double s = (412*std::sin(F+F) + 541*std::sin(lp)) * AS_TO_RAD;
+       lat = (18520*std::sin(F + dlon + s)
+            - 526*std::sin(F-D-D) + 44*std::sin(l+F-D-D)
+            - 31*std::sin(-l+F-D-D) - 25*std::sin(-l-l+F)
+            - 23*std::sin(lp+F-D-D) + 21*std::sin(-l+F)
+            + 11*std::sin(-lp+F-D-D)) * AS_TO_RAD;
+       rad = (385000 - 20905*std::cos(l) - 3699*std::cos(D+D-l)
+            - 2956*std::cos(D+D) - 570*std::cos(l+l) + 246*std::cos(l+l-D-D)
+            - 205*std::cos(lp-D-D) - 171*std::cos(l+D+D)
+            - 152*std::cos(l+lp-D-D)) * 1e3;
+
+       Vector<double> res(3,0.0);
+       res[0] = rad * std::cos(lon) * std::cos(lat);
+       res[1] = rad * std::sin(lon) * std::cos(lat);
+       res[2] = rad * std::sin(lat);
+
+       res = rotation(-eps,1) * res;
+
+       return res;
+   }
+
+ 
+} // end of namespace gpstk

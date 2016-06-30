@@ -77,8 +77,8 @@ namespace gpstk
          : initialTime(iniTime),
            finalTime(finTime)
       {
-         cout << "constructor initi:"<< initialTime << endl;
-         cout << "constructor final:"<< finalTime << endl;
+//         cout << "constructor initi:"<< initialTime << endl;
+//         cout << "constructor final:"<< finalTime << endl;
       }
 
 

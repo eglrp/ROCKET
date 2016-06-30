@@ -17,19 +17,19 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
 /**
 * @file EarthSolidTide.cpp
-* Class to do Earth Solid Tide correction
+* Class to do Earth Solid Tide correction.
+*
 */
-
-#include <complex>
 
 #include "EarthSolidTide.hpp"
 #include "GNSSconstants.hpp"
+#include "Legendre.hpp"
 
 using namespace std;
 
@@ -140,25 +140,24 @@ namespace gpstk
    };
 
 
-      /**
-       * Solid tide to normalized earth potential coefficients
+      /** Solid tide to normalized earth potential coefficients
        *
        * @param utc     time in UTC
-       * @param dC      correction to normalized coefficients dC
-       * @param dS      correction to normalized coefficients dS
+       * @param CS      normalized earth potential coefficients
        */
-   void EarthSolidTide::getSolidTide(CommonTime utc, double dC[], double dS[])
+   void EarthSolidTide::getSolidTide(CommonTime utc, Matrix<double>& CS)
    {
+
        // TT
        CommonTime tt( pRefSys->UTC2TT(utc) );
 
        // UT1
        CommonTime ut1( pRefSys->UTC2UT1(utc) );
 
-       // C2T Matrix
+       // transformation matrix from ICRS to ITRS
        Matrix<double> c2t( pRefSys->C2TMatrix(utc) );
 
-       // sun and moon position and velocity in eci, unit: km, km/day
+       // moon and sun position and velocity in ICRS, unit: km, km/day
        double jd = JulianDate(tt).jd;
        double rv_moon[6] = {0.0};
        pSolSys->computeState(jd,
@@ -171,23 +170,23 @@ namespace gpstk
                              SolarSystem::Earth,
                              rv_sun);
 
-       // Moon and Sun Position in ECI, unit: m
-       Vector<double> rm_eci(3,0.0);
-       rm_eci(0) = rv_moon[0];
-       rm_eci(1) = rv_moon[1];
-       rm_eci(2) = rv_moon[2];
-       rm_eci *= 1000.0;
-       Vector<double> rs_eci(3,0.0);
-       rs_eci(0) = rv_sun[0];
-       rs_eci(1) = rv_sun[1];
-       rs_eci(2) = rv_sun[2];
-       rs_eci *= 1000.0;
-//       cout << "rm_eci: " << rm_eci << endl;
-//       cout << "rs_eci: " << rs_eci << endl;
+       // moon and sun position in ICRS, unit: m
+       Vector<double> rm_icrs(3,0.0);
+       rm_icrs(0) = rv_moon[0];
+       rm_icrs(1) = rv_moon[1];
+       rm_icrs(2) = rv_moon[2];
+       rm_icrs *= 1000.0;
+       Vector<double> rs_icrs(3,0.0);
+       rs_icrs(0) = rv_sun[0];
+       rs_icrs(1) = rv_sun[1];
+       rs_icrs(2) = rv_sun[2];
+       rs_icrs *= 1000.0;
+//       cout << "rm_icrs: " << rm_icrs << endl;
+//       cout << "rs_icrs: " << rs_icrs << endl;
 
-       // Moon and Sun Position in ECEF, unit: m
-       Vector<double> rm_ecef = c2t * rm_eci;
-       Vector<double> rs_ecef = c2t * rs_eci;
+       // moon and sun position in ITRS, unit: m
+       Vector<double> rm_itrs = c2t * rm_icrs;
+       Vector<double> rs_itrs = c2t * rs_icrs;
 
        // IERS Conventions 2010, Chapter 6.2
        // The computation of the tidal contributions to the geopotential
@@ -222,6 +221,26 @@ namespace gpstk
        k32  =  0.09300;
        k33  =  0.09400;
 
+       // indexes for degree = 2
+       int id20, id21, id22;
+       id20 = indexTranslator(2,0) - 1;
+       id21 = indexTranslator(2,1) - 1;
+       id22 = indexTranslator(2,2) - 1;
+
+       // indexes for degree = 3
+       int id30, id31, id32, id33;
+       id30 = indexTranslator(3,0) - 1;
+       id31 = indexTranslator(3,1) - 1;
+       id32 = indexTranslator(3,2) - 1;
+       id33 = indexTranslator(3,3) - 1;
+
+       // indexes for degree = 4
+       int id40, id41, id42;
+       id40 = indexTranslator(4,0) - 1;
+       id41 = indexTranslator(4,1) - 1;
+       id42 = indexTranslator(4,2) - 1;
+
+
        for(int j=2; j<=3; ++j)
        {
           Vector<double> rsm;
@@ -230,12 +249,12 @@ namespace gpstk
           if(2==j)         // Moon
           {
              GSM = GM_MOON;
-             rsm = rm_ecef;
+             rsm = rm_itrs;
           }
           else if(3==j)    // Sun
           {
              GSM = GM_SUN;
-             rsm = rs_ecef;
+             rsm = rs_itrs;
           }
 
           // rho, sin(lat), cos(lat), lat
@@ -248,47 +267,47 @@ namespace gpstk
           double xlon = std::atan2(rsm(1), rsm(0));
 
           // Pnm
-          Vector<double> leg;
-          legendre(3, lat, leg);
+          Vector<double> leg0, leg1, leg2;
+          legendre(3, lat, leg0, leg1, leg2, 0);
 
           // temp
           double temp;
-          
           temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
+
           // C20, S20
-          dC[0] += k20/5.0 * temp * leg(3) * 1.0;
-          dS[0] += 0.0;
+          CS(id20, 0) += k20/5.0 * temp * leg0(3) * 1.0;
+          CS(id20, 1) += 0.0;
           // C21, S21
-          dC[1] += k21/5.0 * temp * leg(4) * std::cos(xlon);
-          dS[1] += k21/5.0 * temp * leg(4) * std::sin(xlon);
+          CS(id21, 0) += k21/5.0 * temp * leg0(4) * std::cos(xlon);
+          CS(id21, 1) += k21/5.0 * temp * leg0(4) * std::sin(xlon);
           // C22, S22
-          dC[2] += k22/5.0 * temp * leg(5) * std::cos(2*xlon);
-          dS[2] += k22/5.0 * temp * leg(5) * std::sin(2*xlon);
+          CS(id22, 0) += k22/5.0 * temp * leg0(5) * std::cos(2*xlon);
+          CS(id22, 1) += k22/5.0 * temp * leg0(5) * std::sin(2*xlon);
 
           temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,4);
           // C30, S30
-          dC[3] += k30/7.0 * temp * leg(6) * 1.0;
-          dS[3] += 0.0;
+          CS(id30, 0) += k30/7.0 * temp * leg0(6) * 1.0;
+          CS(id30, 1) += 0.0;
           // C31, S31
-          dC[4] += k31/7.0 * temp * leg(7) * std::cos(xlon);
-          dS[4] += k31/7.0 * temp * leg(7) * std::sin(xlon);
+          CS(id31, 0) += k31/7.0 * temp * leg0(7) * std::cos(xlon);
+          CS(id31, 1) += k31/7.0 * temp * leg0(7) * std::sin(xlon);
           // C32, S32
-          dC[5] += k32/7.0 * temp * leg(8) * std::cos(2*xlon);
-          dS[5] += k32/7.0 * temp * leg(8) * std::sin(2*xlon);
+          CS(id32, 0) += k32/7.0 * temp * leg0(8) * std::cos(2*xlon);
+          CS(id32, 1) += k32/7.0 * temp * leg0(8) * std::sin(2*xlon);
           // C33, S33
-          dC[6] += k33/7.0 * temp * leg(9) * std::cos(3*xlon);
-          dS[6] += k33/7.0 * temp * leg(9) * std::sin(3*xlon);
+          CS(id33, 0) += k33/7.0 * temp * leg0(9) * std::cos(3*xlon);
+          CS(id33, 1) += k33/7.0 * temp * leg0(9) * std::sin(3*xlon);
 
           temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
           // C40, S40
-          dC[7] += k20p/5.0 * temp * leg(3) * 1.0;
-          dS[7] += 0.0;
+          CS(id40, 0) += k20p/5.0 * temp * leg0(3) * 1.0;
+          CS(id40, 1) += 0.0;
           // C41, S41
-          dC[8] += k21p/5.0 * temp * leg(4) * std::cos(xlon);
-          dS[8] += k21p/5.0 * temp * leg(4) * std::sin(xlon);
+          CS(id41, 0) += k21p/5.0 * temp * leg0(4) * std::cos(xlon);
+          CS(id41, 1) += k21p/5.0 * temp * leg0(4) * std::sin(xlon);
           // C42, S42
-          dC[9] += k22p/5.0 * temp * leg(5) * std::cos(xlon);
-          dS[9] += k22p/5.0 * temp * leg(5) * std::sin(xlon);
+          CS(id42, 0) += k22p/5.0 * temp * leg0(5) * std::cos(xlon);
+          CS(id42, 1) += k22p/5.0 * temp * leg0(5) * std::sin(xlon);
 
        }
 
@@ -322,7 +341,8 @@ namespace gpstk
          double ctf = std::cos(theta_f);
 
          // correction
-         dC[0] += (Argu_C20[i][0]*ctf - Argu_C20[i][1]*stf)*1e-12;
+         
+         CS(id20, 0) += (Argu_C20[i][0]*ctf - Argu_C20[i][1]*stf)*1e-12;
        }
 
        // C21, S21
@@ -339,8 +359,8 @@ namespace gpstk
            double ctf = std::cos(theta_f);
 
            // corrections
-           dC[1] += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
-           dS[1] += (Argu_C21[i][0]*ctf - Argu_C21[i][1]*stf)*1e-12;
+           CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
+           CS(id21, 1) += (Argu_C21[i][0]*ctf - Argu_C21[i][1]*stf)*1e-12;
        }
 
        // C22, S22
@@ -357,8 +377,8 @@ namespace gpstk
            double ctf = std::cos(theta_f);
 
            // corrections
-           dC[2] += ( Argu_C22[i][0]*ctf)*1e-12;
-           dS[2] += (-Argu_C22[i][0]*stf)*1e-12;
+           CS(id22, 0) += ( Argu_C22[i][0]*ctf)*1e-12;
+           CS(id22, 1) += (-Argu_C22[i][0]*stf)*1e-12;
        }
 
 
@@ -366,83 +386,11 @@ namespace gpstk
        //
        //   Treatment of the permanent tide
        //
-       //   It is not needed for tide-free EGM08.
+       //   It does not need to do permanent tide correction for tide-free EGM08.
        //
        /////////////////////////////////////////////////////////////////////////
 
-   }
-
-   /** Evaluate the fully normalized associated legendre functions.
-    * @param deg     Desired degree
-    * @param lat     Geocentric latitude in radians
-    * @param leg0    Fully normalized associated legendre functions (fnALF)
-    *
-    * Ref: E.Fantino, J Geod(2009), Methods of harmonic synthesis for global
-    * geopotential models and their first-, second- and third-order gradients
-    */ 
-   void EarthSolidTide::legendre(const int&      deg,
-                                 const double&   lat,
-                                 Vector<double>& leg0)
-   {
-      // sine, cosine and tangent of latitude
-      double slat, clat, tlat;
-      slat = std::sin(lat);
-      clat = std::cos(lat);
-      tlat = std::tan(lat);
-
-      int size = index(deg, deg);
-      leg0.resize(size, 0.0);
-
-      leg0(0) = 1.0;     // P00
-
-//      cout << "size: " << size << endl;
-//      cout << "sin(lat): " << slat << endl;
-//      cout << "cos(lat): " << clat << endl;
-//      cout << "tan(lat): " << tlat << endl;
-      
-      // first, the leg0
-      for(int n=1; n<=deg; ++n)
-      {
-         // Kronecker's delta
-         double delta = ( (1==n) ? 1.0 : 0.0 );
-
-         for(int m=0; m<=n; ++m)
-         {
-            // sectorials
-            if(m == n)
-            {
-               double fn = std::sqrt((1.0+delta)*(2*n+1.0)/(2*n));
-
-               // P(n,m) = fn * cos(lat) * P(n-1,m-1)
-               leg0( index(n,m)-1 ) = fn*clat*leg0( index(n-1,m-1)-1 );
-            }
-            // zonals and tesserals 
-            else
-            {
-               double gnm = std::sqrt((2*n+1.0)*(2*n-1.0)/(n+m)/(n-m));
-               double hnm = std::sqrt((2*n+1.0)*(n-m-1.0)*(n+m-1.0)/(2*n-3.0)/(n+m)/(n-m));
-               if(m == n-1)
-               {
-                  // P(n,m) = gnm * sin(lat) * P(n-1,m)
-                  leg0( index(n,m)-1 ) = gnm*slat*leg0( index(n-1,m)-1 );
-               }
-               else
-               {
-                  // P(n,m) = gnm * sin(lat) * P(n-1,m) - hnm * P(n-2,m)
-                  leg0( index(n,m)-1 ) = gnm*slat*leg0( index(n-1,m)-1 )
-                                       - hnm*leg0( index(n-2,m)-1 );
-               }
-            }
-         }
-      }
-
-//      cout << "leg0: " << endl;
-//      for(int i=0; i<size; i++)
-//      {
-//         cout << setw(12) << setprecision(8) << leg0(i) << endl;
-//      }
-
-   }   // End of method "EarthSolidTide::legendre()"
+   }  // End of method 'EarthSolidTide::getSolidTide()'
 
 
 }	// End of namespace 'gpstk'

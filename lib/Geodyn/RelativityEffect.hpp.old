@@ -17,21 +17,19 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Kaifa Kuang - Wuhan University . 2016
+//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
-
 /**
-* @file EarthPoleTide.hpp
-* Class to do Earth Pole Tide correction.
-* 
-*/
+ * @file RelativityEffect.hpp
+ * Class to do Relativity Effect calculation.
+ */
 
-#ifndef GPSTK_EARTH_POLE_TIDE_HPP
-#define GPSTK_EARTH_POLE_TIDE_HPP
+#ifndef GPSTK_RELATIVITY_EFFECT_HPP
+#define GPSTK_RELATIVITY_EFFECT_HPP
 
-#include "ReferenceSystem.hpp"
+#include "ForceModel.hpp"
 
 
 namespace gpstk
@@ -39,53 +37,41 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**
-       * Class to do Earth Pole Tide correction
-       * see IERS Conventions 2010 Section 6.4 and 6.5 for more details.
+      /** Class to do Relativity Effect calculation.
+       * see IERS Conventions 2010 Section 10.3 for more details.
+       *
        */
-   class EarthPoleTide
+   class RelativityEffect : public ForceModel
    {
    public:
          /// Default constructor
-      EarthPoleTide() {}
+      RelativityEffect() {}
 
          /// Default destructor
-      ~EarthPoleTide() {}
-
-
-         /// Set reference system
-      inline EarthPoleTide& setReferenceSystem(ReferenceSystem& ref)
-      {
-         pRefSys = &ref;
-
-         return (*this);
-      }
-
-
-         /// Get reference system
-      inline ReferenceSystem* getReferenceSystem() const
-      {
-         return pRefSys;
-      }
-
-
-         /** Pole tide to normalized earth potential coefficients
-          *
+      virtual ~RelativityEffect() {}
+      
+         /** Compute acceleration (and related partial derivatives).
           * @param utc     time in UTC
-          * @param CS      normalized earth potential coefficients
+          * @param rb      earth body
+          * @param sc      spacecraft
           */
-      void getPoleTide(CommonTime utc, Matrix<double>& CS);
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+
+         /// Return the force model name
+      inline virtual std::string modelName() const
+      { return "RelativityEffect"; }
+
+         /// Return the force model index
+      inline virtual int forceIndex() const
+      { return FMI_RelativisticEffect; }
 
    protected:
 
-         /// Reference System
-      ReferenceSystem* pRefSys;
 
-
-   }; // End of class 'EarthPoleTide'
+   }; // End of class 'RelativityEffect'
 
       // @}
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_EARTH_POLE_TIDE_HPP
+#endif   // GPSTK_RELATIVITY_EFFECT_HPP

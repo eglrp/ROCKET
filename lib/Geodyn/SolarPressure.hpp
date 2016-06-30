@@ -23,7 +23,7 @@
 
 /**
  * @file SolarPressure.hpp
- * This class computes the acceleration due to solar pressure on a satellite.
+ * Class to do Solar Pressure calculation.
  */
 
 #ifndef GPSTK_SOLAR_PRESSURE_HPP
@@ -40,14 +40,12 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**
-       * This class computes the acceleration due to solar pressure on a
-       * satellite.
-       *
+      /** Class to do Solar Pressure calculation.
        */
    class SolarPressure : public ForceModel
    {
    public:
+
        enum ShadowModel
        {
            SM_CYLINDRICAL,      // cylindrical
@@ -55,13 +53,15 @@ namespace gpstk
        };
 
    public:
+
          /** Determines if the satellite is in sunlight or shadow.
           * Taken from Montenbruck and Gill p. 80-83
-          * @param r ECI position vector of spacecraft [m].
-          * @param r_Sun position vector of Sun (geocentric) [m].
-          * @param r_Moon position vector of Moon (geocentric) [m].
-          * @return 0.0 if in shadow, 1.0 if in sunlight, 0.0 to 1.0 if in
-          * partial shadow.
+          * @param r       position of spacecraft [m]
+          * @param r_Sun   position of Sun (wrt Earth) [m]
+          * @param r_Moon  position of Moon (wrt Earth) [m]
+          * @return        0.0 if in shadow
+          *                1.0 if in sunlight
+          *                0.0 to 1.0 if in partial shadow
           */
        double getShadowFunction(Vector<double> r,
                                 Vector<double> r_Sun,
@@ -69,8 +69,7 @@ namespace gpstk
                                 SolarPressure::ShadowModel sm = SM_CONICAL);
 
          /// Default constructor
-      SolarPressure()
-      {};
+      SolarPressure() {};
 
          /// Default destructor
       virtual ~SolarPressure() {};
@@ -106,7 +105,7 @@ namespace gpstk
       }
 
 
-         /// Return force model name
+         /// Return the force model name
       inline virtual std::string modelName() const
       {return "SolarPressure";}
 
@@ -114,7 +113,12 @@ namespace gpstk
       inline virtual int forceIndex() const
       { return FMI_SolarRadiationPressure; }
        
-         /// This is the real one
+         /** Compute acceleration (and related partial derivatives) of Solar
+          *  Pressure.
+          * @param utc     time in UTC
+          * @param rb      earth body
+          * @param sc      spacecraft
+          */
       virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc) = 0;
 
 
