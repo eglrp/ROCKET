@@ -62,7 +62,7 @@ namespace gpstk
       Matrix<double> harmonics(6,11,0.0);
 
          // Get harmonics data from file
-      harmonics = blqData.getTideHarmonics(name);
+      harmonics = (*pBLQStore).getTideHarmonics(name);
 
       Vector<double> arguments(11,0.0);
 
@@ -95,24 +95,6 @@ namespace gpstk
       return oLoading;
 
    }  // End of method 'OceanLoading::getOceanLoading()'
-
-
-
-      /* Sets the name of BLQ file containing ocean tides harmonics data.
-       *
-       * @param name      Name of BLQ tides harmonics data file.
-       */
-   OceanLoading& OceanLoading::setFilename(const string& name)
-   {
-
-      fileData = name;
-
-      blqData.open(fileData);
-
-      return (*this);
-
-   }  // End of meters 'OceanLoading::setFilename()'
-
 
 
       /* Compute the value of the corresponding astronomical arguments,
