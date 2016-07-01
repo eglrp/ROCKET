@@ -236,6 +236,9 @@ namespace gpstk
          /// Gravity Model Data
       GravityModelData gmData;
 
+         /// Satellite Gravimetry
+//      bool satGravimetry;
+
 
    }; // End of class 'EarthGravitation'
 
