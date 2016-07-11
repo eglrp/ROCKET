@@ -346,6 +346,7 @@ namespace gpstk
          gnssDataMap::const_iterator it=gdsMap.begin();
          CommonTime epoch((*it).first);
 //
+/////////////////////// /////////////////////// /////////////////////// ///////////////////////
 //             // Let's get stochastic model set
 //          for(varcoeffMap)
 //          {
@@ -410,7 +411,7 @@ namespace gpstk
 //
 //          }
 //
-//
+/////////////////////// /////////////////////// /////////////////////// ///////////////////////
 //
             // Visit each Equation in "equList"
          for( std::list<Equation>::const_iterator itEq = equList.begin();
@@ -466,6 +467,13 @@ namespace gpstk
 
                         // Warning, here we will directly update the xhat/P 
                         // according the phi and its index. 
+
+////////////////////////// //////////////////////////
+//
+//       P(i,:) = phiMatrix * P(i,:)
+//       P(:,i) = P(:,i) * phiMatrixT
+//
+////////////////////////// //////////////////////////
 
                         // Now, Let's update the state and covariance
                      if(phiValue != 1.0)

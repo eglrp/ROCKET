@@ -76,10 +76,7 @@ namespace gpstk
                    CommonTime finTime = CommonTime::BEGINNING_OF_TIME)
          : initialTime(iniTime),
            finalTime(finTime)
-      {
-         cout << "constructor initi:"<< initialTime << endl;
-         cout << "constructor final:"<< finalTime << endl;
-      }
+      {}
 
 
          /// Load the leap second data from input file
