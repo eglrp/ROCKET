@@ -23,7 +23,7 @@
 
 /**
  * @file MoonGravitation.cpp
- * This class calculate the gravitational effect of the moon.
+ * Class to do Moon Gravitation calculation.
  */
 
 #include "MoonGravitation.hpp"
@@ -34,12 +34,13 @@ using namespace std;
 namespace gpstk
 {
 
-      /* Call the relevant methods to compute the acceleration.
-      * @param utc  Time reference class
-      * @param rb   Body reference class
-      * @param sc   Spacecraft parameters and state
-      * @return the acceleration [m/s^s]
-      */
+      
+      /** Compute acceleration (and related partial derivatives) of Moon
+       *  Gravitation.
+       * @param utc     time in UTC
+       * @param rb      earth body
+       * @param sc      spacecraft
+       */
    void MoonGravitation::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
       /* Oliver P69 and P248

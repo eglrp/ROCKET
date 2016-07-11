@@ -24,8 +24,7 @@
 
 /**
  * @file CODEPressure.hpp
- * This class provides a CODE model for the influence
- * of solar radiation pressure on a satellite.
+ * Class to do CODE Pressure calculation.
  */
 
 #ifndef GPSTK_CODE_PRESSURE_HPP
@@ -39,10 +38,7 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**
-       * This class provides a CODE model for the influence
-       * of solar radiation pressure on a satellite.
-       * 
+      /** Class to do CODE Pressure calculation.
        */
    class CODEPressure : public SolarPressure
    {
@@ -53,8 +49,13 @@ namespace gpstk
          /// Default destructor
       virtual ~CODEPressure() {}
 
-         /// This is the real one do computation
-      virtual void doCompute(CommonTime t, EarthBody& bRef, Spacecraft& sc);
+         /** Compute acceleration (and related partial derivatives) of CODE
+          *  Pressure.
+          * @param utc     time in UTC
+          * @param rb      earth body
+          * @param sc      spacecraft
+          */
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
          /// Return the force model name
       inline virtual std::string modelName() const

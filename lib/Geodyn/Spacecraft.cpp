@@ -23,7 +23,7 @@
 
 /**
 * @file Spacecraft.cpp
-* The Spacecraft class encapsulates physical parameters.
+* Class to encapsulate Spacecraft related parameters.
 */
 
 #include "Spacecraft.hpp"
@@ -34,7 +34,7 @@ using namespace std;
 
 namespace gpstk
 {
-   // reset State
+      /// Reset state vector and partial derivatives
    void Spacecraft::resetState()
    {
        // reset state vector
@@ -49,7 +49,7 @@ namespace gpstk
    }
 
 
-   // init State Vector
+   // Initialize state vector with position, velocity and force model parameters
    void Spacecraft::initStateVector(const Vector<double>& rv, const Vector<double>& dp)
    {
       // first the size of input vector should be checked
@@ -79,39 +79,55 @@ namespace gpstk
    }  // End of method 'Spacecraft::initStateVector()'
 
 
-   // get State Vector 6 + 6*(6+np)
+   // Get state vector 6 + 6*(6+np)
    Vector<double> Spacecraft::getStateVector() const
    {
+      // size
       const int np=p.size();
       Vector<double> y(6*np+42,0.0);
+
+
+      //// Parameters related to equation of motion ////
 
       // position
       y(0) = r(0); y(1) = r(1); y(2) = r(2);
 
+      // velocity
+      y(3) = v(0); y(4) = v(1); y(5) = v(2);
+
+
+      //// parameters related to variational equation ////
+
       // position related partial derivatives
+
+      // dr_dr0, dr_dv0
       for(int i=0; i<3*3; i++)
       {
-          y( 3+i) = dr_dr0(i);
-          y(12+i) = dr_dv0(i);
+          y( 6+i) = dr_dr0(i);
+          y(15+i) = dr_dv0(i);
       }
+
+      // dr_dp0
       for(int i=0; i<3*np; i++)
       {
-          y(21+i) = dr_dp0(i);
+          y(24+i) = dr_dp0(i);
       }
 
-      // velocity
-      y(21+3*np) = v(0); y(22+3*np) = v(1); y(23+3*np) = v(2);
-
       // velocity related partial derivatives
+
+      // dv_dr0, dv_dv0
       for(int i=0; i<3*3; i++)
       {
           y(24+3*np+i) = dv_dr0(i);
           y(33+3*np+i) = dv_dv0(i);
       }
+
+      // dv_dp0
       for(int i=0; i<3*np; i++)
       {
           y(42+3*np+i) = dv_dp0(i);
       }
+
 
       // return
       return y;
@@ -119,8 +135,8 @@ namespace gpstk
    }  // End of method 'Spacecraft::getStateVector()'
 
 
-   // set State Vector 
-   void Spacecraft::setStateVector(Vector<double> y)
+   // Set state vector and partial derivatives
+   void Spacecraft::setStateVector(const Vector<double>& y)
    {
       // check the size of y !!!
 
@@ -131,23 +147,26 @@ namespace gpstk
       p.resize(np,0.0);
       dr_dp0.resize(3*np,0.0);
       dv_dp0.resize(3*np,0.0);
-      
+
+
       // set position
       r(0) = y(0); r(1) = y(1); r(2) = y(2);
+
+      // set velocity
+      v(0) = y(3); v(1) = y(4); v(2) = y(5);
+
 
       // set position related partial derivatives
       for(int i=0; i<3*3; i++)
       {
-          dr_dr0(i) = y( 3+i);
-          dr_dv0(i) = y(12+i);
-      }
-      for(int i=0; i<3*np; i++)
-      {
-          dr_dp0(i) = y(21+i);
+          dr_dr0(i) = y( 6+i);
+          dr_dv0(i) = y(15+i);
       }
 
-      // set velocity
-      v(0) = y(21+3*np); v(1) = y(22+3*np); v(2) = y(23+3*np);
+      for(int i=0; i<3*np; i++)
+      {
+          dr_dp0(i) = y(24+i);
+      }
 
       // set velocity related partial derivatives
       for(int i=0; i<3*3; i++)
@@ -160,22 +179,23 @@ namespace gpstk
           dv_dp0(i) = y(42+3*np+i);
       }
 
-   }  // End of method 'Spacecraft::setStateVector(Vector<double> y)'
+   }  // End of method 'Spacecraft::setStateVector()'
 
 
-   // get Transition Matrix
+   // Get transition matrix
    Matrix<double> Spacecraft::getTransitionMatrix() const
    {
       /* Transition Matrix
-          |                          |
-          | dr_dr0   dr_dv0   dr_dp0 |
-          |                          |
-      tra=| dv_dr0   dv_dv0   dv_dp0 |
-          |                          |
-          | 0        0        I      |
-          |                          |
+               |                          |
+               | dr_dr0   dr_dv0   dr_dp0 |
+               |                          |
+      tra   =  | dv_dr0   dv_dv0   dv_dp0 |
+               |                          |
+               | 0        0        I      |
+               |                          |
       */
-      
+
+      // size
       const int np = p.size();
       Matrix<double> traMatrix(6+np,6+np,0.0);
 
@@ -210,21 +230,22 @@ namespace gpstk
    }  // End of method 'Spacecraft::getTransitionMatrix()'
 
 
-   // set Transition Matrix
-   void Spacecraft::setTransitionMatrix(Matrix<double> traMatrix)
+   // Set transition matrix
+   void Spacecraft::setTransitionMatrix(const Matrix<double>& traMatrix)
    {
       // check the size of tranMatrix !!!
 
       /* Transition Matrix
-          |                          |
-          | dr_dr0   dr_dv0   dr_dp0 |
-          |                          |
-      tra=| dv_dr0   dv_dv0   dv_dp0 |
-          |                          |
-          | 0        0        I      |
-          |                          |
+               |                          |
+               | dr_dr0   dr_dv0   dr_dp0 |
+               |                          |
+      tra   =  | dv_dr0   dv_dv0   dv_dp0 |
+               |                          |
+               | 0        0        I      |
+               |                          |
       */
 
+      // size
       const int np = traMatrix.rows()-6;
       p.resize(np,0.0);
       dr_dp0.resize(3*np,0.0);
@@ -253,15 +274,15 @@ namespace gpstk
    }  // End of method 'Spacecraft::setTransitionMatrix()'
 
 
-   // get State Transition Matrix 6*6
+   // Get state transition matrix 6*6
    Matrix<double> Spacecraft::getStateTransitionMatrix() const
    {
       /* State Transition Matrix
-          |                  |
-          | dr_dr0   dr_dv0  |
-      phi=|                  |
-          | dv_dr0   dv_dv0  |
-          |                  |
+               |                  |
+               | dr_dr0   dr_dv0  |
+      phi   =  |                  |
+               | dv_dr0   dv_dv0  |
+               |                  |
       */
 
       Matrix<double> phiMatrix(6,6,0.0);
@@ -282,7 +303,7 @@ namespace gpstk
    }  // End of method 'Spacecraft::getStateTransitionMatrix()'
 
 
-   // get Sensitivity Matrix 6*np
+   // Get sensitivity matrix 6*np
    Matrix<double> Spacecraft::getSensitivityMatrix() const
    {
       /* Sensitivity Matrix
@@ -292,6 +313,8 @@ namespace gpstk
           | dv_dp0 |
           |        |
       */
+
+      // size
       const int np = p.size();
       Matrix<double> senMatrix(6,np,0.0);
 
@@ -309,18 +332,19 @@ namespace gpstk
    }  // End of method 'Spacecraft::getSensitivityMatrix()'
 
 
-      // Stream output for Spacecraft objects.  Typically used for debugging.
-      // @param s stream to append formatted Spacecraft to.
-      // @param sc Spacecraft to append to stream \c s.
-      // @return reference to \c s.
+      /** Stream output for Spacecraft objects. Typically used for debugging.
+       * @param s    stream to append formatted Spacecraft to
+       * @param sc   Spacecraft to append to stream \c s
+       */
    ostream& operator<<( ostream& s, 
                         const gpstk::Spacecraft& sc )
    {
-       s << sc.getSatID() << ' ' << CivilTime(sc.getEpoch()) << ' '
+       s << sc.getSatID() << ' ' << CivilTime(sc.getCurrentTime()) << ' '
          << sc.getBlock() << ' ' << sc.getMass();
 
        return s;
 
    }  // End of 'ostream& operator<<()'
+
 
 }  // End of namespace 'gpstk'

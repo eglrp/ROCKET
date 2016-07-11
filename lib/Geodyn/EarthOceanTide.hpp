@@ -17,7 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
@@ -37,93 +37,124 @@
 
 /**
 * @file EarthOceanTide.hpp
-* 
+* Class to do Earth Ocean Tide correction.
+*
 */
 
-#ifndef GPSTK_OCEAN_TIDE_HPP
-#define GPSTK_OCEAN_TIDE_HPP
+#ifndef GPSTK_EARTH_OCEAN_TIDE_HPP
+#define GPSTK_EARTH_OCEAN_TIDE_HPP
 
-#include <string>
+#include "ReferenceSystem.hpp"
+
 
 namespace gpstk
 {
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**
-       * Solid Earth Ocean Tide
-       * reference: IERS Conventions 2003
+      /** Class to do Earth Ocean Tide correction
+       * see IERS Conventions 2010 Section 6.3 for more details.
        */
    class EarthOceanTide
    {
    public:
-         /// Default constructor
-      EarthOceanTide()
-         : maxN(4),
-           minX(0.05), 
-           isLoaded(false)
+
+          /// struct to hold Ocean Tide Data
+      struct OceanTideData
       {
-         fileName = "OT_CSRC.TID";
-      }
+         int         n[6];
+         std::string Darw;
+         int         l;
+         int         m;
+
+         double      DelCp;
+         double      DelSp;
+         double      DelCm;
+         double      DelSm;
+
+      };
+
+   public:
+         /// Default constructor
+      EarthOceanTide(int n=8, int m=8)
+         : desiredDegree(n),
+           desiredOrder(m),
+           pRefSys(NULL)
+      {}
+
          /// Default destructor
       ~EarthOceanTide() {}
 
 
-         /// struct to hold Ocean Tide information
-      struct CSR_OTIDE
+         /// Load Ocean Tide file
+      void loadFile(const std::string& file)
+         throw(FileMissingException);
+
+
+         /// Set desired degree and order
+      inline EarthOceanTide& setDesiredDegreeOrder(const int& n, const int& m)
       {
-         double   KNMP[20];
-         int      NTACT;
-         int      NDOD[1200][6];
-         double   CSPM[1200][4];
-         int      NM[1200][2];  
-      };
+         if(n >= m)
+         {
+            desiredDegree  =  n;
+            desiredOrder   =  m;
+         }
+         else
+         {
+            desiredDegree  =  n;
+            desiredOrder   =  n;
+         }
 
+         return (*this);
 
-          /// load ocean tide file, reference to Bernese5.0-"OT_CSRC.TID"
-
-      void loadOceanTideFile(std::string file, int NMAX = 4, double XMIN = 0.05);
-
-         /** Solid pole tide to normalized earth potential coefficients
-          *
-          * @param MJD_UTC  UTC in MJD.
-          * @param dC       Correction to normalized coefficients dC.
-          * @param dS       Correction to normalized coefficients dS.
-          *    C20 C21 C22 C30 C31 C32 C33 C40 C41 C42 C43 C44
-          */
-      void getOceanTide(double MJD_UTC, double dC[], double dS[]);
-
-      void setOceanTideFile(std::string file)
-      {
-         fileName = file;
-         isLoaded = false;
       }
 
-      void test();
+
+         /// Get desired degree and order
+      inline void getDesiredDegreeOrder(int& n, int& m) const
+      {
+         n  =  desiredDegree;
+         m  =  desiredOrder;
+      }
+
+
+         /// Set reference system
+      inline EarthOceanTide& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
+
+
+         /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
+
+
+         /**
+          * Ocean tide to normalized earth potential coefficients
+          *
+          * @param utc     time in UTC
+          * @param dC      correction to normalized coefficients dC
+          * @param dS      correction to normalized coefficients dS
+          */
+      void getOceanTide(CommonTime utc, Matrix<double>& CS);
+
 
    protected:
-      std::string fileName;
 
-      int maxN;
-      double minX;
+         /// Degree and Order of ocean tide model desired
+      int desiredDegree;
+      int desiredOrder;
 
-      bool isLoaded;
+         /// Reference System
+      ReferenceSystem* pRefSys;
 
-      double FAC[41];
-
-      /// line 2
-      int    NWAV;   // number of lines to skip
-      int    NTOT;   // number of data lines
-      int    NMX;      // max degree
-      int    MMX;     // max order
-      /// line 4
-      double RRE;
-      double RHOW;
-      double XME;
-      double PFCN;
-      double XXX;
-
-      CSR_OTIDE  tideData;
+         /// Standard vector of Ocean Tide Data
+      std::vector<OceanTideData> otDataVec;
 
    }; // End of class 'EarthOceanTide'
 

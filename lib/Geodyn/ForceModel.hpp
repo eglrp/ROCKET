@@ -142,7 +142,11 @@ namespace gpstk
       virtual ~ForceModel() {}
 
 
-         /// this is the real one to do computation
+         /** Compute acceleration (and partial derivatives).
+          * @param utc     time in UTC
+          * @param rb      earth body
+          * @param sc      spacecraft
+          */
       virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
       {
          a.resize(3,0.0);

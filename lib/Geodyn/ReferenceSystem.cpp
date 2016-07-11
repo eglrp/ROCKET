@@ -495,8 +495,8 @@ namespace gpstk
    }  // End of method 'ReferenceSystem::UTC2TT()'
 
 
-   // Evaluate the effects of zonal Earth tides on the rotation of the Earth.
-   // IERS Conventions 2010
+      /// Evaluate the effects of zonal Earth tides on the rotation of the Earth.
+      /// IERS Conventions 2010
    Vector<double>  ReferenceSystem::RG_ZONT2(const CommonTime& TT)
    { 
       static const struct {
@@ -651,7 +651,7 @@ namespace gpstk
 
       return ret;
 
-   }
+   }  // End of method 'ReferenceSystem::RG_ZONT2()'
 
 
    // Provide the diurnal/subdiurnal tidal effects on polar motion ("), UT1 (s)
@@ -829,11 +829,12 @@ namespace gpstk
        ret(3) = cor_lod;
 
        return ret;
-   }
+
+   }  // End of method 'ReferenceSystem::PMUT1_OCEANS()'
 
 
-   // Provide the diurnal lunisolar effect on polar motion ("), in time domain.
-   // IERS Conventions 2010.
+      /// Provide the diurnal lunisolar effect on polar motion ("), in time domain.
+      /// IERS Conventions 2010.
    Vector<double> ReferenceSystem::PMSDNUT2(const CommonTime& UTC)
    {
        static const struct {
@@ -914,11 +915,12 @@ namespace gpstk
        ret(1) = cor_y;
 
        return ret;
-   }
+
+   }  // End of method 'ReferenceSystem::PMSDNUT2()'
 
 
-   // Evaluate the model of subdiurnal libration in the axial component of
-   // rotation, expressed by UT1 and LOD.
+      /// Evaluate the model of subdiurnal libration in the axial component of
+      /// rotation, expressed by UT1 and LOD.
    Vector<double> ReferenceSystem::UTLIBR(const CommonTime& UTC)
    {
        static const struct {
@@ -1000,11 +1002,12 @@ namespace gpstk
        ret(1) = dlod;
 
        return ret;
-   }
+
+   }  // End of method 'ReferenceSystem::UTLIBR()'
 
 
-   // X,Y coordinates of celestial intermediate pole from series based on IAU
-   // 2006 precession and IAU 2006 nutation.
+      /// X,Y coordinates of celestial intermediate pole from series based on IAU
+      /// 2006 precession and IAU 2006 nutation.
    void ReferenceSystem::XY06(const CommonTime& TT, double& x, double& y)
    {
        /* Maximum power of T in the polynomials for X and Y */
@@ -3657,12 +3660,12 @@ namespace gpstk
        x = AS_TO_RAD * (xypr[0] + (xyls[0] + xypl[0]) / 1e6);
        y = AS_TO_RAD * (xypr[1] + (xyls[1] + xypl[1]) / 1e6);
 
-   }
+   }  // End of method 'ReferenceSystem::XY06()'
 
 
-   // The CIO locator s, positioning the Celestial Intermediate Origin on
-   // the equator of the Celestial Intermediate Pole, given the CIP's X,Y
-   // coordinates.  Compatible with IAU 2006/2000A precession-nutation.
+      /// The CIO locator s, positioning the Celestial Intermediate Origin on
+      /// the equator of the Celestial Intermediate Pole, given the CIP's X,Y
+      /// coordinates.  Compatible with IAU 2006/2000A precession-nutation.
    double ReferenceSystem::S06(const CommonTime& TT, const double& x, const double& y)
    {
        /* Time since J2000.0, in Julian centuries */
@@ -3920,11 +3923,12 @@ namespace gpstk
             w5 * t) * t) * t) * t) * t) * AS_TO_RAD - x*y/2.0;
 
        return s;
-   }
+
+   }  // End of method 'ReferenceSystem::S06()'
 
 
-   // Form the celestial to intermediate-frame-of-date matrix given the CIP
-   // X,Y and CIO locator s.
+      /// Form the celestial to intermediate-frame-of-date matrix given the CIP
+      /// X,Y and CIO locator s.
    Matrix<double> ReferenceSystem::C2IXYS(const double& x, const double& y, const double& s)
    {
        double r2, e, d;
@@ -3940,10 +3944,11 @@ namespace gpstk
        rc2i = rotation(-(e+s),3) * rotation(d,2) * rotation(e,3);
 
        return rc2i;
-   }
+
+   }  // End of method 'ReferenceSystem::C2IXYS()'
 
 
-   // Earth rotation angle (IAU 2000 model).
+      /// Earth rotation angle (IAU 2000 model).
    double ReferenceSystem::ERA00(const CommonTime& UT1)
    {
        double d1, d2, t, f, theta;
@@ -3972,7 +3977,9 @@ namespace gpstk
                                + 0.00273781191135448 * t));
 
        return theta;
-   }
+
+   }  // End of method 'ReferenceSystem::ERA00()'
+
 
    // The TIO locator s', positioning the Terrestrial Intermediate Origin
    // on the equator of the Celestial Intermediate Pole.
@@ -3987,10 +3994,11 @@ namespace gpstk
        sp = -47e-6 * t * AS_TO_RAD;
 
        return sp;
-   }
+
+   }  // End of method 'ReferenceSystem::SP00()'
 
 
-   // Form the matrix of polar motion for a given date, IAU 2000.
+      /// Form the matrix of polar motion for a given date, IAU 2000.
    Matrix<double> ReferenceSystem::POM00(const double& xp, const double& yp, const double& sp)
    {
        Matrix<double> rpom(3,3,0.0);
@@ -4000,10 +4008,11 @@ namespace gpstk
        rpom = rotation(-yp,1) * rotation(-xp,2) * rotation(sp,3);
 
        return rpom;
-   }
+
+   }  // End of method 'ReferenceSystem::POM00()'
 
 
-   // CRS to TRS Matrix
+      /// Transformation matrix from ICRS to ITRS.
    Matrix<double> ReferenceSystem::C2TMatrix(const CommonTime& utc)
    {
        // TT
@@ -4124,17 +4133,19 @@ namespace gpstk
 
        return W * R * Q;
 
-   }
+   }  // End of method 'ReferenceSystem::C2TMatrix()'
  
 
-   // TRS to CRS Matrix
+      /// Transformation matrix from ITRS to ICRS.
    Matrix<double> ReferenceSystem::T2CMatrix(const CommonTime& UTC)
    {
+
        return transpose( C2TMatrix(UTC) );
-   }
+
+   }  // End of method 'ReferenceSystem::T2CMatrix()'
 
 
-   // Earth rotation angle rate (IAU 2000 model)
+      /// Earth rotation angle rate (IAU 2000 model)
    double ReferenceSystem::dERA00(const CommonTime& UT1)
    {
        //
@@ -4144,11 +4155,12 @@ namespace gpstk
        double dtheta = 1.00273781191135448 * TWO_PI / DAY_TO_SEC;
 
        return dtheta;
-   }
+
+   }  // End of method 'ReferenceSystem::dERA00()'
 
 
-   // Time derivative of transformation matrix from CRS to TRS coordinates
-   // for a given date
+      /// Time derivative of transformation matrix from CRS to TRS coordinates
+      /// for a given date
    Matrix<double> ReferenceSystem::dC2TMatrix(const CommonTime& utc)
    {
        // UT1
@@ -4218,18 +4230,21 @@ namespace gpstk
        Matrix<double> W = POM00(xp, yp, sp);
 
        return W * dR * Q;
-   }
+
+   }  // End of method 'ReferenceSystem::dC2TMatrix()'
 
 
-   // Time derivative of transformation matrix from TRS to CRS coordinates
-   // for a given date
+      /// Time derivative of transformation matrix from TRS to CRS coordinates
+      /// for a given date
    Matrix<double> ReferenceSystem::dT2CMatrix(const CommonTime& UTC)
    {
+
        return transpose( dC2TMatrix(UTC) );
-   }
+
+   }  // End of method 'ReferenceSystem::dT2CMatrix()'
 
 
-   // Greenwich mean sidereal time (consistent with IAU 2006 precession)
+      /// Greenwich mean sidereal time (consistent with IAU 2006 precession)
    double ReferenceSystem::GMST06(const CommonTime& UT1, const CommonTime& TT)
    {
       double t, t2, t3, t4, t5, gmst;
@@ -4247,10 +4262,10 @@ namespace gpstk
 
       return gmst;
 
-   }
+   }  // End of method 'ReferenceSystem::GMST06()'
 
 
-   // Doodson fundamental arguments
+      /// Doodson fundamental arguments
    void ReferenceSystem::DoodsonArguments(const CommonTime& UT1,
                                           const CommonTime& TT, 
                                           double BETA[6],
@@ -4326,7 +4341,7 @@ namespace gpstk
       BETA[4] = -F5;
       BETA[5] = S - F4 - F2;
 
-   }
+   }  // End of method 'ReferenceSystem::DoodsonArguments()'
 
 
 

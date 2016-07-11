@@ -28,7 +28,7 @@
 
 #include "SatOrbit.hpp"
 
-#include "EGM08GravityModel.hpp"
+#include "EarthGravitation.hpp"
 
 #include "ROCKPressure.hpp"
 #include "CODEPressure.hpp"
@@ -190,9 +190,9 @@ namespace gpstk
 
       // At last, prepare the force model list
       fmc.pGeoEarth->setDesiredDegreeOrder(fmc.grvDegree,fmc.grvOrder);
-      fmc.pGeoEarth->setCorrectSolidTide(fmc.solidTide);
-      fmc.pGeoEarth->setCorrectOceanTide(fmc.oceanTide);
-      fmc.pGeoEarth->setCorrectPoleTide(fmc.poleTide);
+//      fmc.pGeoEarth->setCorrectSolidTide(fmc.solidTide);
+//      fmc.pGeoEarth->setCorrectOceanTide(fmc.oceanTide);
+//      fmc.pGeoEarth->setCorrectPoleTide(fmc.poleTide);
 
       fml.clear();
 

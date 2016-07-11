@@ -17,13 +17,13 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
 /**
 * @file EarthSolidTide.hpp
-* Class to do Earth Solid Tide correction
+* Class to do Earth Solid Tide correction.
 */
 
 #ifndef GPSTK_EARTH_SOLID_TIDE_HPP
@@ -32,23 +32,27 @@
 #include "ReferenceSystem.hpp"
 #include "SolarSystem.hpp"
 
+
 namespace gpstk
 {
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**Class to do Earth Solid Tide correction
-       * see IERS Conventions 2010
+      /** Class to do Earth Solid Tide correction
+       * see IERS Conventions 2010 Section 6.2 for more details.
        */
    class EarthSolidTide
    {
    public:
 
          /// Default constructor
-      EarthSolidTide(){}
+      EarthSolidTide()
+         : pRefSys(NULL),
+           pSolSys(NULL)
+      {}
 
          /// Default destructor
-      ~EarthSolidTide(){}
+      ~EarthSolidTide() {}
 
 
          /// Set reference system
@@ -82,39 +86,14 @@ namespace gpstk
          return pSolSys;
       }
 
-         /**
-          * Solid tide to normalized earth potential coefficients
+
+         /** Solid tide to normalized earth potential coefficients
           *
           * @param utc     time in UTC
-          * @param dC      correction to normalized coefficients dC
-          * @param dS      correction to normalized coefficients dS
+          * @param CS      normalized earth potential coefficients
           */
-      void getSolidTide(CommonTime utc, double dC[], double dS[]);
+      void getSolidTide(CommonTime utc, Matrix<double>& CS);
 
-
-         /** Translate degree and order (n,m) from 2-D to 1-D.
-          * @param n    Degree
-          * @param m    Order
-          *
-          * For example:
-          * (n,m) = (0,0) <===> return = 1
-          * (n,m) = (1,0) <===>        = 2
-          * (n,m) = (1,1) <===>        = 3
-          * (n,m) = (2,0) <===>        = 4
-          *          ...                ...
-          */
-      inline int index(int n, int m)
-      {
-         return n*(n+1)/2 + (m+1);
-      }
-
-         /** Evaluate the fnALF.
-          * @param deg  Desired degree
-          * @param lat  Geocentric latitude in radians
-          * @param leg  Fully nomalized associated legendre functions
-          */
-      void legendre(const int& deg, const double& lat, Vector<double>& leg);
-      
 
    protected:
 
@@ -125,7 +104,6 @@ namespace gpstk
 
          /// Reference System
       ReferenceSystem* pRefSys;
-
 
          /// Solar System
       SolarSystem* pSolSys;

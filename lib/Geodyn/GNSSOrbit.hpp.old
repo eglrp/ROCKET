@@ -35,7 +35,7 @@
 #include "Spacecraft.hpp"
 #include "ForceModelList.hpp"
 
-#include "EGM08GravityModel.hpp"
+#include "EarthGravitation.hpp"
 #include "MoonGravitation.hpp"
 #include "SunGravitation.hpp"
 #include "SolarPressure.hpp"
@@ -91,7 +91,7 @@ namespace gpstk
       EarthBody eb;
 
          /// Force models
-      EGM08GravityModel egm;
+      EarthGravitation  earth;
       SunGravitation    sun;
       MoonGravitation   moon;
       CODEPressure      srp;

@@ -59,12 +59,12 @@ namespace gpstk
        // force model parameters to be estimated
        const int np(9);
 
-       egm.setDesiredDegreeOrder(12,12);
-       egm.setCorrectSolidTide(true);
-       egm.setCorrectOceanTide(true);
-       egm.setCorrectPoleTide(true);
+       earth.setDesiredDegreeOrder(12,12);
+//       earth.setCorrectSolidTide(true);
+//       earth.setCorrectOceanTide(true);
+//       earth.setCorrectPoleTide(true);
 
-       egm.doCompute(utc,eb,sc);
+       earth.doCompute(utc,eb,sc);
        sun.doCompute(utc,eb,sc);
        moon.doCompute(utc,eb,sc);
        srp.doCompute(utc,eb,sc);
@@ -72,7 +72,7 @@ namespace gpstk
 
        // a
        Vector<double> a(3,0.0);
-       a = egm.getAccel()
+       a = earth.getAccel()
          + sun.getAccel()
          + moon.getAccel()
          + srp.getAccel()
@@ -80,7 +80,7 @@ namespace gpstk
 
        // da/dr
        Matrix<double> da_dr(3,3,0.0);
-       da_dr = egm.partialR()
+       da_dr = earth.partialR()
              + sun.partialR()
              + moon.partialR()
              + srp.partialR()
@@ -88,7 +88,7 @@ namespace gpstk
 
        // da/dv
        Matrix<double> da_dv(3,3,0.0);
-       da_dv = egm.partialV()
+       da_dv = earth.partialV()
              + sun.partialV()
              + moon.partialV()
              + srp.partialV()

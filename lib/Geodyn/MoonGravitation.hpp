@@ -24,7 +24,7 @@
 
 /**
  * @file MoonGravitation.hpp
- * This class calculate the gravitational effect of the moon.
+ * Class to do Moon Gravitation calculation.
  */
 
 #ifndef GPSTK_MOON_GRAVITATION_HPP
@@ -40,21 +40,21 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**
-       * This class calculate the gravitational effect of the moon.
-       * 
+      /** Class to do Moon Gravitation calculation.
        */
    class MoonGravitation : public ForceModel
    {
    public:
 
-      /// Default constructor
+         /// Default constructor
       MoonGravitation()
-         : pSolSys(NULL), pRefSys(NULL), isPrepared(false)
+         : pSolSys(NULL),
+           pRefSys(NULL),
+           isPrepared(false)
       {}
 
 
-      /// Constructor
+         /// Constructor
       MoonGravitation(SolarSystem&     sol,
                       ReferenceSystem& ref)
          : isPrepared(false)
@@ -64,11 +64,11 @@ namespace gpstk
       }
 
 
-      /// Default destructor
+         /// Default destructor
       virtual ~MoonGravitation() {};
 
 
-      /// Set solar system
+         /// Set solar system
       inline MoonGravitation& setSolarSystem(SolarSystem& sol)
       {
          pSolSys = &sol;
@@ -76,13 +76,13 @@ namespace gpstk
          return (*this);
       }
 
-      /// Get solar system
+         /// Get solar system
       inline SolarSystem* getSolarSystem() const
       {
          return pSolSys;
       }
 
-      /// Set reference system
+         /// Set reference system
       inline MoonGravitation& setReferenceSystem(ReferenceSystem& ref)
       {
          pRefSys = &ref;
@@ -90,40 +90,41 @@ namespace gpstk
          return (*this);
       }
 
-      /// Get reference system
+         /// Get reference system
       inline ReferenceSystem* getReferenceSystem() const
       {
          return pRefSys;
       }
 
 
-      /** Call the relevant methods to compute the acceleration.
-       * @param utc Time reference class
-       * @param rb  Reference Body class
-       * @param sc  Spacecraft parameters and state
-       * @return the acceleration [m/s^s]
-       */
+         /** Compute acceleration (and related partial derivatives) of Moon
+          *  Gravitation.
+          * @param utc     time in UTC
+          * @param rb      earth body
+          * @param sc      spacecraft
+          */
       virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
       
-      /// Return force model name
+
+         /// Return the force model name
       inline virtual std::string modelName() const
       { return "MoonGravitation"; }
 
-      /// return the force model index
+         /// Return the force model index
       inline virtual int forceIndex() const
       { return FMI_MoonGravitation; }
 
    private:
 
-      /// Solar System
+         /// Solar System
       SolarSystem* pSolSys;
 
-      /// Reference System
+         /// Reference System
       ReferenceSystem* pRefSys;
 
-      /// Is Prepared ?
-      ///
-      /// The check of data has not been implemented yet !
+         /// Is Prepared ?
+         ///
+         /// The check of data has not been implemented yet !
       bool isPrepared;
 
    }; // End of class 'MoonGravitation'

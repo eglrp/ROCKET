@@ -48,8 +48,8 @@ namespace gpstk
 
       /// Default constructor
       AdamsBashforthMoulton()
-         : stepSize(300.0),
-           errorTol(1.0e-12)
+         : stepSize(300.0)
+//           errorTol(1.0e-12)
       {}
 
 
@@ -72,7 +72,7 @@ namespace gpstk
          return stepSize;
       }
 
-
+/*
       /// Set error tolerance
       inline AdamsBashforthMoulton& setErrorTolerance(const double& tol)
       {
@@ -87,7 +87,7 @@ namespace gpstk
       {
          return errorTol;
       }
-
+*/
 
       /// Real implementation of abm8
       void integrateTo(std::vector< double >&         currentTime,
@@ -109,7 +109,7 @@ namespace gpstk
       double stepSize;
 
       /// Error tolerance
-      double errorTol;
+//      double errorTol;
 
 
    }; // End of class 'AdamsBashforthMoulton'

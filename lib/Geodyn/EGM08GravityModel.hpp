@@ -55,10 +55,10 @@ namespace gpstk
    class EGM08GravityModel : public EarthGravitation
    {
    public:  
-      /** Constructor.
-       * @param n    Desired degree
-       * @param m    Desired order
-       */ 
+         /** Constructor
+          * @param n    Desired degree
+          * @param m    Desired order
+          */ 
       EGM08GravityModel (int n = 0, int m = 0)
          : EarthGravitation(n, m)
       {
@@ -74,62 +74,34 @@ namespace gpstk
          // tide free
          gmData.includesPermTide = false;
 
-         // reference time
+         // reference epoch
          gmData.refMJD =  51544.0;
 
-         // max degree
-         gmData.maxDegree = 200;
-
-         // coefficients and errors
-         int size = 200*(200+1)/2 + (200+1);
-         gmData.normalizedCS.resize(size,4);
-
-         for(int i=0; i<size; i++)
-         {
-            gmData.normalizedCS(i,0) = 0.0;
-            gmData.normalizedCS(i,1) = 0.0;
-            gmData.normalizedCS(i,2) = 0.0;
-            gmData.normalizedCS(i,3) = 0.0;
-         }
-
-       } // End of constructor
+       }    // End of constructor
  
 
-      /// Load EGM file
-      void loadEGMFile(std::string file)
+         /// Default destructor
+      virtual ~EGM08GravityModel() {}
+ 
+
+         /// Load file
+      void loadFile(std::string file)
          throw(FileMissingException);
 
-      /** Compute the acceleration due to earth gravitation.
-       * @param utc   Time reference class
-       * @param rb    Earth body class
-       * @param sc    Spacecraft parameters and state
-       * @return the accelerations [m/s^2]
-       */
+
+         /** Compute acceleration (and related partial derivatives) of Earth
+          *  Gravitation.
+          * @param utc     time in UTC
+          * @param rb      earth body
+          * @param sc      spacecraft
+          */
       virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
+
+         /// Return the force model name
       virtual std::string modelName() const
       { return gmData.modelName; }
 
-      virtual ~EGM08GravityModel(){};
-
-   private:
- 
-      struct GravityModelData
-      {
-         std::string modelName;
-         
-         double GM;
-         double ae;
-
-         bool includesPermTide;
-
-         double refMJD;
-
-         int maxDegree;
-
-         Matrix<double> normalizedCS;
-
-      } gmData;
 
    }; // End of class 'EGM08GravityModel'
 

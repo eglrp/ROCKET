@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "ConfDataReader.hpp"
+
 #include "ReferenceSystem.hpp"
 #include "SolarSystem.hpp"
 
@@ -14,13 +16,9 @@
 #include "MoonGravitation.hpp"
 #include "SunGravitation.hpp"
 
-#include "ROCKPressure.hpp"
 #include "CODEPressure.hpp"
 
 #include "RelativityEffect.hpp"
-
-
-#include "SatOrbit.hpp"
 
 #include "RungeKuttaFehlberg.hpp"
 
@@ -32,11 +30,24 @@ using namespace gpstk;
 
 
 int main(void)
-{ 
-   // EOP Data
-   EOPDataStore eopDataStore;
+{
+   // Conf File
+   ConfDataReader confReader;
 
-   string eopFile("../../ROCKET/tables/finals2000A.all");
+   try
+   {
+      confReader.open("../../ROCKET/oldtests/test.conf");
+   }
+   catch(...)
+   {
+      cerr << "Conf File Open Error." << endl;
+
+      return 1;
+   }
+
+   // EOP File
+   EOPDataStore eopDataStore;
+   string eopFile = confReader.getValue("IERSEOPFILE", "DEFAULT");
 
    try
    {
@@ -52,7 +63,7 @@ int main(void)
    // LeapSecond Data
    LeapSecStore leapSecStore;
 
-   string lsFile("../../ROCKET/tables/Leap_Second_History.dat");
+   string lsFile = confReader.getValue("IERSLSFILE", "DEFAULT");
 
    try
    {
@@ -70,17 +81,17 @@ int main(void)
    refSys.setEOPDataStore(eopDataStore);
    refSys.setLeapSecStore(leapSecStore);
 
-   // Ephemeris Data
+   // Solar System
    SolarSystem solSys;
 
-   string ephFile("../../ROCKET/tables/1980_2040.405");
+   string ephFile = confReader.getValue("JPLEPHFILE", "DEFAULT");
    try
    {
       solSys.initializeWithBinaryFile(ephFile);
    }
    catch(...)
    {
-      cerr << "JPL Ephemeris File Load Error." << endl;
+      cerr << "Solar System Initialize Error." << endl;
 
       return 1;
    }
@@ -94,23 +105,26 @@ int main(void)
    // Satellite ID
    SatID sat(1, SatID::systemGPS);
 
-   // IGS SP3 file
+   // IGS SP3 File
    SP3EphemerisStore sp3Eph;
    sp3Eph.rejectBadPositions(true);
    sp3Eph.setPosGapInterval(900+1);
    sp3Eph.setPosMaxInterval(9*900+1);
 
-   try
-   {
-      sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18253.sp3");
-      sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18254.sp3");
-      sp3Eph.loadFile("../../ROCKET/workplace/sp3/igs18255.sp3");
-   }
-   catch(...)
-   {
-      cerr << "SP3 File Load Error." << endl;
+   string sp3File;
 
-      return 1;
+   while( (sp3File=confReader.getValue("IGSSP3LIST", "DEFAULT")) != "" )
+   {
+      try
+      {
+         sp3Eph.loadFile(sp3File);
+      }
+      catch(...)
+      {
+         cerr << "SP3 File Load Error." << endl;
+
+         return 1;
+      }
    }
 
    // r0, v0 in ITRS
@@ -122,12 +136,12 @@ int main(void)
    }
    catch(...)
    {
-      cerr << "Get r0 and v0 from SP3 file error." << endl;
+      cerr << "Get r0 and v0 from SP3 File Error." << endl;
 
       return 1;
    }
 
-   // Transform matrix between ICRS and ITRS
+   // Transform Matrix between ICRS and ITRS
    Matrix<double> c2t ( refSys.C2TMatrix(utc0)  );
    Matrix<double> dc2t( refSys.dC2TMatrix(utc0) );
 
@@ -137,7 +151,7 @@ int main(void)
    v0_icrs = transpose(c2t) * v0_itrs + transpose(dc2t) * r0_itrs;
 
 
-   // Initial state: r0, v0
+   // Initial State: r0, v0
    Vector<double> rv0(6,0.0);
    rv0(0) = r0_icrs(0); rv0(1) = r0_icrs(1); rv0(2) = r0_icrs(2);
    rv0(3) = v0_icrs(0); rv0(4) = v0_icrs(1); rv0(5) = v0_icrs(2);
@@ -145,7 +159,7 @@ int main(void)
    cout << fixed << setprecision(6);
    cout << rv0 << endl;
 
-   // Intial state: p0
+   // Intial State: p0
    Vector<double> p0(9,0.0);
    p0[0] = 0.999989506;
    p0[1] = -0.000367154;
@@ -157,16 +171,17 @@ int main(void)
    p0[7] = 0.009091403;
    p0[8] = -0.001752761;
 
-   // SatData file
+   // SatData File
    SatDataReader satData;
 
+   string satDataFile = confReader.getValue("SATDATAFILE", "DEFAULT");
    try
    {
-      satData.open("../../ROCKET/tables/SatInfo.txt"); 
+      satData.open(satDataFile); 
    }
    catch(...) 
    {
-      cerr << "SatData file open error." << endl;
+      cerr << "SatData File Open Error." << endl;
 
       return 1;
    }
@@ -179,98 +194,9 @@ int main(void)
    sc.setMass(satData.getMass(sat,utc0));
    sc.initStateVector(rv0, p0);
 
-   // Configurations
-   SatOrbit so;
-   so.setRefEpoch(utc0);
-   so.setSpacecraft(sc);
 
-   so.enableGeopotential(SatOrbit::GM_EGM08, 12, 12, true, false, false);
-   so.enableThirdBodyPerturbation(true, true);
-   so.enableSolarRadiationPressure(SatOrbit::SRPM_CODE, true);
-   so.enableRelativeEffect(true);
+   // to do it later ...
 
-   // State to be estimated: p0
-   set<ForceModel::ForceModelType> fmt;
-   fmt.insert(ForceModel::D0);
-   fmt.insert(ForceModel::Y0);
-   fmt.insert(ForceModel::B0);
-   fmt.insert(ForceModel::Dc);
-   fmt.insert(ForceModel::Ds);
-   fmt.insert(ForceModel::Yc);
-   fmt.insert(ForceModel::Ys);
-   fmt.insert(ForceModel::Bc);
-   fmt.insert(ForceModel::Bs);
-
-   so.setForceModelType(fmt);
-
-//   cout << so.getSpacecraft().P() << endl;
-
-   // Integrator
-   RungeKuttaFehlberg rkf78;
-   rkf78.setStepSize(30.0);
-
-   // Temp variables
-   Vector<double> state;
-
-   double t(0.0);
-   double tt(12*3600.0);
-   double step(30.0);
-
-   // Out file
-   ofstream outfile("myorbit.txt");
-
-   int i=0;
-/*
-    while(t < tt)
-    {
-        state = rkf78.integrateTo(t, sc.getStateVector(), &so, t+step);
-//        cout << sc.P() << endl;
-
-//        Vector<double> rv(6,0.0);
-//        rv[0] = state[0]; rv[1] = state[1]; rv[2] = state[2];
-//        rv[3] = state[3]; rv[4] = state[4]; rv[5] = state[5];
-
-//        Vector<double> p = p0;
-
-//        cout << sc.getStateVector() << endl;
-        sc.setStateVector(state);
-//        cout << sc.P() << endl;
-//        cout << sc.getStateVector() << endl;
-
-//        Vector<double> myorbit(6,0.0);
-//        myorbit[0] = sc.R()[0]; myorbit[1] = sc.R()[1]; myorbit[2] = sc.R()[2];
-//        myorbit[3] = sc.V()[0]; myorbit[4] = sc.V()[1]; myorbit[5] = sc.V()[2];
-
-        outfile << fixed << setprecision(3);
-        outfile << setw(9) << t+step
-                << setw(12) << sc.R()
-                << setw(12) << sc.V()
-//                << setw(12) << sc.dR_dR0()
-//                << setw(12) << sc.dR_dV0()
-//                << setw(12) << sc.dR_dP0()
-                << endl;
-//        outfile << setw(9) << t+step << endl       // #1 sod
-//                << setw(12) << state    // #2 state
-//                << setw(12) << sc.R() << endl      // #2 r
-//                << setw(12) << sc.V() << endl      // #3 v
-//                << setw(12) << sc.dR_dR0() << endl // #4 dr/dr0
-//                << setw(12) << sc.dR_dV0() << endl // #5 dr/dv0
-//                << setw(12) << sc.dR_dP0() << endl // #6 dr/dp0
-//                << endl << endl;
-
-        t += step;
-        i++;
-
-        if(i%60 == 0) cerr << ".";
-
-//        if(i>1) break;
-
-    }
-*/
-
-   cerr << endl;
-
-   outfile.close();
 
    return 0;
 }

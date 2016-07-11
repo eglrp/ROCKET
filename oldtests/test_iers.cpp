@@ -72,7 +72,6 @@ int main(void)
         return 1;
     }
 
-
     // EOP Data Store
     EOPDataStore eopDataStore;
     
@@ -88,7 +87,7 @@ int main(void)
 
         return 1;
     }
-    
+
 
     // Leap Sec Store
     LeapSecStore leapSecStore;
@@ -185,6 +184,7 @@ int main(void)
     cout << setw(12) << r_icrs << endl;
     cout << "v_icrs: " << endl;
     cout << setw(12) << v_icrs << endl;
+
 
     return 0;
 }

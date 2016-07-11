@@ -23,8 +23,7 @@
 
 /**
  * @file SolarPressure.cpp
- * This class provides a simple model for the influence
- * of solar radiation pressure on a satellite.
+ * Class to do Solar Pressure calculation.
  */
 
 #include "SolarPressure.hpp"
@@ -35,10 +34,12 @@ namespace gpstk
 
       /* Determines if the satellite is in sunlight or shadow.
        * Taken from Montenbruck and Gill p. 80-83
-       * @param r ECI position vector of spacecraft [m].
-       * @param r_Sun Sun position vector (geocentric) [m].
-       * @param r_Moon Moon position vector (geocentric) [m].
-       * @return 0.0 if in shadow, 1.0 if in sunlight, 0 to 1.0 if in partial shadow
+       * @param r       position of spacecraft [m]
+       * @param r_Sun   position of Sun (wrt Earth) [m]
+       * @param r_Moon  position of Moon (wrt Earth) [m]
+       * @return        0.0 if in shadow
+       *                1.0 if in sunlight
+       *                0 to 1.0 if in partial shadow
        */
    double SolarPressure::getShadowFunction(Vector<double> r,
                                        Vector<double> r_Sun,

@@ -43,8 +43,6 @@
 // Class to do Runge-Kutta-Fehlberg integrator
 #include "RungeKuttaFehlberg.hpp"
 
-#include "LeapSecStore.hpp"
-
 
 using namespace std;
 using namespace gpstk;
@@ -94,8 +92,8 @@ public:
                            const int& degree,
                            const int& order)
    {
-      egm.loadEGMFile(file);
       egm.setDesiredDegreeOrder(degree, order);
+      egm.loadFile(file);
 
       return (*this);
    }
@@ -127,32 +125,35 @@ private:
 // Get derivatives
 Vector<double> OrbitEOM::getDerivatives(const double& t, const Vector<double>& y)
 {
-   // Current epoch
+   // Current time
    CommonTime utc(utc0+t);
 
    // Current state
    Vector<double> state( sc.getStateVector() );
-   state( 0) = y(0); state( 1) = y(1); state( 2) = y(2);    // r
-   state(21) = y(3); state(22) = y(4); state(23) = y(5);    // v
 
-   // Set spacecraft with current r,v
+   // Update position and velocity
+   state(0) = y(0); state(1) = y(1); state(2) = y(2);    // r
+   state(3) = y(3); state(4) = y(4); state(5) = y(5);    // v
+
+   // Set spacecraft with current position and velocity
    sc.setStateVector(state);
 
-   // Current v
+   // Current velocity
    Vector<double> v(3,0.0);
    v(0) = y(3); v(1) = y(4); v(2) = y(5);
 
-   // Current a 
+   // Current acceleration 
    Vector<double> a(3,0.0);
+
    egm.doCompute(utc, eb, sc);
    a = egm.getAccel();
 
-   // Current v,a
+   // Current velocity and acceleration
    Vector<double> dy(6,0.0);
    dy(0) = v(0); dy(1) = v(1); dy(2) = v(2);
    dy(3) = a(0); dy(4) = a(1); dy(5) = a(2);
 
-    return dy;
+   return dy;
 }
 
 
@@ -301,8 +302,6 @@ void orbsim::process()
       // Leap Second file
    string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
 
-   cout << lsFile << endl;
-
    try
    {
       leapSecStore.loadFile(lsFile);
@@ -402,8 +401,6 @@ void orbsim::process()
    string outFile_ECEF  = confReader.getValue("OutFile_ECEF", "DEFAULT");
    string outFile_ECI   = confReader.getValue("OutFile_ECI", "DEFAULT");
 
-   cout << "out file" << endl;
-
    ofstream fout_ECEF;
 
    try
@@ -477,7 +474,7 @@ void orbsim::process()
                 << endl;
 
          // Spacecraft settings
-      sc.setEpoch(utc);
+      sc.setCurrentTime(utc);
       sc.setStateVector(state);
 
          // Orbit settings

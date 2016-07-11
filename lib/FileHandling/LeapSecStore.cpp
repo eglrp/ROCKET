@@ -35,7 +35,7 @@
 using namespace std;
 using namespace gpstk::StringUtils;
 
-#define debug 1
+#define debug 0
 
 namespace gpstk
 {
@@ -44,9 +44,9 @@ namespace gpstk
       throw(FileMissingException)
    {
 
-      cout << file << endl;
-      cout << initialTime << endl;
-      cout << finalTime << endl;
+//      cout << file << endl;
+//      cout << initialTime << endl;
+//      cout << finalTime << endl;
 
       ifstream inpf(file.c_str());
       if(!inpf) 
@@ -112,7 +112,7 @@ namespace gpstk
                  << CommonTime( MJD(mjd).convertToCommonTime() ) 
                  << " TAI - UTC " << leapSec << endl;
 
-         cout << "mjd: " << mjd << endl;
+//         cout << "mjd: " << mjd << endl;
 
             // UTC time corresponding to the leap second
          CommonTime time( MJD(mjd).convertToCommonTime() );
@@ -121,9 +121,9 @@ namespace gpstk
             // Add leap second into 'leapSecData'
          leapSecData[time] = leapSec;
 
-         cout << time << "leap: " << leapSecData[time] << endl; 
-         cout << initialTime << endl;
-         cout << finalTime << endl;
+//         cout << time << "leap: " << leapSecData[time] << endl; 
+//         cout << initialTime << endl;
+//         cout << finalTime << endl;
 
             // Modify the initialTime and finalTime for 'leapSecData'
          if( time < initialTime )
@@ -135,7 +135,7 @@ namespace gpstk
             finalTime = time;
          }
 
-         cout << "time:"  << time << endl;
+//         cout << "time:"  << time << endl;
 
       }
 

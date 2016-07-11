@@ -17,18 +17,22 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
 
 /**
 * @file EarthPoleTide.hpp
+* Class to do Earth Pole Tide correction.
 * 
 */
 
-#ifndef GPSTK_POLE_TIDE_HPP
-#define GPSTK_POLE_TIDE_HPP
+#ifndef GPSTK_EARTH_POLE_TIDE_HPP
+#define GPSTK_EARTH_POLE_TIDE_HPP
+
+#include "ReferenceSystem.hpp"
+
 
 namespace gpstk
 {
@@ -36,26 +40,46 @@ namespace gpstk
       //@{
 
       /**
-       * Solid Earth Pole Tide
-       * reference: IERS Conventions 2003
+       * Class to do Earth Pole Tide correction
+       * see IERS Conventions 2010 Section 6.4 and 6.5 for more details.
        */
    class EarthPoleTide
    {
    public:
          /// Default constructor
-      EarthPoleTide(){}
+      EarthPoleTide() {}
 
          /// Default destructor
-      ~EarthPoleTide(){}
+      ~EarthPoleTide() {}
 
-      
-         /** Solid pole tide to normalized earth potential coefficients
+
+         /// Set reference system
+      inline EarthPoleTide& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
+
+
+         /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
+
+
+         /** Pole tide to normalized earth potential coefficients
           *
-          * @param MJD_UTC  UTC in MJD
-          * @param dC21     correction to normalized coefficients dC21
-          * @param dS21     correction to normalized coefficients dS21
+          * @param utc     time in UTC
+          * @param CS      normalized earth potential coefficients
           */
-      void getPoleTide(double MJD_UTC, double& dC21, double& dS21);
+      void getPoleTide(CommonTime utc, Matrix<double>& CS);
+
+   protected:
+
+         /// Reference System
+      ReferenceSystem* pRefSys;
 
 
    }; // End of class 'EarthPoleTide'
@@ -64,4 +88,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_POLE_TIDE_HPP
+#endif   // GPSTK_EARTH_POLE_TIDE_HPP
