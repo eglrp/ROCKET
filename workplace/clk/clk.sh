@@ -4,7 +4,7 @@
 # get the rinex file list
 ##############################
 > clk.rnxlist
-get_rnx.sh -b "2011 10 1 0 0 0" -e "2011 10 7 0 0 0" -i 24 -m  -a "IGS" -u "../../tables/url.list" -s "clk.60.reflist" -l "clk" -p "/Users/shjzhang/Documents/data/IGS/data" > get_rnx.log 
+get_rnx.sh -b "2011 10 1 0 0 0" -e "2011 10 2 0 0 0" -i 24 -m  -a "IGS" -u "../../tables/url.list" -s "clk.60.reflist" -l "clk" -p "/Users/shjzhang/Documents/data/IGS/data" > get_rnx.log 
 
 ##############################
 # get the ephemeris file list
@@ -13,7 +13,7 @@ get_rnx.sh -b "2011 10 1 0 0 0" -e "2011 10 7 0 0 0" -i 24 -m  -a "IGS" -u "../.
 > clk.clklist
 > clk.erplist
 > clk.ssclist
-get_eph.sh -b "2011 09 30 0 0 0" -e "2011 10 9 0 0 0" -i 24 -u "../../tables/url.list" -t "type.list" -l "clk" -p "/Users/shjzhang/Documents/data/IGS/data" > get_eph.log 
+get_eph.sh -b "2011 09 30 0 0 0" -e "2011 10 2 0 0 0" -i 24 -u "../../tables/url.list" -t "type.list" -l "clk" -p "/Users/shjzhang/Documents/data/IGS/data" > get_eph.log 
 
 ##############################
 # get the msc file list
