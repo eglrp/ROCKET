@@ -325,7 +325,7 @@ Download()
 	then
 		echo "The file $savefile already exists!"
 	else
-		wget -c -P $savepath $url
+		wget -c -t 2 -P $savepath $url
 		if [[ ! -e $savefile ]]
 		then
 			echo "Warning! Failed when downloading the file $savefile."

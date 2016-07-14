@@ -215,6 +215,10 @@ namespace gpstk
             // Get current unknowns
          currentUnknowns = equSystem.getCurrentUnknowns();
 
+      finish=clock();
+      totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
+      cout << "cputtime equSystem:" << totaltime << endl;
+
             // Get the number of unknowns being processed
          int numUnknowns( currentUnknowns.size() );
 

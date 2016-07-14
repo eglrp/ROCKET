@@ -503,9 +503,9 @@ int main(int argc, char* argv[])
    {
       orbsim program(argv[0]);
 
-         // We are disabling 'pretty print' feature to keep
+         // enable 'pretty print' feature to keep
          // our description format
-      if( !program.initialize(argc, argv, false) )
+      if( !program.initialize(argc, argv, true) )
       {
          return 0;
       }
