@@ -143,6 +143,7 @@ int main(void)
 
    // Transform Matrix between ICRS and ITRS
    Matrix<double> c2t ( refSys.C2TMatrix(utc0)  );
+   // Transform Matrix Time Dot between ICRS and ITRS
    Matrix<double> dc2t( refSys.dC2TMatrix(utc0) );
 
    // r0, v0 in ICRS
@@ -157,7 +158,6 @@ int main(void)
    rv0(3) = v0_icrs(0); rv0(4) = v0_icrs(1); rv0(5) = v0_icrs(2);
 
    cout << fixed << setprecision(6);
-   cout << rv0 << endl;
 
    // Intial State: p0
    Vector<double> p0(9,0.0);

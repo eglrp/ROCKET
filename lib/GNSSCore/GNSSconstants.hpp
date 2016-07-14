@@ -92,7 +92,7 @@ namespace gpstk
    static const double JD_J2000     = 2451545.0;
 
 
-   // IERS 2003 Numerical Standards
+   // IERS 2010 Numerical Standards
    //-------------------------------------------------------------------------
 
       /// Constant of gravitation (m^3/kg/s^2)
@@ -103,7 +103,7 @@ namespace gpstk
    static const double P_Sol        = 4.560e-6;
 
 
-      /// Geocentric gravitational constant (EGM96 value)
+      /// Geocentric gravitational constant
    static const double GM_EARTH     = 3.986004418e14;
       /// Equatorial radius of the Earth (m)
    static const double RE_EARTH     = 6378136.6;

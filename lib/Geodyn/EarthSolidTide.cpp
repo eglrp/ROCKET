@@ -146,249 +146,269 @@ namespace gpstk
        * @param CS      normalized earth potential coefficients
        */
    void EarthSolidTide::getSolidTide(CommonTime utc, Matrix<double>& CS)
-   {
+   { 
+      // TT
+      CommonTime tt( pRefSys->UTC2TT(utc) );
 
-       // TT
-       CommonTime tt( pRefSys->UTC2TT(utc) );
+      // UT1
+      CommonTime ut1( pRefSys->UTC2UT1(utc) );
 
-       // UT1
-       CommonTime ut1( pRefSys->UTC2UT1(utc) );
+      // transformation matrix from ICRS to ITRS
+      Matrix<double> c2t( pRefSys->C2TMatrix(utc) );
 
-       // transformation matrix from ICRS to ITRS
-       Matrix<double> c2t( pRefSys->C2TMatrix(utc) );
+      // moon and sun position and velocity in ICRS, unit: km, km/day
+      double jd = JulianDate(tt).jd;
+      double rv_moon[6] = {0.0};
+      pSolSys->computeState(jd,
+                            SolarSystem::Moon,
+                            SolarSystem::Earth,
+                            rv_moon);
+      double rv_sun[6] = {0.0};
+      pSolSys->computeState(jd,
+                            SolarSystem::Sun,
+                            SolarSystem::Earth,
+                            rv_sun);
 
-       // moon and sun position and velocity in ICRS, unit: km, km/day
-       double jd = JulianDate(tt).jd;
-       double rv_moon[6] = {0.0};
-       pSolSys->computeState(jd,
-                             SolarSystem::Moon,
-                             SolarSystem::Earth,
-                             rv_moon);
-       double rv_sun[6] = {0.0};
-       pSolSys->computeState(jd,
-                             SolarSystem::Sun,
-                             SolarSystem::Earth,
-                             rv_sun);
+      // moon and sun position in ICRS, unit: m
+      Vector<double> rm_icrs(3,0.0);
+      rm_icrs(0) = rv_moon[0];
+      rm_icrs(1) = rv_moon[1];
+      rm_icrs(2) = rv_moon[2];
+      rm_icrs *= 1000.0;
 
-       // moon and sun position in ICRS, unit: m
-       Vector<double> rm_icrs(3,0.0);
-       rm_icrs(0) = rv_moon[0];
-       rm_icrs(1) = rv_moon[1];
-       rm_icrs(2) = rv_moon[2];
-       rm_icrs *= 1000.0;
-       Vector<double> rs_icrs(3,0.0);
-       rs_icrs(0) = rv_sun[0];
-       rs_icrs(1) = rv_sun[1];
-       rs_icrs(2) = rv_sun[2];
-       rs_icrs *= 1000.0;
+      Vector<double> rs_icrs(3,0.0);
+      rs_icrs(0) = rv_sun[0];
+      rs_icrs(1) = rv_sun[1];
+      rs_icrs(2) = rv_sun[2];
+      rs_icrs *= 1000.0;
 //       cout << "rm_icrs: " << rm_icrs << endl;
 //       cout << "rs_icrs: " << rs_icrs << endl;
 
-       // moon and sun position in ITRS, unit: m
-       Vector<double> rm_itrs = c2t * rm_icrs;
-       Vector<double> rs_itrs = c2t * rs_icrs;
+      // moon and sun position in ITRS, unit: m
+      Vector<double> rm_itrs = c2t * rm_icrs;
+      Vector<double> rs_itrs = c2t * rs_icrs;
 
-       // IERS Conventions 2010, Chapter 6.2
-       // The computation of the tidal contributions to the geopotential
-       // coefficients is most efficiently done by a three-step procedure.
+      // IERS Conventions 2010, Chapter 6.2
+      // The computation of the tidal contributions to the geopotential
+      // coefficients is most efficiently done by a three-step procedure.
 
-       /////////////////////////////////////////////////////////////////////////
-       //
-       //   In step 1, the (2m) part of the tidal potential is evaluated in the
-       //   time domain for each m using lunar and solar ephemeris, and the
-       //   corresponding changes dC2m and dS2m are computed using frequency
-       //   independent nominal values k2m for the respective k2m(0). The
-       //   contributions of the degree 3 tides to C3m and S3m through k3m(0)
-       //   and also those of the degree 2 tides to C4m and S4m through k2m(+)
-       //   may be computed by a similar procedure; they are at the level of
-       //   10e-11.
-       //
-       /////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
+      //
+      //   In step 1, the (2m) part of the tidal potential is evaluated in the
+      //   time domain for each m using lunar and solar ephemeris, and the
+      //   corresponding changes dC2m and dS2m are computed using frequency
+      //   independent nominal values k2m for the respective k2m(0). The
+      //   contributions of the degree 3 tides to C3m and S3m through k3m(0)
+      //   and also those of the degree 2 tides to C4m and S4m through k2m(+)
+      //   may be computed by a similar procedure; they are at the level of
+      //   10e-11.
+      //
+      /////////////////////////////////////////////////////////////////////////
 
-       // love numbers for solid earth tides
-       // see IERS Conventions 2010, Table 6.3
-       double k20, k21, k22;
-       k20  =  0.29525;
-       k21  =  0.29470;
-       k22  =  0.29801;
-       double k20p, k21p, k22p;
-       k20p = -0.00087;
-       k21p = -0.00079;
-       k22p = -0.00057;
-       double k30, k31, k32, k33;
-       k30  =  0.09300;
-       k31  =  0.09300;
-       k32  =  0.09300;
-       k33  =  0.09400;
+      // love numbers for solid earth tides
+      // see IERS Conventions 2010, Table 6.3
+      double k20  =  0.29525;
+      double k21  =  0.29470;
+      double k22  =  0.29801;
 
-       // indexes for degree = 2
-       int id20, id21, id22;
-       id20 = indexTranslator(2,0) - 1;
-       id21 = indexTranslator(2,1) - 1;
-       id22 = indexTranslator(2,2) - 1;
+      double k20p = -0.00087;
+      double k21p = -0.00079;
+      double k22p = -0.00057;
 
-       // indexes for degree = 3
-       int id30, id31, id32, id33;
-       id30 = indexTranslator(3,0) - 1;
-       id31 = indexTranslator(3,1) - 1;
-       id32 = indexTranslator(3,2) - 1;
-       id33 = indexTranslator(3,3) - 1;
+      double k30  =  0.09300;
+      double k31  =  0.09300;
+      double k32  =  0.09300;
+      double k33  =  0.09400;
 
-       // indexes for degree = 4
-       int id40, id41, id42;
-       id40 = indexTranslator(4,0) - 1;
-       id41 = indexTranslator(4,1) - 1;
-       id42 = indexTranslator(4,2) - 1;
+      // indexes for degree = 2
+      int id20 = indexTranslator(2,0) - 1;
+      int id21 = indexTranslator(2,1) - 1;
+      int id22 = indexTranslator(2,2) - 1;
 
+      // indexes for degree = 3
+      int id30 = indexTranslator(3,0) - 1;
+      int id31 = indexTranslator(3,1) - 1;
+      int id32 = indexTranslator(3,2) - 1;
+      int id33 = indexTranslator(3,3) - 1;
 
-       for(int j=2; j<=3; ++j)
-       {
-          Vector<double> rsm;
-          double GSM;
+      // indexes for degree = 4
+      int id40 = indexTranslator(4,0) - 1;
+      int id41 = indexTranslator(4,1) - 1;
+      int id42 = indexTranslator(4,2) - 1;
 
-          if(2==j)         // Moon
-          {
-             GSM = GM_MOON;
-             rsm = rm_itrs;
-          }
-          else if(3==j)    // Sun
-          {
-             GSM = GM_SUN;
-             rsm = rs_itrs;
-          }
+      // loop
+      for(int j=2; j<=3; ++j)
+      {
+         double GSM;
+         Vector<double> rsm;
 
-          // rho, sin(lat), cos(lat), lat
-          double rho = norm(rsm);
-          double slat = rsm(2)/rho;
-          double clat = std::sqrt(1.0-slat*slat);
-          double lat = std::atan2(slat, clat);
+         if(2 == j)         // Moon
+         {
+            GSM = GM_MOON;
+            rsm = rm_itrs;
+         }
+         else if(3 == j)    // Sun
+         {
+            GSM = GM_SUN;
+            rsm = rs_itrs;
+         }
 
-          // longitude
-          double xlon = std::atan2(rsm(1), rsm(0));
+         // rho, sin(lat), cos(lat), lat
+         double rho = norm(rsm);
+         double slat = rsm(2)/rho;
+         double clat = std::sqrt(1.0-slat*slat);
+         double lat = std::atan2(slat, clat);
 
-          // Pnm
-          Vector<double> leg0, leg1, leg2;
-          legendre(3, lat, leg0, leg1, leg2, 0);
+         // lon
+         double xlon = std::atan2(rsm(1), rsm(0));
 
-          // temp
-          double temp;
-          temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
+         // Pnm
+         double P20 = 0.5*(3.0*slat*slat - 1.0);
+         double P21 = 3.0*slat*clat;
+         double P22 = 3.0*clat*clat;
+         double P30 = 0.5*(5.0*slat*slat*slat - 3.0*slat);
+         double P31 = 1.5*(5.0*slat*slat - 1.0)*clat;
+         double P32 = 15.0*slat*clat*clat;
+         double P33 = 15.0*clat*clat*clat;
 
-          // C20, S20
-          CS(id20, 0) += k20/5.0 * temp * leg0(3) * 1.0;
-          CS(id20, 1) += 0.0;
-          // C21, S21
-          CS(id21, 0) += k21/5.0 * temp * leg0(4) * std::cos(xlon);
-          CS(id21, 1) += k21/5.0 * temp * leg0(4) * std::sin(xlon);
-          // C22, S22
-          CS(id22, 0) += k22/5.0 * temp * leg0(5) * std::cos(2*xlon);
-          CS(id22, 1) += k22/5.0 * temp * leg0(5) * std::sin(2*xlon);
+//         Vector<double> leg0, leg1, leg2;
+//         legendre(3, lat, leg0, leg1, leg2, 0);
 
-          temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,4);
-          // C30, S30
-          CS(id30, 0) += k30/7.0 * temp * leg0(6) * 1.0;
-          CS(id30, 1) += 0.0;
-          // C31, S31
-          CS(id31, 0) += k31/7.0 * temp * leg0(7) * std::cos(xlon);
-          CS(id31, 1) += k31/7.0 * temp * leg0(7) * std::sin(xlon);
-          // C32, S32
-          CS(id32, 0) += k32/7.0 * temp * leg0(8) * std::cos(2*xlon);
-          CS(id32, 1) += k32/7.0 * temp * leg0(8) * std::sin(2*xlon);
-          // C33, S33
-          CS(id33, 0) += k33/7.0 * temp * leg0(9) * std::cos(3*xlon);
-          CS(id33, 1) += k33/7.0 * temp * leg0(9) * std::sin(3*xlon);
+         // temp
+         double temp;
+         temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
 
-          temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
-          // C40, S40
-          CS(id40, 0) += k20p/5.0 * temp * leg0(3) * 1.0;
-          CS(id40, 1) += 0.0;
-          // C41, S41
-          CS(id41, 0) += k21p/5.0 * temp * leg0(4) * std::cos(xlon);
-          CS(id41, 1) += k21p/5.0 * temp * leg0(4) * std::sin(xlon);
-          // C42, S42
-          CS(id42, 0) += k22p/5.0 * temp * leg0(5) * std::cos(xlon);
-          CS(id42, 1) += k22p/5.0 * temp * leg0(5) * std::sin(xlon);
+         // C20, S20
+//         CS(id20, 0) += k20/5.0 * temp * leg0(id20) * 1.0;
+         CS(id20, 0) += k20/std::sqrt(5.0) * temp * P20 * 1.0;
+         CS(id20, 1) += 0.0;
+         // C21, S21
+//         CS(id21, 0) += k21/5.0 * temp * leg0(id21) * std::cos(xlon);
+//         CS(id21, 1) += k21/5.0 * temp * leg0(id21) * std::sin(xlon);
+         CS(id21, 0) += k21/std::sqrt(15.0) * temp * P21 * std::cos(xlon);
+         CS(id21, 1) += k21/std::sqrt(15.0) * temp * P21 * std::sin(xlon);
+         // C22, S22
+//         CS(id22, 0) += k22/5.0 * temp * leg0(id22) * std::cos(2*xlon);
+//         CS(id22, 1) += k22/5.0 * temp * leg0(id22) * std::sin(2*xlon);
+         CS(id22, 0) += k22/std::sqrt(60.0) * temp * P22 * std::cos(2*xlon);
+         CS(id22, 1) += k22/std::sqrt(60.0) * temp * P22 * std::sin(2*xlon);
 
-       }
+         temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,4);
+         // C30, S30
+//         CS(id30, 0) += k30/7.0 * temp * leg0(id30) * 1.0;
+         CS(id30, 0) += k30/std::sqrt(7.0) * temp * P30 * 1.0;
+         CS(id30, 1) += 0.0;
+         // C31, S31
+//         CS(id31, 0) += k31/7.0 * temp * leg0(id31) * std::cos(xlon);
+//         CS(id31, 1) += k31/7.0 * temp * leg0(id31) * std::sin(xlon);
+         CS(id31, 0) += k31/std::sqrt(42.0) * temp * P31 * std::cos(xlon);
+         CS(id31, 1) += k31/std::sqrt(42.0) * temp * P31 * std::sin(xlon);
+         // C32, S32
+//         CS(id32, 0) += k32/7.0 * temp * leg0(id32) * std::cos(2*xlon);
+//         CS(id32, 1) += k32/7.0 * temp * leg0(id32) * std::sin(2*xlon);
+         CS(id32, 0) += k32/std::sqrt(420.0) * temp * P32 * std::cos(2*xlon);
+         CS(id32, 1) += k32/std::sqrt(420.0) * temp * P32 * std::sin(2*xlon);
+         // C33, S33
+//         CS(id33, 0) += k33/7.0 * temp * leg0(id33) * std::cos(3*xlon);
+//         CS(id33, 1) += k33/7.0 * temp * leg0(id33) * std::sin(3*xlon);
+         CS(id33, 0) += k33/std::sqrt(2520.0) * temp * P33 * std::cos(3*xlon);
+         CS(id33, 1) += k33/std::sqrt(2520.0) * temp * P33 * std::sin(3*xlon);
 
-       /////////////////////////////////////////////////////////////////////////
-       //
-       //   Step 2 corrects for the deviations of the k21(0) of several of the
-       //   constituent tides of the diurnal band from the constant nominal
-       //   value k21 assumed for this band in the first step. Similar
-       //   corrections need to be applied to a few of the constituents of the
-       //   other two bands also.
-       //
-       /////////////////////////////////////////////////////////////////////////
+         temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
+         // C40, S40
+//         CS(id40, 0) += k20p/5.0 * temp * leg0(id20) * 1.0;
+         CS(id40, 0) += k20p/std::sqrt(5.0) * temp * P20 * 1.0;
+         CS(id40, 1) += 0.0;
+         // C41, S41
+//         CS(id41, 0) += k21p/5.0 * temp * leg0(id21) * std::cos(xlon);
+//         CS(id41, 1) += k21p/5.0 * temp * leg0(id21) * std::sin(xlon);
+         CS(id41, 0) += k21p/std::sqrt(15.0) * temp * P21 * std::cos(xlon);
+         CS(id41, 1) += k21p/std::sqrt(15.0) * temp * P21 * std::sin(xlon);
+         // C42, S42
+//         CS(id42, 0) += k22p/5.0 * temp * leg0(id22) * std::cos(xlon);
+//         CS(id42, 1) += k22p/5.0 * temp * leg0(id22) * std::sin(xlon);
+         CS(id42, 0) += k22p/std::sqrt(60.0) * temp * P22 * std::cos(2*xlon);
+         CS(id42, 1) += k22p/std::sqrt(60.0) * temp * P22 * std::sin(2*xlon);
 
-       // Doodson arguments
-       double BETA[6] = {0.0};
-       double FNUT[5] = {0.0};
-       pRefSys->DoodsonArguments(ut1, tt, BETA, FNUT);
-       double GMST = pRefSys->GMST06(ut1, tt);
+      }
 
-       // C20
-       // see IERS Conventions 2010, Equation 6.8a
-       for(int i=0; i<21; ++i)
-       {
-          // theta_f
-          double theta_f = -(Argu_C20[i][2]*FNUT[0] + Argu_C20[i][3]*FNUT[1]
-                           + Argu_C20[i][4]*FNUT[2] + Argu_C20[i][5]*FNUT[3]
-                           + Argu_C20[i][6]*FNUT[4]);
+      /////////////////////////////////////////////////////////////////////////
+      //
+      //   Step 2 corrects for the deviations of the k21(0) of several of the
+      //   constituent tides of the diurnal band from the constant nominal
+      //   value k21 assumed for this band in the first step. Similar
+      //   corrections need to be applied to a few of the constituents of the
+      //   other two bands also.
+      //
+      /////////////////////////////////////////////////////////////////////////
 
-          // sine and cosine of theta_f
+      // Doodson arguments
+      double BETA[6] = {0.0};
+      double FNUT[5] = {0.0};
+      pRefSys->DoodsonArguments(ut1, tt, BETA, FNUT);
+      double GMST = pRefSys->GMST06(ut1, tt);
+
+      // C20
+      // see IERS Conventions 2010, Equation 6.8a
+      for(int i=0; i<21; ++i)
+      {
+         // theta_f
+         double theta_f = -(Argu_C20[i][2]*FNUT[0] + Argu_C20[i][3]*FNUT[1]
+                          + Argu_C20[i][4]*FNUT[2] + Argu_C20[i][5]*FNUT[3]
+                          + Argu_C20[i][6]*FNUT[4]);
+
+         // sine and cosine of theta_f
          double stf = std::sin(theta_f);
          double ctf = std::cos(theta_f);
 
          // correction
-         
          CS(id20, 0) += (Argu_C20[i][0]*ctf - Argu_C20[i][1]*stf)*1e-12;
-       }
+      }
 
-       // C21, S21
-       // see IERS Conventions 2010, Equation 6.8b
-       for(int i=0; i<48; ++i)
-       {
-           // theta_f
-           double theta_f = 1*(GMST+PI) - (Argu_C21[i][2]*FNUT[0]
-                           + Argu_C21[i][3]*FNUT[1] + Argu_C21[i][4]*FNUT[2]
-                           + Argu_C21[i][5]*FNUT[3] + Argu_C21[i][6]*FNUT[4]);
+      // C21, S21
+      // see IERS Conventions 2010, Equation 6.8b
+      for(int i=0; i<48; ++i)
+      {
+         // theta_f
+         double theta_f = 1*(GMST+PI) - (Argu_C21[i][2]*FNUT[0]
+                          + Argu_C21[i][3]*FNUT[1] + Argu_C21[i][4]*FNUT[2]
+                          + Argu_C21[i][5]*FNUT[3] + Argu_C21[i][6]*FNUT[4]);
 
-           // sine and cosine of theta_f
-           double stf = std::sin(theta_f);
-           double ctf = std::cos(theta_f);
+         // sine and cosine of theta_f
+         double stf = std::sin(theta_f);
+         double ctf = std::cos(theta_f);
 
-           // corrections
-           CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
-           CS(id21, 1) += (Argu_C21[i][0]*ctf - Argu_C21[i][1]*stf)*1e-12;
-       }
+         // corrections
+         CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
+         CS(id21, 1) += (Argu_C21[i][0]*ctf + Argu_C21[i][1]*stf)*1e-12;
+      }
 
-       // C22, S22
-       // see IERS Conventions 2010, Equation 6.8b
-       for(int i=0; i<2; ++i)
-       {
-           // theta_f
-           double theta_f = 2*(GMST+PI) - (Argu_C22[i][1]*FNUT[0]
-                           + Argu_C22[i][2]*FNUT[1] + Argu_C22[i][3]*FNUT[2]
-                           + Argu_C22[i][4]*FNUT[3] + Argu_C22[i][5]*FNUT[4]);
+      // C22, S22
+      // see IERS Conventions 2010, Equation 6.8b
+      for(int i=0; i<2; ++i)
+      {
+         // theta_f
+         double theta_f = 2*(GMST+PI) - (Argu_C22[i][1]*FNUT[0]
+                          + Argu_C22[i][2]*FNUT[1] + Argu_C22[i][3]*FNUT[2]
+                          + Argu_C22[i][4]*FNUT[3] + Argu_C22[i][5]*FNUT[4]);
 
-           // sine and cosine of theta_f
-           double stf = std::sin(theta_f);
-           double ctf = std::cos(theta_f);
+         // sine and cosine of theta_f
+         double stf = std::sin(theta_f);
+         double ctf = std::cos(theta_f);
 
-           // corrections
-           CS(id22, 0) += ( Argu_C22[i][0]*ctf)*1e-12;
-           CS(id22, 1) += (-Argu_C22[i][0]*stf)*1e-12;
-       }
+         // corrections
+         CS(id22, 0) += ( Argu_C22[i][0]*ctf)*1e-12;
+         CS(id22, 1) += (-Argu_C22[i][0]*stf)*1e-12;
+      }
 
 
-       /////////////////////////////////////////////////////////////////////////
-       //
-       //   Treatment of the permanent tide
-       //
-       //   It does not need to do permanent tide correction for tide-free EGM08.
-       //
-       /////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
+      //
+      //   Treatment of the permanent tide
+      //
+      //   It does not need to do permanent tide correction for tide-free EGM08.
+      //
+      /////////////////////////////////////////////////////////////////////////
 
    }  // End of method 'EarthSolidTide::getSolidTide()'
 

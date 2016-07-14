@@ -33,228 +33,254 @@ using namespace gpstk;
 
 
 int main(void)
-{
-    // Conf File
-    ConfDataReader confReader;
+{ 
+   // Conf File
+   ConfDataReader confReader;
 
-    try
-    {
-        confReader.open("../../ROCKET/oldtests/test.conf");
-    }
-    catch(...)
-    {
-        cerr << "Conf File open error." << endl;
+   try
+   {
+      confReader.open("../../ROCKET/oldtests/test.conf");
+   }
+   catch(...)
+   {
+      cerr << "Conf File open error." << endl;
 
-        return 1;
-    }
+      return 1;
+   }
 
-    // EOP File
-    EOPDataStore eopDataStore;
-    string eopFile = confReader.getValue("IERSEOPFILE", "DEFAULT");
-    try
-    {
-        eopDataStore.loadIERSFile(eopFile);
-    }
-    catch(...)
-    {
-        cerr << "EOP File Load Error." << endl;
 
-        return 1;
-    }
+   // EOP File
+   EOPDataStore eopDataStore;
+   string eopFile = confReader.getValue("IERSEOPFILE", "DEFAULT");
+   
+   try
+   {
+      eopDataStore.loadIERSFile(eopFile);
+   }
+   catch(...)
+   {
+      cerr << "EOP File Load Error." << endl;
+
+      return 1;
+   }
     
-    // LeapSecond file
-    LeapSecStore leapSecStore;
-    string lsFile  = confReader.getValue("IERSLSFILE", "DEFAULT");
-    try
-    {
-        leapSecStore.loadFile(lsFile);
-    }
-    catch(...)
-    {
-        cerr << "Leap Second File Load Error." << endl;
+   // LeapSecond file
+   LeapSecStore leapSecStore;
+   string lsFile  = confReader.getValue("IERSLSFILE", "DEFAULT");
 
-        return 1;
-    }
+   try
+   {
+      leapSecStore.loadFile(lsFile);
+   }
+   catch(...)
+   {
+      cerr << "Leap Second File Load Error." << endl;
+
+      return 1;
+   }
 
 
-    // Reference System
-    ReferenceSystem refSys;
-    refSys.setEOPDataStore(eopDataStore);
-    refSys.setLeapSecStore(leapSecStore);
+   // Reference System
+   ReferenceSystem refSys;
+   refSys.setEOPDataStore(eopDataStore);
+   refSys.setLeapSecStore(leapSecStore);
 
-    // Solar System
-    SolarSystem solSys;
-    string ephFile = confReader.getValue("JPLEPHFILE", "DEFAULT");
-    try
-    {
-       solSys.initializeWithBinaryFile(ephFile);
-    }
-    catch(...)
-    {
-       cerr << "Solar System Initialize Error." << endl;
+   // Solar System
+   SolarSystem solSys;
+   string ephFile = confReader.getValue("JPLEPHFILE", "DEFAULT");
 
-       return 1;
-    }
+   try
+   {
+      solSys.initializeWithBinaryFile(ephFile);
+   }
+   catch(...)
+   {
+      cerr << "Solar System Initialize Error." << endl;
 
-    // SatID
-    SatID sat(1,SatID::systemGPS);
+      return 1;
+   }
 
-    // Initial Time
-    CivilTime ct(2015,1,1,12,0,0.0, TimeSystem::GPS);
-    CommonTime gps( ct.convertToCommonTime() );
-    CommonTime utc( refSys.GPS2UTC(gps) );
+   // SatID
+   SatID sat(1,SatID::systemGPS);
 
-    // SP3 File
-    SP3EphemerisStore sp3Eph;
-    sp3Eph.rejectBadPositions(true);
-    sp3Eph.setPosGapInterval(900+1);
-    sp3Eph.setPosMaxInterval(9*900+1);
+   // Initial Time
+   CivilTime ct(2015,1,1,12,1,15.0, TimeSystem::GPS);
+   CommonTime gps( ct.convertToCommonTime() );
+   CommonTime utc( refSys.GPS2UTC(gps) );
 
-    string sp3File;
-    while( (sp3File = confReader.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
-    {
-        try
-        {
-            sp3Eph.loadFile(sp3File);
-        }
-        catch(...)
-        {
-            cerr << "IGS SP3 File Load Error." << endl;
+   // SP3 File
+   SP3EphemerisStore sp3Eph;
+   sp3Eph.rejectBadPositions(true);
+   sp3Eph.setPosGapInterval(900+1);
+   sp3Eph.setPosMaxInterval(9*900+1);
 
-            return 1;
-        }
-    }
+   string sp3File;
+   while( (sp3File = confReader.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
+   {
+      try
+      {
+         sp3Eph.loadFile(sp3File);
+      }
+      catch(...)
+      {
+         cerr << "IGS SP3 File Load Error." << endl;
+
+         return 1;
+      }
+   }
+
+
+   // Position and Velocity in ITRS
+   Vector<double> r_itrs, v_itrs;
+
+   try
+   {
+      r_itrs = sp3Eph.getXvt(sat, gps).x.toVector();
+      v_itrs = sp3Eph.getXvt(sat, gps).v.toVector();
+   }
+   catch(...)
+   {
+      cerr << "Get Position and Velocity from SP3 File Error." << endl;
+
+      return 1;
+   }
+
+
+   // Transform Matrix
+   Matrix<double> c2t ( refSys.C2TMatrix(utc)  );
+   
+   // Transform Matrix Time Dot
+   Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
+
+   // Position and Velocity in ICRS
+   Vector<double> r_icrs = transpose(c2t) * r_itrs;
+   Vector<double> v_icrs = transpose(c2t) * v_itrs + transpose(dc2t) * r_itrs;
+
+
+   // Initial State: r0, v0
+   Vector<double> r0(3,0.0);
+   r0(0) = r_icrs(0); r0(1) = r_icrs(1); r0(2) = r_icrs(2);
+   r0(0) = 17253546.071; r0(1) = -19971157.156; r0(2) = 3645801.329;
+
+   Vector<double> v0(3,0.0);
+   v0(0) = v_icrs(0); v0(1) = v_icrs(1); v0(2) = v_icrs(2);
+   v0(0) = 1973.209292;  v0(1) = 1123.311389;   v0(2) = -3124.145454;
+
+
+   // Reference body
+   EarthBody eb;
+
+   // SatData File
+   SatDataReader satReader;
+   string satDataFile = confReader.getValue("SatDataFile", "DEFAULT");
+   
+   try
+   {
+      satReader.open(satDataFile);
+   }
+   catch(...)
+   {
+      cerr << "SatData File Open Error." << endl;
+
+      return 1;
+   }
+
+
+   // Spacecraft
+   Spacecraft sc;
+   sc.setPosition(r0);
+   sc.setVelocity(v0);
+   sc.setNumOfParam(0);
+   sc.setSatID(sat);
+   sc.setCurrentTime(utc);
+   sc.setBlockType(satReader.getBlock(sat,utc));
+   sc.setMass(satReader.getMass(sat,utc));
+
+   cout << fixed << setprecision(12);
+
+   // Earth Gravitation
+   EGM08GravityModel egm;
+
+   // EGM Degree and Order
+   int EGMDEG = confReader.getValueAsInt("EGMDEG", "DEFAULT");
+   int EGMORD = confReader.getValueAsInt("EGMORD", "DEFAULT");
+
+   egm.setDesiredDegreeOrder(EGMDEG, EGMORD);
+   egm.setReferenceSystem(refSys);
+
+   // EGM File
+   string egmFile = confReader.getValue("EGMFILE", "DEFAULT");
+   try
+   {
+      egm.loadFile(egmFile);
+   }
+   catch(...)
+   {
+      cerr << "EGM File Load Error." << endl;
+
+      return 1;
+   }
+
+
+   // Earth Solid Tide
+   EarthSolidTide solidTide;
+   solidTide.setReferenceSystem(refSys);
+   solidTide.setSolarSystem(solSys);
+
+
+   bool correctSolidTide = confReader.getValueAsBoolean("SOLIDTIDE", "DEFAULT");
+
+   if(correctSolidTide)
+   {
+      egm.setEarthSolidTide(solidTide);
+   }
+
+
+   // Earth Ocean Tide
+   EarthOceanTide oceanTide;
+   oceanTide.setReferenceSystem(refSys);
+
+   bool correctOceanTide = confReader.getValueAsBoolean("OCEANTIDE", "DEFAULT");
+
+   if(correctOceanTide)
+   {
+      egm.setEarthOceanTide(oceanTide);
+
+      int EOTDEG = confReader.getValueAsInt("EOTDEG", "DEFAULT");
+      int EOTORD = confReader.getValueAsInt("EOTORD", "DEFAULT");
+
+      oceanTide.setDesiredDegreeOrder(EOTDEG, EOTORD);
+
+      // EOT File
+      string eotFile = confReader.getValue("EOTFILE", "DEFAULT");
+      try
+      {
+         oceanTide.loadFile(eotFile);
+      }
+      catch(...)
+      {
+         cerr << "EOT File Load Error." << endl;
+
+         return 1;
+      }
+   }
+
+   // Earth Pole Tide
+   EarthPoleTide poleTide;
+   poleTide.setReferenceSystem(refSys);
+
+   bool correctPoleTide = confReader.getValueAsBoolean("POLETIDE", "DEFAULT");
+
+   if(correctPoleTide)
+   {
+      egm.setEarthPoleTide(poleTide);
+   }
+
+
+   // Acceleration
+   egm.doCompute(utc, eb, sc);
+
+   cout << "EGM08: " << egm.getAcceleration() << endl;
     
-
-    // Position and Velocity in ITRS
-    Vector<double> r_itrs, v_itrs;
-
-    try
-    {
-        r_itrs = sp3Eph.getXvt(sat, gps).x.toVector();
-        v_itrs = sp3Eph.getXvt(sat, gps).v.toVector();
-    }
-    catch(...)
-    {
-        cerr << "Get Position and Velocity from SP3 File Error." << endl;
-
-        return 1;
-    }
-
-    // Transform Matrix
-    Matrix<double> c2t ( refSys.C2TMatrix(utc)  );
-    // Transform Matrix Time Dot
-    Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
-
-    // Position and Velocity in ICRS
-    Vector<double> r_icrs = transpose(c2t) * r_itrs;
-    Vector<double> v_icrs = transpose(c2t) * v_itrs + transpose(dc2t) * r_itrs;
-
-
-    // Initial State: r0, v0
-    Vector<double> rv0(6,0.0);
-    rv0(0) = r_icrs(0); rv0(1) = r_icrs(1); rv0(2) = r_icrs(2);
-    rv0(3) = v_icrs(0); rv0(4) = v_icrs(1); rv0(5) = v_icrs(2);
-//    rv0(0) = 17253546.071; rv0(1) = -19971157.156; rv0(2) = 3645801.329;
-//    rv0(3) = 1973.209292;  rv0(4) = 1123.311389;   rv0(5) = -3124.145454;
-
-
-    // Reference body
-    EarthBody eb;
-
-    // Initial State: p0
-    Vector<double> p0;
-
-    // SatData File
-    SatDataReader satReader;
-    string satDataFile = confReader.getValue("SatDataFile", "DEFAULT");
-    try
-    {
-        satReader.open(satDataFile);
-    }
-    catch(...)
-    {
-        cerr << "SatData File Open Error." << endl;
-
-        return 1;
-    }
-
-    // Spacecraft
-    Spacecraft sc;
-    sc.setSatID(sat);
-    sc.setCurrentTime(utc);
-    sc.setBlock(satReader.getBlock(sat,utc));
-    sc.setMass(satReader.getMass(sat,utc));
-    sc.initStateVector(rv0, p0);
-
-    cout << fixed << setprecision(15);
-
-    // Earth Gravitation
-    EGM08GravityModel egm;
-
-    // EGM Degree and Order
-    int EGMDEG = confReader.getValueAsInt("EGMDEG", "DEFAULT");
-    int EGMORD = confReader.getValueAsInt("EGMORD", "DEFAULT");
-
-    egm.setDesiredDegreeOrder(EGMDEG, EGMORD);
-    egm.setReferenceSystem(refSys);
-
-    // EGM File
-    string egmFile = confReader.getValue("EGMFILE", "DEFAULT");
-    try
-    {
-       egm.loadFile(egmFile);
-    }
-    catch(...)
-    {
-       cerr << "EGM File Load Error." << endl;
-
-       return 1;
-    }
-
-
-    // Earth Solid Tide
-    EarthSolidTide solidTide;
-    solidTide.setReferenceSystem(refSys);
-    solidTide.setSolarSystem(solSys);
-
-    egm.setEarthSolidTide(solidTide);
-
-
-    // Earth Ocean Tide
-    EarthOceanTide oceanTide;
-    oceanTide.setReferenceSystem(refSys);
-
-    int EOTDEG = confReader.getValueAsInt("EOTDEG", "DEFAULT");
-    int EOTORD = confReader.getValueAsInt("EOTORD", "DEFAULT");
-
-    oceanTide.setDesiredDegreeOrder(EOTDEG, EOTORD);
-
-    // EOT File
-    string eotFile = confReader.getValue("EOTFILE", "DEFAULT");
-    try
-    {
-       oceanTide.loadFile(eotFile);
-    }
-    catch(...)
-    {
-       cerr << "EOT File Load Error." << endl;
-
-       return 1;
-    }
-
-    egm.setEarthOceanTide(oceanTide);
-
-
-    // Earth Pole Tide
-    EarthPoleTide poleTide;
-    poleTide.setReferenceSystem(refSys);
-
-    egm.setEarthPoleTide(poleTide);
-
-    egm.doCompute(utc, eb, sc);
-
-    cout << "EGM08: " << egm.getAccel() << endl;
-    
-    return 0;
+   return 0;
 }

@@ -4271,7 +4271,7 @@ namespace gpstk
                                           double BETA[6],
                                           double FNUT[5]         )
    {
-      // GMST, IAU 1980 model
+      // GMST, IAU 2006 model
       double THETA = GMST06(UT1,TT);
 
       // Fundamental Arguments

@@ -42,8 +42,8 @@ namespace gpstk
       const double GM = GM_EARTH;
       const double C = C_MPS;
       
-      Vector<double> r = sc.R();
-      Vector<double> v = sc.V();
+      Vector<double> r = sc.getPosition();
+      Vector<double> v = sc.getVelocity();
 
       double beta = 1.0;
       double gama = 1.0;

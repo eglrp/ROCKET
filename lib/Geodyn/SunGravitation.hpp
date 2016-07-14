@@ -46,14 +46,14 @@ namespace gpstk
  
          /// Default constructor
       SunGravitation()
-         : pSolSys(NULL), pRefSys(NULL), isPrepared(false)
+         : pSolSys(NULL),
+           pRefSys(NULL)
       {}
 
 
          /// Constructor
       SunGravitation(SolarSystem&      sol,
                      ReferenceSystem&  ref)
-         : isPrepared(false)
       {
          pSolSys = &sol;
          pRefSys = &ref;
@@ -107,7 +107,7 @@ namespace gpstk
 
          /// Return the force model name
       inline virtual std::string modelName()  const
-      { return "SunForce"; }
+      { return "SunGravitation"; }
 
          /// Return the force model index
       inline virtual int forceIndex() const
@@ -120,9 +120,6 @@ namespace gpstk
 
          /// Reference System
       ReferenceSystem* pRefSys;
-
-         /// Is Prepared ?
-      bool isPrepared;
 
 
    }; // End of class 'SunGravitation'

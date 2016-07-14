@@ -272,7 +272,7 @@ namespace gpstk
 
 
       // satellite position in ICRS
-      Vector<double> r_sat_icrs = sc.R();
+      Vector<double> r_sat_icrs = sc.getPosition();
 
       // transformation matrixs between ICRS and ITRS
       Matrix<double> C2T = pRefSys->C2TMatrix(utc);
@@ -367,8 +367,12 @@ namespace gpstk
       //                                                                     //
       /////////////////////////////////////////////////////////////////////////
       Vector<double> c_rll(3,0.0), s_rll(3,0.0);
-      int size = indexTranslator(desiredDegree,desiredOrder) - 1;
-      Matrix<double> df_itrs_dcs(3,size*2,0.0);
+      Matrix<double> df_itrs_dcs;
+      if(satGravimetry)
+      {
+         int size = indexTranslator(desiredDegree,desiredOrder) - 1;
+         df_itrs_dcs.resize(3,size*2,0.0);
+      }
 
       // (GM/rho)^1, (GM/rho)^2, (GM/rho)^3
       double gm_r1 = gmData.GM / rho;
@@ -425,23 +429,26 @@ namespace gpstk
             g_rll(1,2) +=  gm_r1 * m * ae_rho_n * P1 * (-Cnm*smlon+Snm*cmlon);
             g_rll(2,2) += -gm_r1 * m*m * ae_rho_n * P0 * (Cnm*cmlon+Snm*smlon);
 
-            // c_rll
-            c_rll(0) = -gm_r2 * (n+1) * ae_rho_n * P0 * cmlon;
-            c_rll(1) =  gm_r1 * ae_rho_n * P1 * cmlon;
-            c_rll(2) = -gm_r1 * m * ae_rho_n * P0 * smlon;
+            if(satGravimetry)
+            {
+               // c_rll
+               c_rll(0) = -gm_r2 * (n+1) * ae_rho_n * P0 * cmlon;
+               c_rll(1) =  gm_r1 * ae_rho_n * P1 * cmlon;
+               c_rll(2) = -gm_r1 * m * ae_rho_n * P0 * smlon;
 
-            // s_rll
-            s_rll(0) = -gm_r2 * (n+1) * ae_rho_n * P0 * smlon;
-            s_rll(1) =  gm_r1 * ae_rho_n * P1 * smlon;
-            s_rll(2) =  gm_r1 * m * ae_rho_n * P0 * cmlon;
+               // s_rll
+               s_rll(0) = -gm_r2 * (n+1) * ae_rho_n * P0 * smlon;
+               s_rll(1) =  gm_r1 * ae_rho_n * P1 * smlon;
+               s_rll(2) =  gm_r1 * m * ae_rho_n * P0 * cmlon;
 
-            // df_itrs_dcs
-            df_itrs_dcs(0,idnm+0) = c_rll(0)*b(0,0) + c_rll(1)*b(1,0) + c_rll(2)*b(2,0);
-            df_itrs_dcs(1,idnm+0) = c_rll(0)*b(0,1) + c_rll(1)*b(1,1) + c_rll(2)*b(2,1);
-            df_itrs_dcs(2,idnm+0) = c_rll(0)*b(0,2) + c_rll(1)*b(1,2) + c_rll(2)*b(2,2);
-            df_itrs_dcs(0,idnm+1) = s_rll(0)*b(0,0) + s_rll(1)*b(1,0) + s_rll(2)*b(2,0);
-            df_itrs_dcs(1,idnm+1) = s_rll(0)*b(0,1) + s_rll(1)*b(1,1) + s_rll(2)*b(2,1);
-            df_itrs_dcs(2,idnm+1) = s_rll(0)*b(0,2) + s_rll(1)*b(1,2) + s_rll(2)*b(2,2);
+               // df_itrs_dcs
+               df_itrs_dcs(0,idnm+0) = c_rll(0)*b(0,0) + c_rll(1)*b(1,0) + c_rll(2)*b(2,0);
+               df_itrs_dcs(1,idnm+0) = c_rll(0)*b(0,1) + c_rll(1)*b(1,1) + c_rll(2)*b(2,1);
+               df_itrs_dcs(2,idnm+0) = c_rll(0)*b(0,2) + c_rll(1)*b(1,2) + c_rll(2)*b(2,2);
+               df_itrs_dcs(0,idnm+1) = s_rll(0)*b(0,0) + s_rll(1)*b(1,0) + s_rll(2)*b(2,0);
+               df_itrs_dcs(1,idnm+1) = s_rll(0)*b(0,1) + s_rll(1)*b(1,1) + s_rll(2)*b(2,1);
+               df_itrs_dcs(2,idnm+1) = s_rll(0)*b(0,2) + s_rll(1)*b(1,2) + s_rll(2)*b(2,2);
+            }
             
 
          }   // End of "for(int m=0; ...)"
@@ -499,7 +506,10 @@ namespace gpstk
 
 
       // partials of gravitation acceleration in ICRS to (Cnm, Snm)
-      da_dp = T2C * df_itrs_dcs;
+      if(satGravimetry)
+      {
+         da_dEGM = T2C * df_itrs_dcs;
+      }
 
 
    }  // End of method 'EGM08GravityModel::doCompute()'

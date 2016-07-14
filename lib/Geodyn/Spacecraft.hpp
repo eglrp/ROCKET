@@ -17,7 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
@@ -34,8 +34,9 @@
 
 #include "Vector.hpp"
 #include "Matrix.hpp"
-#include "SatID.hpp"
+
 #include "CommonTime.hpp"
+#include "SatID.hpp"
 
 
 namespace gpstk
@@ -50,29 +51,18 @@ namespace gpstk
    {
    public:
 
-         /// Default constructor
-      Spacecraft() { resetState(); }
+         /// Constructor
+      Spacecraft()
+      {
+         resetState();
+      }
 
          /// Default destructor
       ~Spacecraft() {};
 
 
-         /// Set SatID of Spacecraft
-      Spacecraft& setSatID(const SatID& si)
-      {
-         satid = si;
-         return (*this);
-      }
-
-         /// Get SatID of Spacecraft
-      SatID getSatID() const
-      {
-         return satid;
-      }
-
-
          /// Set current time of Spacecraft
-      Spacecraft& setCurrentTime(const CommonTime& utc)
+      inline Spacecraft& setCurrentTime(const CommonTime& utc)
       {
          curTime = utc;
 
@@ -80,112 +70,203 @@ namespace gpstk
       }
 
          /// Get current time of Spacecraft
-      CommonTime getCurrentTime() const
+      inline CommonTime getCurrentTime() const
       {
          return curTime;
       }
 
-
-/*
-         /// Set sat data reader
-      Spacecraft& setSatDataReader(SatDataReader& sat)
+         /// Set SatID of Spacecraft
+      inline Spacecraft& setSatID(const SatID& si)
       {
-         pSatReader = &sat;
+         satID = si;
+
+         return (*this);
+      }
+
+         /// Get SatID of Spacecraft
+      inline SatID getSatID() const
+      {
+         return satID;
+      }
+
+
+         /// Set block type of Spacecraft
+      inline Spacecraft& setBlockType(const std::string& bt)
+      {
+         blockType = bt;
+
+         return (*this);
+      }
+
+         /// Get block type of Spacecraft
+      inline std::string getBlockType() const
+      {
+         return blockType;
+      }
+
+         /// Set mass of Spacecraft
+      inline Spacecraft& setMass(const double& m)
+      {
+         mass = m;
 
          return (*this);
       }
 
 
-         /// Get sat data reader
-      SatDataReader* getSatDataReader() const
+         /// Get mass of Spacecraft
+      inline double getMass() const
       {
-         return pSatReader;
+         return mass;
       }
-*/
-
-         /// Set block of the spacecraft
-      Spacecraft& setBlock(const std::string& b) { block = b; return *this; }
-
-         /// Get block of the spacecraft
-      std::string getBlock() const { return block; };
-
-         /// Set mass of the spacecraft
-      Spacecraft& setMass(const double& m) { mass = m; return *this; }
-
-         /// Get mass of the spacecraft
-      double getMass() const { return mass; };
 
 
-         /// SC position(R), velocity(V) and force model parameters(P)
-      Vector<double> R() {return r;}
-      Vector<double> V() {return v;}
-      Vector<double> P() {return p;}
+         /// Set position of Spacecraft
+      inline Spacecraft& setPosition(const Vector<double>& pos)
+      {
+         r = pos;
 
-         /// SC derivatives
-      Vector<double> dR_dR0() {return dr_dr0;}
-      Vector<double> dR_dV0() {return dr_dv0;}
-      Vector<double> dR_dP0() {return dr_dp0;}
-      Vector<double> dV_dR0() {return dv_dr0;}
-      Vector<double> dV_dV0() {return dv_dv0;}
-      Vector<double> dV_dP0() {return dv_dp0;}
+         return (*this);
+      }
 
-         /// Get number of force model parameters
-      int getNumOfP()
-      { return p.size(); }
 
-         /// Initialize state vector with position, velocity and force model parameters
-      void initStateVector(const Vector<double>& rv, const Vector<double>& dp);
+         /// Get position of Spacecraft
+      inline Vector<double> getPosition() const
+      {
+         return r;
+      }
 
-         /// Methods to handle SC state vector 6 + 6*(6+np)
+
+         /// Set velocity of Spacecraft
+      inline Spacecraft& setVelocity(const Vector<double>& vel)
+      {
+         v = vel;
+
+         return (*this);
+      }
+
+
+         /// Get velocity of Spacecraft
+      inline Vector<double> getVelocity() const
+      {
+         return v;
+      }
+
+
+         /// Set number of force model parameters to be estimated
+      inline Spacecraft& setNumOfParam(const int& n)
+      {
+         numOfParam = n;
+
+         dr_dp0.resize(3*numOfParam, 0.0);
+         dv_dp0.resize(3*numOfParam, 0.0);
+
+         return (*this);
+      }
+
+         /// Get number of force model parameters to be estimated
+      inline int getNumOfParam() const
+      {
+         return numOfParam;
+      }
+
+
+         /// Get partial derivatives of currrent position to initial position
+      inline Vector<double> dR_dR0() const
+      {
+         return dr_dr0;
+      }
+
+
+         /// Get partial derivatives of current position to initial velocity
+      inline Vector<double> dR_V0() const
+      {
+         return dr_dv0;
+      }
+
+
+         /// Get partial derivatives of current position to initial force model
+         /// parameters
+      inline Vector<double> dR_dP0() const
+      {
+         return dr_dp0;
+      }
+
+
+         /// Get partial derivatives of current velocity to initial position
+      inline Vector<double> dV_dR0() const
+      {
+         return dv_dr0;
+      }
+
+
+         /// Get partial derivatives of current velocity to initial velocity
+      inline Vector<double> dV_dV0() const
+      {
+         return dv_dr0;
+      }
+
+
+         /// Get partial derivatives of current velocity to initial force model
+         /// parameters
+      inline Vector<double> dV_dP0() const
+      {
+         return dv_dp0;
+      }
+
+
+         /// Set state vector of Spacecraft
+      Spacecraft& setStateVector(const Vector<double>& sv);
+
+
+         /// Get state vector of Spacecraft
       Vector<double> getStateVector() const;
-      void setStateVector(const Vector<double>& y);
 
-         /// Methods to handle SC transition matrix 6*(6+np)
+
+         /// Get transition matrix of Spacecraft
       Matrix<double> getTransitionMatrix() const;
-      void setTransitionMatrix(const Matrix<double>& phiMatrix);
 
-         /// Method to get SC state transition matrix 6*6
+
+         /// Get state transition matrix of Spacecraft
       Matrix<double> getStateTransitionMatrix() const;
 
-         /// Method to get SC sensitivity matrix 6*np
+
+         /// Get sensitivity matrix of Spacecraft
       Matrix<double> getSensitivityMatrix() const;
 
 
    private:
 
-         /// Reset state of the spacecraft
+         /// Reset state of Spacecraft
       void resetState();
 
-
-         /// SatID of Spacecraft
-      SatID satid;
 
          /// Current time of Spacecraft
       CommonTime curTime;
 
-/*
-         /// Sat data reader
-      SatDataReader* pSatReader;
-*/
+         /// SatID of Spacecraft
+      SatID satID;
 
-         /// Block of the spacecraft
-      std::string block;
-         /// Mass of the spacecraft
+         /// Block type of spacecraft
+      std::string blockType;
+
+         /// Mass of spacecraft
       double mass;
 
 
          /// State vector     6*n + 42
-      Vector<double> r;       // 3 Position
-      Vector<double> v;       // 3 Velocity
-      Vector<double> p;       // n Force Model Parameters
+      Vector<double> r;       // 3*1
+      Vector<double> v;       // 3*1
+
+         /// Number of parameters
+      int numOfParam;
 
          /// Partial derivatives
-      Vector<double> dr_dr0;      // 3*3  I
-      Vector<double> dr_dv0;      // 3*3  0
-      Vector<double> dr_dp0;      // 3*n  0
-      Vector<double> dv_dr0;      // 3*3  0
-      Vector<double> dv_dv0;      // 3*3  I
-      Vector<double> dv_dp0;      // 3*n  0
+      Vector<double> dr_dr0;  // 3*3
+      Vector<double> dr_dv0;  // 3*3
+      Vector<double> dr_dp0;  // 3*n
+      Vector<double> dv_dr0;  // 3*3
+      Vector<double> dv_dv0;  // 3*3
+      Vector<double> dv_dp0;  // 3*n
 
    }; // End of class 'Spacecraft'
 

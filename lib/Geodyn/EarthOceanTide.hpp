@@ -86,7 +86,7 @@ namespace gpstk
       ~EarthOceanTide() {}
 
 
-         /// Load Ocean Tide file
+         /// Load ocean tide file
       void loadFile(const std::string& file)
          throw(FileMissingException);
 

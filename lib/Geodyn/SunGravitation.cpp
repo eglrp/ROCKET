@@ -48,7 +48,7 @@ namespace gpstk
        * da/dr = -GM*( I/norm(r-s)^3 - 3(r-s)transpose(r-s)/norm(r-s)^5)
        */
 
-      Vector<double> r_sat = sc.R();
+      Vector<double> r_sat = sc.getPosition();
 
       // Geocentric position of sun
       double rv_sun[6] = {0.0};     // unit: km, km/day

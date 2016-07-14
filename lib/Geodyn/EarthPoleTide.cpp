@@ -82,8 +82,8 @@ namespace gpstk
 
       // difference of real and mean pole, unit: arcsec
       double m1(0.0), m2(0.0);
-      m1 = xp - xpm;
-      m2 = yp - ypm;
+      m1 = +(xp - xpm);
+      m2 = -(yp - ypm);
 
       // index for degree = 2 and order = 1
       int id21 = indexTranslator(2,1) - 1;

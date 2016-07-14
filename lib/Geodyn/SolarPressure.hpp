@@ -95,6 +95,7 @@ namespace gpstk
       inline SolarPressure& setSolarSystem(SolarSystem& sol)
       {
          pSolSys = &sol;
+
          return (*this);
       }
 
@@ -106,9 +107,25 @@ namespace gpstk
       }
 
 
+         /// Set SRP coefficients
+      inline SolarPressure& setSRPCoeff(const Vector<double>& coeff)
+      {
+         srpCoeff = coeff;
+
+         return (*this);
+      }
+
+
+         /// Get SRP coefficients
+      inline Vector<double> getSRPCoeff() const
+      {
+         return srpCoeff;
+      }
+
+
          /// Return the force model name
       inline virtual std::string modelName() const
-      {return "SolarPressure";}
+      { return "SolarPressure"; }
 
          /// Return the force model index
       inline virtual int forceIndex() const
@@ -130,6 +147,9 @@ namespace gpstk
 
          /// Solar System
       SolarSystem* pSolSys;
+
+         /// SRP Coefficients
+      Vector<double> srpCoeff;
 
    }; // End of class 'SolarPressure'
 

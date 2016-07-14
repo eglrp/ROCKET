@@ -92,10 +92,10 @@ namespace gpstk
            pRefSys(NULL),
            pSolidTide(NULL),
            pOceanTide(NULL),
-           pPoleTide(NULL)
+           pPoleTide(NULL),
+           satGravimetry(false)
       {
          int size = desiredDegree*(desiredDegree+1)/2 + (desiredOrder+1);
-
          gmData.normalizedCS.resize(size,4,0.0);
       }
 
@@ -111,16 +111,18 @@ namespace gpstk
 
 
          /// Set desired degree and order
+         /// Warning: If you call method setDesiredDegreeOrder(), then you MUST
+         ///          call method loadFile() to reinitialize gmData struct.
       inline EarthGravitation& setDesiredDegreeOrder(const int& n, const int& m)
       {
+         desiredDegree  =  n;
+
          if(n >= m)
          {
-            desiredDegree  =  n;
             desiredOrder   =  m;
          }
          else
          {
-            desiredDegree  =  n;
             desiredOrder   =  n;
          }
 
@@ -199,14 +201,30 @@ namespace gpstk
       }
 
 
+         /// Set satellite gravimetry
+      inline EarthGravitation& setSatGravimetry(const bool& sg)
+      {
+         satGravimetry = sg;
+         
+         return (*this);
+      }
+
+
+         /// Get satellite gravimetry
+      inline bool getSatGravimetry() const
+      {
+         return satGravimetry;
+      }
+
+
+
          /** Compute acceleration (and related partial derivatives) of Earth
           *  Gravitation.
           * @param utc     time in UTC
           * @param rb      earth body
           * @param sc      spacecraft
           */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
-      {}
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc) {}
 
 
          /// Return the force model name
@@ -233,11 +251,11 @@ namespace gpstk
       EarthOceanTide*   pOceanTide;
       EarthPoleTide*    pPoleTide;
 
-         /// Gravity Model Data
+         /// Gravity model data
       GravityModelData gmData;
 
-         /// Satellite Gravimetry
-//      bool satGravimetry;
+         /// Satellite gravimetry
+      bool satGravimetry;
 
 
    }; // End of class 'EarthGravitation'

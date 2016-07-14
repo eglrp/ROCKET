@@ -85,8 +85,8 @@ int main(void)
       return 1;
    }
 
-   // sat id
-   SatID satid(1, SatID::systemGPS);
+   // sat ID
+   SatID sat(1, SatID::systemGPS);
 
    // time
    CivilTime ct(2015,1,1,12,1,15.0, TimeSystem::GPS);
@@ -94,24 +94,28 @@ int main(void)
    CommonTime utc( refSys.GPS2UTC(gps) );
 
    // initial conditions
-   Vector<double> rv(6,0.0);
-   rv[0] =  17253.546071e3;
-   rv[1] = -19971.1571565e3;
-   rv[2] =   3645.8013286e3;
-   rv[3] =  1.9732093e3;
-   rv[4] =  1.1233114e3;
-   rv[5] = -3.1241455e3;
+   Vector<double> r0(3,0.0);
+   r0[0] =  17253.546071e3;
+   r0[1] = -19971.1571565e3;
+   r0[2] =   3645.8013286e3;
 
-   Vector<double> p(9,0.0);
-   p[0] = 0.999989506;
-   p[1] = -0.000367154;
-   p[2] = -0.003625165;
-   p[3] = 0.015272206;
-   p[4] = 0.000216184;
-   p[5] = -0.000701573;
-   p[6] = 0.000985358;
-   p[7] = 0.009091403;
-   p[8] = -0.001752761;
+   Vector<double> v0(3,0.0);
+   v0[0] =  1.9732093e3;
+   v0[1] =  1.1233114e3;
+   v0[2] = -3.1241455e3;
+
+   Vector<double> p0(9,0.0);
+   p0[0] = 0.999989506;
+   p0[1] = 0.015272206;
+   p0[2] = 0.000216184;
+
+   p0[3] = -0.000367154;
+   p0[4] = -0.000701573;
+   p0[5] =  0.000985358;
+
+   p0[6] = -0.003625165;
+   p0[7] =  0.009091403;
+   p0[8] = -0.001752761;
 
    EarthBody rb;
 
@@ -133,21 +137,25 @@ int main(void)
 
    // Spacecraft
    Spacecraft sc;
-   sc.initStateVector(rv, p);
-   sc.setSatID(satid);
+   sc.setPosition(r0);
+   sc.setVelocity(v0);
+   sc.setNumOfParam(9);
+
+   sc.setSatID(sat);
    sc.setCurrentTime(utc);
-   sc.setBlock( satReader.getBlock(satid,utc) );
-   sc.setMass( satReader.getMass(satid,utc) );
+   sc.setBlockType( satReader.getBlock(sat,utc) );
+   sc.setMass( satReader.getMass(sat,utc) );
 
    // CODE SRP
    CODEPressure code;
    code.setReferenceSystem(refSys);
    code.setSolarSystem(solSys);
+   code.setSRPCoeff(p0);
 
    code.doCompute(utc, rb, sc);
 
    Vector<double> f_srp(3,0.0);
-   f_srp = code.getAccel();
+   f_srp = code.getAcceleration();
 
    cout << setprecision(8);
    cout << "CODE SRP: " << endl

@@ -17,7 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //  
 //  Copyright 2004, The University of Texas at Austin
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Kaifa Kuang - Kaifa Kuang . 2016
 //
 //============================================================================
 
@@ -30,304 +30,246 @@
 #include "Exception.hpp"
 #include "CivilTime.hpp"
 
+
 using namespace std;
+
 
 namespace gpstk
 {
-      /// Reset state vector and partial derivatives
+
+      /// Reset state
    void Spacecraft::resetState()
    {
-       // reset state vector
-       r.resize(3,0.0); v.resize(3,0.0); p.resize(0,0.0);
+      // reset state vector
+      r.resize(3,0.0); v.resize(3,0.0);
 
-       // reset partial derivatives
-       dr_dr0.resize(9,0.0); dr_dv0.resize(9,0.0); dr_dp0.resize(0,0.0);
-       dv_dr0.resize(9,0.0); dv_dv0.resize(9,0.0); dv_dp0.resize(0,0.0);
+      // reset partial derivatives
+      dr_dr0.resize(9,0.0); dr_dv0.resize(9,0.0); dr_dp0.resize(0,0.0);
+      dv_dr0.resize(9,0.0); dv_dv0.resize(9,0.0); dv_dp0.resize(0,0.0);
+      dr_dr0(0) = 1.0; dr_dr0(4) = 1.0; dr_dr0(8) = 1.0;
+      dv_dv0(0) = 1.0; dv_dv0(4) = 1.0; dv_dv0(8) = 1.0;
 
-       dr_dr0(0) = 1.0; dr_dr0(4) = 1.0; dr_dr0(8) = 1.0;
-       dv_dv0(0) = 1.0; dv_dv0(4) = 1.0; dv_dv0(8) = 1.0;
-   }
+   }  // End of method 'Spacecraft::resetState()'
 
 
-   // Initialize state vector with position, velocity and force model parameters
-   void Spacecraft::initStateVector(const Vector<double>& rv, const Vector<double>& dp)
+      /// Set state vector
+   Spacecraft& Spacecraft::setStateVector(const Vector<double>& sv)
    {
-      // first the size of input vector should be checked
-      if(rv.size()!=6)
+      // check the size of sv
+      if(sv.size() == (42+6*numOfParam))
       {
-         Exception e("Error in Spacecraft::initStateVector(): the size of rv should be 6.");
-         GPSTK_THROW(e);
+         // resize dr_dp0 and dv_dp0
+         dr_dp0.resize(3*numOfParam, 0.0);
+         dv_dp0.resize(3*numOfParam, 0.0);
+
+         // set position
+         r(0) = sv(0); r(1) = sv(1); r(2) = sv(2);
+
+         // set velocity
+         v(0) = sv(3); v(1) = sv(4); v(2) = sv(5);
+
+
+         // set position related partial derivatives
+         for(int i=0; i<3*3; ++i)
+         {
+             dr_dr0(i) = sv( 6+i);
+             dr_dv0(i) = sv(15+i);
+         }
+
+         for(int i=0; i<3*numOfParam; ++i)
+         {
+             dr_dp0(i) = sv(24+i);
+         }
+
+         // set velocity related partial derivatives
+         for(int i=0; i<3*3; ++i)
+         {
+             dv_dr0(i) = sv(24+3*numOfParam+i);
+             dv_dv0(i) = sv(33+3*numOfParam+i);
+         }
+
+         for(int i=0; i<3*numOfParam; ++i)
+         {
+             dv_dp0(i) = sv(42+3*numOfParam+i);
+         }
+
+      }
+      else
+      {
+         cerr << "Spacecraft::setStateVector() error, the size does not match." << endl;
       }
 
-      resetState();
-      
-      // set position
-      r(0) = rv(0); r(1) = rv(1); r(2) = rv(2);
+      return (*this);
 
-      // set velocity
-      v(0) = rv(3); v(1) = rv(4); v(2) = rv(5);
-      
-      // set force model parameters
-      p = dp;
-
-      // set dr_dp0 and dv_dp0
-      const int np = p.size();
-
-      dr_dp0.resize(3*np,0.0);
-      dv_dp0.resize(3*np,0.0);
-
-   }  // End of method 'Spacecraft::initStateVector()'
+   }  // End of method 'Spacecraft::setStateVector()'
 
 
-   // Get state vector 6 + 6*(6+np)
+      /// Get state vector of Spacecraft
    Vector<double> Spacecraft::getStateVector() const
    {
-      // size
-      const int np=p.size();
-      Vector<double> y(6*np+42,0.0);
+
+      Vector<double> sv(42+6*numOfParam, 0.0);
 
 
       //// Parameters related to equation of motion ////
 
       // position
-      y(0) = r(0); y(1) = r(1); y(2) = r(2);
+      sv(0) = r(0); sv(1) = r(1); sv(2) = r(2);
 
       // velocity
-      y(3) = v(0); y(4) = v(1); y(5) = v(2);
+      sv(3) = v(0); sv(4) = v(1); sv(5) = v(2);
 
 
-      //// parameters related to variational equation ////
+      //// parameters related to equation of variation ////
 
       // position related partial derivatives
 
       // dr_dr0, dr_dv0
-      for(int i=0; i<3*3; i++)
+      for(int i=0; i<3*3; ++i)
       {
-          y( 6+i) = dr_dr0(i);
-          y(15+i) = dr_dv0(i);
+          sv( 6+i) = dr_dr0(i);
+          sv(15+i) = dr_dv0(i);
       }
 
       // dr_dp0
-      for(int i=0; i<3*np; i++)
+      for(int i=0; i<3*numOfParam; ++i)
       {
-          y(24+i) = dr_dp0(i);
+          sv(24+i) = dr_dp0(i);
       }
 
       // velocity related partial derivatives
 
       // dv_dr0, dv_dv0
-      for(int i=0; i<3*3; i++)
+      for(int i=0; i<3*3; ++i)
       {
-          y(24+3*np+i) = dv_dr0(i);
-          y(33+3*np+i) = dv_dv0(i);
+          sv(24+3*numOfParam+i) = dv_dr0(i);
+          sv(33+3*numOfParam+i) = dv_dv0(i);
       }
 
       // dv_dp0
-      for(int i=0; i<3*np; i++)
+      for(int i=0; i<3*numOfParam; ++i)
       {
-          y(42+3*np+i) = dv_dp0(i);
+          sv(42+3*numOfParam+i) = dv_dp0(i);
       }
 
 
-      // return
-      return y;
+      return sv;
 
    }  // End of method 'Spacecraft::getStateVector()'
 
 
-   // Set state vector and partial derivatives
-   void Spacecraft::setStateVector(const Vector<double>& y)
-   {
-      // check the size of y !!!
 
-      const int dim = y.size();
-      const int np = (dim-42)/6;
-      
-      // resize the force model parameters
-      p.resize(np,0.0);
-      dr_dp0.resize(3*np,0.0);
-      dv_dp0.resize(3*np,0.0);
-
-
-      // set position
-      r(0) = y(0); r(1) = y(1); r(2) = y(2);
-
-      // set velocity
-      v(0) = y(3); v(1) = y(4); v(2) = y(5);
-
-
-      // set position related partial derivatives
-      for(int i=0; i<3*3; i++)
-      {
-          dr_dr0(i) = y( 6+i);
-          dr_dv0(i) = y(15+i);
-      }
-
-      for(int i=0; i<3*np; i++)
-      {
-          dr_dp0(i) = y(24+i);
-      }
-
-      // set velocity related partial derivatives
-      for(int i=0; i<3*3; i++)
-      {
-          dv_dr0(i) = y(24+3*np+i);
-          dv_dv0(i) = y(33+3*np+i);
-      }
-      for(int i=0; i<3*np; i++)
-      {
-          dv_dp0(i) = y(42+3*np+i);
-      }
-
-   }  // End of method 'Spacecraft::setStateVector()'
-
-
-   // Get transition matrix
+      /// Get transition matrix
    Matrix<double> Spacecraft::getTransitionMatrix() const
    {
-      /* Transition Matrix
-               |                          |
-               | dr_dr0   dr_dv0   dr_dp0 |
-               |                          |
-      tra   =  | dv_dr0   dv_dv0   dv_dp0 |
-               |                          |
-               | 0        0        I      |
-               |                          |
-      */
+      ////////////////// Transition Matrix ////////////////
+      //                                                 //
+      //             |                          |        //
+      //             | dr_dr0   dr_dv0   dr_dp0 |        //
+      //             |                          |        //
+      //    tMat  =  | dv_dr0   dv_dv0   dv_dp0 |        //
+      //             |                          |        //
+      //             | 0        0        I      |        //
+      //             |                          |        //
+      //                                                 //
+      /////////////////////////////////////////////////////
 
-      // size
-      const int np = p.size();
-      Matrix<double> traMatrix(6+np,6+np,0.0);
+      Matrix<double> tMat(6+numOfParam,6+numOfParam, 0.0);
 
       // state transition matrix
-      for(int i=0; i<3; i++)
-          for(int j=0; j<3; j++)
+      for(int i=0; i<3; ++i)
+      {
+          for(int j=0; j<3; ++j)
           {
-              traMatrix(i,j)        =   dr_dr0(i*3+j);
-              traMatrix(i,j+3)      =   dr_dv0(i*3+j);
+              tMat(i+0,j+0)   =   dr_dr0(i*3+j);
+              tMat(i+0,j+3)   =   dr_dv0(i*3+j);
 
-              traMatrix(i+3,j)      =   dv_dr0(i*3+j);
-              traMatrix(i+3,j+3)    =   dv_dv0(i*3+j);
+              tMat(i+3,j+0)   =   dv_dr0(i*3+j);
+              tMat(i+3,j+3)   =   dv_dv0(i*3+j);
           }
-
-      // sensitivity matrix
-      for(int i=0; i<3; i++)
-          for(int j=0; j<np; j++)
-          {
-              traMatrix(i,j+6)      =   dr_dp0(i*np+j);
-
-              traMatrix(i+3,j+6)    =   dv_dp0(i*np+j);
-          }
-
-      // I
-      for(int i=6; i<6+np; i++)
-      {  
-          traMatrix(i,i) = 1.0;
       }
 
-      return traMatrix;
+      // sensitivity matrix
+      for(int i=0; i<3; ++i)
+      {
+          for(int j=0; j<numOfParam; ++j)
+          {
+              tMat(i+0,j+6)   =   dr_dp0(i*numOfParam+j);
+
+              tMat(i+3,j+6)   =   dv_dp0(i*numOfParam+j);
+          }
+      }
+
+      // identity part
+      for(int i=6; i<6+numOfParam; ++i)
+      {  
+          tMat(i,i) = 1.0;
+      }
+
+      return tMat;
 
    }  // End of method 'Spacecraft::getTransitionMatrix()'
 
 
-   // Set transition matrix
-   void Spacecraft::setTransitionMatrix(const Matrix<double>& traMatrix)
-   {
-      // check the size of tranMatrix !!!
-
-      /* Transition Matrix
-               |                          |
-               | dr_dr0   dr_dv0   dr_dp0 |
-               |                          |
-      tra   =  | dv_dr0   dv_dv0   dv_dp0 |
-               |                          |
-               | 0        0        I      |
-               |                          |
-      */
-
-      // size
-      const int np = traMatrix.rows()-6;
-      p.resize(np,0.0);
-      dr_dp0.resize(3*np,0.0);
-      dv_dp0.resize(3*np,0.0);
-
-      // state transition matrix
-      for(int i=0; i<3; i++)
-          for(int j=0; j<3; j++)
-          {
-              dr_dr0(i*3+j) = traMatrix(i,j);
-              dr_dv0(i*3+j) = traMatrix(i,j+3);
-
-              dv_dr0(i*3+j) = traMatrix(i+3,j);
-              dv_dv0(i*3+j) = traMatrix(i+3,j+3);
-          }
-
-      // sensitivity matrix
-      for(int i=0; i<3; i++)
-          for(int j=0; j<np; j++)
-          {
-              dr_dp0(i*np+j) = traMatrix(i,j+6);
-
-              dv_dp0(i*np+j) = traMatrix(i+3,j+6);
-          }
-
-   }  // End of method 'Spacecraft::setTransitionMatrix()'
-
-
-   // Get state transition matrix 6*6
+      // Get state transition matrix
    Matrix<double> Spacecraft::getStateTransitionMatrix() const
    {
-      /* State Transition Matrix
-               |                  |
-               | dr_dr0   dr_dv0  |
-      phi   =  |                  |
-               | dv_dr0   dv_dv0  |
-               |                  |
-      */
+      ////////////// State Transition Matrix //////////////
+      //                                                 //
+      //             |                  |                //
+      //             | dr_dr0   dr_dv0  |                //
+      //    stMat =  |                  |                //
+      //             | dv_dr0   dv_dv0  |                //
+      //             |                  |                //
+      //                                                 //
+      /////////////////////////////////////////////////////
 
-      Matrix<double> phiMatrix(6,6,0.0);
+      Matrix<double> stMat(6,6,0.0);
 
       // state transition matrix
-      for(int i=0; i<3; i++)
-          for(int j=0; j<3; j++)
+      for(int i=0; i<3; ++i)
+      {
+          for(int j=0; j<3; ++j)
           {
-              phiMatrix(i,j)      =   dr_dr0(i*3+j);
-              phiMatrix(i,j+3)    =   dr_dv0(i*3+j);
+              stMat(i+0,j+0)  =  dr_dr0(i*3+j);
+              stMat(i+0,j+3)  =  dr_dv0(i*3+j);
 
-              phiMatrix(i+3,j)    =   dv_dr0(i*3+j);
-              phiMatrix(i+3,j+3)  =   dv_dv0(i*3+j);
+              stMat(i+3,j+0)  =  dv_dr0(i*3+j);
+              stMat(i+3,j+3)  =  dv_dv0(i*3+j);
           }
+      }
 
-      return phiMatrix;
+      return stMat;
 
    }  // End of method 'Spacecraft::getStateTransitionMatrix()'
 
 
-   // Get sensitivity matrix 6*np
+   // Get sensitivity matrix
    Matrix<double> Spacecraft::getSensitivityMatrix() const
    {
-      /* Sensitivity Matrix
-          |        |
-          | dr_dp0 |
-      s = |        |
-          | dv_dp0 |
-          |        |
-      */
+      ////////// Sensitivity Matrix //////////////
+      //                                        //
+      //                |        |              //
+      //                | dr_dp0 |              //
+      //       sMat  =  |        |              //
+      //                | dv_dp0 |              //
+      //                |        |              //
+      //                                        //
+      ////////////////////////////////////////////
 
-      // size
-      const int np = p.size();
-      Matrix<double> senMatrix(6,np,0.0);
+      Matrix<double> sMat(6,numOfParam, 0.0);
 
       // sensitivity matrix
-      for(int i=0; i<3; i++)
-          for(int j=0; j<np; j++)
+      for(int i=0; i<3; ++i)
+      {
+          for(int j=0; j<numOfParam; ++j)
           {
-              senMatrix(i,j)      =   dr_dp0(i*np+j);
-
-              senMatrix(i+3,j)    =   dv_dp0(i*np+j);
+              sMat(i+0,j)  =  dr_dp0(i*numOfParam+j);
+              sMat(i+3,j)  =  dv_dp0(i*numOfParam+j);
           }
+      }
 
-      return senMatrix;
+      return sMat;
 
    }  // End of method 'Spacecraft::getSensitivityMatrix()'
 
@@ -340,7 +282,7 @@ namespace gpstk
                         const gpstk::Spacecraft& sc )
    {
        s << sc.getSatID() << ' ' << CivilTime(sc.getCurrentTime()) << ' '
-         << sc.getBlock() << ' ' << sc.getMass();
+         << sc.getBlockType() << ' ' << sc.getMass();
 
        return s;
 

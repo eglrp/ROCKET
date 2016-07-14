@@ -24,7 +24,7 @@
 
 /**
  * @file GNSSOrbit.hpp
- * This Class handles GNSS orbit.
+ * Class to do GNSS Orbit configuration.
  */
 
 #ifndef GNSSORBIT_HPP
@@ -50,7 +50,7 @@ namespace gpstk
       //@{
 
   
-      /** This Class handles GNSS orbit.
+      /** Class to do GNSS Orbit configuration.
        * 
        */
    class GNSSOrbit : public EquationOfMotion

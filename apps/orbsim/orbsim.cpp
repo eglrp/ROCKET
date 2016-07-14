@@ -146,7 +146,7 @@ Vector<double> OrbitEOM::getDerivatives(const double& t, const Vector<double>& y
    Vector<double> a(3,0.0);
 
    egm.doCompute(utc, eb, sc);
-   a = egm.getAccel();
+   a = egm.getAcceleration();
 
    // Current velocity and acceleration
    Vector<double> dy(6,0.0);

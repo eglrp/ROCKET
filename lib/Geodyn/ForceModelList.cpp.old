@@ -37,7 +37,7 @@
 
 /**
 * @file ForceModelList.cpp
-* ForceModelList is a countainer for force models.
+* Class to do Force Model configuration.
 */
 
 #include "ForceModelList.hpp"
@@ -58,6 +58,7 @@ namespace gpstk
       a.resize(3,0.0);
       da_dr.resize(3,3,0.0); da_dv.resize(3,3,0.0); da_dp.resize(3,np,0.0);
 
+/*
       da_dCd.resize(3,0.0);
       da_dCr.resize(3,0.0);
 
@@ -68,6 +69,7 @@ namespace gpstk
       da_dB0.resize(3,0.0); da_dBc.resize(3,0.0); da_dBs.resize(3,0.0);
 
       da_dar.resize(3,0.0); da_dat.resize(3,0.0); da_dan.resize(3,0.0);
+*/
 
       for(list<ForceModel*>::iterator it = fmList.begin();
           it != fmList.end();
@@ -79,7 +81,7 @@ namespace gpstk
           da_dr   += (*it)->partialR();
           da_dv   += (*it)->partialV();
           da_dp   += (*it)->partialP();
-
+/*
           da_dCd  += (*it)->partialCd();
           da_dCr  += (*it)->partialCr();
 
@@ -100,6 +102,7 @@ namespace gpstk
           da_dar  += (*it)->partialAr();
           da_dat  += (*it)->partialAt();
           da_dan  += (*it)->partialAn();
+*/
       }
       
       // declare a counter

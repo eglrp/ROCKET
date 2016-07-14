@@ -37,31 +37,30 @@
 
 /**
 * @file ForceModelList.hpp
-* ForceModelList is a countainer for force models.
+* Class to do Force Model configuration.
 */
 
 #ifndef GPSTK_FORCE_MODEL_LIST_HPP
 #define GPSTK_FORCE_MODEL_LIST_HPP
 
-#include "ForceModel.hpp"
-
 #include <list>
 #include <set>
+
+#include "ForceModel.hpp"
+
 
 namespace gpstk
 {
       /** @addtogroup GeoDynamics */
       //@{
       
-      /**
-       * ForceModelList is a countainer for force models. It allows the simulation to encapsulate
-       * a number of different force models and obtain their combined effect on a spacecraft. 
+      /** Class to do Force Model configuration.
        */
    class ForceModelList : public ForceModel
    {
    public:
 
-         /// Default constructor
+         /// Constructor
       ForceModelList()
       {
           clear();
@@ -71,25 +70,25 @@ namespace gpstk
       virtual ~ForceModelList() {}
 
          /// Clear the ForceModelList
-      void clear()
+      inline void clear()
       {
           fmList.clear();
 //          fmtSet.clear();
       }
-      
+
 
          /**
          * Add a generic force to the list
          * @param fm    Object which implements the ForceModel interface
          */
-      void addForce(ForceModel* fm)
+      inline void addForce(ForceModel* fm)
       { fmList.push_back(fm); }
 
          /**
          * Remove a generic force to the list
          * @param fm    Object which implements the ForceModel interface
          */
-      void removeForce(ForceModel* fm)
+      inline void removeForce(ForceModel* fm)
       { fmList.remove(fm); }
 
 
@@ -98,26 +97,26 @@ namespace gpstk
 
 
          /// Get force model type
-      std::set<ForceModel::ForceModelType> getForceModelType()
+      inline std::set<ForceModel::ForceModelType> getForceModelType() const
       { return fmtSet; }
 
          /// Set force model type
       void setForceModelType(std::set<ForceModel::ForceModelType> fmt);
 
 
-         /// Get force model
-      std::list<ForceModel*> getForceModel()
+         /// Get force model list
+      inline std::list<ForceModel*> getForceModel() const
       { return fmList; }
 
-         /// Set force model
+         /// Set force model list
       void setForceModel(std::list<ForceModel*> fm);
 
          /// Return the force model name
-      virtual std::string forceModelName() const
+      inline virtual std::string forceModelName() const
       { return "ForceModelList"; };
 
          /// Return the force model index
-      virtual int forceModelIndex() const
+      inline virtual int forceModelIndex() const
       { return FMI_LIST; }
 
          /// Show the existing force model

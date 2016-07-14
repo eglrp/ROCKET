@@ -49,15 +49,13 @@ namespace gpstk
          /// Default constructor
       MoonGravitation()
          : pSolSys(NULL),
-           pRefSys(NULL),
-           isPrepared(false)
+           pRefSys(NULL)
       {}
 
 
          /// Constructor
       MoonGravitation(SolarSystem&     sol,
                       ReferenceSystem& ref)
-         : isPrepared(false)
       {
          pSolSys = &sol;
          pRefSys = &ref;
@@ -121,11 +119,6 @@ namespace gpstk
 
          /// Reference System
       ReferenceSystem* pRefSys;
-
-         /// Is Prepared ?
-         ///
-         /// The check of data has not been implemented yet !
-      bool isPrepared;
 
    }; // End of class 'MoonGravitation'
 
