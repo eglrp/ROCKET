@@ -383,10 +383,10 @@ namespace gpstk
          double ctf = std::cos(theta_f);
 
          // corrections
-//         CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
-//         CS(id21, 1) += (Argu_C21[i][0]*ctf + Argu_C21[i][1]*stf)*1e-12;
-         CS(id21, 0) += (Argu_C21[i][0]*stf)*1e-12;
-         CS(id21, 1) += (Argu_C21[i][0]*ctf)*1e-12;
+         CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
+         CS(id21, 1) += (Argu_C21[i][0]*ctf + Argu_C21[i][1]*stf)*1e-12;
+//         CS(id21, 0) += (Argu_C21[i][0]*stf)*1e-12;
+//         CS(id21, 1) += (Argu_C21[i][0]*ctf)*1e-12;
       }
 
 
