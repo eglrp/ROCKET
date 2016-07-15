@@ -62,6 +62,7 @@ namespace gpstk
       const double yp2[2] = { 358.891, -0.6287 };
 
       // mean pole, unit: arcsec
+      // see IERS Conventions 2010, equation 7.25
       double xpm(0.0), ypm(0.0);
       
       if(MJD_UTC < 55197.0)   // until 2010.0
@@ -81,6 +82,7 @@ namespace gpstk
       yp = pRefSys->getYPole(utc);
 
       // difference of real and mean pole, unit: arcsec
+      // see IERS Conventions 2010, equation 7.24
       double m1(0.0), m2(0.0);
       m1 = +(xp - xpm);
       m2 = -(yp - ypm);
@@ -90,8 +92,8 @@ namespace gpstk
 
       // solid earth pole tide
       // see IERS Conventions 2010, section 6.4
-      CS(id21, 0) += -1.333e-9 * (m1 - 0.0115*m2);
-      CS(id21, 1) += -1.333e-9 * (m2 + 0.0115*m1);
+      CS(id21, 0) += -1.333e-9 * (m1 + 0.0115*m2);
+      CS(id21, 1) += -1.333e-9 * (m2 - 0.0115*m1);
 
       // ocean pole tide
       // see IERS Conventions 2010, section 6.5
