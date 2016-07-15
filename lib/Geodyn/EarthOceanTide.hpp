@@ -76,7 +76,7 @@ namespace gpstk
 
    public:
          /// Default constructor
-      EarthOceanTide(int n=8, int m=8)
+      EarthOceanTide(int n=4, int m=4)
          : desiredDegree(n),
            desiredOrder(m),
            pRefSys(NULL)

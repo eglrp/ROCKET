@@ -365,10 +365,14 @@ namespace gpstk
          CS(id20, 0) += (Argu_C20[i][0]*ctf - Argu_C20[i][1]*stf)*1e-12;
       }
 
+
+
       // C21, S21
       // see IERS Conventions 2010, Equation 6.8b
       for(int i=0; i<48; ++i)
       {
+//         if(std::abs(Argu_C21[i][0]) < 5.0) continue;
+
          // theta_f
          double theta_f = 1*(GMST+PI) - (Argu_C21[i][2]*FNUT[0]
                           + Argu_C21[i][3]*FNUT[1] + Argu_C21[i][4]*FNUT[2]
@@ -379,9 +383,45 @@ namespace gpstk
          double ctf = std::cos(theta_f);
 
          // corrections
-         CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
-         CS(id21, 1) += (Argu_C21[i][0]*ctf + Argu_C21[i][1]*stf)*1e-12;
+//         CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
+//         CS(id21, 1) += (Argu_C21[i][0]*ctf + Argu_C21[i][1]*stf)*1e-12;
+         CS(id21, 0) += (Argu_C21[i][0]*stf)*1e-12;
+         CS(id21, 1) += (Argu_C21[i][0]*ctf)*1e-12;
       }
+
+
+
+/*
+      CS(id21, 0) += 470.9e-12 * std::sin(GMST+PI);
+      CS(id21, 1) += 470.9e-12 * std::cos(GMST+PI);
+
+      double ARG;
+
+      ARG = BETA[0] + BETA[1] + BETA[4];
+      CS(id21, 0) += 68.1e-12 * std::sin(ARG);
+      CS(id21, 1) += 68.1e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1] - 2*BETA[2];
+      CS(id21, 0) += -43.4e-12 * std::sin(ARG);
+      CS(id21, 1) += -43.4e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1] + BETA[2] - BETA[5];
+      CS(id21, 0) += -20.6e-12 * std::sin(ARG);
+      CS(id21, 1) += -20.6e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1] - BETA[4];
+      CS(id21, 0) += -8.8e-12 * std::sin(ARG);
+      CS(id21, 1) += -8.8e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1];
+      CS(id21, 0) += -6.8e-12 * std::sin(ARG);
+      CS(id21, 1) += -6.8e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1] + 2*BETA[2];
+      CS(id21, 0) += -5.0e-12 * std::sin(ARG);
+      CS(id21, 1) += -5.0e-12 * std::cos(ARG);
+*/
+
 
       // C22, S22
       // see IERS Conventions 2010, Equation 6.8b
@@ -400,6 +440,7 @@ namespace gpstk
          CS(id22, 0) += ( Argu_C22[i][0]*ctf)*1e-12;
          CS(id22, 1) += (-Argu_C22[i][0]*stf)*1e-12;
       }
+
 
 
       /////////////////////////////////////////////////////////////////////////

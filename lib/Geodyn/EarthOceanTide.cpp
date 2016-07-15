@@ -123,7 +123,7 @@ namespace gpstk
          GPSTK_THROW(fme);
       }
 
-   }  // End of method "EarthOceanTide::loadOceanTideFile()"
+   }  // End of method "EarthOceanTide::loadFile()"
 
 
       /* Ocean pole tide to normalized earth potential coefficients
@@ -160,14 +160,17 @@ namespace gpstk
          double ctf = std::cos(theta_f);
 
          // index
-         int id;
-         id = indexTranslator((*itr).l, (*itr).m);
+         int id = indexTranslator((*itr).l, (*itr).m) - 1;
+
+         // coefficients
+         double DelCp = (*itr).DelCp;
+         double DelSp = (*itr).DelSp;
+         double DelCm = (*itr).DelCm;
+         double DelSm = (*itr).DelSm;
 
          // corrections
-         CS(id-1, 0) += ((*itr).DelCp + (*itr).DelCm)*ctf
-                      + ((*itr).DelSp + (*itr).DelSm)*stf;
-         CS(id-1, 1) += ((*itr).DelSp - (*itr).DelSm)*ctf
-                      - ((*itr).DelCp - (*itr).DelCm)*stf;
+         CS(id, 0) += (DelCp + DelCm)*ctf + (DelSp + DelSm)*stf;
+         CS(id, 1) += (DelSp - DelSm)*ctf - (DelCp - DelCm)*stf;
 
       }  // End of 'for()'
       

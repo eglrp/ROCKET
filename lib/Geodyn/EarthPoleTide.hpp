@@ -47,7 +47,9 @@ namespace gpstk
    {
    public:
          /// Default constructor
-      EarthPoleTide() {}
+      EarthPoleTide()
+         : pRefSys(NULL)
+      {}
 
          /// Default destructor
       ~EarthPoleTide() {}

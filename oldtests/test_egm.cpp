@@ -240,29 +240,29 @@ int main(void)
    EarthOceanTide oceanTide;
    oceanTide.setReferenceSystem(refSys);
 
+   int EOTDEG = confReader.getValueAsInt("EOTDEG", "DEFAULT");
+   int EOTORD = confReader.getValueAsInt("EOTORD", "DEFAULT");
+
+   oceanTide.setDesiredDegreeOrder(EOTDEG, EOTORD);
+
+   // EOT File
+   string eotFile = confReader.getValue("EOTFILE", "DEFAULT");
+   try
+   {
+      oceanTide.loadFile(eotFile);
+   }
+   catch(...)
+   {
+      cerr << "EOT File Load Error." << endl;
+
+      return 1;
+   }
+
    bool correctOceanTide = confReader.getValueAsBoolean("OCEANTIDE", "DEFAULT");
 
    if(correctOceanTide)
    {
       egm.setEarthOceanTide(oceanTide);
-
-      int EOTDEG = confReader.getValueAsInt("EOTDEG", "DEFAULT");
-      int EOTORD = confReader.getValueAsInt("EOTORD", "DEFAULT");
-
-      oceanTide.setDesiredDegreeOrder(EOTDEG, EOTORD);
-
-      // EOT File
-      string eotFile = confReader.getValue("EOTFILE", "DEFAULT");
-      try
-      {
-         oceanTide.loadFile(eotFile);
-      }
-      catch(...)
-      {
-         cerr << "EOT File Load Error." << endl;
-
-         return 1;
-      }
    }
 
    // Earth Pole Tide

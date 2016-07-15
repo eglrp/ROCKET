@@ -248,9 +248,13 @@ namespace gpstk
       double C21 = +std::sqrt(3.0)*xpm*C20 - xpm*C22 + ypm*S22;
       double S21 = -std::sqrt(3.0)*ypm*C20 - ypm*C22 - xpm*S22;
 
+//      cout << "EGM08" << endl;
+//      cout << gmData.normalizedCS(id21, 0) << ' '
+//           << gmData.normalizedCS(id21, 1) << endl;
+//      cout << C21 << ' ' << S21 << endl;
+
       gmData.normalizedCS(id21, 0) = C21;   // C21
       gmData.normalizedCS(id21, 1) = S21;   // S21
-
 
       // solid tide
       if(pSolidTide != NULL)
