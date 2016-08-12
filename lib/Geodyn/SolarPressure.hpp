@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2015
 //
@@ -36,7 +36,7 @@
 
 namespace gpstk
 {
-   
+
       /** @addtogroup GeoDynamics */
       //@{
 
@@ -130,7 +130,7 @@ namespace gpstk
          /// Return the force model index
       inline virtual int forceIndex() const
       { return FMI_SolarRadiationPressure; }
-       
+
          /** Compute acceleration (and related partial derivatives) of Solar
           *  Pressure.
           * @param utc     time in UTC

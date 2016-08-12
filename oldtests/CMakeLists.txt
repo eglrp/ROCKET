@@ -12,11 +12,17 @@ target_link_libraries(test_sp3 rocket)
 add_executable(test_iers test_iers.cpp)
 target_link_libraries(test_iers rocket)
 
-#add_executable(test_de405 test_de405.cpp)
-#target_link_libraries(test_de405 rocket)
+add_executable(test_eop test_eop.cpp)
+target_link_libraries(test_eop rocket)
 
-#add_executable(test_oi test_oi.cpp)
-#target_link_libraries(test_oi rocket)
+add_executable(test_rkf test_rkf.cpp)
+target_link_libraries(test_rkf rocket)
+
+add_executable(test_force test_force.cpp)
+target_link_libraries(test_force rocket)
+
+add_executable(test_oi test_oi.cpp)
+target_link_libraries(test_oi rocket)
 
 add_executable(test_jpl test_jpl.cpp)
 target_link_libraries(test_jpl rocket)

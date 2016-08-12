@@ -22,8 +22,6 @@
 
 #include "GNSSOrbit.hpp"
 
-#include "RungeKuttaFehlberg.hpp"
-
 #include "Epoch.hpp"
 
 
@@ -100,7 +98,7 @@ int main(void)
 
 
    // Initial time
-   CivilTime cv0(2015,1,1,0,0,0.0, TimeSystem::GPS);
+   CivilTime cv0(2015,1,1,12,1,15.0, TimeSystem::GPS);
    CommonTime gps0( cv0.convertToCommonTime() );
    CommonTime utc0( refSys.GPS2UTC(gps0) );
 
@@ -144,27 +142,27 @@ int main(void)
    }
 
    // Transform Matrix between ICRS and ITRS
-   Matrix<double> t2c ( refSys.T2CMatrix(utc0)  );
+   Matrix<double> c2t ( refSys.C2TMatrix(utc0)  );
    // Transform Matrix Time Dot between ICRS and ITRS
-   Matrix<double> dt2c( refSys.dT2CMatrix(utc0) );
+   Matrix<double> dc2t( refSys.dC2TMatrix(utc0) );
 
    // r0, v0 in ICRS
    Vector<double> r0_icrs, v0_icrs;
-   r0_icrs = t2c * r0_itrs;
-   v0_icrs = t2c * v0_itrs + dt2c * r0_itrs;
+   r0_icrs = transpose(c2t) * r0_itrs;
+   v0_icrs = transpose(c2t) * v0_itrs + transpose(dc2t) * r0_itrs;
 
    // p0
    int np(9);
    Vector<double> p0(np,0.0);
-   p0(0) = 1.0;   // D0
-   p0(1) = 0.0;   // Dc
-   p0(2) = 0.0;   // Ds
-   p0(3) = 0.0;   // Y0
-   p0(4) = 0.0;   // Yc
-   p0(5) = 0.0;   // Ys
-   p0(6) = 0.0;   // B0
-   p0(7) = 0.0;   // Bc
-   p0(8) = 0.0;   // Bs
+   p0(0) =  0.999989;   // D0
+   p0(1) =  0.015272;   // Dc
+   p0(2) =  0.000216;   // Ds
+   p0(3) = -0.000367;   // Y0
+   p0(4) = -0.000702;   // Yc
+   p0(5) =  0.000985;   // Ys
+   p0(6) = -0.003625;   // B0
+   p0(7) =  0.009091;   // Bc
+   p0(8) = -0.001753;   // Bs
 
 
    // SatData File
@@ -190,7 +188,7 @@ int main(void)
    sc.setMass(satData.getMass(sat,utc0));
    sc.setPosition(r0_icrs);
    sc.setVelocity(v0_icrs);
-   sc.setNumOfParam(np);
+   sc.setNumOfParam(9);
 
    // Earth gravitation
    EGM08GravityModel egm;
@@ -283,6 +281,27 @@ int main(void)
    // Relativity effect
    RelativityEffect re;
 
+   // Earth body
+   EarthBody rb;
+
+   egm.doCompute(utc0, rb, sc);
+   sg.doCompute(utc0, rb, sc);
+   mg.doCompute(utc0, rb, sc);
+   sp.doCompute(utc0, rb, sc);
+   re.doCompute(utc0, rb, sc);
+
+   cout << CivilTime(gps0) << endl;
+
+   cout << fixed << setprecision(12);
+
+   cout << r0_icrs << endl;
+
+   cout << egm.getAcceleration() << endl
+        << sg.getAcceleration() << endl
+        << mg.getAcceleration() << endl
+        << sp.getAcceleration() << endl
+        << re.getAcceleration() << endl;
+
    // GNSS orbit
    GNSSOrbit gnss;
    gnss.setRefEpoch(utc0);
@@ -293,125 +312,13 @@ int main(void)
    gnss.setSolarPressure(sp);
    gnss.setRelativityEffect(re);
 
+   Vector<double> y(sc.getStateVector());
 
-   // RungeKuttaFehlberg integrator
-   RungeKuttaFehlberg rkf;
+   Vector<double> dy = gnss.getDerivatives(75.0, y);
 
-   double stepSize = confReader.getValueAsDouble("STEPSIZE", "DEFAULT");
-   rkf.setStepSize(stepSize);
-
-   double length = confReader.getValueAsDouble("LENGTH", "DEFAULT");
-
-   //
-   double t0(0.0);
-
-   int total(int(length*3600.0/900.0));
-
-//   Matrix<double> b(3,total, 0.0);
-//   Matrix<double> l(3,total, 0.0);
-
-   for(int i=0; i<=total; ++i)
-   {
-      // Current time
-      CommonTime gps = gps0 + t0;
-      CommonTime utc = refSys.GPS2UTC(gps);
-
-      // Transformation matrix
-      Matrix<double>  c2t( refSys.C2TMatrix(utc) );
-
-      // SP3 position
-      Vector<double> r_sp3(3,0.0);
-      try
-      {
-         r_sp3 = transpose(c2t) * sp3Eph.getXvt(sat,gps).x.toVector();
-      }
-      catch(...)
-      {
-         cerr << "Get sp3 position error." << endl;
-         continue;
-      }
-
-      // OI position
-      Vector<double> y(sc.getStateVector());
-
-      // Difference position
-      Vector<double> r_diff(3,0.0);
-      r_diff(0) = y(0) - r_sp3(0);
-      r_diff(1) = y(1) - r_sp3(1);
-      r_diff(2) = y(2) - r_sp3(2);
-
-
-      // Output
-      cout << fixed;
-
-      cout << CivilTime(gps) << endl;
-
-      cout << setprecision(9);
-
-      // dr
-      // (dx, dy, dz)
-      cout << setw(20) << r_diff(0) << ' '
-           << setw(20) << r_diff(1) << ' '
-           << setw(20) << r_diff(2) << endl;
-
-      cout << setprecision(9);
-
-      // dr/dr0
-      // (drx/drx0, drx/dry0, drx/drz0, ...)
-      cout << setw(20) << y( 6) << ' '
-           << setw(20) << y( 7) << ' '
-           << setw(20) << y( 8) << endl
-           << setw(20) << y( 9) << ' '
-           << setw(20) << y(10) << ' '
-           << setw(20) << y(11) << endl
-           << setw(20) << y(12) << ' '
-           << setw(20) << y(13) << ' '
-           << setw(20) << y(14) << endl;
-
-      // dr/dv0
-      // (drx/dvx0, drx/drvy0, drx/drvz0, ...)
-      cout << setw(20) << y(15) << ' '
-           << setw(20) << y(16) << ' '
-           << setw(20) << y(17) << endl
-           << setw(20) << y(18) << ' '
-           << setw(20) << y(19) << ' '
-           << setw(20) << y(20) << endl
-           << setw(20) << y(21) << ' '
-           << setw(20) << y(22) << ' '
-           << setw(20) << y(23) << endl;
-
-      // dr/dp0
-      // (drx/dp0, ..., drx/dp9, ...)
-      for(int j=0; j<3; ++j)
-      {
-          for(int k=0; k<np; ++k)
-          {
-              cout << setw(20) << y(24+j*np+k) << ' ';
-          }
-
-          cout << endl;
-      }
-
-      cout << endl;
-
-
-      // Integration
-      rkf.integrateTo(t0, y, &gnss, t0+900.0);
-
-
-      // Update spacecraft
-      sc.setCurrentTime(utc);
-      sc.setStateVector(y);
-      sc.setBlockType(satData.getBlock(sat,utc));
-      sc.setMass(satData.getMass(sat,utc));
-
-      // Update gnss orbit
-      gnss.setSpacecraft(sc);
-
-//      if(i > 5) break;
-
-   }
-
+   cout << dy(3) << ' '
+        << dy(4) << ' '
+        << dy(5) << endl;
 
    return 0;
 }

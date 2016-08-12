@@ -33,7 +33,7 @@ using namespace gpstk;
 
 
 int main(void)
-{ 
+{
    // Conf File
    ConfDataReader confReader;
 
@@ -50,9 +50,9 @@ int main(void)
 
 
    // EOP File
-   EOPDataStore eopDataStore;
+   EOPDataStore2 eopDataStore;
    string eopFile = confReader.getValue("IERSEOPFILE", "DEFAULT");
-   
+
    try
    {
       eopDataStore.loadIERSFile(eopFile);
@@ -63,7 +63,7 @@ int main(void)
 
       return 1;
    }
-    
+
    // LeapSecond file
    LeapSecStore leapSecStore;
    string lsFile  = confReader.getValue("IERSLSFILE", "DEFAULT");
@@ -148,7 +148,7 @@ int main(void)
 
    // Transform Matrix
    Matrix<double> c2t ( refSys.C2TMatrix(utc)  );
-   
+
    // Transform Matrix Time Dot
    Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
 
@@ -173,7 +173,7 @@ int main(void)
    // SatData File
    SatDataReader satReader;
    string satDataFile = confReader.getValue("SatDataFile", "DEFAULT");
-   
+
    try
    {
       satReader.open(satDataFile);
@@ -281,6 +281,6 @@ int main(void)
    egm.doCompute(utc, eb, sc);
 
    cout << "EGM08: " << egm.getAcceleration() << endl;
-    
+
    return 0;
 }

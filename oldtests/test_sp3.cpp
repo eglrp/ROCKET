@@ -48,7 +48,7 @@ int main(void)
 
 
    // EOP Data
-   EOPDataStore eopDataStore;
+   EOPDataStore2 eopDataStore;
 
    string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
    try
@@ -70,7 +70,7 @@ int main(void)
    {
       leapSecStore.loadFile(lsFile);
    }
-   catch(...) 
+   catch(...)
    {
       cerr << "IERS LeapSecond File Load Error." << endl;
 
@@ -82,22 +82,19 @@ int main(void)
    refSys.setEOPDataStore(eopDataStore);
    refSys.setLeapSecStore(leapSecStore);
 
-   CivilTime ct0(2015,1,1,0,0,0.0, TimeSystem::GPS);
+   CivilTime ct0(2015,1,1,12,0,0.0, TimeSystem::GPS);
    CommonTime gps0( ct0.convertToCommonTime() );
 
    SatID sat(1,SatID::systemGPS);
 
-   ofstream outfile("sp3orbit.txt");
 
-   gps0 += 22.0;
-   Vector<double> ecefPos = sp3Eph.getXvt(sat, gps0).x.toVector();
-
-   double dt = 5.0;
-
-   for(int i=0; i<=60/int(dt); i++)
+   for(int i=0; i<=12*3600/900; i++)
    {
-      CommonTime utc( refSys.GPS2UTC(gps0) );
-      Matrix<double> c2t( refSys.C2TMatrix(utc) );
+      CommonTime gps = gps0 + i*900.0;
+
+      CommonTime utc( refSys.GPS2UTC(gps) );
+
+      Matrix<double>  c2t( refSys.C2TMatrix(utc) );
       Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
 
       Vector<double> sp3Pos(3,0.0), sp3Vel(3,0.0);
@@ -105,20 +102,17 @@ int main(void)
 
       try
       {
-         sp3Pos = sp3Eph.getXvt(sat, gps0).x.toVector();
-         sp3Vel = sp3Eph.getXvt(sat, gps0).v.toVector();
+         sp3Pos = sp3Eph.getXvt(sat, gps).x.toVector();
+         sp3Vel = sp3Eph.getXvt(sat, gps).v.toVector();
 
          eciPos = transpose(c2t) * sp3Pos;
          eciVel = transpose(c2t) * sp3Vel + transpose(dc2t) * sp3Pos;
 
-//         if(yds.sod>=3600 && yds.sod<=7200)
-//         {
-            outfile << fixed << setprecision(3);
-            outfile << setw(9)  << gps0.getSecondOfDay()
-                    << setw(12) << eciPos
-//                    << setw(12) << eciVel
-                    << endl;
-//         }
+         cout << fixed << setprecision(3);
+         cout << setw( 9)  << gps.getSecondOfDay()
+              << setw(12) << eciPos
+//            << setw(12) << eciVel
+              << endl;
       }
       catch(...)
       {
@@ -126,11 +120,7 @@ int main(void)
 //         continue;
       }
 
-      gps0 += dt;
-
    }
-
-   outfile.close();
 
 	return 0;
 }

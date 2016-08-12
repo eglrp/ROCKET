@@ -34,7 +34,7 @@ int main(void)
    }
 
    // EOP Data
-   EOPDataStore eopDataStore;
+   EOPDataStore2 eopDataStore;
 
    string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
 

@@ -179,6 +179,21 @@ namespace gpstk
       }
 
 
+         /// Get partials of acceleration to EGM coefficients, da_dEGM
+      inline virtual Matrix<double> dA_dEGM() const
+      {
+         return da_dEGM;
+      }
+
+
+         /// Get partials of acceleration to SRP coefficients, da_dSRP
+      inline virtual Matrix<double> dA_dSRP() const
+      {
+         return da_dSRP;
+      }
+
+
+
          /// Get coefficient matrix of equation of variation
       Matrix<double> getCoeffMatOfEOV() const
       {

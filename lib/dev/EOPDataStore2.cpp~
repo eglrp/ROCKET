@@ -1,0 +1,422 @@
+#pragma ident "$Id$"
+
+/**
+* @file EOPDataStor2.cpp
+*
+*/
+
+//============================================================================
+//
+//  This file is part of GPSTk, the GPS Toolkit.
+//
+//  The GPSTk is free software; you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published
+//  by the Free Software Foundation; either version 2.1 of the License, or
+//  any later version.
+//
+//  The GPSTk is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with GPSTk; if not, write to the Free Software Foundation,
+//  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
+//
+//  Kaifa Kuang - Wuhan University . 2016
+//
+//============================================================================
+
+
+#include "EOPDataStore2.hpp"
+#include "MiscMath.hpp"
+#include <fstream>
+#include "MJD.hpp"
+#include "Exception.hpp"
+
+
+using namespace std;
+
+
+namespace gpstk
+{
+    // Add to the store directly
+    void EOPDataStore2::addEOPData(const CommonTime& utc,
+                                   const EOPDataStore2::EOPData& data)
+        throw(InvalidRequest)
+    {
+        if(!(utc.getTimeSystem()==TimeSystem::UTC)) throw Exception();
+
+        allData[utc] = data;
+
+    }  // End of method 'EOPDataStore2::addEOPData()'
+
+
+
+    // Get the data at the given epoch
+    EOPDataStore2::EOPData EOPDataStore2::getEOPData(const CommonTime& utc) const
+        throw(InvalidRequest)
+    {
+        if(!(utc.getTimeSystem()==TimeSystem::UTC)) throw Exception();
+
+        if( (t < initialTime) || (t > finalTime) )
+        {
+            InvalidRequest ire(string("Time tag (")
+                + t.asString()
+                + string(") not found within the EOPData, please check it!"));
+
+            GPSTK_THROW(ire);
+        }
+
+        // first, try to get it from the original EOP data map
+        EOPDataMap::const_iterator it = allData.find(t);
+        if(it != allData.end())
+        {
+            return it->second;
+        }
+
+        // second, try to get it from the interpolated EOP data map
+        if(interpMethod == InterpolationMethod::Lagrange)
+        {
+            const int half = 5;
+
+            it = allData.lower_bound(t);
+
+            EOPDataMap::const_iterator itb(it), ite(it);
+
+            if(int(allData.size()) > 2*half)
+            {
+                int ileft = half;
+                for(int i=0; i<half; ++i)
+                {
+                    if(itb != allData.begin()) break;
+                    itb--;
+                    ileft--;
+                }
+
+                int iright = half - 1 + left;
+                for(int i=0; i<(half-1+left); ++i)
+                {
+                    ite++;
+                    if(ite == allData.end())
+                    {
+                        ite--;
+                        break;
+                    }
+                    iright--;
+                }
+
+                int ileft2 = iright;
+                for(int i=0; i<right; ++i)
+                {
+                    if(itb == allData.begin()) break;
+                    itb--;
+                    ileft2--;
+                }
+
+            }
+            else
+            {
+                itb = allData.begin();
+                ite = allData.end();
+                ite--;
+            }
+
+            const int N = 6;
+
+            std::vector<double> times;
+            std::vector< std::vector<double> > datas(N);
+
+            EOPDataMap::const_iterator itrEnd = ite;
+            itrEnd++;
+            for(EOPDataMap::const_iterator itr=itb; itr!=itrEnd; ++itr)
+            {
+                CommonTime time = itr->first;
+
+                EOPDataStore2::EOPData data = itr->second;
+
+                std::vector<double> vd;
+                vd.push_back(data.xp);
+                vd.push_back(data.yp);
+                vd.push_back(data.UT1mUTC);
+                vd.push_back(data.LOD);
+                vd.push_back(data.dX);
+                vd.push_back(data.dY);
+
+                times.push_back(itr->first - itb->first);
+
+                for(int i=0; i<N; ++i)
+                {
+                    datas[i].push_back(vd[i]);
+                }
+            }
+
+            std::vector<double> vd(N,0.0);
+
+            double dt = t - its->first;
+
+            for(int i=0; i<N; ++i)
+            {
+                vd[i] = SimpleLagrangeInterpolation(times,datas[i],dt);
+            }
+
+            EOPData eopData;
+            eopData.xp = vd[0];
+            eopData.yp = vd[1];
+            eopData.UT1mUTC = vd[2];
+            eopData.LOD = vd[3];
+            eopData.dX = vd[4];
+            eopData.dY = vd[5];
+
+            return eopData;
+
+        }
+
+    }  // End of method 'EOPDataStore2::getEOPData()'
+
+
+
+    // Add EOPs to the store via a flat IERS file.
+    void EOPDataStore2::loadIERSFile(std::string iersFile)
+        throw(FileMissingException)
+    {
+        ifstream inpf(iersFile.c_str());
+        if(!inpf)
+        {
+            FileMissingException fme("Could not open IERS file " + iersFile);
+            GPSTK_THROW(fme);
+        }
+
+        allData.clear();
+
+        bool ok (true);
+        while(!inpf.eof() && inpf.good())
+        {
+            string line;
+            getline(inpf,line);
+            StringUtils::stripTrailing(line,'\r');
+            if(inpf.eof()) break;
+
+            // line length is actually 185
+            if(inpf.bad() || line.size() < 70) { ok = false; break; }
+
+
+            // from Bulletin A
+            double mjd = StringUtils::asDouble(line.substr(7,8));
+
+            double xp = StringUtils::asDouble(line.substr(18,9));          // arcsec
+            double err_xp = StringUtils::asDouble(line.substr(28,8));      // arcsec
+
+            double yp = StringUtils::asDouble(line.substr(37,9));          // arcsec
+            double err_yp = StringUtils::asDouble(line.substr(47,8));      // arcsec
+
+            double UT1mUTC = StringUtils::asDouble(line.substr(58,10));    // seconds
+            double err_UT1mUTC = StringUtils::asDouble(line.substr(69,9)); // seconds
+
+            double LOD = StringUtils::asDouble(line.substr(80,6));         // seconds
+            double err_LOD = StringUtils::asDouble(line.substr(87,6));     // seconds
+
+            double dX = StringUtils::asDouble(line.substr(100,6))*1e-3;    // milliarcsec->arcsec
+            double err_dX = StringUtils::asDouble(line.substr(110,5))*1e-3;// milliarcsec->arcsec
+
+            double dY = StringUtils::asDouble(line.substr(119,6))*1e-3;    // milliarcsec->arcsec
+            double err_dY = StringUtils::asDouble(line.substr(129,5))*1e-3;// milliarcsec->arcsec
+
+
+            // from Bulletin B
+            if(line.size()>=134)
+            {
+                xp = StringUtils::asDouble(line.substr(135,9));        // arcsec
+                yp = StringUtils::asDouble(line.substr(145,9));        // arcsec
+                UT1mUTC = StringUtils::asDouble(line.substr(155,10));  // seconds
+                dX = StringUtils::asDouble(line.substr(169,6))*1e-3;   // milliarcsec->arcsec
+                dY = StringUtils::asDouble(line.substr(179,6))*1e-3;   // milliarcsec->arcsec
+            }
+
+            CommonTime utc( (MJD(mjd,TimeSystem::UTC)).convertToCommonTime() );
+
+            EOPDataStor2::EOPData data;
+            data.xp = xp;               data.err_xp = err_xp;
+            data.yp = yp;               data.err_yp = err_yp;
+            data.UT1mUTC = UT1mUTC;     data.err_UT1mUTC = err_UT1mUTC;
+            data.LOD = LOD;             data.err_LOD = err_LOD;
+            data.dX = dX;               data.err_dX = err_dX;
+            data.dY = dY;               data.err_dY = err_dY;
+
+            addEOPData(MJD(utc,data);
+        }
+
+        inpf.close();
+
+        if(!ok)
+        {
+            FileMissingException fme("IERS File " + iersFile
+                                + " is corrupted or wrong format");
+            GPSTK_THROW(fme);
+        }
+    }
+
+
+    // Add EOPs to the store via a flat IGS file
+    void EOPDataStore2::loadIGSFile(std::string igsFile)
+        throw(FileMissingException)
+    {
+        ifstream inpf(igsFile.c_str());
+        if(!inpf)
+        {
+            FileMissingException fme("Could not open IERS file " + igsFile);
+            GPSTK_THROW(fme);
+        }
+
+        allData.clear();
+
+        // first we skip the header section
+        // skip the header
+        string temp;
+        getline(inpf,temp);
+        getline(inpf,temp);
+        getline(inpf,temp);
+        getline(inpf,temp);
+
+        bool ok (true);
+        while(!inpf.eof() && inpf.good())
+        {
+            string line;
+            getline(inpf,line);
+            StringUtils::stripTrailing(line,'\r');
+            if(inpf.eof()) break;
+
+            // line length is actually 185
+            if(inpf.bad() || line.size() < 120) { ok = false; break; }
+
+            istringstream istrm(line);
+
+            double mjd(0.0);
+            double xp(0.0),err_xp(0.0), yp(0.0),err_yp(0.0);
+            double UT1mUTC(0.0),err_UT1mUTC(0.0), LOD(0.0),err_LOD(0.0);
+            double dX(0.0),err_dX(0.0), dY(0.0),err_dY(0.0);
+
+            istrm >> mjd
+                  >> xp >> yp >> UT1mUTC >> LOD
+                  >> err_xp >> err_yp >> err_UT1mUTC >> err_LOD;
+
+            // since EOP data from IGS doesn't contain precession and nutation
+            // corrections the following code doesn't need.
+
+            xp *= 1e-6;        // convert to arcsec
+            yp *= 1e-6;        // convert to arcsec
+            UT1mUTC *= 1e-7;   // convert to seconds
+            LOD *= 1e-7;       // convert to seconds/day
+
+            CommonTime utc( (MJD(mjd,TimeSystem::UTC)).convertToCommonTime() );
+
+            EOPDataStor2::EOPData data;
+            data.xp = xp;               data.err_xp = err_xp;
+            data.yp = yp;               data.err_yp = err_yp;
+            data.UT1mUTC = UT1mUTC;     data.err_UT1mUTC = err_UT1mUTC;
+            data.LOD = LOD;             data.err_LOD = err_LOD;
+            data.dX = dX;               data.err_dX = err_dX;
+            data.dY = dY;               data.err_dY = err_dY;
+
+            addEOPData(utc,data);
+        }
+
+        inpf.close();
+
+        if(!ok)
+        {
+            FileMissingException fme("IGS File " + igsFile
+                                + " is corrupted or wrong format");
+            GPSTK_THROW(fme);
+        }
+    }
+
+    // Add EOPs to the store via a flat STK file.
+    void EOPDataStore::loadSTKFile(std::string stkFile)
+        throw(FileMissingException)
+    {
+        std::ifstream fstk(stkFile.c_str());
+
+        int  numData = 0;
+        bool bData = false;
+
+        std::string buf;
+        while(getline(fstk,buf))
+        {
+            if(buf.substr(0,19) == "NUM_OBSERVED_POINTS")
+            {
+                numData = StringUtils::asInt(buf.substr(20));
+                continue;
+            }
+            else if(buf.substr(0,14) == "BEGIN OBSERVED")
+            {
+                bData = true;
+                continue;
+            }
+            else if(buf.substr(0,13) == "END PREDICTED")
+            {
+                bData = false;
+                break;
+            }
+            if(!StringUtils::isDigitString(buf.substr(0,4)))
+            {
+                // for observed data and predicted data
+                continue;
+            }
+
+            if(bData)
+            {
+                // # FORMAT(I4,I3,I3,I6,2F10.6,2F11.7,4F10.6,I4)
+                //int year = StringUtils::asInt(buf.substr(0,4));
+                //int month = StringUtils::asInt(buf.substr(4,3));
+                //int day = StringUtils::asInt(buf.substr(7,3));
+                double mjd = StringUtils::asInt(buf.substr(10,6));
+
+                double xp = StringUtils::asDouble(buf.substr(16,10));
+                double err_xp = 0.0;
+                double yp = StringUtils::asDouble(buf.substr(26,10));
+                double err_yp = 0.0;
+                double UT1mUTC = StringUtils::asDouble(buf.substr(36,11));
+                double err_UT1mUTC = 0.0;
+                double LOD = StringUtils::asDouble(buf.substr(47,11));
+                double err_LOD = 0.0;
+//                double dPsi = StringUtils::asDouble(buf.substr(58,10));
+//                double dEps = StringUtils::asDouble(buf.substr(68,10));
+                double dX = StringUtils::asDouble(buf.substr(78,10));
+                double err_dX = 0.0;
+                double dY = StringUtils::asDouble(buf.substr(88,10));
+                double err_dY = 0.0;
+                int UTCmTAI = StringUtils::asDouble(buf.substr(98,4));
+
+                CommonTime utc( (MJD(mjd,TimeSystem::UTC)).convertToCommonTime() );
+
+                EOPDataStor2::EOPData data;
+                data.xp = xp;               data.err_xp = err_xp;
+                data.yp = yp;               data.err_yp = err_yp;
+                data.UT1mUTC = UT1mUTC;     data.err_UT1mUTC = err_UT1mUTC;
+                data.LOD = LOD;             data.err_LOD = err_LOD;
+                data.dX = dX;               data.err_dX = err_dX;
+                data.dY = dY;               data.err_dY = err_dY;
+
+                addEOPData(utc,data);
+            }
+
+        }  // End of 'while'
+
+        fstk.close();
+    }
+
+    ostream& operator<<(std::ostream& os, const EOPDataStore2::EOPData& d)
+    {
+        os << " " << setw(18) << setprecision(8) << d.xp
+           << " " << setw(18) << setprecision(8) << d.yp
+           << " " << setw(18) << setprecision(8) << d.UT1mUTC
+           << " " << setw(18) << setprecision(8) << d.LOD
+           << " " << setw(18) << setprecision(8) << d.dX
+           << " " << setw(18) << setprecision(8) << d.dY;
+
+        return os;
+   }
+
+}  // End of namespace 'gpstk'
+

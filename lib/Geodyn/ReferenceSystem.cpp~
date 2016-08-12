@@ -41,182 +41,164 @@ using namespace std;
 namespace gpstk
 {
 
-    /// Method from EOPDataStore2
+      /// Method from EOPDataStore     
 
-    /// Get the x pole displacement parameter, in arcseconds.
-    double ReferenceSystem::getXPole(const CommonTime& UTC) const
-        throw(InvalidRequest)
-    {
-        double xpole;
+      /// Get the x pole displacement parameter, in arcseconds.
+   double ReferenceSystem::getXPole(const CommonTime& UTC) const
+      throw (InvalidRequest)
+   {
+      double xpole;
 
-        try
-        {
-            // Get the x pole from EOPDataStore2
-            if( pEopStore != NULL )
-            {
-                xpole = (*pEopStore).getXPole( UTC );
-            }
-        }
-        catch(InvalidRequest& ire)
-        {
-            GPSTK_RETHROW(ire);
-        }
+      try
+      {
+            // Get the x pole from EOPDataStore
+         if( pEopStore != NULL )
+         {
+//            xpole = (*pEopStore).getXPole( UTC );
+            xpole = (*pEopStore).getEOPData( UTC ).xp;
+         }
 
-        // return
-        return xpole;
+      }
+      catch(InvalidRequest& ire) 
+      {
+         GPSTK_RETHROW(ire);
+      }
 
-    }   // End of method 'ReferenceSystem::getXPole()'
+         // return
+      return xpole;
 
-
-    /// Get the y pole displacement parameter, in arcseconds.
-    double ReferenceSystem::getYPole(const CommonTime& UTC) const
-        throw(InvalidRequest)
-    {
-        double ypole;
-
-        try
-        {
-            // Get the x pole from EOPDataStore2
-            if( pEopStore != NULL )
-            {
-                ypole = (*pEopStore).getYPole( UTC );
-            }
-        }
-        catch(InvalidRequest& ire)
-        {
-            GPSTK_RETHROW(ire);
-        }
-
-        // return
-        return ypole;
-
-    }   // End of method 'ReferenceSystem::getYPole()'
+   } // End of method 'ReferenceSystem::getXPole()'
 
 
-    /// Get the value of UT1mUTC, in seconds.
-    double ReferenceSystem::getUT1mUTC(const CommonTime& UTC) const
-        throw(InvalidRequest)
-    {
-        double UT1mUTC;
+      /// Get the y pole displacement parameter, in arcseconds.
+   double ReferenceSystem::getYPole(const CommonTime& UTC) const
+      throw (InvalidRequest)
+   {
+      double ypole;
 
-    try
-    {
-        // Get the UT1mUTC from EOPDataStore
-        if( pEopStore != NULL )
-        {
-            UT1mUTC = (*pEopStore).getUT1mUTC( UTC );
-        }
-    }
-    catch(InvalidRequest& ire)
-    {
-        GPSTK_RETHROW(ire);
-    }
+      try
+      {
+            // Get the x pole from EOPDataStore
+         if( pEopStore != NULL )
+         {
+//            ypole = (*pEopStore).getYPole( UTC );
+            ypole = (*pEopStore).getEOPData( UTC ).yp;
+         }
 
-        // return
-        return UT1mUTC;
+      }
+      catch(InvalidRequest& ire) 
+      {
+         GPSTK_RETHROW(ire);
+      }
 
-    } // End of method 'ReferenceSystem::getUT1mUTC()'
+         // return
+      return ypole;
+
+   } // End of method 'ReferenceSystem::getYPole()'
 
 
-    // Get the value of LOD, in seconds.
-    double ReferenceSystem::getLOD(const CommonTime& UTC) const
+      /// Get the value of UT1mUTC, in seconds.
+   double ReferenceSystem::getUT1mUTC(const CommonTime& UTC) const
+      throw (InvalidRequest) 
+   {
+      double UT1mUTC;
+
+      try
+      {
+            // Get the UT1mUTC from EOPDataStore
+         if( pEopStore != NULL )
+         {
+//            UT1mUTC = (*pEopStore).getUT1mUTC( UTC );
+            UT1mUTC = (*pEopStore).getEOPData( UTC ).UT1mUTC;
+         }
+
+      }
+      catch(InvalidRequest& ire) 
+      {
+         GPSTK_RETHROW(ire);
+      }
+
+         // return
+      return UT1mUTC;
+
+   } // End of method 'ReferenceSystem::getUT1mUTC()'
+
+
+      /// Get the value of dPsi, in arcseconds.
+   double ReferenceSystem::getDPsi(const CommonTime& UTC) const
        throw(InvalidRequest)
-    {
-        double LOD;
+   {
+       double dPsi;
 
-        try
-        {
-            if( pEopStore != NULL )
-            {
-                LOD = (*pEopStore).getLOD( UTC );
-            }
-        }
-        catch(InvalidRequest& ire)
-        {
-            GPSTK_RETHROW(ire);
-        }
+       try
+       {
+           // Get the dPsi from EOPDataStore
+           if( pEopStore != NULL )
+           {
+               dPsi = (*pEopStore).getEOPData( UTC ).dPsi;
+           }
+       }
+       catch(InvalidRequest& ire) 
+       {
+           GPSTK_RETHROW(ire);
+       }
 
-        // return
-        return LOD;
+       // return
+       return dPsi;
 
-    }   // End of method 'ReferenceSystem::getLOD()'
-
-
-    /// Get the value of dX, in arcseconds.
-    double ReferenceSystem::getDX(const CommonTime& UTC) const
-        throw(InvalidRequest)
-    {
-        double dX;
-
-        try
-        {
-            // Get the dX from EOPDataStore
-            if( pEopStore != NULL )
-            {
-                dX = (*pEopStore).getDX( UTC );
-            }
-        }
-        catch(InvalidRequest& ire)
-        {
-            GPSTK_RETHROW(ire);
-        }
-
-        // return
-        return dX;
-
-   }    // End of method 'ReferenceSystem::getDX()'
+   } // End of method 'ReferenceSystem::getDPsi()'
 
 
-    /// Get the value of dY, in arcseconds.
-    double ReferenceSystem::getDY(const CommonTime& UTC) const
-        throw(InvalidRequest)
-    {
-        double dY;
+      /// Get the value of dEps, in arcseconds.
+   double ReferenceSystem::getDEps(const CommonTime& UTC) const
+       throw(InvalidRequest)
+   {
+       double dEps;
 
-        try
-        {
-            // Get the dY from EOPDataStore
-            if( pEopStore != NULL )
-            {
-                dY = (*pEopStore).getDY( UTC );
-            }
-        }
-        catch(InvalidRequest& ire)
-        {
-            GPSTK_RETHROW(ire);
-        }
+       try
+       {
+           // Get the dEps from EOPDataStore
+           if( pEopStore != NULL )
+           {
+               dEps = (*pEopStore).getEOPData( UTC ).dEps;
+           }
+       }
+       catch(InvalidRequest& ire) 
+       {
+           GPSTK_RETHROW(ire);
+       }
 
-        // return
-        return dY;
+       // return
+       return dEps;
 
-   }    // End of method 'ReferenceSystem::getDY()'
+   } // End of method 'ReferenceSystem::getDEps()'
 
 
-    /// Get the EOP data at the given UTC time.
-    EOPDataStore2::EOPData ReferenceSystem::getEOPData(const CommonTime& UTC) const
-        throw(InvalidRequest)
-    {
-        EOPDataStore2::EOPData eopData;
+      /// Get the EOP data at the given UTC time.
+   EOPDataStore::EOPData ReferenceSystem::getEOPData(const CommonTime& UTC) const
+      throw(InvalidRequest)
+   {
+      EOPDataStore::EOPData eopData;
 
-        try
-        {
+      try
+      {
             // Get the EOP data from EOPDataStore
-            if( pEopStore != NULL )
-            {
-                eopData = (*pEopStore).getEOPData( UTC );
-            }
-        }
-        catch(InvalidRequest& ire)
-        {
-            GPSTK_RETHROW(ire);
-        }
+         if( pEopStore != NULL )
+         {
+            eopData = (*pEopStore).getEOPData( UTC );
+         }
 
-        // return
-        return eopData;
+      }
+      catch(InvalidRequest& ire) 
+      {
+         GPSTK_RETHROW(ire);
+      }
 
-   }    // End of method 'ReferenceSystem::getEOPData()'
+         // return
+      return eopData;
 
-
+   } // End of method 'ReferenceSystem::getEOPData()'
+   
 
       /// Method from LeapSecondStore
 
@@ -336,8 +318,8 @@ namespace gpstk
          //  01-JUL-1993 00:00:00 GPS TIME (- 9s) = 30-JUN-1993 23:59:51 UTC TIME
          //  30-JUN-1993 23:59:59 GPS TIME (- 8s) = 30-JUN-1993 23:59:51 UTC TIME
          //
-         //
-         //  The fix allows the following conversion:
+         //  
+         //  The fix allows the following conversion: 
          //
          //  01-JUL-1993 00:00:10 GPS TIME (- 9s) = 01-JUL-1993 00:00:01 UTC TIME
          //  01-JUL-1993 00:00:09 GPS TIME (- 9s) = 01-JUL-1993 00:00:00 UTC TIME
@@ -352,11 +334,11 @@ namespace gpstk
          //  01-JUL-1993 00:00:00 GPS TIME (- 8s) = 30-JUN-1993 23:59:52 UTC TIME
          //  30-JUN-1993 23:59:59 GPS TIME (- 8s) = 30-JUN-1993 23:59:51 UTC TIME
          //
-         //  \reference Please refer to the subroutine 'gps2utc' in GRACE
+         //  \reference Please refer to the subroutine 'gps2utc' in GRACE 
          //  data format converting software from GFZ.
          //
          ///////////////////////////////////////////////////////////////////
-
+         
          // New leap second
       leapSec = getLeapSec(UTC1);
 
@@ -513,6 +495,534 @@ namespace gpstk
    }  // End of method 'ReferenceSystem::UTC2TT()'
 
 
+      /// Evaluate the effects of zonal Earth tides on the rotation of the Earth.
+      /// IERS Conventions 2010
+   Vector<double>  ReferenceSystem::RG_ZONT2(const CommonTime& TT)
+   { 
+      static const struct {
+         int nl,nlp,nf,nd,nom;    // Luni-Solar argument multipliers
+         double s1, c1;           // sine and cosine of DUT
+         double c2, s2;           // cosine and sine of DLOD
+         double c3, s3;           // cosine and sine of DOMEGA
+      } x[] = {
+            // 0 - 20
+         {  1,  0,  2,  2,  2,     -0.0235, 0.0000, 0.2617, 0.0000, -0.2209, 0.0000 },
+         {  2,  0,  2,  0,  1,     -0.0404, 0.0000, 0.3706, 0.0000, -0.3128, 0.0000 },
+         {  2,  0,  2,  0,  2,     -0.0987, 0.0000, 0.9041, 0.0000, -0.7630, 0.0000 },
+         {  0,  0,  2,  2,  1,     -0.0508, 0.0000, 0.4499, 0.0000, -0.3797, 0.0000 },
+         {  0,  0,  2,  2,  2,     -0.1231, 0.0000, 1.0904, 0.0000, -0.9203, 0.0000 },
+         {  1,  0,  2,  0,  0,     -0.0385, 0.0000, 0.2659, 0.0000, -0.2244, 0.0000 },
+         {  1,  0,  2,  0,  1,     -0.4108, 0.0000, 2.8298, 0.0000, -2.3884, 0.0000 },
+         {  1,  0,  2,  0,  2,     -0.9926, 0.0000, 6.8291, 0.0000, -5.7637, 0.0000 },
+         {  3,  0,  0,  0,  0,     -0.0179, 0.0000, 0.1222, 0.0000, -0.1031, 0.0000 },
+         { -1,  0,  2,  2,  1,     -0.0818, 0.0000, 0.5384, 0.0000, -0.4544, 0.0000 },
+         { -1,  0,  2,  2,  2,     -0.1974, 0.0000, 1.2978, 0.0000, -1.0953, 0.0000 },
+         {  1,  0,  0,  2,  0,     -0.0761, 0.0000, 0.4976, 0.0000, -0.4200, 0.0000 },
+         {  2,  0,  2, -2,  2,      0.0216, 0.0000,-0.1060, 0.0000,  0.0895, 0.0000 },
+         {  0,  1,  2,  0,  2,      0.0254, 0.0000,-0.1211, 0.0000,  0.1022, 0.0000 },
+         {  0,  0,  2,  0,  0,     -0.2989, 0.0000, 1.3804, 0.0000, -1.1650, 0.0000 },
+         {  0,  0,  2,  0,  1,     -3.1873, 0.2010,14.6890, 0.9266,-12.3974,-0.7820 },
+         {  0,  0,  2,  0,  2,     -7.8468, 0.5320,36.0910, 2.4469,-30.4606,-2.0652 },
+         {  2,  0,  0,  0, -1,      0.0216, 0.0000,-0.0988, 0.0000,  0.0834, 0.0000 },
+         {  2,  0,  0,  0,  0,     -0.3384, 0.0000, 1.5433, 0.0000, -1.3025, 0.0000 },
+         {  2,  0,  0,  0,  1,      0.0179, 0.0000,-0.0813, 0.0000,  0.0686, 0.0000 },
+
+            // 21 - 40
+         {  0, -1,  2,  0,  2,     -0.0244, 0.0000,  0.1082, 0.0000, -0.0913, 0.0000 },
+         {  0,  0,  0,  2, -1,      0.0470, 0.0000, -0.2004, 0.0000,  0.1692, 0.0000 },
+         {  0,  0,  0,  2,  0,     -0.7341, 0.0000,  3.1240, 0.0000, -2.6367, 0.0000 },
+         {  0,  0,  0,  2,  1,     -0.0526, 0.0000,  0.2235, 0.0000, -0.1886, 0.0000 },
+         {  0, -1,  0,  2,  0,     -0.0508, 0.0000,  0.2073, 0.0000, -0.1749, 0.0000 },
+         {  1,  0,  2, -2,  1,      0.0498, 0.0000, -0.1312, 0.0000,  0.1107, 0.0000 },
+         {  1,  0,  2, -2,  2,      0.1006, 0.0000, -0.2640, 0.0000,  0.2228, 0.0000 },
+         {  1,  1,  0,  0,  0,      0.0395, 0.0000, -0.0968, 0.0000,  0.0817, 0.0000 },
+         { -1,  0,  2,  0,  0,      0.0470, 0.0000, -0.1099, 0.0000,  0.0927, 0.0000 },
+         { -1,  0,  2,  0,  1,      0.1767, 0.0000, -0.4115, 0.0000,  0.3473, 0.0000 },
+         { -1,  0,  2,  0,  2,      0.4352, 0.0000, -1.0093, 0.0000,  0.8519, 0.0000 },
+         {  1,  0,  0,  0, -1,      0.5339, 0.0000, -1.2224, 0.0000,  1.0317, 0.0000 },
+         {  1,  0,  0,  0,  0,     -8.4046, 0.2500, 19.1647, 0.5701,-16.1749,-0.4811 },
+         {  1,  0,  0,  0,  1,      0.5443, 0.0000, -1.2360, 0.0000,  1.0432, 0.0000 },
+         {  0,  0,  0,  1,  0,      0.0470, 0.0000, -0.1000, 0.0000,  0.0844, 0.0000 },
+         {  1, -1,  0,  0,  0,     -0.0555, 0.0000,  0.1169, 0.0000, -0.0987, 0.0000 },
+         { -1,  0,  0,  2, -1,      0.1175, 0.0000, -0.2332, 0.0000,  0.1968, 0.0000 },
+         { -1,  0,  0,  2,  0,     -1.8236, 0.0000,  3.6018, 0.0000, -3.0399, 0.0000 },
+         { -1,  0,  0,  2,  1,      0.1316, 0.0000, -0.2587, 0.0000,  0.2183, 0.0000 },
+         {  1,  0, -2,  2, -1,      0.0179, 0.0000, -0.0344, 0.0000,  0.0290, 0.0000 },
+ 
+            // 41 - 60
+         { -1, -1,  0,  2,  0,     -0.0855, 0.0000,  0.1542, 0.0000, -0.1302, 0.0000 }
+/*
+         {  0,  2,  2, -2,  2,     -0.0573, 0.0000,  0.0395, 0.0000, -0.0333, 0.0000 },
+         {  0,  1,  2, -2,  1,      0.0329, 0.0000, -0.0173, 0.0000,  0.0146, 0.0000 },
+         {  0,  1,  2, -2,  2,     -1.8847, 0.0000,  0.9726, 0.0000, -0.8209, 0.0000 },
+         {  0,  0,  2, -2,  0,      0.2510, 0.0000, -0.0910, 0.0000,  0.0768, 0.0000 },
+         {  0,  0,  2, -2,  1,      1.1703, 0.0000, -0.4135, 0.0000,  0.3490, 0.0000 },
+         {  0,  0,  2, -2,  2,    -49.7174, 0.4330, 17.1056, 0.1490,-14.4370,-0.1257 },
+         {  0,  2,  0,  0,  0,     -0.1936, 0.0000,  0.0666, 0.0000, -0.0562, 0.0000 },
+         {  2,  0,  0, -2, -1,      0.0489, 0.0000, -0.0154, 0.0000,  0.0130, 0.0000 },
+         {  2,  0,  0, -2,  0,     -0.5471, 0.0000,  0.1670, 0.0000, -0.1409, 0.0000 },
+         {  2,  0,  0, -2,  1,      0.0367, 0.0000, -0.0108, 0.0000,  0.0092, 0.0000 },
+         {  0, -1,  2, -2,  1,     -0.0451, 0.0000,  0.0082, 0.0000, -0.0069, 0.0000 },
+         {  0,  1,  0,  0, -1,      0.0921, 0.0000, -0.0167, 0.0000,  0.0141, 0.0000 },
+         {  0, -1,  2, -2,  2,      0.8281, 0.0000, -0.1425, 0.0000,  0.1202, 0.0000 },
+         {  0,  1,  0,  0,  0,    -15.8887, 0.1530,  2.7332, 0.0267, -2.3068,-0.0222 },
+         {  0,  1,  0,  0,  1,     -0.1382, 0.0000,  0.0225, 0.0000, -0.0190, 0.0000 },
+         {  1,  0,  0, -1,  0,      0.0348, 0.0000, -0.0053, 0.0000,  0.0045, 0.0000 },
+         {  2,  0, -2,  0,  0,     -0.1372, 0.0000, -0.0079, 0.0000,  0.0066, 0.0000 },
+         { -2,  0,  2,  0,  1,      0.4211, 0.0000, -0.0203, 0.0000,  0.0171, 0.0000 },
+         { -1,  1,  0,  1,  0      -0.0404, 0.0000,  0.0008, 0.0000, -0.0007, 0.0000 },
+   
+            // 61 - 62
+         {  0,  0,  0,  0,  2,      7.8998, 0.0000,  0.1460, 0.0000, -0.1232, 0.0000 },
+         {  0,  0,  0,  0,  1,  -1617.2681, 0.0000,-14.9471, 0.0000, 12.6153, 0.0000 }
+*/
+      };
+
+      /* Number of terms in the series */
+      const int NT = (int) (sizeof(x) / sizeof(x[0]));
+
+      double el, elp, f, d, om;
+
+      /* Interval between fundamental epoch J2000.0 and given date (JC). */
+      double t = (MJD(TT).mjd - MJD_J2000) / JC;
+
+      /* --------------------- */
+      /* Fundamental arguments */
+      /* --------------------- */
+
+      /* Mean longitude of Moon minus mean longitude of Moon's perigee. */
+      el = Anpm(
+            (485866.733 + (715922.633 + (31.310 + 0.064 * t) * t) * t)
+            * AS_TO_RAD + fmod(1325.0 * t, 1.0) * TWO_PI);
+
+      /* Mean longitude of Sun minus mean longitude of Sun's perigee. */
+      elp = Anpm(
+            (1287099.804 + (1292581.224 + (-0.577 - 0.012 * t) * t) * t)
+            * AS_TO_RAD + fmod(99.0 * t, 1.0) * TWO_PI);
+
+      /* Mean longitude of Moon minus mean longitude of Moon's node. */
+      f = Anpm(
+            (335778.877 + (295263.137 + (-13.257 + 0.011 * t) * t) * t)
+            * AS_TO_RAD + fmod(1342.0 * t, 1.0) * TWO_PI);
+
+      /* Mean elongation of Moon from Sun. */
+      d = Anpm(
+            (1072261.307 + (1105601.328 + (-6.891 + 0.019 * t) * t) * t)
+            * AS_TO_RAD + fmod(1236.0 * t, 1.0) * TWO_PI);
+
+      /* Longitude of the mean ascending node of the lunar orbit on the */
+      /* ecliptic, measured from the mean equinox of date. */
+      om = Anpm(
+            (450160.280 + (-482890.539 + (7.455 + 0.008 * t) * t) * t)
+            * AS_TO_RAD + fmod(-5.0 * t, 1.0) * TWO_PI);
+
+      double arg;
+      double dut(0.0), dlod(0.0), domega(0.0);
+      for(int i=0; i<NT; i++)
+      {
+         arg = 0.0;
+
+         // Formation of multiples of arguments.
+         arg = x[i].nl*el
+               + x[i].nlp*elp
+               + x[i].nf*f
+               + x[i].nd*d
+               + x[i].nom*om;
+
+         arg = std::fmod(arg, TWO_PI);
+         if(arg < 0.0) arg += TWO_PI;
+
+         // Evaluate zonal tidal terms.
+         dut    += x[i].s1*std::sin(arg) + x[i].c1*std::cos(arg);
+         dlod   += x[i].c2*std::cos(arg) + x[i].s2*std::sin(arg);
+         domega += x[i].c3*std::cos(arg) + x[i].s3*std::sin(arg);
+      }
+
+      // Rescale corrections so that they are in units involving seconds.
+      dut    = dut    * 1.0e-4;
+      dlod   = dlod   * 1.0e-5;
+      domega = domega * 1.0e-14;
+
+      // return
+      Vector<double> ret(3,0.0);
+      ret(0) = dut;
+      ret(1) = dlod;
+      ret(2) = domega;
+
+      return ret;
+
+   }  // End of method 'ReferenceSystem::RG_ZONT2()'
+
+
+   // Provide the diurnal/subdiurnal tidal effects on polar motion ("), UT1 (s)
+   // and LOD (s), in time domain. IERS Conventions 2010
+   Vector<double> ReferenceSystem::PMUT1_OCEANS(const CommonTime& UTC)
+   {
+       static const struct {
+           int nchi;            // coefficients of GMST + PI
+           int nl,nlp,nf,nd,nom;// coefficients of l,l',F,D,Om
+           double s1, c1;       // sine and cosine of xp
+           double s2, c2;       // sine and cosine of yp
+           double s3, c3;       // sine and cosine of ut1
+       } x[] = {
+           { 1,-1, 0,-2,-2,-2,  -0.05,   0.94,  -0.94,  -0.05,  0.396, -0.078 },
+           { 1,-2, 0,-2, 0,-1,   0.06,   0.64,  -0.64,   0.06,  0.195, -0.059 },
+           { 1,-2, 0,-2, 0,-2,   0.30,   3.42,  -3.42,   0.30,  1.034, -0.314 },
+           { 1, 0, 0,-2,-2,-1,   0.08,   0.78,  -0.78,   0.08,  0.224, -0.073 },
+           { 1, 0, 0,-2,-2,-2,   0.46,   4.15,  -4.15,   0.45,  1.187, -0.387 },
+           { 1,-1, 0,-2, 0,-1,   1.19,   4.96,  -4.96,   1.19,  0.966, -0.474 },
+           { 1,-1, 0,-2, 0,-2,   6.24,  26.31, -26.31,   6.23,  5.118, -2.499 },
+           { 1, 1, 0,-2,-2,-1,   0.24,   0.94,  -0.94,   0.24,  0.172, -0.090 },
+           { 1, 1, 0,-2,-2,-2,   1.28,   4.99,  -4.99,   1.28,  0.911, -0.475 },
+           { 1, 0, 0,-2, 0, 0,  -0.28,  -0.77,   0.77,  -0.28, -0.093,  0.070 },
+           { 1, 0, 0,-2, 0,-1,   9.22,  25.06, -25.06,   9.22,  3.025, -2.280 },
+           { 1, 0, 0,-2, 0,-2,  48.82, 132.91,-132.90,  48.82, 16.020,-12.069 },
+           { 1,-2, 0, 0, 0, 0,  -0.32,  -0.86,   0.86,  -0.32, -0.103,  0.078 },
+           { 1, 0, 0, 0,-2, 0,  -0.66,  -1.72,   1.72,  -0.66, -0.194,  0.154 },
+           { 1,-1, 0,-2, 2,-2,  -0.42,  -0.92,   0.92,  -0.42, -0.083,  0.074 },
+           { 1, 1, 0,-2, 0,-1,  -0.30,  -0.64,   0.64,  -0.30, -0.057,  0.050 },
+           { 1, 1, 0,-2, 0,-2,  -1.61,  -3.46,   3.46,  -1.61, -0.308,  0.271 },
+           { 1,-1, 0, 0, 0, 0,  -4.48,  -9.61,   9.61,  -4.48, -0.856,  0.751 },
+           { 1,-1, 0, 0, 0,-1,  -0.90,  -1.93,   1.93,  -0.90, -0.172,  0.151 },
+           { 1, 1, 0, 0,-2, 0,  -0.86,  -1.81,   1.81,  -0.86, -0.161,  0.137 },
+           { 1, 0,-1,-2, 2,-2,   1.54,   3.03,  -3.03,   1.54,  0.315, -0.189 },
+           { 1, 0, 0,-2, 2,-1,  -0.29,  -0.58,   0.58,  -0.29, -0.062,  0.035 },
+           { 1, 0, 0,-2, 2,-2,  26.13,  51.25, -51.25,  26.13,  5.512, -3.095 },
+           { 1, 0, 1,-2, 2,-2,  -0.22,  -0.42,   0.42,  -0.22, -0.047,  0.025 },
+           { 1, 0,-1, 0, 0, 0,  -0.61,  -1.20,   1.20,  -0.61, -0.134,  0.070 },
+           { 1, 0, 0, 0, 0, 1,   1.54,   3.00,  -3.00,   1.54,  0.348, -0.171 },
+           { 1, 0, 0, 0, 0, 0, -77.48,-151.74, 151.74, -77.48,-17.620,  8.548 },
+           { 1, 0, 0, 0, 0,-1, -10.52, -20.56,  20.56, -10.52, -2.392,  1.159 },
+           { 1, 0, 0, 0, 0,-2,   0.23,   0.44,  -0.44,   0.23,  0.052, -0.025 },
+           { 1, 0, 1, 0, 0, 0,  -0.61,  -1.19,   1.19,  -0.61, -0.144,  0.065 },
+           { 1, 0, 0, 2,-2, 2,  -1.09,  -2.11,   2.11,  -1.09, -0.267,  0.111 },
+           { 1,-1, 0, 0, 2, 0,  -0.69,  -1.43,   1.43,  -0.69, -0.288,  0.043 },
+           { 1, 1, 0, 0, 0, 0,  -3.46,  -7.28,   7.28,  -3.46, -1.610,  0.187 },
+           { 1, 1, 0, 0, 0,-1,  -0.69,  -1.44,   1.44,  -0.69, -0.320,  0.037 },
+           { 1, 0, 0, 0, 2, 0,  -0.37,  -1.06,   1.06,  -0.37, -0.407, -0.005 },
+           { 1, 2, 0, 0, 0, 0,  -0.17,  -0.51,   0.51,  -0.17, -0.213, -0.005 },
+           { 1, 0, 0, 2, 0, 2,  -1.10,  -3.42,   3.42,  -1.09, -1.436, -0.037 },
+           { 1, 0, 0, 2, 0, 1,  -0.70,  -2.19,   2.19,  -0.70, -0.921, -0.023 },
+           { 1, 0, 0, 2, 0, 0,  -0.15,  -0.46,   0.46,  -0.15, -0.193, -0.005 },
+           { 1, 1, 0, 2, 0, 2,  -0.03,  -0.59,   0.59,  -0.03, -0.396, -0.024 },
+           { 1, 1, 0, 2, 0, 1,  -0.02,  -0.38,   0.38,  -0.02, -0.253, -0.015 },
+           { 2,-3, 0,-2, 0,-2,  -0.49,  -0.04,   0.63,   0.24, -0.089, -0.011 },
+           { 2,-1, 0,-2,-2,-2,  -1.33,  -0.17,   1.53,   0.68, -0.224, -0.032 },
+           { 2,-2, 0,-2, 0,-2,  -6.08,  -1.61,   3.13,   3.35, -0.637, -0.177 },
+           { 2, 0, 0,-2,-2,-2,  -7.59,  -2.05,   3.44,   4.23, -0.745, -0.222 },
+           { 2, 0, 1,-2,-2,-2,  -0.52,  -0.14,   0.22,   0.29, -0.049, -0.015 },
+           { 2,-1,-1,-2, 0,-2,   0.47,   0.11,  -0.10,  -0.27,  0.033,  0.013 },
+           { 2,-1, 0,-2, 0,-1,   2.12,   0.49,  -0.41,  -1.23,  0.141,  0.058 },
+           { 2,-1, 0,-2, 0,-2, -56.87, -12.93,  11.15,  32.88, -3.795, -1.556 },
+           { 2,-1, 1,-2, 0,-2,  -0.54,  -0.12,   0.10,   0.31, -0.035, -0.015 },
+           { 2, 1, 0,-2,-2,-2, -11.01,  -2.40,   1.89,   6.41, -0.698, -0.298 },
+           { 2, 1, 1,-2,-2,-2,  -0.51,  -0.11,   0.08,   0.30, -0.032, -0.014 },
+           { 2,-2, 0,-2, 2,-2,   0.98,   0.11,  -0.11,  -0.58,  0.050,  0.022 },
+           { 2, 0,-1,-2, 0,-2,   1.13,   0.11,  -0.13,  -0.67,  0.056,  0.025 },
+           { 2, 0, 0,-2, 0,-1,  12.32,   1.00,  -1.41,  -7.31,  0.605,  0.266 },
+           { 2, 0, 0,-2, 0,-2,-330.15, -26.96,  37.58, 195.92,-16.195, -7.140 },
+           { 2, 0, 1,-2, 0,-2,  -1.01,  -0.07,   0.11,   0.60, -0.049, -0.021 },
+           { 2,-1, 0,-2, 2,-2,   2.47,  -0.28,  -0.44,  -1.48,  0.111,  0.034 },
+           { 2, 1, 0,-2, 0,-2,   9.40,  -1.44,  -1.88,  -5.65,  0.425,  0.117 },
+           { 2,-1, 0, 0, 0, 0,  -2.35,   0.37,   0.47,   1.41, -0.106, -0.029 },
+           { 2,-1, 0, 0, 0,-1,  -1.04,   0.17,   0.21,   0.62, -0.047, -0.013 },
+           { 2, 0,-1,-2, 2,-2,  -8.51,   3.50,   3.29,   5.11, -0.437, -0.019 },
+           { 2, 0, 0,-2, 2,-2,-144.13,  63.56,  59.23,  86.56, -7.547, -0.159 },
+           { 2, 0, 1,-2, 2,-2,   1.19,  -0.56,  -0.52,  -0.72,  0.064,  0.000 },
+           { 2, 0, 0, 0, 0, 1,   0.49,  -0.25,  -0.23,  -0.29,  0.027, -0.001 },
+           { 2, 0, 0, 0, 0, 0, -38.48,  19.14,  17.72,  23.11, -2.104,  0.041 },
+           { 2, 0, 0, 0, 0,-1, -11.44,   5.75,   5.32,   6.87, -0.627,  0.015 },
+           { 2, 0, 0, 0, 0,-2,  -1.24,   0.63,   0.58,   0.75, -0.068,  0.002 },
+           { 2, 1, 0, 0, 0, 0,  -1.77,   1.79,   1.71,   1.04, -0.146,  0.037 },
+           { 2, 1, 0, 0, 0,-1,  -0.77,   0.78,   0.75,   0.45, -0.064,  0.017 },
+           { 2, 0, 0, 2, 0, 2,  -0.33,   0.62,   0.65,   0.19, -0.049,  0.018 }
+       };
+
+       /* Number of terms in the series */
+       const int NT = (int)(sizeof(x) / sizeof(x[0]));
+
+       /* Interval between fundamental epoch J2000.0 and given date (JC). */
+       double t = (MJD(UTC).mjd - MJD_J2000) / JC;
+       double t2 = t*t;
+       double t3 = t2*t;
+       double t4 = t3*t;
+
+       double chi, l, lp, f, d, om;
+       double dchi, dl, dlp, df, dd, dom;
+
+       // Arguments in the following order : chi=GMST+PI,l,lp,F,D,Omega
+
+       chi = (67310.54841 + (876600.0*3600 + 8640184.812866)*t + 0.093104*t2 - 6.2e-6*t3)*15.0 + 648000.0;
+       chi = std::fmod(chi, TURNAS) * AS_TO_RAD;
+
+       dchi = (876600.0*3600 + 8640184.812866 + 2*0.093104*t - 3*6.2e-6*t2)*15.0;
+       dchi = dchi * AS_TO_RAD / JC;    // rad/day
+
+       l = -0.00024470*t4 + 0.051635*t3 + 31.8792*t2 + 1717915923.2178*t + 485868.249036;
+       l = std::fmod(l, TURNAS) * AS_TO_RAD;
+
+       dl = -4*0.00024470*t3 + 3*0.051635*t2 + 2*31.8792*t + 1717915923.2178;
+       dl = dl * AS_TO_RAD / JC;        // rad/day
+ 
+       lp = -0.00001149*t4 - 0.000136*t3 - 0.5532*t2 + 129596581.0481*t + 1287104.79305;
+       lp = std::fmod(lp, TURNAS) * AS_TO_RAD;
+
+       dlp = -4*0.00001149*t3 - 3*0.000136*t2 - 2*0.5532*t + 129596581.0481;
+       dlp = dlp * AS_TO_RAD / JC;      // rad/day
+
+       f = 0.00000417*t4 - 0.001037*t3 - 12.7512*t2 + 1739527262.8478*t + 335779.526232;
+       f = std::fmod(f, TURNAS) * AS_TO_RAD;
+
+       df = 4*0.00000417*t3 - 3*0.001037*t2 - 2*12.7512*t + 1739527262.8478;
+       df = df * AS_TO_RAD / JC;        // rad/day
+
+       d = -0.00003169*t4 + 0.006593*t3 - 6.3706*t2 + 1602961601.2090*t + 1072260.70369;
+       d = std::fmod(d, TURNAS) * AS_TO_RAD;
+
+       dd = -4*0.00003169*t3 + 3*0.006593*t2 - 2*6.3706*t + 1602961601.2090;
+       dd = dd * AS_TO_RAD / JC;        // rad/day
+
+       om = -0.00005939*t4 + 0.007702*t3 + 7.4722*t2 - 6962890.2665*t + 450160.398036;
+       om = std::fmod(om, TURNAS) * AS_TO_RAD;
+
+       dom = -4*0.00005939*t3 + 3*0.007702*t2 + 2*7.4722*t - 6962890.2665;
+       dom = dom * AS_TO_RAD / JC;      // rad/day
+
+       // corrections
+       double arg, darg;
+       double cor_x(0.0), cor_y(0.0), cor_ut1(0.0), cor_lod(0.0);
+
+       for(int i=0; i<NT; i++)
+       {
+           arg = 0.0; darg = 0.0;
+           arg += x[i].nchi*chi
+                + x[i].nl*l
+                + x[i].nlp*lp
+                + x[i].nf*f
+                + x[i].nd*d
+                + x[i].nom*om;
+           darg += x[i].nchi*dchi
+                 + x[i].nl*dl
+                 + x[i].nlp*dlp
+                 + x[i].nf*df
+                 + x[i].nd*dd
+                 + x[i].nom*dom;
+
+           arg = std::fmod(arg, TWO_PI);
+
+           cor_x    += x[i].c1*std::cos(arg) + x[i].s1*std::sin(arg);
+           cor_y    += x[i].c2*std::cos(arg) + x[i].s2*std::sin(arg);
+           cor_ut1  += x[i].c3*std::cos(arg) + x[i].s3*std::sin(arg);
+           cor_lod  -= (-x[i].c3*std::sin(arg) + x[i].s3*std::cos(arg))*darg;
+       }
+
+       cor_x   = cor_x * 1.0e-6;    // arcsecond (")
+       cor_y   = cor_y * 1.0e-6;    // arcsecond (")
+       cor_ut1 = cor_ut1 * 1.0e-6;  // second (s)
+       cor_lod = cor_lod * 1.0e-6;  // second (s)
+
+       // return
+       Vector<double> ret(4,0.0);
+       ret(0) = cor_x;
+       ret(1) = cor_y;
+       ret(2) = cor_ut1;
+       ret(3) = cor_lod;
+
+       return ret;
+
+   }  // End of method 'ReferenceSystem::PMUT1_OCEANS()'
+
+
+      /// Provide the diurnal lunisolar effect on polar motion ("), in time domain.
+      /// IERS Conventions 2010.
+   Vector<double> ReferenceSystem::PMSDNUT2(const CommonTime& UTC)
+   {
+       static const struct {
+           int nchi;            // coefficients of GMST+PI
+           int nl,nlp,nf,nd,nom;// coefficients of l,l',F,D,Om
+           double s1, c1;       // sine and cosine of xp
+           double s2, c2;       // sine and cosine of yp
+       } x[] = {
+           { 1,-1, 0,-2, 0,-1,    -.44,   .25,   -.25,  -.44 },
+           { 1,-1, 0,-2, 0,-2,   -2.31,  1.32,  -1.32, -2.31 },
+           { 1, 1, 0,-2,-2,-2,    -.44,   .25,   -.25,  -.44 },
+           { 1, 0, 0,-2, 0,-1,   -2.14,  1.23,  -1.23, -2.14 },
+           { 1, 0, 0,-2, 0,-2,  -11.36,  6.52,  -6.52,-11.36 },
+           { 1,-1, 0, 0, 0, 0,     .84,  -.48,    .48,   .84 },
+           { 1, 0, 0,-2, 2,-2,   -4.76,  2.73,  -2.73, -4.76 },
+           { 1, 0, 0, 0, 0, 0,   14.27, -8.19,   8.19, 14.27 },
+           { 1, 0, 0, 0, 0,-1,    1.93, -1.11,   1.11,  1.93 },
+           { 1, 1, 0, 0, 0, 0,     .76,  -.43,    .43,   .76 }
+       };
+
+       /* Number of terms in the series */
+       const int NT = (int)(sizeof(x) / sizeof(x[0]));
+
+       /* Interval between fundamental epoch J2000.0 and given date (JC). */
+       double t = (MJD(UTC).mjd - MJD_J2000)/ JC;
+       double t2 = t*t;
+       double t3 = t2*t;
+       double t4 = t3*t;
+
+       double chi, l, lp, f, d, om;
+       // Arguments in the following order : chi=GMST+PI,l,lp,F,D,Omega
+
+       chi = (67310.54841 + (876600.0*3600 + 8640184.812866)*t + 0.093104*t2 - 6.2e-6*t3)*15.0 + 648000.0;
+       chi = std::fmod(chi, TURNAS) * AS_TO_RAD;
+
+       l = -0.00024470*t4 + 0.051635*t3 + 31.8792*t2 + 1717915923.2178*t + 485868.249036;
+       l = std::fmod(l, TURNAS) * AS_TO_RAD;
+
+       lp = -0.00001149*t4 - 0.000136*t3 - 0.5532*t2 + 129596581.0481*t + 1287104.79305;
+       lp = std::fmod(lp, TURNAS) * AS_TO_RAD;
+
+       f = 0.00000417*t4 - 0.001037*t3 - 12.7512*t2 + 1739527262.8478*t + 335779.526232;
+       f = std::fmod(f, TURNAS) * AS_TO_RAD;
+
+       d = -0.00003169*t4 + 0.006593*t3 - 6.3706*t2 + 1602961601.2090*t + 1072260.70369;
+       d = std::fmod(d, TURNAS) * AS_TO_RAD;
+
+       om = -0.00005939*t4 + 0.007702*t3 + 7.4722*t2 - 6962890.2665*t + 450160.398036;
+       om = std::fmod(om, TURNAS) * AS_TO_RAD;
+
+       // corrections
+       double cor_x = 0.0, cor_y = 0.0;
+
+       double arg;
+
+       for(int i=0; i<NT; i++)
+       {
+           arg = 0.0;
+           arg += x[i].nchi * chi 
+                + x[i].nl * l
+                + x[i].nlp * lp
+                + x[i].nf * f
+                + x[i].nd * d
+                + x[i].nom * om;
+
+           arg = std::fmod(arg, TWO_PI);
+
+           cor_x += x[i].c1*std::cos(arg) + x[i].s1*std::sin(arg);
+           cor_y += x[i].c2*std::cos(arg) + x[i].s2*std::sin(arg);
+       }
+
+       cor_x = cor_x * 1.0e-6;   // arcsecond (")
+       cor_y = cor_y * 1.0e-6;   // arcsecond (")
+
+       // return 
+       Vector<double> ret(2,0.0);
+       ret(0) = cor_x;
+       ret(1) = cor_y;
+
+       return ret;
+
+   }  // End of method 'ReferenceSystem::PMSDNUT2()'
+
+
+      /// Evaluate the model of subdiurnal libration in the axial component of
+      /// rotation, expressed by UT1 and LOD.
+   Vector<double> ReferenceSystem::UTLIBR(const CommonTime& UTC)
+   {
+       static const struct {
+           int nchi;            // coefficients of GMST+PI
+           int nl,nlp,nf,nd,nom;// coefficients of l,l',F,D,Om
+           double period;       // period of the tide
+           double s1, c1;       // sine and cosine of UT1
+           double s2, c2;       // sine and cosine of LOD
+       } x[] = {
+           { 2, -2,  0, -2,  0, -2, 0.5377239,  0.05, -0.03,  -0.3,  -0.6 },
+           { 2,  0,  0, -2, -2, -2, 0.5363232,  0.06, -0.03,  -0.4,  -0.7 },
+           { 2, -1,  0, -2,  0, -2, 0.5274312,  0.35, -0.20,  -2.4,  -4.1 },
+           { 2,  1,  0, -2, -2, -2, 0.5260835,  0.07, -0.04,  -0.5,  -0.8 },
+           { 2,  0,  0, -2,  0, -1, 0.5175645, -0.07,  0.04,   0.5,   0.8 },
+           { 2,  0,  0, -2,  0, -2, 0.5175251,  1.75, -1.01, -12.2, -21.3 },
+           { 2,  1,  0, -2,  0, -2, 0.5079842, -0.05,  0.03,   0.3,   0.6 },
+           { 2,  0, -1, -2,  2, -2, 0.5006854,  0.04, -0.03,  -0.3,  -0.6 },
+           { 2,  0,  0, -2,  2, -2, 0.5000000,  0.76, -0.44,  -5.5,  -9.6 },
+           { 2,  0,  0,  0,  0,  0, 0.4986348,  0.21, -0.12,  -1.5,  -2.6 },
+           { 2,  0,  0,  0,  0, -1, 0.4985982,  0.06, -0.04,  -0.4,  -0.8 }
+       };
+
+       /* Number of terms in the series */
+       const int NT = (int)(sizeof(x) / sizeof(x[0]));
+
+       /* Interval between fundamental epoch J2000.0 and given date (JC). */
+       double t = (MJD(UTC).mjd - MJD_J2000)/ JC;
+       double t2 = t*t;
+       double t3 = t2*t;
+       double t4 = t3*t;
+
+       double gmst, chi, l, lp, f, d, om;
+
+       // Arguments in the following order : chi=GMST+PI,l,lp,F,D,Omega
+       chi = (67310.54841 + (876600.0*3600 + 8640184.812866)*t + 0.093104*t2 - 6.2e-6*t3)*15.0 + 648000.0;
+       chi = std::fmod(chi, TURNAS) * AS_TO_RAD;
+
+       l = -0.00024470*t4 + 0.051635*t3 + 31.8792*t2 + 1717915923.2178*t + 485868.249036;
+       l = std::fmod(l, TURNAS) * AS_TO_RAD;
+
+       lp = -0.00001149*t4 - 0.000136*t3 - 0.5532*t2 + 129596581.0481*t + 1287104.79305;
+       lp = std::fmod(lp, TURNAS) * AS_TO_RAD;
+
+       f = 0.00000417*t4 - 0.001037*t3 - 12.7512*t2 + 1739527262.8478*t + 335779.526232;
+       f = std::fmod(f, TURNAS) * AS_TO_RAD;
+
+       d = -0.00003169*t4 + 0.006593*t3 - 6.3706*t2 + 1602961601.2090*t + 1072260.70369;
+       d = std::fmod(d, TURNAS) * AS_TO_RAD;
+
+       om = -0.00005939*t4 + 0.007702*t3 + 7.4722*t2 - 6962890.2665*t + 450160.398036;
+       om = std::fmod(om, TURNAS) * AS_TO_RAD;
+
+       // corrections
+       double arg;
+       double dut1 = 0.0, dlod = 0.0;
+
+       for(int i=0; i<NT; i++)
+       {
+           arg = 0.0;
+           arg += x[i].nchi * chi
+                + x[i].nl * l
+                + x[i].nlp * lp
+                + x[i].nf * f
+                + x[i].nd * d
+                + x[i].nom * om;
+
+           arg = std::fmod(arg, TWO_PI);
+
+           dut1 += x[i].s1 * std::sin(arg) + x[i].c1 * std::cos(arg);
+           dlod += x[i].s2 * std::sin(arg) + x[i].c2 * std::cos(arg);
+       }
+
+       dut1 = dut1 * 1.0e-6;    // second (s)
+       dlod = dlod * 1.0e-6;    // second (s)
+
+       // return
+       Vector<double> ret(2,0.0);
+       ret(0) = dut1;
+       ret(1) = dlod;
+
+       return ret;
+
+   }  // End of method 'ReferenceSystem::UTLIBR()'
+
+
+      /**Mean obliquity of the ecliptic, IAU 1980 model.
+       *
+       * @param   TT
+       * @return  Mean obliquity of the ecliptic
+       */
+   double ReferenceSystem::MeanObliquity80(const CommonTime& TT)
+   {
+
+      const double T = (MJD(TT).mjd - MJD_J2000) / 36525.0;
+
+      return AS_TO_RAD * ( 84381.448 +
+                         (-46.8150   +
+                         (-0.00059   +
+                         ( 0.001813) * T) * T) * T);
+
+   }  // End of method 'ReferenceSystem::MeanObliquity80()'
+
 
       /**Mean obliquity of the ecliptic, IAU 2006 precession model.
        *
@@ -538,6 +1048,279 @@ namespace gpstk
 
    }  // End of method 'ReferenceSystem::MeanObliquity06()'
 
+
+
+      /**Transformation of equatorial to ecliptical coordinates.
+       *
+       *@param    TT
+       *@return   Transformation matrix
+       */
+   Matrix<double> ReferenceSystem::EclMatrix80 (const CommonTime& TT)
+   {
+
+      return rotation ( MeanObliquity80(TT), 1 );
+
+   }  // End of method 'ReferenceSystem::EclMatrix80()'
+   
+
+      /**Precession matrix from J2000.0 to a specified date, IAU 1976 model.
+       *
+       *@param    TT
+       *@return   Precession transformation matrix
+       */
+   Matrix<double> ReferenceSystem::PrecMatrix76(const CommonTime& TT)
+   {
+      /// Interval between fundamental epoch J2000.0 and start date (JC).
+      const double t0 = 0.0;
+
+      /// Interval over which precession required (JC).
+      const double t = (MJD(TT).mjd - MJD_J2000) / 36525.0;
+
+      /// Euler angles.
+      double tas2r = t * AS_TO_RAD;
+
+//      double w = 2306.2181 + (1.39656 - 0.000139 * t0) * t0;
+      double w = 2306.2181;
+
+      double zeta,z,theta;
+//      zeta   = (w + ((0.30188 - 0.000344 * t0) + 0.017998 * t) * t) * tas2r;
+//      z      = (w + ((1.09468 + 0.000066 * t0) + 0.018203 * t) * t) * tas2r;
+//      theta  = ((2004.3109 + (-0.85330 - 0.000217 * t0) * t0)
+//               + ((-0.42665 - 0.000217 * t0) - 0.041833 * t) * t) * tas2r;
+      zeta   = (w + (0.30188 + 0.017998 * t) * t) * tas2r;
+      z      = (w + (1.09468 + 0.018203 * t) * t) * tas2r;
+      theta  = (2004.3109 + (-0.42665 - 0.041833 * t) * t) * tas2r;
+
+        // Precession matrix
+      return rotation(-z,3) * rotation(theta,2) * rotation(-zeta,3);
+
+   }  // End of method 'ReferenceSystem::PreMatrix76()'
+
+
+      /**Nutation, IAU 1980 model.
+       *
+       *@param    TT
+       *@return   dpsi     nutation in longitude (radians)
+       *@return   deps     nutation in obliquity (radians)
+       */
+   void ReferenceSystem::NutAngles80(const CommonTime& TT, double& dpsi, double& deps)
+   {
+        // Units of 0.1 milliarcsecond to radians
+      const double U2R = AS_TO_RAD / 1e4;
+
+      /* ------------------------------------------------ */
+      /* Table of multiples of arguments and coefficients */
+      /* ------------------------------------------------ */
+
+        // The units for the sine and cosine coefficients are 0.1 mas and */
+        // the same per Julian century */
+      static const struct {
+         int nl,nlp,nf,nd,nom; /* coefficients of l,l',F,D,Om */
+         double sp,spt;        /* longitude sine, 1 and t coefficients */
+         double ce,cet;        /* obliquity cosine, 1 and t coefficients */
+      } x[] = {
+
+      /* 1-10 */
+         {  0,  0,  0,  0,  1, -171996.0, -174.2,  92025.0,    8.9 },
+         {  0,  0,  0,  0,  2,    2062.0,    0.2,   -895.0,    0.5 },
+         { -2,  0,  2,  0,  1,      46.0,    0.0,    -24.0,    0.0 },
+         {  2,  0, -2,  0,  0,      11.0,    0.0,      0.0,    0.0 },
+         { -2,  0,  2,  0,  2,      -3.0,    0.0,      1.0,    0.0 },
+         {  1, -1,  0, -1,  0,      -3.0,    0.0,      0.0,    0.0 },
+         {  0, -2,  2, -2,  1,      -2.0,    0.0,      1.0,    0.0 },
+         {  2,  0, -2,  0,  1,       1.0,    0.0,      0.0,    0.0 },
+         {  0,  0,  2, -2,  2,  -13187.0,   -1.6,   5736.0,   -3.1 },
+         {  0,  1,  0,  0,  0,    1426.0,   -3.4,     54.0,   -0.1 },
+
+      /* 11-20 */
+         {  0,  1,  2, -2,  2,    -517.0,    1.2,    224.0,   -0.6 },
+         {  0, -1,  2, -2,  2,     217.0,   -0.5,    -95.0,    0.3 },
+         {  0,  0,  2, -2,  1,     129.0,    0.1,    -70.0,    0.0 },
+         {  2,  0,  0, -2,  0,      48.0,    0.0,      1.0,    0.0 },
+         {  0,  0,  2, -2,  0,     -22.0,    0.0,      0.0,    0.0 },
+         {  0,  2,  0,  0,  0,      17.0,   -0.1,      0.0,    0.0 },
+         {  0,  1,  0,  0,  1,     -15.0,    0.0,      9.0,    0.0 },
+         {  0,  2,  2, -2,  2,     -16.0,    0.1,      7.0,    0.0 },
+         {  0, -1,  0,  0,  1,     -12.0,    0.0,      6.0,    0.0 },
+         { -2,  0,  0,  2,  1,      -6.0,    0.0,      3.0,    0.0 },
+
+      /* 21-30 */
+         {  0, -1,  2, -2,  1,      -5.0,    0.0,      3.0,    0.0 },
+         {  2,  0,  0, -2,  1,       4.0,    0.0,     -2.0,    0.0 },
+         {  0,  1,  2, -2,  1,       4.0,    0.0,     -2.0,    0.0 },
+         {  1,  0,  0, -1,  0,      -4.0,    0.0,      0.0,    0.0 },
+         {  2,  1,  0, -2,  0,       1.0,    0.0,      0.0,    0.0 },
+         {  0,  0, -2,  2,  1,       1.0,    0.0,      0.0,    0.0 },
+         {  0,  1, -2,  2,  0,      -1.0,    0.0,      0.0,    0.0 },
+         {  0,  1,  0,  0,  2,       1.0,    0.0,      0.0,    0.0 },
+         { -1,  0,  0,  1,  1,       1.0,    0.0,      0.0,    0.0 },
+         {  0,  1,  2, -2,  0,      -1.0,    0.0,      0.0,    0.0 },
+
+      /* 31-40 */
+         {  0,  0,  2,  0,  2,   -2274.0,   -0.2,    977.0,   -0.5 },
+         {  1,  0,  0,  0,  0,     712.0,    0.1,     -7.0,    0.0 },
+         {  0,  0,  2,  0,  1,    -386.0,   -0.4,    200.0,    0.0 },
+         {  1,  0,  2,  0,  2,    -301.0,    0.0,    129.0,   -0.1 },
+         {  1,  0,  0, -2,  0,    -158.0,    0.0,     -1.0,    0.0 },
+         { -1,  0,  2,  0,  2,     123.0,    0.0,    -53.0,    0.0 },
+         {  0,  0,  0,  2,  0,      63.0,    0.0,     -2.0,    0.0 },
+         {  1,  0,  0,  0,  1,      63.0,    0.1,    -33.0,    0.0 },
+         { -1,  0,  0,  0,  1,     -58.0,   -0.1,     32.0,    0.0 },
+         { -1,  0,  2,  2,  2,     -59.0,    0.0,     26.0,    0.0 },
+
+      /* 41-50 */
+         {  1,  0,  2,  0,  1,     -51.0,    0.0,     27.0,    0.0 },
+         {  0,  0,  2,  2,  2,     -38.0,    0.0,     16.0,    0.0 },
+         {  2,  0,  0,  0,  0,      29.0,    0.0,     -1.0,    0.0 },
+         {  1,  0,  2, -2,  2,      29.0,    0.0,    -12.0,    0.0 },
+         {  2,  0,  2,  0,  2,     -31.0,    0.0,     13.0,    0.0 },
+         {  0,  0,  2,  0,  0,      26.0,    0.0,     -1.0,    0.0 },
+         { -1,  0,  2,  0,  1,      21.0,    0.0,    -10.0,    0.0 },
+         { -1,  0,  0,  2,  1,      16.0,    0.0,     -8.0,    0.0 },
+         {  1,  0,  0, -2,  1,     -13.0,    0.0,      7.0,    0.0 },
+         { -1,  0,  2,  2,  1,     -10.0,    0.0,      5.0,    0.0 },
+
+      /* 51-60 */
+         {  1,  1,  0, -2,  0,      -7.0,    0.0,      0.0,    0.0 },
+         {  0,  1,  2,  0,  2,       7.0,    0.0,     -3.0,    0.0 },
+         {  0, -1,  2,  0,  2,      -7.0,    0.0,      3.0,    0.0 },
+         {  1,  0,  2,  2,  2,      -8.0,    0.0,      3.0,    0.0 },
+         {  1,  0,  0,  2,  0,       6.0,    0.0,      0.0,    0.0 },
+         {  2,  0,  2, -2,  2,       6.0,    0.0,     -3.0,    0.0 },
+         {  0,  0,  0,  2,  1,      -6.0,    0.0,      3.0,    0.0 },
+         {  0,  0,  2,  2,  1,      -7.0,    0.0,      3.0,    0.0 },
+         {  1,  0,  2, -2,  1,       6.0,    0.0,     -3.0,    0.0 },
+         {  0,  0,  0, -2,  1,      -5.0,    0.0,      3.0,    0.0 },
+
+      /* 61-70 */
+         {  1, -1,  0,  0,  0,       5.0,    0.0,      0.0,    0.0 },
+         {  2,  0,  2,  0,  1,      -5.0,    0.0,      3.0,    0.0 },
+         {  0,  1,  0, -2,  0,      -4.0,    0.0,      0.0,    0.0 },
+         {  1,  0, -2,  0,  0,       4.0,    0.0,      0.0,    0.0 },
+         {  0,  0,  0,  1,  0,      -4.0,    0.0,      0.0,    0.0 },
+         {  1,  1,  0,  0,  0,      -3.0,    0.0,      0.0,    0.0 },
+         {  1,  0,  2,  0,  0,       3.0,    0.0,      0.0,    0.0 },
+         {  1, -1,  2,  0,  2,      -3.0,    0.0,      1.0,    0.0 },
+         { -1, -1,  2,  2,  2,      -3.0,    0.0,      1.0,    0.0 },
+         { -2,  0,  0,  0,  1,      -2.0,    0.0,      1.0,    0.0 },
+
+      /* 71-80 */
+         {  3,  0,  2,  0,  2,      -3.0,    0.0,      1.0,    0.0 },
+         {  0, -1,  2,  2,  2,      -3.0,    0.0,      1.0,    0.0 },
+         {  1,  1,  2,  0,  2,       2.0,    0.0,     -1.0,    0.0 },
+         { -1,  0,  2, -2,  1,      -2.0,    0.0,      1.0,    0.0 },
+         {  2,  0,  0,  0,  1,       2.0,    0.0,     -1.0,    0.0 },
+         {  1,  0,  0,  0,  2,      -2.0,    0.0,      1.0,    0.0 },
+         {  3,  0,  0,  0,  0,       2.0,    0.0,      0.0,    0.0 },
+         {  0,  0,  2,  1,  2,       2.0,    0.0,     -1.0,    0.0 },
+         { -1,  0,  0,  0,  2,       1.0,    0.0,     -1.0,    0.0 },
+         {  1,  0,  0, -4,  0,      -1.0,    0.0,      0.0,    0.0 },
+
+      /* 81-90 */
+         { -2,  0,  2,  2,  2,       1.0,    0.0,     -1.0,    0.0 },
+         { -1,  0,  2,  4,  2,      -2.0,    0.0,      1.0,    0.0 },
+         {  2,  0,  0, -4,  0,      -1.0,    0.0,      0.0,    0.0 },
+         {  1,  1,  2, -2,  2,       1.0,    0.0,     -1.0,    0.0 },
+         {  1,  0,  2,  2,  1,      -1.0,    0.0,      1.0,    0.0 },
+         { -2,  0,  2,  4,  2,      -1.0,    0.0,      1.0,    0.0 },
+         { -1,  0,  4,  0,  2,       1.0,    0.0,      0.0,    0.0 },
+         {  1, -1,  0, -2,  0,       1.0,    0.0,      0.0,    0.0 },
+         {  2,  0,  2, -2,  1,       1.0,    0.0,     -1.0,    0.0 },
+         {  2,  0,  2,  2,  2,      -1.0,    0.0,      0.0,    0.0 },
+
+      /* 91-100 */
+         {  1,  0,  0,  2,  1,      -1.0,    0.0,      0.0,    0.0 },
+         {  0,  0,  4, -2,  2,       1.0,    0.0,      0.0,    0.0 },
+         {  3,  0,  2, -2,  2,       1.0,    0.0,      0.0,    0.0 },
+         {  1,  0,  2, -2,  0,      -1.0,    0.0,      0.0,    0.0 },
+         {  0,  1,  2,  0,  1,       1.0,    0.0,      0.0,    0.0 },
+         { -1, -1,  0,  2,  1,       1.0,    0.0,      0.0,    0.0 },
+         {  0,  0, -2,  0,  1,      -1.0,    0.0,      0.0,    0.0 },
+         {  0,  0,  2, -1,  2,      -1.0,    0.0,      0.0,    0.0 },
+         {  0,  1,  0,  2,  0,      -1.0,    0.0,      0.0,    0.0 },
+         {  1,  0, -2, -2,  0,      -1.0,    0.0,      0.0,    0.0 },
+
+      /* 101-106 */
+         {  0, -1,  2,  0,  1,      -1.0,    0.0,      0.0,    0.0 },
+         {  1,  1,  0, -2,  1,      -1.0,    0.0,      0.0,    0.0 },
+         {  1,  0, -2,  2,  0,      -1.0,    0.0,      0.0,    0.0 },
+         {  2,  0,  0,  2,  0,       1.0,    0.0,      0.0,    0.0 },
+         {  0,  0,  2,  4,  2,      -1.0,    0.0,      0.0,    0.0 },
+         {  0,  1,  0,  1,  0,       1.0,    0.0,      0.0,    0.0 }
+      };
+
+        // Number of terms in the series
+      const int NT = (int) (sizeof x / sizeof x[0]);
+
+   /*--------------------------------------------------------------------*/
+
+        // Interval between fundamental epoch J2000.0 and given date (JC).
+      const double t  = (MJD(TT).mjd - MJD_J2000) / 36525.0;
+
+
+      /* --------------------- */
+      /* Fundamental arguments */
+      /* --------------------- */
+
+      double el, elp, f, d, om;
+
+        // Mean longitude of Moon minus mean longitude of Moon's perigee.
+      el = Anpm(
+           (485866.733 + (715922.633 + (31.310 + 0.064 * t) * t) * t)
+           * AS_TO_RAD + fmod(1325.0 * t, 1.0) * TWO_PI);
+
+        // Mean longitude of Sun minus mean longitude of Sun's perigee.
+      elp = Anpm(
+            (1287099.804 + (1292581.224 + (-0.577 - 0.012 * t) * t) * t)
+            * AS_TO_RAD + fmod(99.0 * t, 1.0) * TWO_PI);
+
+        // Mean longitude of Moon minus mean longitude of Moon's node.
+      f = Anpm(
+          (335778.877 + (295263.137 + (-13.257 + 0.011 * t) * t) * t)
+          * AS_TO_RAD + fmod(1342.0 * t, 1.0) * TWO_PI);
+
+        // Mean elongation of Moon from Sun.
+      d = Anpm(
+          (1072261.307 + (1105601.328 + (-6.891 + 0.019 * t) * t) * t)
+          * AS_TO_RAD + fmod(1236.0 * t, 1.0) * TWO_PI);
+
+        // Longitude of the mean ascending node of the lunar orbit on the
+        // ecliptic, measured from the mean equinox of date.
+      om = Anpm(
+         (450160.280 + (-482890.539 + (7.455 + 0.008 * t) * t) * t)
+         * AS_TO_RAD + fmod(-5.0 * t, 1.0) * TWO_PI);
+
+      /* --------------- */
+      /* Nutation series */
+      /* --------------- */
+
+        // Initialize nutation components.
+      double dp = 0.0;
+      double de = 0.0;
+      
+      double arg, s, c;
+        // Sum the nutation terms, ending with the biggest.
+      for (int j = NT-1; j >= 0; j--) {
+
+           // Form argument for current term.
+         arg = (double)x[j].nl  * el
+             + (double)x[j].nlp * elp
+             + (double)x[j].nf  * f
+             + (double)x[j].nd  * d
+             + (double)x[j].nom * om;
+
+           // Accumulate current nutation term.
+         s = x[j].sp + x[j].spt * t;
+         c = x[j].ce + x[j].cet * t;
+         if (s != 0.0) dp += s * std::sin(arg);
+         if (c != 0.0) de += c * std::cos(arg);
+      }
+
+        // Convert results from 0.1 mas units to radians.
+      dpsi = dp * U2R;
+      deps = de * U2R;
+
+   }  // End of method 'ReferenceSystem::NutAngles80()'
 
 
 
@@ -1388,7 +2171,7 @@ namespace gpstk
          { 2,-1, 2, 4, 2,     -3.0,   0.0,    0.0,      1.0,  0.0,    0.0},
          { 2, 0, 2, 4, 1,     -3.0,   0.0,    0.0,      2.0,  0.0,    0.0}
       };
-
+    
       /* Number of terms in the luni-solar nutation model */
       const int NLS = (int) (sizeof xls / sizeof xls[0]);
 
@@ -2242,7 +3025,7 @@ namespace gpstk
          { 1, 2, 0, 2, 0,  1, -1,  0, 0, 0, 0, 0, 0,    3,   0,    0,  -1},
          { 0, 2, 2, 2, 0,  0,  2,  0,-2, 0, 0, 0, 0,    3,   0,    0,  -1}
       };
-
+    
       /* Number of terms in the planetary nutation model */
       const int NPL = (int) (sizeof xpl / sizeof xpl[0]);
 
@@ -2443,13 +3226,45 @@ namespace gpstk
    } // End of method 'ReferenceSystem::NutMatrix()'
 
 
+      /**Form the matrix of nutation for a given date, IAU 1980 model.
+       *
+       *@param    TT
+       *@return   nutation matrix
+       */
+   Matrix<double> ReferenceSystem::NutMatrix80(const CommonTime& TT)
+   {
+      double dpsi, deps, epsa;
+
+        // convert TT to UTC
+      CommonTime UTC( TT2UTC(TT) );
+
+        // Mean obliquity of the ecliptic
+      epsa = MeanObliquity80(TT);
+
+        // Nutation in longitude and obliquity
+      NutAngles80(TT, dpsi, deps);
+
+        // corrections for dpsi and deps
+      double ddpsi = getDPsi(UTC) * AS_TO_RAD;
+      double ddeps = getDEps(UTC) * AS_TO_RAD;
+
+        // Add adjustments: frame bias, precession-rates, geophysical
+      dpsi += ddpsi;
+      deps += ddeps;
+
+        // Transformation from mean to true equator and equinox
+      return NutMatrix(epsa, dpsi, deps);
+
+   }  // End of method 'ReferenceSystem::NutMatrix80()'
+
+
 
       /**Form the matrix of nutation for a given date, IAU 2006/2000A model.
        *
        * @param   TT
        * @return  nutation matrix
        */
-   Matrix<double> ReferenceSystem::NutMatrix06(const CommonTime& TT)
+   Matrix<double> NutMatrix06(const CommonTime& TT)
    {
       double epsa, dpsi, deps;
 
@@ -2463,8 +3278,8 @@ namespace gpstk
       NutAngles06A(TT, dpsi, deps);
 
         // corrections for dpsi, deps
-      double ddpsi = getDX(UTC) * AS_TO_RAD;
-      double ddeps = getDY(UTC) * AS_TO_RAD;
+      double ddpsi = getDPsi(UTC) * AS_TO_RAD;
+      double ddeps = getDEps(UTC) * AS_TO_RAD;
 
       dpsi += ddpsi;
       deps += ddeps;
@@ -2569,8 +3384,7 @@ namespace gpstk
       double gamb, phib, psib, eps;
 
       /* Bias-precession Fukushima-Williams angles of J2000.0 = frame bias. */
-      MJD J2000(MJD_J2000);
-      PreAngles06(J2000.convertToCommonTime(), gamb, phib, psib, eps);
+      PreAngles06(MJD_J2000, gamb, phib, psib, eps);
 
       /* B matrix. */
       rb = FWMatrix(gamb, phib, psib, eps);
@@ -2657,7 +3471,7 @@ namespace gpstk
    double ReferenceSystem::EqnOrigin(const Matrix<double>& rnpb,
                                      const double& s)
    {
-
+      
       double x, ax, xs, ys, zs, p, q, eo;
 
       /* Evaluate Wallace & Capitaine (2006) expression (16). */
@@ -2738,7 +3552,7 @@ namespace gpstk
        *          TT
        * @return  Greenwich apparent sidereal time (radians)
        */
-   double ReferenceSystem::GST06A(const CommonTime& UT1,
+   double ReferenceSystem::GST06(const CommonTime& UT1,
                                  const CommonTime& TT)
    {
       /* Classical nutation x precession x bias matrix, IAU 2000A. */
@@ -2749,12 +3563,202 @@ namespace gpstk
 
       return gst;
 
-   }  // End of method 'ReferenceSystem::GST06A()'
+   }  // End of method 'ReferenceSystem::GST06()'
+
+
+      /**The TIO locator s', positioning the Terrestrial Intermediate Origin
+       * on the equator of the Celestial Intermediate Pole.
+       *
+       * @param   TT
+       * @return  the TIO locator s' in radians
+       */
+   double ReferenceSystem::SP00(const CommonTime& TT)
+   {
+
+      /* Interval between fundamental epoch J2000.0 and current date (JC). */
+      double t = (MJD(TT).mjd - MJD_J2000) / 36525.0;
+
+      /* Approximate s'. */
+      double sp = -47e-6 * t * AS_TO_RAD;
+
+      return sp;
+
+   }  // End of method 'ReferenceSystem::SP00()'
+
+
+
+
+
+
+
+
+
+
+      /**Equation of the equinoxes, IAU 1994 model.
+       *
+       *@param    TT
+       *@return   equation of the equinoxes
+
+       * \warning
+       * The equation of the equinoxes dpsi*cos(eps) is the right ascension of the
+       * mean equinox referred to the true equator and equinox and is equal to the
+       * difference between apparent and mean sidereal time.
+       */
+   double ReferenceSystem::EqnEquinox94(const CommonTime& TT)
+   {
+        // Interval between fundamental epoch J2000.0 and given date (JC).
+      const double t = (MJD(TT).mjd - MJD_J2000) / 36525.0;
+
+        // Longitude of the mean ascending node of the lunar orbit on the
+        // ecliptic, measured from the mean equinox of date.
+      double Om;
+      Om = Anpm((450160.280 + (-482890.539
+            + (7.455 + 0.008 * t) * t) * t) * AS_TO_RAD
+            + std::fmod(-5.0 * t, 1.0) * TWO_PI);
+
+        // Nutation components and mean obliquity.
+      double dpsi, deps, eps0;
+      NutAngles80(TT, dpsi,deps);
+      eps0 = MeanObliquity80(TT);
+
+      double ee;
+      ee = dpsi * std::cos(eps0) + AS_TO_RAD * (0.00264*std::sin(Om) + 0.000063*std::sin(Om+Om));
+
+      return ee;
+/*
+        // Interval between fundamental epoch J2000.0 and given date (JC).
+     double T, T2, T3;
+     T  = (Mjd_TT - MJD_J2000) / 36525.0;
+     T2 = T * T;
+     T3 = T2 * T;
+
+        // Longitude of the mean ascending node of the lunar orbit on the
+        // ecliptic, measured from the mean equinox of date.
+     double rev = 360.0 * 3600.0;
+     double Om;
+     Om = fmod (  450160.280 - (   5.0*rev +  482890.539)*T
+                                +  7.455*T2 + 0.008*T3, rev );
+
+        // Nutation components and mean obliquity.
+     double dpsi, deps, eps0;
+     NutAngles(Mjd_TT, dpsi,deps);
+     eps0 = MeanObliquity(Mjd_TT);
+
+        // Equation of the equinoxes.
+     return  dpsi * std::cos(eps0) + AS_TO_RAD * (0.00264*std::sin(Om) + 0.000063*std::sin(Om+Om));
+*/
+
+   }  // End of method 'ReferenceSystem::EqnEquinox94()'
+
+
+      /**Universal Time to Greenwich mean sidereal time (IAU 1982 model).
+       *
+       *@param    UT1
+       *@return   Greenwich mean sidereal time (radians)
+       */
+   double ReferenceSystem::GMST82 (const CommonTime& UT1)
+   {
+        // Coefficients of IAU 1982 GMST-UT1 model.
+     double A, B, C, D;
+     A = 24110.54841;
+     B = 8640184.812866;
+     C = 0.093104;
+     D = -6.2e-6;
+
+        // Julian centuries since fundamental epoch.
+     double t;
+     t = (MJD(UT1).mjd - MJD_J2000) / 36525.0;
+
+        // Fractional part of JD(UT1), in seconds.
+     double f;
+     f = 86400.0 * fmod(double(MJD(UT1).mjd), 1.0);
+
+        // GMST at this UT1.
+     double gmst;
+     gmst = Anp(SEC_TO_RAD * ((A + (B + (C + D * t) * t) * t) + f));
+
+     return gmst;
+/*
+        // Variables
+     double Mjd_0,UT1,T_0,T,gmst;
+
+        // Mean Sidereal Time
+     Mjd_0 = floor(Mjd_UT1);
+     UT1   = 86400.0*(Mjd_UT1 - Mjd_0);          // [s]
+     T_0   = (Mjd_0  -MJD_J2000) / 36525.0;
+     T     = (Mjd_UT1-MJD_J2000) / 36525.0;
+
+
+        // According to the IERS notes 21, the GMST shoule be computed
+        // using the formula:
+     gmst  = 24110.54841 + 8640184.812866*T_0 + (0.093104-6.2e-6*T_0)*T_0*T_0
+             + 1.002737909350795*UT1; // [s]
+        // Fraction and integer of gmst
+     double Frac, Integer;
+
+        // Get the fraction of gmst
+     Frac = modf(gmst/86400.0, &Integer);
+
+     return  TWO_PI*Frac;
+*/
+   }
+
+
+      /**Greenwich apparent sidereal time (consistent with IAU 1982/94
+       * resolutions).
+       *
+       *@param    UT1
+       *@return   Greenwich apparent sidereal time (radians)
+       */
+   double ReferenceSystem::GAST94(const CommonTime& UT1)
+   {
+         // Conversion from UT1 to TT.
+      CommonTime UTC( UT12UTC(UT1) );
+
+      CommonTime TT( UTC2TT(UTC) );
+
+        // Mean obliquity of the ecliptic
+      double eps0 = MeanObliquity80(TT);
+
+      double ddpsi = getDPsi(UTC) * AS_TO_RAD;
+
+         // Greenwich apparent sidereal time (IAU 1982/1994).
+      double gst = GMST82(UT1) + EqnEquinox94(TT) + ddpsi * std::cos(eps0);
+
+      return fmod(gst, TWO_PI);
+   }
+
+
+      /* Transformation from true equator and equinox to Earth equator and
+       * Greenwich meridian system.
+       *
+       *@param    UT1
+       *@return   Greenwich hour angle matrix
+       */
+   Matrix<double> ReferenceSystem::GHAMatrix94(const CommonTime& UT1)
+   {
+      return  rotation( GAST94(UT1),3 );
+   }
+
+
+      /**Form the matrix of polar motion for a given date, IAU 2000.
+       *
+       *@param    UTC
+       *@return   Pole matrix
+       */
+   Matrix<double> ReferenceSystem::PoleMatrix (const CommonTime& UTC)
+   {
+      double xp = getXPole(UTC) * AS_TO_RAD;
+      double yp = getYPole(UTC) * AS_TO_RAD;
+
+      return  rotation( -xp, 2) * rotation( -yp, 1);
+   }
+
 
 
       /// X,Y coordinates of celestial intermediate pole from series based on IAU
       /// 2006 precession and IAU 2006 nutation.
-   void ReferenceSystem::XY06(const CommonTime& TT, double& X, double& Y)
+   void ReferenceSystem::XY06(const CommonTime& TT, double& x, double& y)
    {
        /* Maximum power of T in the polynomials for X and Y */
        enum { MAXPT = 5 };
@@ -3692,7 +4696,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  4, -7,  0,  0,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  3, -7,  0,  0,  0,  0,  0, -2 },
 
-
+           
            /* 101-110 */
            {  0,  0,  0,  0,  0,  0,  2, -2,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  1 },
@@ -3704,8 +4708,8 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  3, -3,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  1,  0,  2,  0,  0,  0,  2 },
-
-
+           
+           
            /* 111-120 */
            {  0,  0,  0,  0,  1,  0,  0,  1, -2,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  2 },
@@ -3717,8 +4721,8 @@ namespace gpstk
            {  0,  0,  1, -1,  0,  0,  0, -1,  0, -1,  0,  0,  0,  0 },
            {  2,  0,  0, -2,  0,  0, -6,  8,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  1,  0,  0, -2,  2,  0,  0,  0,  0,  0 },
-
-
+           
+           
            /* 121-130 */
            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  1 },
            {  0,  0,  1, -1,  1,  0,  0, -1,  0,  1,  0,  0,  0,  0 },
@@ -3730,8 +4734,8 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0, -3,  4,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  6, -9,  0,  0,  0,  0,  0, -2 },
            {  1,  0,  0, -1,  1,  0,  0, -1,  0,  2,  0,  0,  0,  0 },
-
-
+           
+           
            /* 131-140 */
            {  0,  0,  0,  0,  0,  0,  5, -7,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  5, -5,  0,  0,  0,  0,  0,  0 },
@@ -3743,8 +4747,8 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  1, -1,  0,  0,  0,  0,  0,  1 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  0,  0,  0,  0,  0,  1 },
            {  0,  0,  0,  0,  1,  0,  2, -3,  0,  0,  0,  0,  0,  0 },
-
-
+           
+           
            /* 141-150 */
            {  1,  0,  0, -1,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  1, -3,  0,  0,  0,  0,  0, -1 },
@@ -3756,8 +4760,8 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0, -4,  5,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  4, -6,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  4,  0, -1,  0,  0,  0,  2 },
-
-
+           
+           
            /* 151-160 */
            {  1,  0,  0, -1,  1,  0, -3,  4,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  1,  1,  1,  0,  0,  1,  0,  0,  0,  0,  0,  0 },
@@ -3769,8 +4773,8 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  1,  0, -4,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  2, -5,  0,  0, -2 },
            {  0,  0,  2, -2,  1,  0, -4,  4,  0,  0,  0,  0,  0,  0 },
-
-
+           
+           
            /* 161-170 */
            {  0,  0,  0,  0,  0,  0,  0,  3,  0,  0, -1,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  4, -3,  0,  0,  0,  0,  2 },
@@ -3782,7 +4786,7 @@ namespace gpstk
            {  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  1,  0,  0,  0 },
            {  0,  0,  2, -2,  1,  0,  0, -9, 13,  0,  0,  0,  0,  0 },
            {  2,  0,  2,  0,  2,  0,  0,  2,  0, -3,  0,  0,  0,  0 },
-
+           
            /* 171-180 */
            {  0,  0,  0,  0,  0,  0,  3, -6,  0,  0,  0,  0,  0, -2 },
            {  0,  0,  1, -1,  2,  0,  0, -1,  0,  0,  2,  0,  0,  0 },
@@ -3806,7 +4810,7 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0, -1,  0,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  0,  0, -5,  7,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  0, -2,  0,  0,  0,  1 },
-
+           
            /* 191-200 */
            {  0,  0,  0,  0,  0,  0,  0,  2,  0, -1,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  7,-10,  0,  0,  0,  0,  0, -2 },
@@ -3818,7 +4822,7 @@ namespace gpstk
            {  0,  0,  0,  0,  1,  0, -2,  3,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0, -1,  1,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  3, -6,  0,  0,  0,  0,  0 },
-
+           
            /* 201-210 */
            {  0,  0,  0,  0,  0,  0,  0,  1, -4,  0,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  0,  3,  0,  0,  0,  0,  2 },
@@ -3830,7 +4834,7 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0,  8,-14,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  0,  0,  0,  0 },
-
+           
            /* 211-220 */
            {  0,  0,  0,  0,  1,  0,  0,  8,-15,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  4, -6,  0,  0,  0,  0,  0 },
@@ -3842,7 +4846,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  4, -7,  0,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  3, -3,  0,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  1,  0,  0, -3,  4,  0,  0,  0,  0,  0 },
-
+           
            /* 221-230 */
            {  2,  0,  0, -2,  0,  0,  0, -6,  8,  0,  0,  0,  0,  0 },
            {  2,  0,  0, -2,  0,  0,  0, -5,  6,  0,  0,  0,  0,  0 },
@@ -3854,7 +4858,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  1, -1,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  3, -9,  4,  0,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  3, -5,  0,  0,  0,  0, -2 },
-
+           
            /* 231-240 */
            {  0,  0,  0,  0,  0,  0,  0,  2,  0, -4,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  2,  1 },
@@ -3866,7 +4870,7 @@ namespace gpstk
            {  0,  0,  1, -1,  2,  0,  0, -2,  2,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  3,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  6, -6,  0,  0,  0,  0,  0, -1 },
-
+           
            /* 241-250 */
            {  0,  0,  1, -1,  1,  0,  0, -1,  0, -1,  1,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  2, -2,  0,  0,  0,  0,  0,  1 },
@@ -3878,7 +4882,7 @@ namespace gpstk
            {  0,  0,  2, -2,  2,  0, -8, 11,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  5, -8,  3,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  1,  0,  0, -2,  0,  0,  0 },
-
+           
            /* 251-260 */
            {  0,  0,  0,  0,  0,  0,  0,  1,  0,  0,  1,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  5, -9,  0,  0,  0,  0, -2 },
@@ -3890,7 +4894,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  1,  1,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  0, -2,  5,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  3, -3,  0,  0,  0,  0,  0,  1 },
-
+           
            /* 261-270 */
            {  0,  0,  0,  0,  0,  0,  0,  6,  0,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  0,  2, -5,  0,  0,  2 },
@@ -3902,7 +4906,7 @@ namespace gpstk
            {  0,  0,  0,  0,  1,  0,  3, -7,  4,  0,  0,  0,  0,  0 },
            {  0,  0,  2, -2,  1,  0, -2,  2,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0,  0, -1,  0,  1,  0,  0,  0,  0 },
-
+           
            /* 271-280 */
            {  0,  0,  1, -1,  0,  0,  0, -1,  0, -2,  5,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  3,  0, -3,  0,  0,  0,  0 },
@@ -3914,7 +4918,7 @@ namespace gpstk
            {  1,  0,  0, -1,  0,  0,  0, -3,  4,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0, -3,  7, -4,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  5,  0, -2,  0,  0,  0,  2 },
-
+           
            /* 281-290 */
            {  0,  0,  0,  0,  0,  0,  3, -5,  0,  0,  0,  0,  0,  1 },
            {  0,  0,  2, -2,  2,  0, -5,  6,  0,  0,  0,  0,  0,  0 },
@@ -3926,7 +4930,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  4, -5,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  5, -7,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  6,-11,  0,  0,  0,  0, -2 },
-
+           
            /* 291-300 */
            {  0,  0,  0,  0,  0,  0,  0,  1, -3,  0,  0,  0,  0, -2 },
            {  0,  0,  1, -1,  1,  0,  0, -1,  0,  3,  0,  0,  0,  0 },
@@ -3938,7 +4942,7 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0, -2,  3,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  7, -7,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  0,  3, -6,  0,  0,  0,  0, -1 },
-
+           
            /* 301-310 */
            {  0,  0,  0,  0,  0,  0,  0,  6, -6,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  1,  0, -4,  0,  0,  0,  0,  0, -2 },
@@ -3950,7 +4954,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  2,  0,  0, -2,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  5, -9,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  5, -6,  0,  0,  0,  0,  0,  2 },
-
+           
            /* 311-320 */
            {  0,  0,  0,  0,  0,  0,  9, -9,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  1, -1,  1,  0,  0, -1,  0,  0,  3,  0,  0,  0 },
@@ -3962,7 +4966,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  5, -3,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  4,  0,  0,  0,  2 },
            {  0,  0,  2,  0,  2,  0,  0,  4, -8,  3,  0,  0,  0,  0 },
-
+           
            /* 321-330 */
            {  0,  0,  2,  0,  2,  0,  0, -4,  8, -3,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  5,  0, -3,  0,  0,  0,  2 },
@@ -3974,7 +4978,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  8,-13,  0,  0,  0,  0,  0,  1 },
            {  0,  0,  2, -2,  1, -1,  0,  2,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  1,  0,  0, -1,  0,  0,  0,  2,  0,  0 },
-
+           
            /* 331-340 */
            {  0,  0,  0,  0,  1,  0,  3, -5,  0,  0,  0,  0,  0,  0 },
            {  1,  0,  0, -2,  0,  0,  0, -2,  0,  3,  0,  0,  0,  0 },
@@ -3986,7 +4990,7 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0,  0, -1,  0, -1,  2,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  5, -5,  0,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  2, -6,  0,  0,  0,  0,  0, -2 },
-
+           
            /* 341-350 */
            {  0,  0,  0,  0,  0,  0,  0,  8,-15,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  0,  5, -2,  0,  0,  0,  0,  2 },
@@ -3998,7 +5002,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  8, -8,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  8,-10,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  4, -2,  0,  0,  0,  0,  0,  1 },
-
+           
            /* 351-360 */
            {  0,  0,  0,  0,  0,  0,  3, -6,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  3, -4,  0,  0,  0,  0,  0, -1 },
@@ -4010,7 +5014,7 @@ namespace gpstk
            {  2,  0, -1, -1, -1,  0,  0,  3, -7,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  5, -8,  0,  0,  0,  0,  0 },
            {  0,  0,  2,  0,  2,  0, -1,  1,  0,  0,  0,  0,  0,  0 },
-
+           
            /* 361-370 */
            {  2,  0,  0, -2,  0,  0,  0, -2,  0,  4, -3,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  6,-11,  0,  0,  0,  0,  0 },
@@ -4022,7 +5026,7 @@ namespace gpstk
            {  0,  0,  0,  0,  2,  0,  0,  4, -8,  3,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  2,  0,  0, -4,  8, -3,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  6,  0,  0,  0,  0,  0,  1 },
-
+           
            /* 371-380 */
            {  0,  0,  0,  0,  0,  0,  0,  6, -7,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  4,  0,  0, -2,  0,  0,  2 },
@@ -4034,7 +5038,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  3, -5,  0,  2,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  7,-13,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  0, -2,  0,  0,  0,  2 },
-
+           
            /* 381-390 */
            {  0,  0,  1, -1,  0,  0,  0, -1,  0,  0,  2,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0,  0, -8, 15,  0,  0,  0,  0,  0 },
@@ -4046,7 +5050,7 @@ namespace gpstk
            {  0,  0,  2,  0,  2,  0,  0, -1,  0,  1,  0,  0,  0,  0 },
            {  0,  0,  2, -2, -1,  0, -5,  6,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  2,  0,  0, -1,  0,  1,  0,  0,  0,  0 },
-
+           
            /* 391-400 */
            {  0,  0,  0,  0,  1,  0,  2, -2,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  8,-16,  0,  0,  0,  0,  0, -2 },
@@ -4058,7 +5062,7 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0,  0, -1,  0, -2,  4,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  2,  0,  0,  0,  0,  2 },
            {  2,  0,  0, -2, -1,  0,  0, -2,  0,  4, -5,  0,  0,  0 },
-
+           
            /* 401-410 */
            {  2,  0,  0, -2, -1,  0, -3,  3,  0,  0,  0,  0,  0,  0 },
            {  2,  0, -1, -1, -1,  0,  0, -1,  0,  0,  0,  0,  0,  0 },
@@ -4070,7 +5074,7 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0, -2,  1,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0,  5, -8,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0,  0,  0,  0,  0, -1,  0,  0,  0 },
-
+           
            /* 411-420 */
            {  0,  0,  0,  0,  0,  0,  9,-11,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  5, -3,  0,  0,  0,  0,  0,  1 },
@@ -4082,7 +5086,7 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0,  0, -1,  0,  0, -2,  0,  0,  0 },
            {  0,  0,  1, -1,  2,  0,  0, -1,  0, -2,  5,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  5, -7,  0,  0,  0,  0,  0 },
-
+           
            /* 421-430 */
            {  0,  0,  0,  0,  0,  0,  1, -3,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  5, -8,  0,  0,  0,  0, -2 },
@@ -4094,7 +5098,7 @@ namespace gpstk
            {  0,  0,  1, -1,  2,  0,  0, -1,  0, -1,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  8,-12,  0,  0,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  9,-17,  0,  0,  0,  0,  0 },
-
+           
            /* 431-440 */
            {  0,  0,  0,  0,  0,  0,  0,  5, -6,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  4, -8,  1,  5,  0,  0,  2 },
@@ -4106,7 +5110,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  1, -4,  0,  0,  0,  0,  0, -2 },
            {  1,  0, -2, -2, -2,  0,  0, -2,  0,  3,  0,  0,  0,  0 },
            {  1,  0, -1,  1, -1,  0,  0,  1,  0,  0,  0,  0,  0,  0 },
-
+           
            /* 441-450 */
            {  0,  0,  2, -2,  2,  0,  0, -2,  0,  2,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  2,  0,  0, -1,  0,  0,  1,  0,  0,  0 },
@@ -4118,7 +5122,7 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  5,-10,  0,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  4,  0, -4,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  0, -5,  0,  0,  0, -2 },
-
+           
            /* 451-460 */
            {  0,  0,  0,  0,  0,  0,  0,  1,  0, -5,  0,  0,  0, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  1,  0, -2,  5,  0,  0,  2 },
@@ -4130,8 +5134,8 @@ namespace gpstk
            {  0,  0,  1, -1, -1,  0,  0, -1,  0, -1,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0,  0,  1,  0, -2,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  6,-10,  0,  0,  0,  0, -2 },
-
-
+           
+           
            /* 461-470 */
            {  1,  0,  0, -1,  1,  0,  0, -1,  0,  1,  0,  0,  0,  0 },
            {  0,  0,  2, -2,  1,  0,  0,  4, -8,  3,  0,  0,  0,  0 },
@@ -4143,8 +5147,8 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0,  0, -4,  6,  0,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  1,  0,  0, -1,  0,  0,  0, -1,  0,  0 },
            {  0,  0,  1, -1,  1,  0, -5,  6,  0,  0,  0,  0,  0,  0 },
-
-
+           
+           
            /* 471-480 */
            {  0,  0,  0,  0,  1,  0,  3, -4,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0, -2,  2,  0,  0,  0,  0,  0,  0 },
@@ -4156,8 +5160,8 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  1, -2,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  0,  7, -9,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  7, -8,  0,  0,  0,  0,  2 },
-
-
+           
+           
            /* 481-490 */
            {  0,  0,  0,  0,  0,  0,  0,  3,  0,  0,  0,  0,  0,  2 },
            {  0,  0,  0,  0,  0,  0,  0,  3, -8,  3,  0,  0,  0, -2 },
@@ -4169,8 +5173,8 @@ namespace gpstk
            {  2,  0, -1, -1,  1,  0,  0,  3, -7,  0,  0,  0,  0,  0 },
            {  0,  0,  2, -2,  1,  0,  0, -7,  9,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  3, -5,  0,  0,  0,  0, -1 },
-
-
+           
+           
            /* 491-500 */
            {  0,  0,  1, -1,  2,  0, -8, 12,  0,  0,  0,  0,  0,  0 },
            {  1,  0,  0,  0,  0,  0,  0, -2,  0,  2,  0,  0,  0,  0 },
@@ -4182,8 +5186,8 @@ namespace gpstk
            {  1,  0,  1,  1,  1,  0,  0,  1,  0,  0,  0,  0,  0,  0 },
            {  1,  0,  0, -2,  1,  0,  0, -2,  0,  2,  0,  0,  0,  0 },
            {  1,  0,  0, -2, -1,  0,  0, -2,  0,  2,  0,  0,  0,  0 },
-
-
+           
+           
            /* 501-510 */
            {  1,  0,  0, -1, -1,  0,  0, -3,  4,  0,  0,  0,  0,  0 },
            {  1,  0, -1,  0, -1,  0, -3,  5,  0,  0,  0,  0,  0,  0 },
@@ -4195,8 +5199,8 @@ namespace gpstk
            {  0,  0,  1, -1,  1,  0,  0,  1, -4,  0,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  1,  0,  0, -1,  0,  1, -3,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0,  0,  7,-13,  0,  0,  0,  0,  0 },
-
-
+           
+           
            /* 511-520 */
            {  0,  0,  0,  0,  1,  0,  0,  2,  0, -2,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  1,  0,  0, -2,  2,  0,  0,  0,  0,  0 },
@@ -4208,8 +5212,8 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  5, -6,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  4, -2,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  3, -4,  0,  0,  0,  0,  0,  1 },
-
-
+           
+           
            /* 521-530 */
            {  0,  0,  0,  0,  0,  0,  1, -4,  0,  0,  0,  0,  0, -1 },
            {  0,  0,  0,  0,  0,  0,  0,  9,-17,  0,  0,  0,  0, -2 },
@@ -4221,8 +5225,8 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  1,  0,  1,  0,  0,  0,  1 },
            {  0,  0,  0,  0,  0,  0,  0,  1,  0, -4,  0,  0,  0,  0 },
            {  2,  0,  0, -2,  0,  0,  0, -4,  8, -3,  0,  0,  0,  0 },
-
-
+           
+           
            /* 531-540 */
            {  2,  0,  0, -2,  0,  0, -2,  2,  0,  0,  0,  0,  0,  0 },
            {  1,  0,  0,  0,  0,  0,  0,  4, -8,  3,  0,  0,  0,  0 },
@@ -4234,8 +5238,8 @@ namespace gpstk
            {  0,  0,  0,  0,  0,  0,  0,  6, -9,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  4,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  0,  3,  0, -4,  0,  0,  0,  0 },
-
-
+           
+           
            /* 541-550 */
            {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1, -2, -2 },
            {  0,  0,  0,  0,  0,  0,  0,  2,  1,  0,  0,  0,  0,  2 },
@@ -4247,8 +5251,8 @@ namespace gpstk
            {  1,  0,  0, -2,  0,  0,  1, -1,  0,  0,  0,  0,  0,  0 },
            {  1,  0,  0, -2,  0,  0,  0,  4, -8,  3,  0,  0,  0,  0 },
            {  1,  0,  0, -2,  0,  0,  0, -4,  8, -3,  0,  0,  0,  0 },
-
-
+           
+           
            /* 551-560 */
            {  1,  0,  0, -2,  0,  0, -2,  2,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  2, -2,  0,  0, -4,  4,  0,  0,  0,  0,  0,  0 },
@@ -4260,8 +5264,8 @@ namespace gpstk
            {  0,  0,  1, -1,  0,  0, -4,  5,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  1, -1,  0,  0, -3,  4,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  2,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0 },
-
-
+           
+           
            /* 561-570 */
            {  0,  0,  0,  0,  0,  0,  8, -9,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  0,  0,  0,  0,  3, -6,  0,  0,  0,  0,  0,  0 },
@@ -4273,8 +5277,8 @@ namespace gpstk
            {  1,  0,  0,  0, -1,  0,-10,  3,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  2,  0,  2,  0,  2, -3,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  2,  0,  2,  0,  2, -2,  0,  0,  0,  0,  0,  0 },
-
-
+           
+           
            /* 571-580 */
            {  0,  0,  2,  0,  2,  0, -2,  3,  0,  0,  0,  0,  0,  0 },
            {  0,  0,  2,  0,  2,  0, -2,  2,  0,  0,  0,  0,  0,  0 },
@@ -4286,8 +5290,8 @@ namespace gpstk
            {  2,  0,  0, -2,  0,  0,  0, -2,  0,  5, -5,  0,  0,  0 },
            {  2,  0,  0, -2,  0,  0,  0, -2,  0,  1,  5,  0,  0,  0 },
            {  2,  0,  0, -2,  0,  0,  0, -2,  0,  0,  5,  0,  0,  0 },
-
-
+           
+           
            /* 581-590 */
            {  2,  0,  0, -2,  0,  0,  0, -2,  0,  0,  2,  0,  0,  0 },
            {  2,  0,  0, -2,  0,  0, -4,  4,  0,  0,  0,  0,  0,  0 },
@@ -5243,11 +6247,7 @@ namespace gpstk
        /*--------------------------------------------------------------------*/
 
        /* Interval between fundamental date J2000.0 and given date (JC). */
-       long double mjd = MJD(TT).mjd;
-       int mjd_int = int(mjd);
-       double mjd_frac = mjd - mjd_int;
-
-       t = ((mjd_int - MJD_J2000) + mjd_frac) / JC;
+       t = (MJD(TT).mjd - MJD_J2000) / JC;
 
        /* Powers of T. */
        w = 1.0;
@@ -5294,8 +6294,8 @@ namespace gpstk
                  	    t * ( 1602961601.2090 +
                  	    t * (        - 6.3706 +
                  	    t * (          0.006593 +
-                        t * (        - 0.00003169 ) ) ) ), TURNAS ) * AS_TO_RAD;
-
+             	        t * (        - 0.00003169 ) ) ) ), TURNAS ) * AS_TO_RAD;
+ 
        /* Mean longitude of the ascending node of the Moon. */
        fa[4] = std::fmod(        450160.398036 +
                  	    t * ( - 6962890.5431 +
@@ -5305,19 +6305,12 @@ namespace gpstk
 
        /* Planetary longitudes, Mercury through Neptune. */
        fa[5] = std::fmod(4.402608842 + 2608.7903141574 * t, TWO_PI);
-
        fa[6] = std::fmod(3.176146697 + 1021.3285546211 * t, TWO_PI);
-
        fa[7] = std::fmod(1.753470314 + 628.3075849991 * t, TWO_PI);
-
        fa[8] = std::fmod(6.203480913 + 334.0612426700 * t, TWO_PI);
-
        fa[9] = std::fmod(0.599546497 + 52.9690962641 * t, TWO_PI);
-
        fa[10] = std::fmod(0.874016757 + 21.3299104960 * t, TWO_PI);
-
        fa[11] = std::fmod(5.481293872 + 7.4781598567 * t, TWO_PI);
-
        fa[12] = std::fmod(5.311886287 + 3.8133035638 * t, TWO_PI);
 
        /* General accumulated precession in longitude. */
@@ -5414,8 +6407,8 @@ namespace gpstk
        /* Results:  CIP unit vector components */
        /* ------------------------------------ */
 
-       X = AS_TO_RAD * (xypr[0] + (xyls[0] + xypl[0]) / 1e6);
-       Y = AS_TO_RAD * (xypr[1] + (xyls[1] + xypl[1]) / 1e6);
+       x = AS_TO_RAD * (xypr[0] + (xyls[0] + xypl[0]) / 1e6);
+       y = AS_TO_RAD * (xypr[1] + (xyls[1] + xypl[1]) / 1e6);
 
    }  // End of method 'ReferenceSystem::XY06()'
 
@@ -5423,7 +6416,7 @@ namespace gpstk
       /// The CIO locator s, positioning the Celestial Intermediate Origin on
       /// the equator of the Celestial Intermediate Pole, given the CIP's X,Y
       /// coordinates.  Compatible with IAU 2006/2000A precession-nutation.
-   double ReferenceSystem::S06(const CommonTime& TT, const double& X, const double& Y)
+   double ReferenceSystem::S06(const CommonTime& TT, const double& x, const double& y)
    {
        /* Time since J2000.0, in Julian centuries */
        double t;
@@ -5607,7 +6600,7 @@ namespace gpstk
                  	    t * (        - 6.3706 +
                  	    t * (          0.006593 +
              	        t * (        - 0.00003169 ) ) ) ), TURNAS ) * AS_TO_RAD;
-
+ 
        /* Mean longitude of the ascending node of the Moon. */
        fa[4] = std::fmod(        450160.398036 +
                  	    t * ( - 6962890.5431 +
@@ -5677,7 +6670,7 @@ namespace gpstk
            (w2 +
            (w3 +
            (w4 +
-            w5 * t) * t) * t) * t) * t) * AS_TO_RAD - X*Y/2.0;
+            w5 * t) * t) * t) * t) * t) * AS_TO_RAD - x*y/2.0;
 
        return s;
 
@@ -5686,13 +6679,13 @@ namespace gpstk
 
       /// Form the celestial to intermediate-frame-of-date matrix given the CIP
       /// X,Y and CIO locator s.
-   Matrix<double> ReferenceSystem::C2IXYS(const double& X, const double& Y, const double& s)
+   Matrix<double> ReferenceSystem::C2IXYS(const double& x, const double& y, const double& s)
    {
        double r2, e, d;
 
        /* Obtaion the spherical angles E and d. */
-       r2 = X*X + Y*Y;
-       e = (r2 > 0.0) ? std::atan2(Y,X) : 0.0;
+       r2 = x*x + y*y;
+       e = (r2 > 0.0) ? std::atan2(y,x) : 0.0;
        d = std::atan(std::sqrt(r2 / (1.0 - r2)));
 
        /* Form the matrix. */
@@ -5711,7 +6704,7 @@ namespace gpstk
        double d1, d2, t, f, theta;
 
        /* Days since fundamental epoch. */
-/*
+/*       
        long day, sod; double fsod;
        ut1.get(day, sod, fsod);
 
@@ -5738,22 +6731,19 @@ namespace gpstk
    }  // End of method 'ReferenceSystem::ERA00()'
 
 
-      /**The TIO locator s', positioning the Terrestrial Intermediate Origin
-       * on the equator of the Celestial Intermediate Pole.
-       *
-       * @param   TT
-       * @return  the TIO locator s' in radians
-       */
+   // The TIO locator s', positioning the Terrestrial Intermediate Origin
+   // on the equator of the Celestial Intermediate Pole.
    double ReferenceSystem::SP00(const CommonTime& TT)
    {
+       double t, sp;
 
-      /* Interval between fundamental epoch J2000.0 and current date (JC). */
-      double t = (MJD(TT).mjd - MJD_J2000) / 36525.0;
+       /* Interval between fundamental epoch J2000.0 and current date (JC). */
+       t = (MJD(TT).mjd - MJD_J2000) / JC;
 
-      /* Approximate s'. */
-      double sp = -47e-6 * t * AS_TO_RAD;
+       /* Approximate s'. */
+       sp = -47e-6 * t * AS_TO_RAD;
 
-      return sp;
+       return sp;
 
    }  // End of method 'ReferenceSystem::SP00()'
 
@@ -5772,63 +6762,142 @@ namespace gpstk
    }  // End of method 'ReferenceSystem::POM00()'
 
 
-
       /// Transformation matrix from ICRS to ITRS.
    Matrix<double> ReferenceSystem::C2TMatrix(const CommonTime& UTC)
    {
-       // EOP Data
-       EOPDataStore2::EOPData eop( getEOPData(UTC) );
-
-       // Ocean Tide
-       double cor_ocean[4] = {0.0};
-       (*pEopStore).PMUT1_OCEANS(UTC, cor_ocean);
-
-       eop.xp += cor_ocean[0];
-       eop.yp += cor_ocean[1];
-       eop.UT1mUTC += cor_ocean[2];
-       eop.LOD += cor_ocean[3];
-
-       eop.xp *= AS_TO_RAD;
-       eop.yp *= AS_TO_RAD;
-       eop.dX *= AS_TO_RAD;
-       eop.dY *= AS_TO_RAD;
-
        // TT
        CommonTime TT( UTC2TT(UTC) );
 
+       // day, sod, fsod and timeSystem of utc
+       long day, sod;
+       double fsod;
+       TimeSystem timeSystem;
+
+       UTC.get(day, sod, fsod, timeSystem);
+
+       // get the epoch before and after utc
+       CommonTime UTC1, UTC2;
+       UTC1.set(day, timeSystem);
+       UTC2.set(day+1, timeSystem);
+
+       // get the eop before and after utc
+       EOPDataStore::EOPData eop1, eop2;
+       eop1 = getEOPData(UTC1);
+       eop2 = getEOPData(UTC2);
+
+//       cout << "EOP before reduce UT1-UTC to UT1R-UTC:" << endl;
+//       cout << CivilTime(UTC1) << eop1 << endl;
+//       cout << CivilTime(UTC2) << eop2 << endl;
+
+       // reduce UT1-UTC to UT1R-UTC for interpolation
+       CommonTime TT1(UTC2TT(UTC1)), TT2(UTC2TT(UTC2));
+
+       Vector<double> cor_zonalTide1( RG_ZONT2(TT1) );
+       Vector<double> cor_zonalTide2( RG_ZONT2(TT2) );
+
+       eop1.UT1mUTC -= cor_zonalTide1(0);
+       eop2.UT1mUTC -= cor_zonalTide2(0);
+
+//       cout << "EOP after reduce UT1-UTC to UT1R-UTC (subroutine RG_ZONT2):" << endl;
+//       cout << CivilTime(UTC1) << eop1 << endl;
+//       cout << CivilTime(UTC2) << eop2 << endl;
+
+       // interpolation of eop
+       EOPDataStore::EOPData eop;
+       eop.xp       =   eop1.xp + (eop2.xp-eop1.xp) * ((UTC-UTC1)/(UTC2-UTC1));
+       eop.yp       =   eop1.yp + (eop2.yp-eop1.yp) * ((UTC-UTC1)/(UTC2-UTC1));
+       eop.UT1mUTC  =   eop1.UT1mUTC + (eop2.UT1mUTC-eop1.UT1mUTC) * ((UTC-UTC1)/(UTC2-UTC1));
+       eop.dPsi     =   eop1.dPsi + (eop2.dPsi-eop1.dPsi) * ((UTC-UTC1)/(UTC2-UTC1));
+       eop.dEps     =   eop1.dEps + (eop2.dEps-eop1.dEps) * ((UTC-UTC1)/(UTC2-UTC1));
+//       cout << "EOP interpolation:" << endl;
+//       cout << CivilTime(UTC) << eop << endl;
+
+       // add subdaily pole model to pole values
+       // Tidal variations in the Earth's rotation
+       // 1. diurnal/subdiurnal tidal effect on polar motion ("), UT1 (s) and
+       //    LOD (s).
+       // 2. diurnal lunisolar effect on polar motion (").
+       Vector<double> cor_oceanTides = PMUT1_OCEANS(UTC);   // xp, yp, ut1, lod
+       Vector<double> cor_libration1 = PMSDNUT2(UTC);       // xp, yp
+       Vector<double> cor_libration2 = UTLIBR(UTC);         // ut1, lod
+
+//       cout << "OceanTides from PMUT1_OCEANS subroutine: " << endl
+//            << setw(12) << cor_oceanTides << endl;
+//       cout << "Libration1 from PMSDNUT2     subroutine: " << endl
+//            << setw(12) << cor_libration1 << endl;
+//       cout << "Libration2 from UTLIBR       subroutine: " << endl
+//            << setw(12) << cor_libration2 << endl;
+
+       eop.UT1mUTC  +=  cor_oceanTides(2) + cor_libration2(0);
+       eop.xp       +=  cor_oceanTides(0) + cor_libration1(0);
+       eop.yp       +=  cor_oceanTides(1) + cor_libration1(1);
+//       cout << "EOP after add subdaily pole model:" << endl;
+//       cout << CivilTime(UTC) << eop << endl;
+
+       // correct interpolated UT1R-UTC to UT1-UTC
+       Vector<double> cor_zonalTide( RG_ZONT2(TT) );
+       eop.UT1mUTC += cor_zonalTide(0);
+//       cout << "EOP after correct interpolated UT1R-UTC to UT1-UTC:" << endl;
+//       cout << CivilTime(UTC) << eop << endl;
+
+       cout << setprecision(6);
+       cout << "EOP " << MJD(UTC).mjd << eop << endl;
+
+       eop.xp   *=  AS_TO_RAD;
+       eop.yp   *=  AS_TO_RAD;
+       eop.dPsi *=  AS_TO_RAD;
+       eop.dEps *=  AS_TO_RAD;
+
        // UT1
-       CommonTime UT1( UTC2UT1(UTC, eop.UT1mUTC) );
+       CommonTime UT1(UTC2UT1(UTC, eop.UT1mUTC));
 
-       // Raw CIP X,Y coordinates
-       double X(0.0), Y(0.0);
-       XY06(TT, X, Y);
 
-       // The CIO locator s
-       double s = S06(TT, X, Y);
+       cout << setprecision(14);
 
-       // Corrected CIP X,Y coordinates
-       X += eop.dX;
-       Y += eop.dY;
+       Matrix<double> P = PrecMatrix76(TT);
+       cout << "Precession Matrix: " << endl;
+       cout << P << endl;
 
-       // GCRS-to-CTRS matrix
-       Matrix<double> Q = C2IXYS(X, Y, s);
+       Matrix<double> N = NutMatrix80(TT);
+       cout << "Nutation Matrix: " << endl;
+       cout << N << endl;
 
-       // Earth rotation angle
-       double ERA = ERA00(UT1);
+       Matrix<double> R = GHAMatrix94(UT1);
+       Matrix<double> W = PoleMatrix(UTC);
+       cout << "S Matrix: " << endl;
+       cout << W*R << endl;
 
-       // CIRS-to-TIRS matrix
-       Matrix<double> R = rotation(ERA,3);
+       return W*R*N*P;
 
-       // The TIO locator s'
-       double sp = SP00(TT);
 
-       // TIRS-to-ITRS matrix
+       //-------------------- IERS Conventions 2010 --------------------//
+/*
+       // X,Y and s
+       double x,y,s;
+       XY06(tt, x, y);
+       s = S06(tt, x, y);
+       x += eop.dPsi;
+       y += eop.dEps;
+
+       // Q
+       Matrix<double> Q = C2IXYS(x,y,s);
+
+       // R
+       double era = ERA00(ut1);
+       Matrix<double> R(3,3,0.0);
+//       R(0,0) = 1.0; R(1,1) = 1.0; R(2,2) = 1.0;
+//       Rz(era, R);
+       R = rotation(era,3);
+
+       // W
+       double sp = SP00(tt);
        Matrix<double> W = POM00(eop.xp, eop.yp, sp);
 
        return W * R * Q;
+*/
 
    }  // End of method 'ReferenceSystem::C2TMatrix()'
-
+ 
 
       /// Transformation matrix from ITRS to ICRS.
    Matrix<double> ReferenceSystem::T2CMatrix(const CommonTime& UTC)
@@ -5845,7 +6914,7 @@ namespace gpstk
        //
        const double t( (MJD(UT1).mjd - MJD_J2000) / JC );
 
-       //
+       // 
        double dtheta = 1.00273781191135448 * TWO_PI / DAY_TO_SEC;
 
        return dtheta;
@@ -5855,60 +6924,73 @@ namespace gpstk
 
       /// Time derivative of transformation matrix from CRS to TRS coordinates
       /// for a given date
-   Matrix<double> ReferenceSystem::dC2TMatrix(const CommonTime& UTC)
+   Matrix<double> ReferenceSystem::dC2TMatrix(const CommonTime& utc)
    {
-       // EOP Data
-       EOPDataStore2::EOPData eop( getEOPData(UTC) );
-
-       // Ocean Tide
-       double cor_ocean[4] = {0.0};
-       (*pEopStore).PMUT1_OCEANS(UTC, cor_ocean);
-
-       eop.xp += cor_ocean[0];
-       eop.yp += cor_ocean[1];
-       eop.UT1mUTC += cor_ocean[2];
-       eop.LOD += cor_ocean[3];
-
-       eop.xp *= AS_TO_RAD;
-       eop.yp *= AS_TO_RAD;
-       eop.dX *= AS_TO_RAD;
-       eop.dY *= AS_TO_RAD;
+       // UT1
+       CommonTime ut1( UTC2UT1(utc) );
 
        // TT
-       CommonTime TT( UTC2TT(UTC) );
+       CommonTime tt( UTC2TT(utc) );
 
-       // UT1
-       CommonTime UT1( UTC2UT1(UTC, eop.UT1mUTC) );
+       // Earth Orientation Parameters
+       double xp     =  getXPole(utc);    // arcsecond
+       double yp     =  getYPole(utc);    // arcsecond
+       double dut1   =  getUT1mUTC(utc);  // second
+       double dX     =  getDPsi(utc);     // arcsecond
+       double dY     =  getDEps(utc);     // arcsecond
 
-       // Raw CIP X,Y coordinates
-       double X(0.0), Y(0.0);
-       XY06(TT, X, Y);
+       // Tidal variations in the Earth's rotation
+       // 1. diurnal/subdiurnal tidal effect on polar motion ("), UT1 (s) and
+       //    LOD (s).
+       // 2. diurnal lunisolar effect on polar motion (").
+       Vector<double> cor_oceantides = PMUT1_OCEANS(utc);   // xp, yp, ut1, lod
+       Vector<double> cor_libration1 = PMSDNUT2(utc);       // xp, yp
+       Vector<double> cor_libration2 = UTLIBR(utc);         // ut1, lod
 
-       // The CIO locator s
-       double s = S06(TT, X, Y);
+//       cout << "OceanTides: " << cor_oceantides << endl;
+//       cout << "Libration1: " << cor_libration1 << endl;
+//       cout << "Libration2: " << cor_libration2 << endl;
 
-       // Corrected CIP X,Y coordinates
-       X += eop.dX;
-       Y += eop.dY;
+       dut1 += cor_oceantides(2) + cor_libration2(0);
+       xp   += cor_oceantides(0) + cor_libration1(0);
+       yp   += cor_oceantides(1) + cor_libration1(1);
 
-       // GCRS-to-CTRS matrix
-       Matrix<double> Q = C2IXYS(X, Y, s);
+//       cout << "dut1: " << dut1 << endl
+//            << "xp: " << xp << endl
+//            << "yp: " << yp << endl;
 
-       // Earth rotation angle and its time dot
-       double ERA = ERA00(UT1);
-       double dERA = dERA00(UT1);
+       xp = xp * AS_TO_RAD;
+       yp = yp * AS_TO_RAD;
+       dX = dX * AS_TO_RAD;
+       dY = dY * AS_TO_RAD;
 
-       // CIRS-to-TIRS matrix time dot
+       double x,y,s;
+       XY06(tt, x, y);
+       s = S06(tt, x, y);
+       x = x + dX;
+       y = y + dY;
+//       cout << "X: " << x << endl
+//            << "Y: " << y << endl
+//            << "S: " << s*RAD_TO_AS << endl;
+
+       // Q
+       Matrix<double> Q = C2IXYS(x,y,s);
+
+       // ERA, dERA
+       double era    = ERA00(ut1);
+       double dera   = dERA00(ut1);
+
+       // dR
        Matrix<double> dR(3,3,0.0);
-       dR(0,0) = -std::sin(ERA);
-       dR(0,1) =  std::cos(ERA);
-       dR(1,0) = -std::cos(ERA);
-       dR(1,1) = -std::sin(ERA);
-       dR = dR * dERA;
+       dR(0,0) = -std::sin(era);
+       dR(0,1) =  std::cos(era);
+       dR(1,0) = -std::cos(era);
+       dR(1,1) = -std::sin(era);
+       dR = dR * dera;
 
        // W
-       double sp = SP00(TT);
-       Matrix<double> W = POM00(eop.xp, eop.yp, sp);
+       double sp = SP00(tt);
+       Matrix<double> W = POM00(xp, yp, sp);
 
        return W * dR * Q;
 
@@ -5948,7 +7030,7 @@ namespace gpstk
 
       /// Doodson fundamental arguments
    void ReferenceSystem::DoodsonArguments(const CommonTime& UT1,
-                                          const CommonTime& TT,
+                                          const CommonTime& TT, 
                                           double BETA[6],
                                           double FNUT[5]         )
    {
@@ -5981,7 +7063,7 @@ namespace gpstk
          t * (       - 0.00001149 ) ) ) ), TURNAS ) * AS_TO_RAD;
 
       double F2 = Anpm(temp);           // [-PI, +PI]
-
+      
       // Mean longitude of the Moon minus that of the ascending node.
       temp = fmod(           335779.526232 +
          t * ( 1739527262.8478 +
@@ -5989,8 +7071,8 @@ namespace gpstk
          t * (        - 0.001037 +
          t * (          0.00000417 ) ) ) ), TURNAS ) * AS_TO_RAD;
       double F3 = Anpm(temp);           // [-PI, +PI]
-
-      // Mean elongation of the Moon from the Sun.
+      
+      // Mean elongation of the Moon from the Sun. 
       temp = fmod(          1072260.703692 +
          t * ( 1602961601.2090 +
          t * (        - 6.3706 +
@@ -5998,7 +7080,7 @@ namespace gpstk
          t * (        - 0.00003169 ) ) ) ), TURNAS ) * AS_TO_RAD;
 
       double F4 = Anpm(temp);           // [-PI, +PI]
-
+      
       // Mean longitude of the ascending node of the Moon.
       temp = fmod(          450160.398036 +
          t * ( - 6962890.5431 +

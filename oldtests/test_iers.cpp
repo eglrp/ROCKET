@@ -1,47 +1,6 @@
 /*
  * Test for the transformation between ITRS and ICRS.
  *
- * Test time: 2015/01/01,12h, 0m, 0.0s, UTC
- *
- * Matrix from http://hpiers.obspm.fr/eop-pc/index.php?index=matrice&lang=en#description
- *
- *    0.184438630509  0.982842935794  0.001468038215
- *   -0.982843980602  0.184438898953 -0.000048456351
- *   -0.000318388334 -0.001433915300  0.999998921257
- *
- * Matrix from finals2000A.all
- *
- *    0.184438630470  0.982842935802  0.001468037600
- *   -0.982843980609  0.184438898913 -0.000048455779
- *   -0.000318387659 -0.001433914801  0.999998921258
- *
- * Matrix difference
- *
- *   -3.9e-11   0.8e-11  -6.2e-10
- *   -0.7e-11  -4.0e-11   5.7e-10
- *    6.8e-10   5.0e-10   0.1e-11
- *
- * Position & Velocity in ICRS
- *
- *    17136494.765728, -20036699.180210,  3829990.621173
- *    1994.595123,      1098.432731,     -3119.495350
- *
- * Matrix from eopc04_08_IAU2000.62-now
- *
- *    0.184438630447  0.982842935806  0.001468037936
- *   -0.982843980613  0.184438898891 -0.000048456120
- *   -0.000318388056 -0.001433915068  0.999998921258
- *
- * Matrix difference
- *
- *   -6.2e-11   1.2e-11  -2.8e-10
- *   -1.1e-11   6.2e-11   2.3e-10
- *    2.8e-10   2.3e-10   0.1e-11
- *
- * Position & Velocity in ICRS
- *
- *    17136494.766552, -20036699.181912,  3829990.608585
- *    1994.595122,      1098.432732,     -3119.495350
  */
 
 #include <iostream>
@@ -73,17 +32,17 @@ int main(void)
     }
 
     // EOP Data Store
-    EOPDataStore eopDataStore;
-    
+    EOPDataStore2 eopDataStore;
+
     // IERS EOP file
-    string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
+    string eopFile = confReader.getValue("STKEOPFILE", "DEFAULT");
     try
     {
-        eopDataStore.loadIERSFile(eopFile);
+        eopDataStore.loadSTKFile(eopFile);
     }
     catch(...)
     {
-        cerr << "IERS Earth Orientation Parameters File Load Error." << endl;
+        cerr << "STK Earth Orientation Parameters File Load Error." << endl;
 
         return 1;
     }
@@ -93,7 +52,7 @@ int main(void)
     LeapSecStore leapSecStore;
 
     // IERS LeapSecond file
-    string lsFile  = confReader.getValue("IERSLSFile", "DEFAULT");
+    string lsFile  = confReader.getValue("IERSLSFILE", "DEFAULT");
     try
     {
         leapSecStore.loadFile(lsFile);
@@ -122,7 +81,7 @@ int main(void)
     sp3Eph.setPosMaxInterval(9*900+1);
 
     string sp3File;
-    while( (sp3File = confReader.fetchListValue("IGSSP3List", "DEFAULT")) != "" )
+    while( (sp3File = confReader.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
     {
         try
         {
@@ -136,22 +95,82 @@ int main(void)
         }
     }
 
-    // Time
-    CivilTime ct(2015,1,1,12,0,0.0, TimeSystem::UTC);
-    CommonTime UTC( ct.convertToCommonTime() );
+    // GPS
+//    CivilTime CT(2015,1,1,12,0,0.0, TimeSystem::GPS);
+//    CommonTime GPS( CT.convertToCommonTime() );
+
+//    cout << "GPS: " << CT << endl;
+
+    // UTC
+//    CommonTime UTC( rs.GPS2UTC(GPS) );
+//    cout << "UTC: " << CivilTime(UTC) << endl;
+
+    // TT
+//    CommonTime TT( rs.UTC2TT(UTC) );
+
+    CivilTime CT(2014,1,1,0,0,0.0, TimeSystem::UTC);
+    CommonTime UTC( CT.convertToCommonTime() );
+
     CommonTime GPS( rs.UTC2GPS(UTC) );
+    CommonTime TT ( rs.UTC2TT (UTC) );
 
-    cout << fixed << setprecision(4);
-    cout << ct << endl;
 
-    // Transform matrix
-    Matrix<double> C2T( rs.C2TMatrix(UTC) );
-    cout << fixed << setprecision(12);
-    cout << "C2T: " << endl << C2T << endl;
-    // Transform matrix time dot
-    Matrix<double> dC2T( rs.dC2TMatrix(UTC) );
-    cout << fixed << setprecision(12);
-    cout << "dC2T: " << endl << dC2T << endl;
+    for(int i=0; i<=24*360; ++i)
+    {
+        CommonTime time = UTC + i*3600.0;
+
+        Matrix<double> T2C( rs.T2CMatrix(time) );
+
+        CivilTime temp(time);
+
+        cout << setw(4) << temp.year << " "
+             << setw(2) << temp.month << " "
+             << setw(2) << temp.day << " "
+             << setw(2) << temp.hour << " "
+             << setw(2) << temp.minute << " "
+             << setw(10) << temp.second << " ";
+
+        cout << fixed << setprecision(10);
+
+        cout << setw(15) << T2C(0,0) << " "
+             << setw(15) << T2C(0,1) << " "
+             << setw(15) << T2C(0,2) << " "
+             << setw(15) << T2C(1,0) << " "
+             << setw(15) << T2C(1,1) << " "
+             << setw(15) << T2C(1,2) << " "
+             << setw(15) << T2C(2,0) << " "
+             << setw(15) << T2C(2,1) << " "
+             << setw(15) << T2C(2,2) << endl;
+    }
+
+/*
+    // T2C matrix and its time dot
+    Matrix<double> T2C( rs.T2CMatrix(UTC) );
+    Matrix<double> dT2C( rs.dT2CMatrix(UTC) );
+
+    cout << fixed << setprecision(10);
+    cout << "C2T: " << endl
+         << setw(18) << T2C(0,0) << " "
+         << setw(18) << T2C(0,1) << " "
+         << setw(18) << T2C(0,2) << endl
+         << setw(18) << T2C(1,0) << " "
+         << setw(18) << T2C(1,1) << " "
+         << setw(18) << T2C(1,2) << endl
+         << setw(18) << T2C(2,0) << " "
+         << setw(18) << T2C(2,1) << " "
+         << setw(18) << T2C(2,2) << endl;
+
+    cout << "dC2T: " << endl
+         << setw(18) << dT2C(0,0) << " "
+         << setw(18) << dT2C(0,1) << " "
+         << setw(18) << dT2C(0,2) << endl
+         << setw(18) << dT2C(1,0) << " "
+         << setw(18) << dT2C(1,1) << " "
+         << setw(18) << dT2C(1,2) << endl
+         << setw(18) << dT2C(2,0) << " "
+         << setw(18) << dT2C(2,1) << " "
+         << setw(18) << dT2C(2,2) << endl;
+
 
     // Satellite ID
     SatID sat(1, SatID::systemGPS);
@@ -171,20 +190,30 @@ int main(void)
     }
 
     // Position and velocity in ICRS
-    Vector<double> r_icrs( transpose(C2T)*r_itrs );
-    Vector<double> v_icrs( transpose(C2T)*v_itrs + transpose(dC2T)*r_itrs);
+    Vector<double> r_icrs( T2C * r_itrs );
+    Vector<double> v_icrs( T2C * v_itrs + dT2C * r_itrs);
 
-    // Output
     cout << fixed << setprecision(6);
-    cout << "r_itrs: " << endl;
-    cout << setw(12) << r_itrs << endl;
-    cout << "v_itrs: " << endl;
-    cout << setw(12) << v_itrs << endl;
-    cout << "r_icrs: " << endl;
-    cout << setw(12) << r_icrs << endl;
-    cout << "v_icrs: " << endl;
-    cout << setw(12) << v_icrs << endl;
 
+    cout << "r_itrs: " << endl
+         << setw(18) << r_itrs[0] << " "
+         << setw(18) << r_itrs[1] << " "
+         << setw(18) << r_itrs[2] << endl;
 
+    cout << "v_itrs: " << endl
+         << setw(18) << v_itrs[0] << " "
+         << setw(18) << v_itrs[1] << " "
+         << setw(18) << v_itrs[2] << endl;
+
+    cout << "r_icrs: " << endl
+         << setw(18) << r_icrs[0] << " "
+         << setw(18) << r_icrs[1] << " "
+         << setw(18) << r_icrs[2] << endl;
+
+    cout << "v_icrs: " << endl
+         << setw(18) << v_icrs[0] << " "
+         << setw(18) << v_icrs[1] << " "
+         << setw(18) << v_icrs[2] << endl;
+*/
     return 0;
 }
