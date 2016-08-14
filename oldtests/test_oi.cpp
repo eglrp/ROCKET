@@ -100,7 +100,7 @@ int main(void)
 
 
    // Initial time
-   CivilTime cv0(2015,1,1,0,0,0.0, TimeSystem::GPS);
+   CivilTime cv0(2015,1,1,12,0,0.0, TimeSystem::GPS);
    CommonTime gps0( cv0.convertToCommonTime() );
    CommonTime utc0( refSys.GPS2UTC(gps0) );
 
@@ -357,39 +357,27 @@ int main(void)
       cout << setprecision(9);
 
       // dr/dr0
-      // (drx/drx0, drx/dry0, drx/drz0, ...)
-      cout << setw(20) << y( 6) << ' '
-           << setw(20) << y( 7) << ' '
-           << setw(20) << y( 8) << endl
-           << setw(20) << y( 9) << ' '
-           << setw(20) << y(10) << ' '
-           << setw(20) << y(11) << endl
-           << setw(20) << y(12) << ' '
-           << setw(20) << y(13) << ' '
-           << setw(20) << y(14) << endl;
-
-      // dr/dv0
-      // (drx/dvx0, drx/drvy0, drx/drvz0, ...)
-      cout << setw(20) << y(15) << ' '
-           << setw(20) << y(16) << ' '
-           << setw(20) << y(17) << endl
-           << setw(20) << y(18) << ' '
-           << setw(20) << y(19) << ' '
-           << setw(20) << y(20) << endl
-           << setw(20) << y(21) << ' '
-           << setw(20) << y(22) << ' '
-           << setw(20) << y(23) << endl;
-
-      // dr/dp0
-      // (drx/dp0, ..., drx/dp9, ...)
       for(int j=0; j<3; ++j)
       {
-          for(int k=0; k<np; ++k)
-          {
-              cout << setw(20) << y(24+j*np+k) << ' ';
-          }
+          cout << setw(20) << y( 6+j) << ' '
+               << setw(20) << y( 9+j) << ' '
+               << setw(20) << y(12+j) << endl;
+      }
 
-          cout << endl;
+      // dr/dv0
+      for(int j=0; j<3; ++j)
+      {
+          cout << setw(20) << y(15+j) << ' '
+               << setw(20) << y(18+j) << ' '
+               << setw(20) << y(21+j) << endl;
+      }
+
+      // dr/dp0
+      for(int j=0; j<np; ++j)
+      {
+          cout << setw(20) << y(24+0*np+j) << ' '
+               << setw(20) << y(24+1*np+j) << ' '
+               << setw(20) << y(24+2*np+j) << endl;
       }
 
       cout << endl;
