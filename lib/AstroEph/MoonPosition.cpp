@@ -17,7 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
-//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007 
+//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007
 //
 //============================================================================
 
@@ -37,14 +37,13 @@
 
 /**
  * @file MoonPosition.cpp
- * Returns the approximate position of the Moon at the given epoch in the 
+ * Returns the approximate position of the Moon at the given epoch in the
  * ECEF system.
  */
 
 #include "MoonPosition.hpp"
 #include "MJD.hpp"
 #include "CivilTime.hpp"
-#include "EpochDataStore.hpp"
 
 
 namespace gpstk
@@ -139,14 +138,14 @@ namespace gpstk
 
 
 
-      // Returns the position of Moon ECEF coordinates (meters) at 
+      // Returns the position of Moon ECEF coordinates (meters) at
       // the indicated time.
       //
       // @param[in] t   the time to look up
       //
       // @return the position of the Moon at time (as a Triple)
       //
-      // @throw InvalidRequest If the request can not be completed for 
+      // @throw InvalidRequest If the request can not be completed for
       // any reason, this is thrown. The text may have additional
       // information as to why the request failed.
    Triple MoonPosition::getPosition(const CommonTime& t) const
@@ -671,7 +670,7 @@ namespace gpstk
       double EQCOR(DS2R*(0.035+0.00085*(EPJ-B1950)));
 
          // Mean obliquity (IAU 1976)
-      double EPS(DAS2R*(84381.448 + (-46.8150 + 
+      double EPS(DAS2R*(84381.448 + (-46.8150 +
                         (-0.00059+0.001813*tt)*tt)*tt));
 
          // Change to equatorial system, mean of date, FK5 system

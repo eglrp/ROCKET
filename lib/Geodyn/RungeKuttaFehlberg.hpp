@@ -48,8 +48,8 @@ namespace gpstk
 
       /// Default constructor
       RungeKuttaFehlberg()
-         : stepSize(75.0),
-           errorTol(1.0e-12)
+         : stepSize(60.0),
+           errorTol(1.0e-5)
       {}
 
 

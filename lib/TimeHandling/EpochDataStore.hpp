@@ -2,7 +2,7 @@
 
 /**
 * @file EpochDataStore.hpp
-* Class to handle interpolatable time serial data 
+* Class to handle interpolatable time serial data
 */
 
 #ifndef GPSTK_EPOCHDATASTORE_HPP
@@ -41,12 +41,12 @@
 
 namespace gpstk
 {
-   
+
       /** @addtogroup General Data Tool */
       //@{
 
-      /** Class to handle interpolatable time serial data 
-       * 
+      /** Class to handle interpolatable time serial data
+       *
        */
    class EpochDataStore
    {
@@ -55,7 +55,6 @@ namespace gpstk
          /// Handy type definition
       typedef std::set<CommonTime> EpochList;
       typedef std::map<CommonTime, std::vector<double> > EpochData;
-      
 
          /// Default constructor
       EpochDataStore()
@@ -73,13 +72,13 @@ namespace gpstk
          /// Default deconstructor
       virtual ~EpochDataStore()
       { allData.clear(); }
-         
+
          /// get epoch list stored in this object
       EpochList epochList();
 
       bool isEpochExist(CommonTime t)
       { return (allData.find(t) != allData.end()) ? true : false ; }
-      
+
          /// clear the all the data
       void clear()
       { allData.clear(); }
@@ -97,7 +96,7 @@ namespace gpstk
       size_t size(void)
       { return allData.size(); }
 
-         /** Determine the earliest time stored in the object 
+         /** Determine the earliest time stored in the object
           *
           * @return The initial time
           *
@@ -134,15 +133,15 @@ namespace gpstk
       std::vector<double> getData(const CommonTime& t) const
          throw(InvalidRequest);
 
-      
+
          /// Object holding all the data for the vehicle
       EpochData allData;
-         
+
          /// These give the overall span of time for which this object
-         ///  contains data.
+         /// contains data.
       CommonTime initialTime;
       CommonTime finalTime;
-      
+
          /// Number of points to do Lagrange Interpolation, default is 10
       int interPoints;
 

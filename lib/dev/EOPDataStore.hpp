@@ -2,7 +2,7 @@
 
 /**
 * @file EOPDataStore.hpp
-* 
+*
 */
 
 #ifndef GPSTK_EOPDATASTORE_HPP
@@ -50,30 +50,54 @@ namespace gpstk
    class EOPDataStore : public EpochDataStore
    {
    public:
-     
+
       typedef struct EOPData
       {
-         double xp;        /// arcseconds
-         double yp;        /// arcseconds
-         double UT1mUTC;   /// seconds
-         double dPsi;      /// arcseconds
-         double dEps;      /// arcseconds
-         
-         EOPData() : xp(0.0), yp(0.0), UT1mUTC(0.0),dPsi(0.0), dEps(0.0)
+         double xp;         /// arcsec
+         double err_xp;     /// arcsec
+         double yp;         /// arcsec
+         double err_yp;     /// arcsec
+         double UT1mUTC;    /// seconds
+         double err_UT1mUTC;/// seconds
+         double LOD;        /// seconds
+         double err_LOD;    /// seconds
+         double dX;         /// arcsec
+         double err_dX;     /// arcsec
+         double dY;         /// arcsec
+         double err_dY;     /// arcsec
+
+         EOPData()
+             : xp(0.0), err_xp(0.0),
+               yp(0.0), err_yp(0.0),
+               UT1mUTC(0.0), err_UT1mUTC(0.0),
+               LOD(0.0), err_LOD(0.0),
+               dX(0.0), err_dX(0.0),
+               dY(0.0), err_dY(0.0)
          {}
 
-         EOPData(double x, double y, double ut1_utc, double dpsi = 0.0, double deps = 0.0) 
-            : xp(x), yp(y), UT1mUTC(ut1_utc), dPsi(dpsi), dEps(deps)
+         EOPData(double x, double ex,
+                 double y, double ey,
+                 double dut1, double edut1,
+                 double lod, double elod,
+                 double X = 0.0, double eX = 0.0,
+                 double Y = 0.0, double eY = 0.0)
+            : xp(x), err_xp(ex),
+              yp(y), err_yp(ey),
+              UT1mUTC(dut1), err_UT1mUTC(edut1),
+              LOD(lod), err_LOD(elod),
+              dX(X), err_dX(eX),
+              dY(Y), err_dY(eY)
          {}
+
       } EOPData;
 
          /// Default constructor
-      EOPDataStore() : EpochDataStore(2)
+      EOPDataStore() : EpochDataStore(10)
       {}
 
          /// Default deconstructor
       virtual ~EOPDataStore() {}
-      
+
          /// Add to the store directly
       void addEOPData(const CommonTime& utc,const EOPData& data)
          throw(InvalidRequest);
@@ -89,7 +113,7 @@ namespace gpstk
          throw(InvalidRequest)
       {
 
-            // Get the EOPData 
+            // Get the EOPData
          EOPData eopData(  getEOPData(utc) );
 
             // Get yp value
@@ -104,7 +128,7 @@ namespace gpstk
       double getYPole(const CommonTime& utc) const
          throw(InvalidRequest)
       {
-            // Get the EOPData 
+            // Get the EOPData
          EOPData eopData(  getEOPData(utc) );
 
             // Get yp value
@@ -119,7 +143,7 @@ namespace gpstk
       double getUT1mUTC(const CommonTime& utc) const
          throw(InvalidRequest)
       {
-            // Get the EOPData 
+            // Get the EOPData
          EOPData eopData(  getEOPData(utc) );
 
             // Get yp value
@@ -131,7 +155,7 @@ namespace gpstk
       };
 
 
-         /// Add EOPs to the store via a flat IERS file. 
+         /// Add EOPs to the store via a flat IERS file.
          /// get finals.data from http://maia.usno.navy.mil/
       void loadIERSFile(std::string iersFile)
          throw(FileMissingException);
@@ -140,7 +164,7 @@ namespace gpstk
       void loadIGSFile(std::string igsFile)
          throw(FileMissingException);
 
-         /** Add EOPs to the store via a flat STK file. 
+         /** Add EOPs to the store via a flat STK file.
           *  EOP-v1.1.txt
           *  http://celestrak.com/SpaceData/EOP-format.asp
           *
@@ -154,7 +178,7 @@ namespace gpstk
 
    }; // End of class 'EOPDataStore'
 
-   
+
    std::ostream& operator<<(std::ostream& s, const EOPDataStore::EOPData& d);
 
       // @}

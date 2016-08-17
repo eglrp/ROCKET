@@ -148,12 +148,14 @@ namespace gpstk
                                         EquationOfMotion* peom,
                                         double nextTime)
    {
-
       // Integration done or not
       bool done(false);
 
+      int count(0);
+
       while(!done)
       {
+         count++;
   
          // Step size out of range or not
          if(stepSize > std::abs(nextTime-currentTime))
@@ -232,10 +234,17 @@ namespace gpstk
          k12 = peom->getDerivatives(currentTime+a[12]*stepSize, tempy);
 
 
+//         cout << "StepSize: " << stepSize << endl;
+
+//         cout << k0  << endl
+//              << k10 << endl
+//              << k11 << endl
+//              << k12 << endl;
 
          // Truncation error
          Vector<double> TE;
          TE = c1[0] * stepSize * (k0 + k10 - k11 - k12);
+//         cout << "TE: " << norm(TE) << endl;
 
          /// The formula used by ESA is as follows:
          ///
@@ -244,6 +253,9 @@ namespace gpstk
          /// Currently, we use a simplified formula instead.
          double A;
          A = norm(TE)/errorTol;
+//         cout << "A: " << A << endl;
+
+         if(count > 20) break;
 
          if(A < 1)   // if yes
          {
@@ -252,8 +264,10 @@ namespace gpstk
             currentState += stepSize * (c2[0]*k0 + c2[1]*k1 + c2[2]*k2 + c2[3]*k3 + c2[4]*k4 + c2[5]*k5 + c2[6]*k6
                                       + c2[7]*k7 + c2[8]*k8 + c2[9]*k9 + c2[10]*k10 + c2[11]*k11 + c2[12]*k12);
 
+//            cout << currentTime << ' ' << nextTime << endl;
+
             // check if we are done or not
-            if(std::fabs(currentTime-nextTime) < 1e-18)
+            if(std::fabs(currentTime-nextTime) < 1e-12)
                done = true;
             else
                continue;

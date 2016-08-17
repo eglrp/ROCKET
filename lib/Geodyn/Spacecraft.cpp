@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Kaifa Kuang . 2016
 //
@@ -202,7 +202,7 @@ namespace gpstk
 
       // identity part
       for(int i=6; i<6+numOfParam; ++i)
-      {  
+      {
           tMat(i,i) = 1.0;
       }
 
@@ -278,7 +278,7 @@ namespace gpstk
        * @param s    stream to append formatted Spacecraft to
        * @param sc   Spacecraft to append to stream \c s
        */
-   ostream& operator<<( ostream& s, 
+   ostream& operator<<( ostream& s,
                         const gpstk::Spacecraft& sc )
    {
        s << sc.getSatID() << ' ' << CivilTime(sc.getCurrentTime()) << ' '

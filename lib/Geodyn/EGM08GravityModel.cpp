@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2015
 //
@@ -24,13 +24,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -85,7 +85,7 @@ namespace gpstk
          if( inpf.eof() ) break;
 
          if( inpf.bad() ) { ok = false; break; }
- 
+
          // degree, order
          int L, M;
          L        =  asInt( line.substr( 5, 4) );
@@ -178,14 +178,14 @@ namespace gpstk
       id20 = indexTranslator(2,0) - 1;
       id21 = indexTranslator(2,1) - 1;
       id22 = indexTranslator(2,2) - 1;
-      
+
       // indexes for degree = 3
       int id30, id31, id32, id33;
       id30 = indexTranslator(3,0) - 1;
       id31 = indexTranslator(3,1) - 1;
       id32 = indexTranslator(3,2) - 1;
       id33 = indexTranslator(3,3) - 1;
-      
+
       // indexes for degree = 4
       int id40, id41, id42, id43, id44;
       id40 = indexTranslator(4,0) - 1;
@@ -316,7 +316,7 @@ namespace gpstk
 
 
       // partials of b to (rho, lat, lon) in ITRS
-      
+
       Matrix<double> db_drho(3,3,0.0);     // db / drho
       db_drho(1,0) =  slat * clon / (rho*rho);
       db_drho(1,1) =  slat * slon / (rho*rho);
@@ -453,7 +453,6 @@ namespace gpstk
                df_itrs_dcs(1,idnm+1) = s_rll(0)*b(0,1) + s_rll(1)*b(1,1) + s_rll(2)*b(2,1);
                df_itrs_dcs(2,idnm+1) = s_rll(0)*b(0,2) + s_rll(1)*b(1,2) + s_rll(2)*b(2,2);
             }
-            
 
          }   // End of "for(int m=0; ...)"
 
@@ -492,15 +491,15 @@ namespace gpstk
                         + g_rll(1,2)*b(1,1) + f_rll(1)*db_dlon(1,1)
                         + g_rll(2,2)*b(2,1) + f_rll(2)*db_dlon(2,1);
 
-      df_itrs_drll(2,0) = g_rll(0,0)*b(0,0) + f_rll(0)*db_drho(0,2)
-                        + g_rll(1,0)*b(1,0) + f_rll(1)*db_drho(1,2)
-                        + g_rll(2,0)*b(2,0) + f_rll(2)*db_drho(2,2);
-      df_itrs_drll(2,1) = g_rll(0,1)*b(0,0) + f_rll(0)*db_dlat(0,2)
-                        + g_rll(1,1)*b(1,0) + f_rll(1)*db_dlat(1,2)
-                        + g_rll(2,1)*b(2,0) + f_rll(2)*db_dlat(2,2);
-      df_itrs_drll(2,2) = g_rll(0,2)*b(0,0) + f_rll(0)*db_dlon(0,2)
-                        + g_rll(1,2)*b(1,0) + f_rll(1)*db_dlon(1,2)
-                        + g_rll(2,2)*b(2,0) + f_rll(2)*db_dlon(2,2);
+      df_itrs_drll(2,0) = g_rll(0,0)*b(0,2) + f_rll(0)*db_drho(0,2)
+                        + g_rll(1,0)*b(1,2) + f_rll(1)*db_drho(1,2)
+                        + g_rll(2,0)*b(2,2) + f_rll(2)*db_drho(2,2);
+      df_itrs_drll(2,1) = g_rll(0,1)*b(0,2) + f_rll(0)*db_dlat(0,2)
+                        + g_rll(1,1)*b(1,2) + f_rll(1)*db_dlat(1,2)
+                        + g_rll(2,1)*b(2,2) + f_rll(2)*db_dlat(2,2);
+      df_itrs_drll(2,2) = g_rll(0,2)*b(0,2) + f_rll(0)*db_dlon(0,2)
+                        + g_rll(1,2)*b(1,2) + f_rll(1)*db_dlon(1,2)
+                        + g_rll(2,2)*b(2,2) + f_rll(2)*db_dlon(2,2);
 
       da_dr = T2C * df_itrs_drll * b * C2T;
 

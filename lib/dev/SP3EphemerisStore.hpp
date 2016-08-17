@@ -145,7 +145,7 @@ namespace gpstk
       /// Edit the dataset, removing data outside the indicated time interval
       /// @param[in] tmin defines the beginning of the time interval
       /// @param[in] tmax defines the end of the time interval
-      virtual void edit(const CommonTime& tmin, 
+      virtual void edit(const CommonTime& tmin,
                         const CommonTime& tmax = CommonTime::END_OF_TIME) throw()
       {
          posStore.edit(tmin, tmax);
@@ -155,18 +155,18 @@ namespace gpstk
       /// Clear the dataset, meaning remove all data
       virtual void clear(void) throw()
          { clearPosition(); clearClock(); }
- 
+
       /// Return time system (NB usually GPS, but CANNOT assume so)
       virtual TimeSystem getTimeSystem(void) const throw()
          { return storeTimeSystem; }
 
-      /// Determine the earliest time for which this object can successfully 
+      /// Determine the earliest time for which this object can successfully
       /// determine the Xvt for any object.
       /// @return the earliest time in the table
       /// @throw InvalidRequest if the object has no data.
       virtual CommonTime getInitialTime() const throw(InvalidRequest);
 
-      /// Determine the latest time for which this object can successfully 
+      /// Determine the latest time for which this object can successfully
       /// determine the Xvt for any object.
       /// @return the latest time in the table
       /// @throw InvalidRequest if the object has no data.
@@ -254,7 +254,7 @@ namespace gpstk
       virtual void clearClock(void) throw()
          { clkStore.clear(); }
 
-   
+
       /// Choose to load the clock data tables from RINEX clock files. This will
       /// clear the clock store; loadFile() or loadRinexClockFile() should be called
       /// after this, to load data into the clock store from RINEX clock files.
@@ -444,19 +444,19 @@ namespace gpstk
       /// this routine will also accept that file type and load the data into the
       /// clock store. This routine will may set the velocity, acceleration, bias
       /// or drift 'have' flags.
-      /// @param filename name of file (SP3 or RINEX clock format) to load 
+      /// @param filename name of file (SP3 or RINEX clock format) to load
       /// @throw if time step is inconsistent with previous value
       void loadFile(const std::string& filename) throw(Exception);
 
       /// Load an SP3 ephemeris file; may set the velocity and acceleration flags.
       /// If the clock store uses RINEX clock data, this will ignore the clock data.
-      /// @param filename name of file (SP3 format) to load 
+      /// @param filename name of file (SP3 format) to load
       /// @throw if time step is inconsistent with previous value
       void loadSP3File(const std::string& filename) throw(Exception);
 
       /// Load a RINEX clock file; may set the 'have' bias and drift flags.
       /// If clock store is set to use SP3 data, this will call useRinexClockData()
-      /// @param filename name of file (RINEX clock format) to load 
+      /// @param filename name of file (RINEX clock format) to load
       /// @throw if time step is inconsistent with previous value
       void loadRinexClockFile(const std::string& filename) throw(Exception);
 
