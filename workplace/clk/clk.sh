@@ -1,5 +1,17 @@
 #!/bin/bash
 
+################################ ################################
+#  
+#  Function
+#
+#  bash shell script for rinex data and GNSS ephemeris downloading
+#
+#  Copywright
+#  
+#  Shoujian Zhang, Wuhan University, 2015, 2016
+#
+################################ ################################
+
 ##############################
 # get the rinex file list
 ##############################
