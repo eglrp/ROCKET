@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2015
 //
@@ -102,7 +102,7 @@ namespace gpstk
       // satellite position in ICRS, unit: m
       Vector<double> r_sat(3,0.0);
       r_sat = sc.getPosition();
-      
+
       // satellite velocity in ICRS, unit: m/s
       Vector<double> v_sat(3,0.0);
       v_sat = sc.getVelocity();
@@ -155,7 +155,7 @@ namespace gpstk
       Vector<double> vvec = v_sat / norm(v_sat);       // +T direction
       Vector<double> zvec = -rvec;                     // +Z direction
       Vector<double> ssvec = r_sunsat / norm(r_sunsat);// -D direction
-      Vector<double> esvec = r_sun / norm(r_sun);      // 
+      Vector<double> esvec = r_sun / norm(r_sun);      //
 
       Vector<double> hvec = cross(rvec, vvec);         // +N direction
       hvec = normalize(hvec);
@@ -241,7 +241,7 @@ namespace gpstk
 
       /// Partials of acceleration wrt satellite position, velocity and SRP
       /// parameters
-      
+
       // first, get the partials of acceleration wrt satellite position vector
       da_dr.resize(3,3,0.0);
 
@@ -272,7 +272,6 @@ namespace gpstk
             da_dSRP(i,4) = sinu * bvec(i) * d0 * distfct;      // da / dBs
          }
       }
-
 
    }  // End of method 'CODEPressure::doCompute()'
 

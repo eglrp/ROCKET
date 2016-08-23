@@ -15,8 +15,8 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
-//  Copyright 
+//
+//  Copyright
 //
 //  Kaifa Kuang - Wuhan University . 2016
 //
@@ -46,9 +46,9 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-  
+
       /** Class to do GNSS Orbit configuration.
-       * 
+       *
        */
    class GNSSOrbit : public EquationOfMotion
    {
@@ -78,7 +78,7 @@ namespace gpstk
       inline GNSSOrbit& setSpacecraft(const Spacecraft& s)
       {
          sc = s;
-         
+
          return *this;
       }
 

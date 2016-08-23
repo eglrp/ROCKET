@@ -111,7 +111,7 @@ public:
                                          const Vector<double>& y);
 
 private:
-   
+
    CommonTime utc0;        // Reference time
 
    Spacecraft sc;          // Spacecraft
@@ -142,7 +142,7 @@ Vector<double> OrbitEOM::getDerivatives(const double& t, const Vector<double>& y
    Vector<double> v(3,0.0);
    v(0) = y(3); v(1) = y(4); v(2) = y(5);
 
-   // Current acceleration 
+   // Current acceleration
    Vector<double> a(3,0.0);
 
    egm.doCompute(utc, eb, sc);
@@ -225,7 +225,7 @@ void orbsim::spinUp()
       confReader.exceptions(ios::failbit);
 
       try
-      {    
+      {
             // Try to open the provided configuration file
          confReader.open( confFile.getValue()[0] );
 
@@ -281,7 +281,7 @@ void orbsim::spinUp()
 void orbsim::process()
 {
       // EOP Data Store
-   EOPDataStore eopDataStore;
+   EOPDataStore2 eopDataStore;
 
       // EOP file
    string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");

@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
 //
@@ -33,7 +33,7 @@ using namespace std;
 
 namespace gpstk
 {
-   
+
       /** Compute acceleration (and related partial derivatives) of Sun
        *  Gravitation.
        * @param utc     time in UTC
@@ -86,7 +86,7 @@ namespace gpstk
       da_dv.resize(3,3,0.0);
 
       // da_dp
-      
+
    }  // End of method 'SunGravitation::doCompute()'
 
 }  // End of namespace 'gpstk'

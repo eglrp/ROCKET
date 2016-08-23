@@ -41,11 +41,17 @@ namespace gpstk
    void Spacecraft::resetState()
    {
       // reset state vector
-      r.resize(3,0.0); v.resize(3,0.0);
+      r.resize(3,0.0);
+      v.resize(3,0.0);
 
       // reset partial derivatives
-      dr_dr0.resize(9,0.0); dr_dv0.resize(9,0.0); dr_dp0.resize(0,0.0);
-      dv_dr0.resize(9,0.0); dv_dv0.resize(9,0.0); dv_dp0.resize(0,0.0);
+      dr_dr0.resize(9,0.0);
+      dr_dv0.resize(9,0.0);
+      dr_dp0.resize(0,0.0);
+      dv_dr0.resize(9,0.0);
+      dv_dv0.resize(9,0.0);
+      dv_dp0.resize(0,0.0);
+
       dr_dr0(0) = 1.0; dr_dr0(4) = 1.0; dr_dr0(8) = 1.0;
       dv_dv0(0) = 1.0; dv_dv0(4) = 1.0; dv_dv0(8) = 1.0;
 
@@ -151,7 +157,6 @@ namespace gpstk
       {
           sv(42+3*numOfParam+i) = dv_dp0(i);
       }
-
 
       return sv;
 

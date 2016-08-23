@@ -142,14 +142,18 @@ int main(void)
    }
 
    // Transform Matrix between ICRS and ITRS
-   Matrix<double> c2t ( refSys.C2TMatrix(utc0)  );
+   Matrix<double> t2c ( refSys.T2CMatrix(utc0)  );
    // Transform Matrix Time Dot between ICRS and ITRS
-   Matrix<double> dc2t( refSys.dC2TMatrix(utc0) );
+   Matrix<double> dt2c( refSys.dT2CMatrix(utc0) );
 
    // r0, v0 in ICRS
    Vector<double> r0_icrs, v0_icrs;
-   r0_icrs = transpose(c2t) * r0_itrs;
-   v0_icrs = transpose(c2t) * v0_itrs + transpose(dc2t) * r0_itrs;
+   r0_icrs = t2c * r0_itrs;
+   v0_icrs = t2c * v0_itrs + dt2c * r0_itrs;
+
+   r0_icrs(0) =  17253546.07;
+   r0_icrs(1) = -19971157.16;
+   r0_icrs(2) =   3645801.33;
 
    // p0
    int np(9);
@@ -296,11 +300,36 @@ int main(void)
 
    cout << r0_icrs << endl;
 
-   cout << egm.getAcceleration() << endl
-        << sg.getAcceleration() << endl
-        << mg.getAcceleration() << endl
-        << sp.getAcceleration() << endl
-        << re.getAcceleration() << endl;
+   Vector<double> f_egm( egm.getAcceleration() );
+   Vector<double> f_moon( mg.getAcceleration() );
+   Vector<double> f_sun( sg.getAcceleration() );
+   Vector<double> f_srp( sp.getAcceleration() );
+   Vector<double> f_re( re.getAcceleration() );
+
+   cout << "EARTH: " << endl;
+   cout << setw(20) << f_egm(0) << ' '
+        << setw(20) << f_egm(1) << ' '
+        << setw(20) << f_egm(2) << endl;
+
+   cout << "MOON: " << endl;
+   cout << setw(20) << f_moon(0) << ' '
+        << setw(20) << f_moon(1) << ' '
+        << setw(20) << f_moon(2) << endl;
+
+   cout << "SUN: " << endl;
+   cout << setw(20) << f_sun(0) << ' '
+        << setw(20) << f_sun(1) << ' '
+        << setw(20) << f_sun(2) << endl;
+
+   cout << "SRP: " << endl;
+   cout << setw(20) << f_srp(0) << ' '
+        << setw(20) << f_srp(1) << ' '
+        << setw(20) << f_srp(2) << endl;
+
+   cout << "RE: " << endl;
+   cout << setw(20) << f_re(0) << ' '
+        << setw(20) << f_re(1) << ' '
+        << setw(20) << f_re(2) << endl;
 
    // GNSS orbit
    GNSSOrbit gnss;

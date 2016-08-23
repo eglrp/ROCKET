@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
 //
@@ -52,7 +52,7 @@ namespace gpstk
 
    // coefficients, bij
    const double RungeKuttaFehlberg::b[13][12] =
-   {  
+   {
        {        0.0,               0.0,            0.0,                0.0,
                 0.0,               0.0,            0.0,                0.0,
                 0.0,               0.0,            0.0,                0.0          } ,
@@ -60,12 +60,12 @@ namespace gpstk
        {        2.0 / 27.0,        0.0,            0.0,                0.0,
                 0.0,               0.0,            0.0,                0.0,
                 0.0,               0.0,            0.0,                0.0          } ,
- 
+
        {        1.0 / 36.0,        1.0 / 12.0,     0.0,                0.0,
                 0.0,               0.0,            0.0,                0.0,
                 0.0,               0.0,            0.0,                0.0          } ,
 
-       {        1.0 / 24.0,        0.0,            1.0 / 8.0,          0.0, 
+       {        1.0 / 24.0,        0.0,            1.0 / 8.0,          0.0,
                 0.0,               0.0,            0.0,                0.0,
                 0.0,               0.0,            0.0,                0.0          } ,
 
@@ -89,12 +89,12 @@ namespace gpstk
               704.0 / 45.0,     -107.0 / 9.0,     67.0 / 90.0,         3.0,
                 0.0,               0.0,            0.0,                0.0          } ,
 
-       {      -91.0 / 108.0,       0.0,            0.0,               23.0 / 108.0,  
-             -976.0 / 135.0,     311.0 / 54.0,   -19.0 / 60.0,        17.0 / 6.0,  
+       {      -91.0 / 108.0,       0.0,            0.0,               23.0 / 108.0,
+             -976.0 / 135.0,     311.0 / 54.0,   -19.0 / 60.0,        17.0 / 6.0,
                -1.0 / 12.0,        0.0,            0.0,                0.0          } ,
 
        {     2383.0 / 4100.0,      0.0,            0.0,             -341.0 / 164.0,
-             4496.0 / 1025.0,   -301.0 / 82.0,  2133.0 / 4100,        45.0 / 82.0, 
+             4496.0 / 1025.0,   -301.0 / 82.0,  2133.0 / 4100,        45.0 / 82.0,
                45.0 /  164.0,     18.0 / 41.0,     0.0,                0.0          } ,
 
        {        3.0 / 205.0,       0.0,            0.0,                0.0,
@@ -140,7 +140,7 @@ namespace gpstk
        41.0 / 840.0,
    };
 
-   
+
 
    /// Real implementation of rkf78
    void RungeKuttaFehlberg::integrateTo(double& currentTime,
@@ -156,7 +156,7 @@ namespace gpstk
       while(!done)
       {
          count++;
-  
+
          // Step size out of range or not
          if(stepSize > std::abs(nextTime-currentTime))
          {
@@ -176,7 +176,7 @@ namespace gpstk
          // k0
          k0 = peom->getDerivatives(currentTime, currentState);
 
-         // k1  
+         // k1
          tempy = currentState + stepSize * b[1][0]*k0;
          k1 = peom->getDerivatives(currentTime+a[1]*stepSize, tempy);
 

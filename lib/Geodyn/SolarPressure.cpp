@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2015
 //
@@ -48,7 +48,7 @@ namespace gpstk
    {
       // shadow function
       double v = 0.0;
-      
+
       // Mean Radious of Sun, Moon and Earth
       const double R_sun = RE_SUN;
       const double R_earth = RE_EARTH;
@@ -56,14 +56,14 @@ namespace gpstk
       Vector<double> e_Sun = r_Sun/norm(r_Sun);   // Sun direction unit vector
 
       double r_dot_sun = dot(r,e_Sun);
-      
+
       if(r_dot_sun>0)
       {
          // Sunny side of central body is always fully lit and return
          v= 1.0;
          return v;
       }
-      
+
       if(sm == SM_CYLINDRICAL)
       {
          // Taken fram Jisheng Li P111, and checked with GMAT and Bernese5 SHADOW.f
@@ -74,7 +74,7 @@ namespace gpstk
       {
          double r_mag = norm(r);
          Vector<double> d = r_Sun-r;            // vector from sc to sun
-         double dmag = norm(d);               
+         double dmag = norm(d);
 
          double a = std::asin(R_sun/dmag);
          double b = std::asin(R_earth/r_mag);
@@ -88,7 +88,7 @@ namespace gpstk
          {
             v =  0.0;
          }
-         else                   // in Penumbra 
+         else                   // in Penumbra
          {
             double x = (c*c+a*a-b*b)/(2*c);
             double y = std::sqrt(a*a-x*x);

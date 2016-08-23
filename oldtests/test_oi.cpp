@@ -347,14 +347,39 @@ int main(void)
       cout << CivilTime(gps) << endl;
 
       cout << setprecision(9);
+/*
+      for(int j=0; j<3; ++j)
+      {
+          cout << setw(20) << r_diff(j) << ' ';
+
+          cout << setw(20) << y( 6+j*3) << ' '
+               << setw(20) << y( 7+j*3) << ' '
+               << setw(20) << y( 8+j*3) << ' '
+               << setw(20) << y(15+j*3) << ' '
+               << setw(20) << y(16+j*3) << ' '
+               << setw(20) << y(17+j*3) << ' ';
+
+          for(int k=0; k<np; ++k)
+          {
+              cout << setw(20) << y(24+j*np+k) << ' ';
+          }
+
+          cout << endl;
+      }
+*/
+
+      // r
+      cout << setw(20) << y(0) << ' '
+           << setw(20) << y(1) << ' '
+           << setw(20) << y(2) << endl;
+      cout << setw(20) << r_sp3(0) << ' '
+           << setw(20) << r_sp3(1) << ' '
+           << setw(20) << r_sp3(2) << endl;
 
       // dr
-      // (dx, dy, dz)
       cout << setw(20) << r_diff(0) << ' '
            << setw(20) << r_diff(1) << ' '
            << setw(20) << r_diff(2) << endl;
-
-      cout << setprecision(9);
 
       // dr/dr0
       for(int j=0; j<3; ++j)

@@ -123,9 +123,9 @@ namespace gpstk
 
          if(debug)
          {
-            cout << setw(22) << doub2sci(gmData.normalizedCS(id,0),22,3) << " "
-                 << setw(22) << doub2sci(gmData.normalizedCS(id,1),22,3) << " "
-                 << setw(22) << doub2sci(gmData.normalizedCS(id,2),22,3) << " "
+            cout << setw(22) << doub2sci(gmData.normalizedCS(id,0),22,3) << ' '
+                 << setw(22) << doub2sci(gmData.normalizedCS(id,1),22,3) << ' '
+                 << setw(22) << doub2sci(gmData.normalizedCS(id,2),22,3) << ' '
                  << setw(22) << doub2sci(gmData.normalizedCS(id,3),22,3) << endl;
          }
       }
@@ -163,8 +163,9 @@ namespace gpstk
       const double value[3] =
       {
          // the value of C20, C30 and C40 at 2000.0
-         -0.48416531e-3, 0.9571612e-6, 0.5399659e-6
-//       -0.48416948e-3
+         -0.48416514e-3, 0.9571612e-6, 0.5399659e-6
+//         -0.48416531e-3, 0.9571612e-6, 0.5399659e-6
+//         -0.48416948e-3
       };
       const double rate[3]  =
       {
