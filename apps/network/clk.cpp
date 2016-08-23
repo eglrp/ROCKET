@@ -1610,7 +1610,7 @@ void clk::shutDown()
 {
       // computed clock data output stream
    ofstream clockStream;
-   clockStream.open( outputFileName, ios::out );
+   clockStream.open( outputFileName.c_str(), ios::out );
 
       // Print the header information
    printClockHeader( clockStream );
