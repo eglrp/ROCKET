@@ -27,6 +27,9 @@ target_link_libraries(test_oi rocket)
 add_executable(test_jpl test_jpl.cpp)
 target_link_libraries(test_jpl rocket)
 
+add_executable(test_gds_serialize test_gds_serialize.cpp)
+target_link_libraries(test_gds_serialize rocket)
+
 #add_executable(test_thirdbody test_thirdbody.cpp)
 #target_link_libraries(test_thirdbody rocket)
 
