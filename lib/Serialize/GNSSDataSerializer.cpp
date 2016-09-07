@@ -82,8 +82,8 @@ string GDSSerializer::serializeToString(CommonTime& time){
 	time.get(day, sod, fsod);
 	
 	// add day sod and fsod
-	doc.AddMember( "day" , day , doc.GetAllocator() );
-	doc.AddMember( "sod" , sod , doc.GetAllocator() );
+	doc.AddMember( "day" , (int64_t)day , doc.GetAllocator() );
+	doc.AddMember( "sod" , (int64_t)sod , doc.GetAllocator() );
 	doc.AddMember( "fsod", fsod, doc.GetAllocator() );
 	doc.AddMember( "timeSystem", time.getTimeSystem().getTimeSystem(), doc.GetAllocator() );
 	
@@ -331,7 +331,7 @@ bool GDSSerializer::deserializeFromString(CommonTime& time, string dataString){
 		fsodValue.IsDouble() && 
 		tSysValue.IsInt() ){
 
-		time.set( dayValue.GetInt64(), sodValue.GetInt64(), 
+		time.set( (long)dayValue.GetInt64(), (long)sodValue.GetInt64(), 
 				  fsodValue.GetDouble(), TimeSystem( (TimeSystem::Systems)(tSysValue.GetInt()) ) );
 
 		return true;
