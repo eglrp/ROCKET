@@ -100,4 +100,4 @@ install (FILES ${HEADERS} ${HEADERS2} DESTINATION include/rocket )
 
 # GPSTk Subdirectories
 add_subdirectory (apps)
-
+add_subdirectory (oldtests)

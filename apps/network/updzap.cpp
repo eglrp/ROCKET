@@ -14,11 +14,10 @@
 //
 //  Revision
 //
-//  2014/03/18  
-//  Get the initial time using 'YDSTime' class. You MUST set the 
-//  'TimeSystem' as well, because the time system is set as 'GPS' 
-//  for 'gnssRinex'. if you don't set it as 'GPS', you could 
-//  operate the time correctly.  
+//  2014/03/18  Get the initial time using 'YDSTime' class. You MUST set the 
+//              'TimeSystem' as well, because the time system is set as 'GPS' 
+//              for 'gnssRinex'. if you don't set it as 'GPS', you could 
+//              operate the time correctly.  
 //
 //  2014/03/18  
 //  Add 'AmbiguitySmoother' to smooth the ambiguities. you can set 
@@ -197,6 +196,9 @@
 
    // Class to time conversion between different time system
 #include "Epoch.hpp"
+
+   // Class to deal with the ambiguity constraints for solver
+#include "AmbiguityDatum.hpp"
 
    // Class to smooth the ambiguities
 #include "AmbiguitySmoother.hpp"

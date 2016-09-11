@@ -1,20 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file EarthOceanTide.hpp
-* 
-*/
-
-#ifndef GPSTK_OCEAN_TIDE_HPP
-#define GPSTK_OCEAN_TIDE_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -25,12 +15,36 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  
+//  Copyright 2004, The University of Texas at Austin
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
-#include <string>
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+* @file EarthOceanTide.hpp
+* Class to do Earth Ocean Tide correction.
+*
+*/
+
+#ifndef GPSTK_EARTH_OCEAN_TIDE_HPP
+#define GPSTK_EARTH_OCEAN_TIDE_HPP
+
+#include "ReferenceSystem.hpp"
 
 
 namespace gpstk
@@ -38,92 +52,109 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**
-       * Solid Earth Ocean Tide
-       * reference: IERS Conventions 2003
+      /** Class to do Earth Ocean Tide correction
+       * see IERS Conventions 2010 Section 6.3 for more details.
        */
    class EarthOceanTide
    {
    public:
-         /// Default constructor
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wreorder"
-      EarthOceanTide()
-         : minX(0.05), 
-           maxN(4), 
-           isLoaded(false)
-      {
-         fileName = "InputData\\Earth\\OT_CSRC.TID";
-      }
-#pragma clang diagnostic pop
-         /// Default destructor
-      ~EarthOceanTide(){}
 
-     
-         /// struct to hold Ocean Tide information
-      struct CSR_OTIDE
+          /// struct to hold Ocean Tide Data
+      struct OceanTideData
       {
-         double   KNMP[20];
-         int      NTACT;
-         int      NDOD[1200][6];
-         double   CSPM[1200][4];
-         int      NM[1200][2];  
+         int         n[6];
+         std::string Darw;
+         int         l;
+         int         m;
+
+         double      DelCp;
+         double      DelSp;
+         double      DelCm;
+         double      DelSm;
+
       };
 
-         
-          /// load ocean data file, reference to Bernese5.0-"OT_CSRC.TID"
+   public:
+         /// Default constructor
+      EarthOceanTide(int n=4, int m=4)
+         : desiredDegree(n),
+           desiredOrder(m),
+           pRefSys(NULL)
+      {}
 
-      void loadTideFile(std::string fileName, int NMAX = 4, double XMIN = 0.05);
+         /// Default destructor
+      ~EarthOceanTide() {}
 
-         /** Solid pole tide to normalized earth potential coefficients
-          *
-          * @param mjdUtc UTC in MJD
-          * @param dC     Correction to normalized coefficients dC
-          * @param dS     Correction to normalized coefficients dS
-          *    C20 C21 C22 C30 C31 C32 C33 C40 C41 C42 C43 C44
-          */
-      void getOceanTide(double mjdUtc, double dC[], double dS[] );
 
-      void setTideFile(std::string file)
+         /// Load ocean tide file
+      void loadFile(const std::string& file)
+         throw(FileMissingException);
+
+
+         /// Set desired degree and order
+      inline EarthOceanTide& setDesiredDegreeOrder(const int& n, const int& m)
       {
-         fileName = file;
-         isLoaded = false;
+         if(n >= m)
+         {
+            desiredDegree  =  n;
+            desiredOrder   =  m;
+         }
+         else
+         {
+            desiredDegree  =  n;
+            desiredOrder   =  n;
+         }
+
+         return (*this);
+
       }
 
-      void test();
+
+         /// Get desired degree and order
+      inline void getDesiredDegreeOrder(int& n, int& m) const
+      {
+         n  =  desiredDegree;
+         m  =  desiredOrder;
+      }
+
+
+         /// Set reference system
+      inline EarthOceanTide& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
+
+
+         /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
+
+
+         /**
+          * Ocean tide to normalized earth potential coefficients
+          *
+          * @param utc     time in UTC
+          * @param dC      correction to normalized coefficients dC
+          * @param dS      correction to normalized coefficients dS
+          */
+      void getOceanTide(CommonTime utc, Matrix<double>& CS);
+
 
    protected:
-      //Get Doson  FUNDAMENTAL ARGUMENTS
-      //void NUTARG(double mjdUtc, double BETA[6]);   
 
-   protected:
-      std::string fileName;
+         /// Degree and Order of ocean tide model desired
+      int desiredDegree;
+      int desiredOrder;
 
-      int maxN;
-      double minX;
+         /// Reference System
+      ReferenceSystem* pRefSys;
 
-      bool isLoaded;
-
-      double FAC[41];
-
-      /// line 2
-      int    NWAV;   // number of lines to skip
-      int    NTOT;   // number of data lines
-      int    NMX;      // max degree
-      int    MMX;     // max order 
-      /// line 4
-      double RRE;
-      double RHOW;
-      double XME;
-      double PFCN;
-      double XXX;
-
-      CSR_OTIDE  tideData;
-
-      /// GRAVITY CONSTANT G, GRAV ACC ON EARTH SURFACE GE
-      /// see IERS Conventions 2003 Chapter 1
-      static const double G;  //= 6.67259e-11;
-      static const double GE; //= 9.780327;
+         /// Standard vector of Ocean Tide Data
+      std::vector<OceanTideData> otDataVec;
 
    }; // End of class 'EarthOceanTide'
 
@@ -133,5 +164,3 @@ namespace gpstk
 
 
 #endif   // GPSTK_OCEAN_TIDE_HPP
-
-

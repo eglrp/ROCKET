@@ -1,17 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file AstronomicalFunctions.cpp
- * Useful functions used in astronomical computations.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -22,12 +15,31 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
-//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007
+//
+//  Copyright 2004, The University of Texas at Austin
+//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007 
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software.
+//
+//Pursuant to DoD Directive 523024
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public
+//                           release, distribution is unlimited.
+//
+//=============================================================================
 
+/**
+ * @file AstronomicalFunctions.cpp
+ * Useful functions used in astronomical computations.
+ */
+ 
 #include "AstronomicalFunctions.hpp"
 #include "YDSTime.hpp"
 #include "JulianDate.hpp"
@@ -71,18 +83,10 @@ namespace gpstk
        */
    double UTC2SID(const CommonTime& t)
    {
-      YDSTime yds(t);
-
-      double y(yds.year-1.0);
-      double m(13.0);
-      double d(yds.doy);
+      const YDSTime yds(t);
 
        // Hours of day (decimal)
       double h(yds.sod/3600.0);
-
-         // Fraction of day
-      double frofday (yds.sod/86400.0);
-#pragma unused(y,m,d,frofday)
 
          // Compute Julian Day, including decimals
       double jd(JulianDate(t).jd);

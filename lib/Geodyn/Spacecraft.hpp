@@ -1,20 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file Spacecraft.hpp
-* The Spacecraft class encapsulates physical parameters.
-*/
-
-#ifndef GPSTK_SPACECRAFT_HPP
-#define GPSTK_SPACECRAFT_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -26,173 +16,271 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Copyright 2004, The University of Texas at Austin
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
+/**
+* @file Spacecraft.hpp
+* Class to encapsulate Spacecraft related paramenters.
+*/
+
+#ifndef GPSTK_SPACECRAFT_HPP
+#define GPSTK_SPACECRAFT_HPP
+
 #include <iostream>
 #include <string>
+
 #include "Vector.hpp"
 #include "Matrix.hpp"
-#include "UTCTime.hpp"
+
+#include "CommonTime.hpp"
+#include "SatID.hpp"
+
 
 namespace gpstk
 {
-   using namespace std;
 
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**
-       * The Spacecraft class encapsulates physical parameters
-       * 
+      /** Class to encapsulate Spacecraft related parameters.
        */
    class Spacecraft
    {
    public:
 
-         /// Default constructor
-      Spacecraft(std::string name = "spacecraft");
+         /// Constructor
+      Spacecraft()
+      {
+         resetState();
+      }
 
          /// Default destructor
       ~Spacecraft() {};
 
-         /// SC position(R), velocity(V) and dynamic parameters(P)
-      Vector<double> R() {return r;}
-      Vector<double> V() {return v;}
-      Vector<double> P() {return p;}
-      
-         /// SC derivatives
-      Vector<double> dR_dR0() {return dr_dr0;}
-      Vector<double> dR_dV0() {return dr_dv0;}
-      Vector<double> dR_dP0() {return dr_dp0;}
-      Vector<double> dV_dR0() {return dv_dr0;}
-      Vector<double> dV_dV0() {return dv_dv0;}
-      Vector<double> dV_dP0() {return dv_dp0;}
 
-         /// Get number of force model parameters
-      int getNumOfP()
-      { return p.size(); }
-      
-         /// initialize the state vector with position and velocity and force model parameters 
-      void initStateVector(Vector<double> rv, Vector<double> dp = Vector<double>(0,0.0));
-      
-         /// Methods to handle SC state vector
-      Vector<double> getStateVector();
-      void setStateVector(Vector<double> y);
+         /// Set current time of Spacecraft
+      inline Spacecraft& setCurrentTime(const CommonTime& utc)
+      {
+         curTime = utc;
 
-         /// Methods to handle SC transition matrix
-      Matrix<double> getTransitionMatrix();
-      void setTransitionMatrix(Matrix<double> phiMatrix);
-      
-         /// Method to get SC state transition matrix 6*6
-      Matrix<double> getStateTransitionMatrix();
+         return (*this);
+      }
 
-         /// Method to get SC sensitivity matrix 6*np
-      Matrix<double> getSensitivityMatrix();
+         /// Get current time of Spacecraft
+      inline CommonTime getCurrentTime() const
+      {
+         return curTime;
+      }
+
+         /// Set SatID of Spacecraft
+      inline Spacecraft& setSatID(const SatID& si)
+      {
+         satID = si;
+
+         return (*this);
+      }
+
+         /// Get SatID of Spacecraft
+      inline SatID getSatID() const
+      {
+         return satID;
+      }
 
 
-         // Methods to handle SC physical parameters
-      
-      std::string getName()
-      { return scName; }
+         /// Set block type of Spacecraft
+      inline Spacecraft& setBlockType(const std::string& bt)
+      {
+         blockType = bt;
+
+         return (*this);
+      }
+
+         /// Get block type of Spacecraft
+      inline std::string getBlockType() const
+      {
+         return blockType;
+      }
+
+         /// Set mass of Spacecraft
+      inline Spacecraft& setMass(const double& m)
+      {
+         mass = m;
+
+         return (*this);
+      }
 
 
-      Spacecraft& setName(std::string satName)
-      { scName = satName; return (*this);}
+         /// Get mass of Spacecraft
+      inline double getMass() const
+      {
+         return mass;
+      }
 
 
-      double getReflectCoeff()
-      { return reflectCoeff; }
+         /// Set position of Spacecraft
+      inline Spacecraft& setPosition(const Vector<double>& pos)
+      {
+         r = pos;
+
+         return (*this);
+      }
 
 
-      Spacecraft& setReflectCoeff(double Cr)
-      { reflectCoeff = Cr; return (*this); }
-
-      double getDragCoeff()
-      { return dragCoeff; }
-
-
-      Spacecraft& setDragCoeff(double Cd)
-      { dragCoeff = Cd; return (*this);}
-      
-
-      double getDragArea()
-      { return crossArea; }
-
-      Spacecraft& setDragArea(double satArea)
-      { crossArea = satArea; return (*this);}
-      
-
-      double getSRPArea()
-      { return crossArea; }
+         /// Get position of Spacecraft
+      inline Vector<double> getPosition() const
+      {
+         return r;
+      }
 
 
-      Spacecraft& setSRPArea(double satArea)
-      { crossArea = satArea; return (*this);}
-      
+         /// Set velocity of Spacecraft
+      inline Spacecraft& setVelocity(const Vector<double>& vel)
+      {
+         v = vel;
 
-      double getDryMass()
-      {return dryMass;}
-
-
-      Spacecraft& setDryMass(double satMass)
-      { dryMass = satMass; return (*this);}
-      
+         return (*this);
+      }
 
 
-         /// some basic test
-      void test();
+         /// Get velocity of Spacecraft
+      inline Vector<double> getVelocity() const
+      {
+         return v;
+      }
 
 
-   protected:
+         /// Set number of force model parameters to be estimated
+      inline Spacecraft& setNumOfParam(const int& n)
+      {
+         numOfParam = n;
 
+         dr_dp0.resize(3*numOfParam, 0.0);
+         dv_dp0.resize(3*numOfParam, 0.0);
+
+         return (*this);
+      }
+
+         /// Get number of force model parameters to be estimated
+      inline int getNumOfParam() const
+      {
+         return numOfParam;
+      }
+
+
+         /// Get partial derivatives of currrent position to initial position
+      inline Vector<double> dR_dR0() const
+      {
+         return dr_dr0;
+      }
+
+
+         /// Get partial derivatives of current position to initial velocity
+      inline Vector<double> dR_V0() const
+      {
+         return dr_dv0;
+      }
+
+
+         /// Get partial derivatives of current position to initial force model
+         /// parameters
+      inline Vector<double> dR_dP0() const
+      {
+         return dr_dp0;
+      }
+
+
+         /// Get partial derivatives of current velocity to initial position
+      inline Vector<double> dV_dR0() const
+      {
+         return dv_dr0;
+      }
+
+
+         /// Get partial derivatives of current velocity to initial velocity
+      inline Vector<double> dV_dV0() const
+      {
+         return dv_dr0;
+      }
+
+
+         /// Get partial derivatives of current velocity to initial force model
+         /// parameters
+      inline Vector<double> dV_dP0() const
+      {
+         return dv_dp0;
+      }
+
+
+         /// Set state vector of Spacecraft
+      Spacecraft& setStateVector(const Vector<double>& sv);
+
+
+         /// Get state vector of Spacecraft
+      Vector<double> getStateVector() const;
+
+
+         /// Get transition matrix of Spacecraft
+      Matrix<double> getTransitionMatrix() const;
+
+
+         /// Get state transition matrix of Spacecraft
+      Matrix<double> getStateTransitionMatrix() const;
+
+
+         /// Get sensitivity matrix of Spacecraft
+      Matrix<double> getSensitivityMatrix() const;
+
+
+   private:
+
+         /// Reset state of Spacecraft
       void resetState();
-      
-         /// name: The name of the spacecraft (e.g. "NCC-1701-D") 
-      string scName;
-      
-         /// Object to hold epoch in UTC
-      UTCTime utc;
 
-         /// state vector     6*n + 42
-      Vector<double> r;         // 3 Position
-      Vector<double> v;         // 3 Velocity
-      Vector<double> p;         // n dynamical parameters [this is important]
 
-      Vector<double> dr_dr0;      // 3*3  I
-      Vector<double> dr_dv0;      // 3*3  0
-      Vector<double> dr_dp0;      // 3*n  0
-      Vector<double> dv_dr0;      // 3*3  0
-      Vector<double> dv_dv0;      // 3*3  I
-      Vector<double> dv_dp0;      // 3*n  0
+         /// Current time of Spacecraft
+      CommonTime curTime;
 
-         /// Coefficient of Reflectivity
-      double reflectCoeff;
+         /// SatID of Spacecraft
+      SatID satID;
 
-         /// Coefficient of drag
-      double dragCoeff;
+         /// Block type of spacecraft
+      std::string blockType;
 
-         /// Cross sectional (reflective) area [m^2]
-      double crossArea;
+         /// Mass of spacecraft
+      double mass;
 
-         /// mass [kg]
-      double dryMass;
+
+         /// State vector     6*n + 42
+      Vector<double> r;       // 3*1
+      Vector<double> v;       // 3*1
+
+         /// Number of parameters
+      int numOfParam;
+
+         /// Partial derivatives
+      Vector<double> dr_dr0;  // 3*3
+      Vector<double> dr_dv0;  // 3*3
+      Vector<double> dr_dp0;  // 3*n
+      Vector<double> dv_dr0;  // 3*3
+      Vector<double> dv_dv0;  // 3*3
+      Vector<double> dv_dp0;  // 3*n
 
    }; // End of class 'Spacecraft'
 
 
       /**
-       * Stream output for CommonTime objects.  Typically used for debugging.
-       * @param s stream to append formatted CommonTime to.
-       * @param t CommonTime to append to stream \c s.
+       * Stream output for Spacecraft objects.  Typically used for debugging.
+       * @param s stream to append formatted Spacecraft to.
+       * @param t Spacecraft to append to stream \c s.
        * @return reference to \c s.
        */
    std::ostream& operator<<( std::ostream& s,
-                             const gpstk::Spacecraft& sc );
+                             const Spacecraft& sc );
       // @}
 
 }  // End of namespace 'gpstk'
 
 #endif   // GPSTK_SPACECRAFT_HPP
-

@@ -320,15 +320,16 @@ Download()
 	filename=$(echo $compressed_file | cut -d "." -f 1,2)
 		
 	savefile="$savepath""$filename"
+	download_file="$savepath""$compressed_file"
 
 	if [[ -e $savefile ]]
 	then
 		echo "The file $savefile already exists!"
 	else
-		wget -c -P $savepath $url
-		if [[ ! -e $savefile ]]
+		wget -c -t 2 -P $savepath $url
+		if [[ ! -e $download_file ]]
 		then
-			echo "Warning! Failed when downloading the file $savefile."
+			echo "Warning! Failed when downloading the file $download_file ."
 			echo "( Please confirm if this file exists on the network. ) "
 		fi
 	fi
@@ -375,7 +376,7 @@ Decompress()
 			echo "The file $savefile2 already exists!"
 		else
             # Convert
-	      CRX2RNX "$savefile"
+	      crx2rnx "$savefile"
       fi
 
          # Now, observation file name has already changed to '*.yyo'
@@ -681,7 +682,7 @@ then # When the product type is OBS and 's' displays a list file.
 			URLMatch
 			Download
 			   # When the $savefile doesn't exist, jump out the loop
-			if [[ ! -e $savefile ]]
+			if [[ ! -e $download_file ]]
 			then
 				continue
 			fi
@@ -740,7 +741,7 @@ else
 		URLMatch
 		Download
 		   # When the $savefile doesn't exist, jump out the loop
-		if [[ ! -e $savefile ]]
+		if [[ ! -e $download_file ]]
 		then
 			continue
 		fi

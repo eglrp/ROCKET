@@ -66,13 +66,13 @@ namespace gpstk
          oData.obsSource.type = SatIDsystem2SourceIDtype(obsHeader.system);
          oData.obsSource.sourceName = obsHeader.markerName;
 
-         oData.pSynchro->setReferenceSource(*oData.pObsStream);
+         oData.pSynchro->setReferenceStream(*oData.pObsStream);
 
             // Now, we should store the data for the receiver
          allStreamData.push_back(oData);
 
-         mapSourceStream[oData.obsSource] = oData.pObsStream;
-         mapSourceSynchro[oData.obsSource] = oData.pSynchro;
+         srcStreamMap[oData.obsSource] = oData.pObsStream;
+         srcSyncMap[oData.obsSource] = oData.pSynchro;
 
          referenceSource = oData.obsSource;
 
@@ -102,7 +102,7 @@ namespace gpstk
       gdsMap.clear();
 
 
-      RinexObsStream* pRefObsStream = mapSourceStream[referenceSource];
+      RinexObsStream* pRefObsStream = srcStreamMap[referenceSource];
 
       gnssRinex gRef;
   
@@ -111,13 +111,13 @@ namespace gpstk
          gdsMap.addGnssRinex(gRef);
 
          std::map<SourceID, RinexObsStream*>::iterator it;
-         for( it = mapSourceStream.begin();
-              it != mapSourceStream.end();
+         for( it = srcStreamMap.begin();
+              it != srcStreamMap.end();
             ++it)
          {
             if( it->first == referenceSource) continue;
 
-            Synchronize* synchro = mapSourceSynchro[it->first];
+            Synchronize* synchro = srcSyncMap[it->first];
             synchro->setRoverData(gRef);
 
             gnssRinex gRin;
@@ -155,7 +155,7 @@ namespace gpstk
       // do some clean operation 
    void NetworkObsStreams::cleanUp()
    {
-      mapSourceStream.clear();
+      srcStreamMap.clear();
 
       std::list<ObsData>::iterator it;
       for( it = allStreamData.begin();

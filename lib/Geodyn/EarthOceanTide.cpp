@@ -1,18 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file EarthOceanTide.cpp
-* 
-*/
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,221 +15,166 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  
+//  Copyright 2004, The University of Texas at Austin
+//  kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+* @file EarthOceanTide.cpp
+* 
+*/
+
 #include "EarthOceanTide.hpp"
-#include <fstream>
-#include <math.h>
-#include <string>
-#include "UTCTime.hpp"
-#include "ASConstant.hpp"
-#include "ReferenceFrames.hpp"
+#include "GNSSconstants.hpp"
+#include "StringUtils.hpp"
+#include "MJD.hpp"
+#include "Legendre.hpp"
+
+
+using namespace std;
+using namespace gpstk::StringUtils;
 
 
 namespace gpstk
 {
-   using namespace gpstk::StringUtils;
 
-   // constants
-   const double EarthOceanTide::G  = 6.67259e-11; // m^3/kg/s/s
-   const double EarthOceanTide::GE = 9.780327;    // m/s/s 
-
-      /*
-      * load ocean data file see bern "OT_CSRC.TID"
-      * reference bernese5 OTIDES.f
-      */
-   void EarthOceanTide::loadTideFile(std::string fileName,int NMAX,double XMIN)
+   // Load Ocean Tide file
+   void EarthOceanTide::loadFile(const string& file)
+      throw(FileMissingException)
    {
-      if(isLoaded) return;
+      ifstream inpf(file.c_str());
 
-      // open the file
-      std::ifstream fin(fileName.c_str());
-      if(!fin.good())
+      if(!inpf)
       {
-         Exception e("Can not Open the CSR Ocean Tide File:"+fileName);
-         GPSTK_THROW(e);
+         FileMissingException fme("Could not open Ocean Tide file " + file);
+         GPSTK_THROW(fme);
       }
 
-      // read the file
-      std::string buf;
+      // First, file header
+      string temp;
+      for(int i=0; i<4; ++i)
+         getline(inpf,temp);
 
-      // line 1 ,skip it
-      getline(fin,buf);   
+      bool ok(true);
 
-      // line 2
-      getline(fin,buf);
-      NWAV = asInt(buf.substr(0,4));
-      NTOT = asInt(buf.substr(4,4));
-      NMX = asInt(buf.substr(8,4));
-      MMX = asInt(buf.substr(12,4));
-
-      // line 3 ,skip it
-      getline(fin,buf);
-
-      // line 4
-      getline(fin,buf);
-      RRE = asDouble(buf.substr(0,21));
-      RHOW = asDouble(buf.substr(21,21));
-      XME = asDouble(buf.substr(42,21));
-      PFCN = asDouble(buf.substr(63,21));
-      XXX = asDouble(buf.substr(84,21));
-
-      // line 5 ~ 8
-      for(int i=0;i<4;i++)
+      string line;
+      // Then, file data
+      while( !inpf.eof() && inpf.good() )
       {
-         getline(fin,buf);
-         for(int j=0;j<6;j++   )      
+         getline(inpf,line);
+         stripTrailing(line,'\r');
+
+         if( inpf.eof() ) break;
+
+         if( inpf.bad() ) { ok = false; break; }
+
+         OceanTideData data;
+         // Doodson number, coded into Doodson variable multipliers
+         data.n[0]   =  asInt( line.substr(0,1) );
+         data.n[1]   =  asInt( line.substr(1,1) ) - 5;
+         data.n[2]   =  asInt( line.substr(2,1) ) - 5;
+         data.n[3]   =  asInt( line.substr(4,1) ) - 5;
+         data.n[4]   =  asInt( line.substr(5,1) ) - 5;
+         data.n[5]   =  asInt( line.substr(6,1) ) - 5;
+         // Darwin's symbol
+         data.Darw   =  line.substr(8,3);
+         // Degree, Order
+         data.l      =  asInt( line.substr(12,3) );
+         data.m      =  asInt( line.substr(16,3) );
+
+         // Coefficients
+         data.DelCp  =  asDouble( line.substr(21,8) )*1e-12;
+         data.DelSp  =  asDouble( line.substr(31,8) )*1e-12;
+         data.DelCm  =  asDouble( line.substr(43,8) )*1e-12;
+         data.DelSm  =  asDouble( line.substr(53,8) )*1e-12;
+
+         if(data.l <= desiredDegree)
          {
-            if((i*6+j) > 19) break;
-            tideData.KNMP[i*6+j] = asDouble(buf.substr(j*21,21));   
+            otDataVec.push_back(data);
          }
-      }
-
-      //IGNORE  THE NWAV LINE
-      for(int i=0;i<NWAV;i++) getline(fin,buf);
-
-      // CEXTRACT REQUIRED INFORMATION FROM NEXT NTOT LINES
-      int id = 0;
-      for(int i=0;i<NTOT;i++)
-      {
-         getline(fin,buf);
-
-         tideData.NDOD[id][0] = asInt(buf.substr(13,1)); 
-         tideData.NDOD[id][1] = asInt(buf.substr(14,1)); 
-         tideData.NDOD[id][2] = asInt(buf.substr(15,1)); 
-
-         tideData.NDOD[id][3] = asInt(buf.substr(17,1)); 
-         tideData.NDOD[id][4] = asInt(buf.substr(18,1)); 
-         tideData.NDOD[id][5] = asInt(buf.substr(19,1));          
-
-         tideData.NM[id][0] = asInt(buf.substr(24,2)); 
-         tideData.NM[id][1] = asInt(buf.substr(26,2));       
-
-         tideData.CSPM[id][0] = asDouble(buf.substr(30,22)); 
-         tideData.CSPM[id][1] = asDouble(buf.substr(52,22));
-         tideData.CSPM[id][2] = asDouble(buf.substr(74,22));
-         tideData.CSPM[id][3] = asDouble(buf.substr(96,22));
-
-
-         if((tideData.NM[id][0]<=NMAX) &&
-            (
-            (fabs(tideData.CSPM[id][0])>XMIN) ||
-            (fabs(tideData.CSPM[id][1])>XMIN) ||
-            (fabs(tideData.CSPM[id][2])>XMIN) ||
-            (fabs(tideData.CSPM[id][3])>XMIN))
-            )
+         else
          {
-            for(int j=1;j<6;j++) tideData.NDOD[id][j]-=5;
-
-            id ++;
-            tideData.NTACT = id;
+            continue;
          }
-         // check
-         /*
-         if(m_csr_otide.NTACT>=MAXTRM)
-         {
-         cerr << "ERROR: SR OTIDES: NOT ALL TERMS AVAILABLE IN FILE" << endl;
-         exit(1);
-         }*/
-      }   
 
-      // close the file
-      fin.close();
-
-      isLoaded = true;
-
-      FAC[0] = 1.0;
-      for(int i=1;i<=30;i++)
-      {
-         FAC[i]=FAC[i-1]*i;
       }
 
-   }
+      inpf.close();
+
+      if( !ok )
+      {
+         FileMissingException fme("Ocean Tide file " + file + " is corrupted or in wrong format.");
+         GPSTK_THROW(fme);
+      }
+
+   }  // End of method "EarthOceanTide::loadFile()"
+
 
       /* Ocean pole tide to normalized earth potential coefficients
        *
-       * @param mjdUtc UTC in MJD
-       * @param dC     Correction to normalized coefficients dC
-       * @param dS     Correction to normalized coefficients dS
-       *    C20 C21 C22 C30 C31 C32 C33 C40 C41 C42 C43 C44
+       * @param utc     time in UTC
+       * @param dC      Correction to normalized coefficients dC
+       * @param dS      Correction to normalized coefficients dS
        */
-   void EarthOceanTide::getOceanTide(double mjdUtc, double dC[], double dS[] )
+   void EarthOceanTide::getOceanTide(CommonTime utc, Matrix<double>& CS)
    {
-      try
+      // TT
+      CommonTime tt( pRefSys->UTC2TT(utc) );
+
+      // UT1
+      CommonTime ut1( pRefSys->UTC2UT1(utc) );
+
+      // Doodson arguments
+      double BETA[6] = {0.0};
+      double FNUT[5] = {0.0};
+
+      pRefSys->DoodsonArguments(ut1, tt, BETA, FNUT);
+
+
+      vector<OceanTideData>::iterator itr;
+      for(itr=otDataVec.begin(); itr!=otDataVec.end(); ++itr)
       {
-         loadTideFile(fileName,maxN,minX);
-      }
-      catch (...)
-      {
-         // faild to get the ocean tide model
-         // return zeros
-         const int n = (maxN-1)*(maxN+4)/2; 
-         for(int i=0;i<n;i++)
-         {
-            dC[i] = 0.0;
-            dS[i] = 0.0;
-         }
+         // theta_f
+         double theta_f = (*itr).n[0]*BETA[0] + (*itr).n[1]*BETA[1]
+                        + (*itr).n[2]*BETA[2] + (*itr).n[3]*BETA[3]
+                        + (*itr).n[4]*BETA[4] + (*itr).n[5]*BETA[5];
 
-         return;
-      }
-      
-      UTCTime utc;
-      utc=mjdUtc;
+         // sine and cosine of theta_f
+         double stf = std::sin(theta_f);
+         double ctf = std::cos(theta_f);
 
-      //   CC PURPOSE    :  COMPUTE DOODSON'S FUNDAMENTAL ARGUMENTS (BETA)
-      //  CC               AND FUNDAMENTAL ARGUMENTS FOR NUTATION (FNUT)
-      double BETA[6]={0.0};
-      double FNUT[5] ={0.0};
-      ReferenceFrames::doodsonArguments(utc.asUT1(), utc.asTT(), BETA,FNUT);
+         // index
+         int id = indexTranslator((*itr).l, (*itr).m) - 1;
 
-      for(int i=0;i<tideData.NTACT;i++)
-      {
-         int N= tideData.NM[i][0];
-         int M= tideData.NM[i][1];
+         // coefficients
+         double DelCp = (*itr).DelCp;
+         double DelSp = (*itr).DelSp;
+         double DelCm = (*itr).DelCm;
+         double DelSm = (*itr).DelSm;
 
-         if(tideData.NM[i][0]>maxN) continue;
+         // corrections
+         CS(id, 0) += (DelCp + DelCm)*ctf + (DelSp + DelSm)*stf;
+         CS(id, 1) += (DelSp - DelSm)*ctf - (DelCp - DelCm)*stf;
 
-         double delta = M ? 0 : 1;
-
-         double FNM = 4.0*ASConstant::PI*G*RHOW/GE* std::sqrt(FAC[N+M]/FAC[N-M]/(2.0*N+1.0)/(2.0-delta))
-            *(1.0+tideData.KNMP[N-1])/(2.0*N+1)/100.0;
-
-         double ARG =0;
-         for(int j=0;j<6;j++)
-         {
-            ARG +=tideData.NDOD[i][j]*BETA[j];
-         }
-
-         double CARG = std::cos(ARG);
-         double SARG = std::sin(ARG);
-
-         int index=N*(N+1)/2-3+M;
-
-         dC[index]=dC[index]
-         +FNM*(
-            (tideData.CSPM[i][0]+tideData.CSPM[i][2])*CARG
-            +(tideData.CSPM[i][1]+tideData.CSPM[i][3])*SARG);
-
-         dS[index]=dS[index]
-         +FNM*(
-            (tideData.CSPM[i][1]-tideData.CSPM[i][3])*CARG
-            -(tideData.CSPM[i][0]-tideData.CSPM[i][2])*SARG);
-      }
+      }  // End of 'for()'
       
    }	// End of method 'EarthOceanTide::getOceanTide()'
-   
 
-   void EarthOceanTide::test()
-   {
-      std::cout<<"test Earth Ocean Tide"<<std::endl;
-      // debuging
-      double mjdUtc = 2454531 + 0.49983796296296296 - 2400000.5;
-      double dc[12]={0.0},ds[12]={0.0};
-      getOceanTide(mjdUtc,dc,ds);
-
-   }
 
 }  // End of namespace 'gpstk'

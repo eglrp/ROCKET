@@ -1,4 +1,4 @@
-#pragma ident "$Id: NetworkAmbiDatum.cpp 2939 2012-04-06 19:55:11Z shjzhang $"
+#pragma ident "$Id: AmbiguityDatum.cpp 2939 2012-04-06 19:55:11Z shjzhang $"
 
 /**
  * @file NetworkAmbiDatum.cpp
@@ -26,7 +26,7 @@
 //  Copyright 
 //  ---------
 //
-//  Shoujian Zhang, 2014.
+//  Shjzhang, Wuhan University, 2014
 //
 //============================================================================
 //

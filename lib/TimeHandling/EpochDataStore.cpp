@@ -2,7 +2,7 @@
 
 /**
 * @file EpochDataStore.cpp
-* Class to handle interpolatable time serial data 
+* Class to handle interpolatable time serial data
 */
 
 //============================================================================
@@ -30,6 +30,7 @@
 
 #include "EpochDataStore.hpp"
 #include "MiscMath.hpp"
+#include "Epoch.hpp"
 
 using namespace std;
 
@@ -46,10 +47,10 @@ namespace gpstk
       {
          epochList.insert(it->first);
       }
-      
+
       return epochList;
    }
-   
+
       /* Edit the dataset, removing data outside the indicated time
        *  interval.
        *
@@ -58,7 +59,7 @@ namespace gpstk
        */
    void EpochDataStore::edit( CommonTime tmin, CommonTime tmax  )
    {
-      if(tmin > tmax) 
+      if(tmin > tmax)
       {
          CommonTime m= tmin;
          tmin = tmax;
@@ -95,19 +96,19 @@ namespace gpstk
       {
          finalTime = CommonTime::BEGINNING_OF_TIME;
       }
-      else 
+      else
       {
          finalTime = it->first;
       }
 
    } // End of method 'EpochDataStore::edit()'
-   
-   
+
+
       // Add to the store directly
-   void EpochDataStore::addData(const CommonTime& time, 
+   void EpochDataStore::addData(const CommonTime& time,
                                 const std::vector<double>& data)
    {
-      
+
       allData[time] = data;
 
       if((initialTime == CommonTime::END_OF_TIME)    ||
@@ -115,18 +116,18 @@ namespace gpstk
       {
          initialTime = finalTime = time;
       }
-      else if(time < initialTime) 
+      else if(time < initialTime)
       {
          initialTime = time;
       }
-      else if(time > finalTime) 
+      else if(time > finalTime)
       {
          finalTime = time;
       }
 
    }  // End of method 'EpochDataStore::addData()'
-   
-   
+
+
       /* Get the VehiclePVData at the given epoch and return it.
        *  @param t CommonTime at which to compute the EOPs.
        *  @return EarthOrientation EOPs at time t.
@@ -150,18 +151,21 @@ namespace gpstk
       {
          return it->second;
       }
-      
-     
+
+//      cout << "InterPoints: " << interPoints << endl;
       const int half = ( interPoints + 1 ) / 2;
 
       it = allData.lower_bound(t);   // i points to first element with key >= t
 
-      if(t > finalTime) 
-      { 
+//      cout << CivilTime(it->first) << endl;
+//      cout << CivilTime(t) << endl;
+
+      if(t > finalTime)
+      {
          it = allData.end();
          it--;
       }
- 
+
       EpochData::const_iterator its = it;
       EpochData::const_iterator ite = it;
 
@@ -190,7 +194,7 @@ namespace gpstk
             iright--;
          }
 
-         int ileft2 = iright; 
+         int ileft2 = iright;
          for(int i = 0; i < iright; i++)
          {
             if(its == allData.begin()) break;
@@ -213,12 +217,15 @@ namespace gpstk
          ite = allData.end();
          ite--;
       }
-      
+
+//      cout << CivilTime(its->first) << endl;
+//      cout << CivilTime(ite->first) << endl;
+
       const int N = its->second.size();
 
       std::vector<double> times;
       std::vector<std::vector<double> > datas(N);
-      
+
       EpochData::const_iterator itrEnd = ite;
       itrEnd++;
       for(EpochData::const_iterator itr=its; itr!=itrEnd; itr++)
@@ -227,32 +234,32 @@ namespace gpstk
          std::vector<double> vd = itr->second;
 
          times.push_back(itr->first - its->first);
-         
+
          if( vd.size() != N)
          {
             // Exception
             InvalidRequest e("Size of the data vector doesn't match!");
             GPSTK_THROW(e);
-            
+
          }
-         
+
          for(int i = 0; i < N; i++)
          {
             datas[i].push_back( vd[i] );
          }
       }
-      
+
       std::vector<double> vd(N, 0.0);
 
       double dt = t - its->first;
-      
+
       for(int i = 0; i < N; i++)
       {
          vd[i] = SimpleLagrangeInterpolation(times,datas[i],dt);
       }
 
       return vd;
-   
+
    }  // End of method 'EpochDataStore::getPVData()'
 
 

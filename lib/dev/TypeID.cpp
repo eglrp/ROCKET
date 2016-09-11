@@ -415,6 +415,34 @@ namespace gpstk
       tStrings[Placeholder]= "Placeholder";
    }
 
+	
+   TypeID::TypeID(std::string name){
+
+		/// search tString
+		for( std::map<ValueType, std::string>::const_iterator it_ = tStrings.begin();
+			 it_ != tStrings.end(); it_++)
+		{
+             
+			if( it_->second == name ) {
+				type = it_->first;
+				return;
+			}
+
+		}
+
+
+		/// search mapUserTypeID
+		std::map<std::string, TypeID>::iterator map_user_it = mapUserTypeID.find(name); 
+		if( map_user_it != mapUserTypeID.end() ){
+			type = map_user_it->second.type;
+			return;
+		}
+
+
+		/// create new TypeID
+		type = newValueType(name);
+	}
+
 
       // Assignment operator
    TypeID TypeID::operator=(const TypeID& right)

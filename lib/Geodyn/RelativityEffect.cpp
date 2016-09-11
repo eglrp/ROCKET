@@ -1,18 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file RelativityEffect.cpp
- * Calculate Relativity Effect to earth satellite
- */
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,41 +15,46 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+/**
+ * @file RelativityEffect.cpp
+ * Class to do Relativity Effect calculation.
+ */
 
 #include "RelativityEffect.hpp"
-#include "ASConstant.hpp"
+#include "GNSSconstants.hpp"
 
 namespace gpstk
 {
    // this is the real one
-   void RelativityEffect::doCompute(UTCTime utc, EarthBody& rb, Spacecraft& sc)
+   void RelativityEffect::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
       /* reference: Jisheng,Li P110 Bernese5 GENREL.f
          a_rl = a_rl1 + a_rl2 + a_rl3
 
          a_rl2 and a_rl3 are ignored for precise orbit determination
       */
-      const double GM = ASConstant::GM_Earth;
-      const double C = ASConstant::SPEED_OF_LIGHT;
+      const double GM = GM_EARTH;
+      const double C = C_MPS;
       
-      Vector<double> r = sc.R();
-      Vector<double> v = sc.V();
+      Vector<double> r = sc.getPosition();
+      Vector<double> v = sc.getVelocity();
 
       double beta = 1.0;
       double gama = 1.0;
-      
+
       double c2 = C * C;
       double r2 = dot(r,r);
       double v2 = dot(v,v);
 
       double r_mag = norm(r);
       double r3 = r2 * r_mag;
-      
+
       double p = GM/c2/r3;
       
       // a
@@ -115,7 +112,3 @@ namespace gpstk
 
 
 }  // End of namespace 'gpstk'
-
-
-
-

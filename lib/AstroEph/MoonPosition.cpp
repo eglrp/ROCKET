@@ -1,18 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file MoonPosition.cpp
- * Returns the approximate position of the Moon at the given epoch in the 
- * ECEF system.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,16 +15,35 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
+//  Copyright 2004, The University of Texas at Austin
 //  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software.
+//
+//Pursuant to DoD Directive 523024
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file MoonPosition.cpp
+ * Returns the approximate position of the Moon at the given epoch in the
+ * ECEF system.
+ */
 
 #include "MoonPosition.hpp"
 #include "MJD.hpp"
 #include "CivilTime.hpp"
-#include "EpochDataStore.hpp"
 
 
 namespace gpstk
@@ -127,14 +138,14 @@ namespace gpstk
 
 
 
-      // Returns the position of Moon ECEF coordinates (meters) at 
+      // Returns the position of Moon ECEF coordinates (meters) at
       // the indicated time.
       //
       // @param[in] t   the time to look up
       //
       // @return the position of the Moon at time (as a Triple)
       //
-      // @throw InvalidRequest If the request can not be completed for 
+      // @throw InvalidRequest If the request can not be completed for
       // any reason, this is thrown. The text may have additional
       // information as to why the request failed.
    Triple MoonPosition::getPosition(const CommonTime& t) const
@@ -659,7 +670,7 @@ namespace gpstk
       double EQCOR(DS2R*(0.035+0.00085*(EPJ-B1950)));
 
          // Mean obliquity (IAU 1976)
-      double EPS(DAS2R*(84381.448 + (-46.8150 + 
+      double EPS(DAS2R*(84381.448 + (-46.8150 +
                         (-0.00059+0.001813*tt)*tt)*tt));
 
          // Change to equatorial system, mean of date, FK5 system

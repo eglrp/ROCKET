@@ -1,22 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file EquationOfMotion.hpp
- *
- * Class to provides the mechanism for passing a method
- * that computes the derivatives to an integrator.
- */
-
-#ifndef GPSTK_EQUATION_OF_MOTION_HPP
-#define GPSTK_EQUATION_OF_MOTION_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -28,10 +16,21 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+
+/**
+ * @file EquationOfMotion.hpp
+ *
+ * Class provides the mechanism for passing a method
+ * that computes the derivatives to an integrator.
+ */
+
+#ifndef GPSTK_EQUATION_OF_MOTION_HPP
+#define GPSTK_EQUATION_OF_MOTION_HPP
 
 #include "Vector.hpp"
 
@@ -51,7 +50,7 @@ namespace gpstk
          /// Default constructor
       EquationOfMotion()
       {}
-      
+
          /// Default deconstructor
       virtual ~EquationOfMotion()
       {}
@@ -71,7 +70,3 @@ namespace gpstk
 }  // End of namespace 'gpstk'
 
 #endif  // GPSTK_EQUATION_OF_MOTION_HPP
-
-
-
-

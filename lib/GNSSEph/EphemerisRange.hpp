@@ -70,10 +70,11 @@ namespace gpstk
       /// the CER quantities, given the nominal receive time tr_nom and
       /// an XvtStore.
       double ComputeAtReceiveTime(
-         const CommonTime& tr_nom,
-         const Position& Rx,
-         const SatID sat,
-         const XvtStore<SatID>& Eph);
+                           const CommonTime& tr_nom,
+                           const Position& Rx,
+                           const SatID sat,
+                           const XvtStore<SatID>& Eph)
+      throw(InvalidRequest,Exception);
 
       /// Compute the corrected range at TRANSMIT time, from receiver at
       /// position Rx, to the GPS satellite given by SatID sat, as well as all
@@ -84,7 +85,8 @@ namespace gpstk
          const double& pr,
          const Position& Rx,
          const SatID sat,
-         const XvtStore<SatID>& Eph);
+         const XvtStore<SatID>& Eph)
+      throw(InvalidRequest, Exception);
 
       /// Compute the corrected range at TRANSMIT time, from receiver at
       /// position Rx, to the GPS satellite given by SatID sat, as well as all
@@ -98,7 +100,8 @@ namespace gpstk
          const CommonTime& tr_nom,
          const Position& Rx,
          const SatID sat,
-         const XvtStore<SatID>& Eph);
+         const XvtStore<SatID>& Eph)
+      throw(InvalidRequest, Exception);
 
       /// Compute the corrected range at TRANSMIT time, from receiver at
       /// position Rx, to the GPS satellite given by SatID sat, as well as all
@@ -109,7 +112,8 @@ namespace gpstk
          const double& pr,
          const Position& Rx,
          const SatID sat,
-         const XvtStore<SatID>& Eph);
+         const XvtStore<SatID>& Eph)
+      throw(InvalidRequest, Exception);
 
       /// The computed raw (geometric) range in meters.
       double rawrange;

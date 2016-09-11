@@ -1,21 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file EarthSolidTide.hpp
-* Class to do Earth Solid Tide correction
-*/
-
-#ifndef GPSTK_SOLID_TIDE_HPP
-#define GPSTK_SOLID_TIDE_HPP
-
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -26,10 +15,22 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  
+//  Copyright 2004, The University of Texas at Austin
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
+
+/**
+* @file EarthSolidTide.hpp
+* Class to do Earth Solid Tide correction.
+*/
+
+#ifndef GPSTK_EARTH_SOLID_TIDE_HPP
+#define GPSTK_EARTH_SOLID_TIDE_HPP
+
+#include "ReferenceSystem.hpp"
+#include "SolarSystem.hpp"
 
 
 namespace gpstk
@@ -37,43 +38,75 @@ namespace gpstk
       /** @addtogroup GeoDynamics */
       //@{
 
-      /**Class to do Earth Solid Tide correction
-       * reference: IERS Conventions 2003
+      /** Class to do Earth Solid Tide correction
+       * see IERS Conventions 2010 Section 6.2 for more details.
        */
    class EarthSolidTide
    {
    public:
 
          /// Default constructor
-      EarthSolidTide(){}
+      EarthSolidTide()
+         : pRefSys(NULL),
+           pSolSys(NULL)
+      {}
 
          /// Default destructor
-      ~EarthSolidTide(){}
+      ~EarthSolidTide() {}
 
-         /**
-          * Solid tide to normalized earth potential coefficients
+
+         /// Set reference system
+      inline EarthSolidTide& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
+
+
+         /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
+
+
+         /// Set solar system
+      inline EarthSolidTide& setSolarSystem(SolarSystem& sol)
+      {
+         pSolSys = &sol;
+
+         return (*this);
+      }
+
+
+         /// Get solar system
+      inline SolarSystem* getSolarSystem() const
+      {
+         return pSolSys;
+      }
+
+
+         /** Solid tide to normalized earth potential coefficients
           *
-          * @param mjdUtc  UTC in MJD
-          * @param dC      correction to normalized coefficients dC
-          * @param dS      correction to normalized coefficients dS
+          * @param utc     time in UTC
+          * @param CS      normalized earth potential coefficients
           */
-      void getSolidTide(double mjdUtc, double dC[], double dS[] );
+      void getSolidTide(CommonTime utc, Matrix<double>& CS);
 
-
-      void test();
 
    protected:
 
-         ///  Legendre polynomial
-         //  relevant formula can be found in "satellite orbits"(3.23,3.24,3.25 in chapter 3.2.4)
-      static double legendrePoly(int n,int m,double u);
-
-      double normFactor (int n, int m) ;
-      
-         /// Objects to hold parameters
+         /// Parameters
       static const double Argu_C20[21][7];
       static const double Argu_C21[48][7];
       static const double Argu_C22[2][6];
+
+         /// Reference System
+      ReferenceSystem* pRefSys;
+
+         /// Solar System
+      SolarSystem* pSolSys;
       
    }; // End of class 'EarthSolidTide'
 
@@ -81,8 +114,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   //GPSTK_SOLID_TIDE_HPP
-
-
-
-
+#endif   //GPSTK_EARTH_SOLID_TIDE_HPP

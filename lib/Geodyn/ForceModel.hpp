@@ -1,21 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file ForceModel.hpp
-* Force Model is a simple interface which allows uniformity among the various force
-* models 
-*/
-
-#ifndef GPSTK_FORCE_MODEL_HPP
-#define GPSTK_FORCE_MODEL_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -26,34 +15,42 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
-//
-//============================================================================
-//
-//  Some basic operations
-//
-//  getAccelaration();
-//
-//  getForce();
-//
-//  getDerivaties();
-//
-//
-//  ....
-//  ....
-//
-//  The real force model will inherit the basic force model.
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+* @file ForceModel.hpp
+* Force Model is a simple interface which allows uniformity among the various force
+* models.
+*/
+
+#ifndef GPSTK_FORCE_MODEL_HPP
+#define GPSTK_FORCE_MODEL_HPP
 
 
 #include "Vector.hpp"
 #include "Matrix.hpp"
+
 #include "Spacecraft.hpp"
 #include "EarthBody.hpp"
+
 
 namespace gpstk
 {
@@ -62,7 +59,7 @@ namespace gpstk
 
       /**
        * Force Model is a simple interface which allows uniformity among the various force
-       * models 
+       * models.
        */
    class ForceModel
    {
@@ -74,237 +71,235 @@ namespace gpstk
          /// to the force model list
       enum ForceModelIndex
       {
-         FMI_BASE       = 1000,  ///< For This class 'ForceModel'
+         FMI_BASE       = 1000,     ///< For This class 'ForceModel'
 
-         FMI_GEOEARTH,           ///< Geopotential of Earth
-         FMI_GEOSUN,             ///< Geopotential of Sun
-         FMI_GEOMOON,            ///< Geopotential of Moon 
-         FMI_DRAG,               ///< Atmospheric Drag
-         FMI_SRP,                ///< Solar Radiation Pressure
-         FMI_RELATIVE,           ///< Relative Effect   
-         FMT_EMPIRICAL,          ///< Empirical Force 
-         
+         FMI_EarthGravitation,      ///< Geopotential of Earth
+         FMI_SunGravitation,        ///< Geopotential of Sun
+         FMI_MoonGravitation,       ///< Geopotential of Moon
+         FMI_AtmosphericDrag,       ///< Atmospheric Drag
+         FMI_SolarRadiationPressure,///< Solar Radiation Pressure
+         FMI_RelativisticEffect,    ///< Relativistic Effect
+         FMI_EmpiricalForce,        ///< Empirical Force
+
          //... add more here
 
-         FMI_LIST   = 2000      ///< For class 'ForceModelList'
+         FMI_LIST       = 2000      ///< For class 'ForceModelList'
       };
 
+         /// The force model parameters to be estimated
       enum ForceModelType
       {
-         Cd,               // Coefficient of drag
-         Cr               // Coefficient of Reflectivity
+         Cnm,           // Spherical harmonic coefficients
+         Snm,           // Spherical harmonic coefficients
+
+         Cd,            // Coefficient of Atomspheric Drag
+         Cr,            // Coefficient of Solar Radiation Pressure
+
+         // added by kfkuang, 2015/09/10
+         Gx,            // Scale factor of ROCK-T SRP model, x axis
+         Gy,            // Scale factor of ROCK-T SRP model, y axis
+         Gz,            // Sacle factor of ROCK-T SRP model, z axis
+
+         // added by kfkuang, 2015/10/10
+         D0,            // Scale factor of CODE SRP model, D direction
+         Dc,            // Scale factor of CODE SRP model, D direction, 1/revolution
+         Ds,            // Scale factor of CODE SRP model, D direction, 1/revolution
+         Y0,            // Scale factor of CODE SRP model, Y direction
+         Yc,            // Scale factor of CODE SRP model, Y direciton, 1/revolution
+         Ys,            // Scale factor of CODE SRP model, Y direciton, 1/revolution
+         B0,            // Scale factor of CODE SRP model, B direction
+         Bc,            // Scale factor of CODE SRP model, B direction, 1/revolution
+         Bs,            // Scale factor of CODE SRP model, B direction, 1/revolution
+
+         // added by kfkuang, 2015/09/10
+         ar,            // Empirical acceleration, radial
+         at,            // Empirical acceleration, along-track (transverse)
+         an             // Empirical acceleration, cross-track (normal)
+
       };
 
-         /// Default constructor
-      ForceModel()
-      {         
-         a.resize(3,0.0);
-         da_dr.resize(3,3,0.0);
-         da_dv.resize(3,3,0.0);
-         da_dp.resize(3,0,0.0);      // default np = 0;
+   public:
 
-         da_dcd.resize(3,1,0.0);
-         da_dcr.resize(3,1,0.0);
+         /// Constructor
+      ForceModel()
+      {
+         a.resize(3, 0.0);
+         da_dr.resize(3,3, 0.0);
+         da_dv.resize(3,3, 0.0);
+         da_dp.resize(3,0, 0.0);
+         da_dEGM.resize(3,0, 0.0);
+         da_dSRP.resize(3,0, 0.0);
       }
 
          /// Default destructor
-      virtual ~ForceModel(){}
+      virtual ~ForceModel() {}
 
 
-         /// this is the real one to do computation
-      virtual void doCompute(UTCTime t, EarthBody& bRef, Spacecraft& sc)
-      {
-         a.resize(3,0.0);
-         da_dr.resize(3,3,0.0);
-         da_dv.resize(3,3,0.0);
-         da_dp.resize(3,0,0.0);      // default np = 0;
+         /** Compute acceleration (and related partial derivatives).
+          * @param utc     time in UTC
+          * @param rb      earth body
+          * @param sc      spacecraft
+          */
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc) {}
 
-         da_dcd.resize(3,1,0.0);
-         da_dcr.resize(3,1,0.0);
 
-      }
-         
-         /// return the force model name
-      virtual std::string modelName() const
+         /// Return the force model name
+      inline virtual std::string forceModelName() const
       { return "ForceModel"; }
 
 
-         /// return the force model index
-      virtual int forceIndex() const
+         /// Return the force model index
+      inline virtual int forceModelIndex() const
       { return FMI_BASE; }
 
 
-         /**
-          * Return the acceleration
-          * @return  acceleration
-          */
-      virtual Vector<double> getAccel() const
-      { return a; }
-
-         /**
-          * Return the partial derivative of acceleration wrt position
-          * @return Matrix containing the partial derivative of acceleration wrt velocity
-          */
-      virtual Matrix<double> partialR() const
-      { return da_dr; }
-
-         /**
-          * Return the partial derivative of acceleration wrt velocity
-          * @return Matrix containing the partial derivative of acceleration wrt velocity
-          */
-      virtual Matrix<double> partialV() const
-      { return da_dv; }
-
-         /**
-          * Return the partial derivative of acceleration wrt velocity
-          * @return Matrix containing the partial derivative of acceleration wrt velocity
-          */
-      virtual Matrix<double> partialP() const
-      { return da_dp; }
-
-         /**
-          * Return the partial derivative of acceleration wrt velocity
-          * @return Matrix containing the partial derivative of acceleration wrt cd
-          */
-      virtual Matrix<double> partialCd() const
-      { return da_dcd; } 
-
-         /**
-          * Return the partial derivative of acceleration wrt velocity
-          * @return Matrix containing the partial derivative of acceleration wrt cr
-          */
-      virtual Matrix<double> partialCr() const
-      { return da_dcr; }
-
-         /** return number of np
-          */
-      int getNP() const
-      { return da_dp.cols(); }
-
-         /// get A Matrix
-      Matrix<double> getAMatrix() const
+         /// Get acceleration, a
+      inline virtual Vector<double> getAcceleration() const
       {
-            /* A Matrix
-            |                        |
-            | 0         I      0      |
-            |                        |
-         A =| da_dr      da_dv   da_dp  |
-            |                        |
-            | 0         0      0      |
-            |                        |
-            */
+         return a;
+      }
 
-         const int np = da_dp.cols();
+         /// Get partials of acceleration to position, da_dr
+      inline virtual Matrix<double> dA_dR() const
+      {
+         return da_dr;
+      }
 
-         gpstk::Matrix<double> A(6+np,6+np,0.0);
+         /// Get partials of acceleration to velocity, da_dv
+      inline virtual Matrix<double> dA_dV() const
+      {
+         return da_dv;
+      }
 
-         A(0,3) = 1.0;
-         A(1,4) = 1.0;
-         A(2,5) = 1.0;
+
+         /// Get partials of acceleration to force model parameters, da_dp
+      inline virtual Matrix<double> dA_dP() const
+      {
+         return da_dp;
+      }
+
+
+         /// Get partials of acceleration to EGM coefficients, da_dEGM
+      inline virtual Matrix<double> dA_dEGM() const
+      {
+         return da_dEGM;
+      }
+
+
+         /// Get partials of acceleration to SRP coefficients, da_dSRP
+      inline virtual Matrix<double> dA_dSRP() const
+      {
+         return da_dSRP;
+      }
+
+
+
+         /// Get coefficient matrix of equation of variation
+      Matrix<double> getCoeffMatOfEOV() const
+      {
+
+         //////////////////////////////////////////////////
+         //             |                     |          //
+         //             | 0      I      0     |          //
+         //             |                     |          //
+         //    cMat  =  | da/dr  da/dv  da/dp |          //
+         //             |                     |          //
+         //             | 0      0      0     |          //
+         //             |                     |          //
+         //////////////////////////////////////////////////
+
+         int numOfParam = da_dp.cols();
+         Matrix<double> cMat(6+numOfParam,6+numOfParam, 0.0);
+
+         // identify part
+         cMat(0,3) = 1.0; cMat(1,4) = 1.0; cMat(2,5) = 1.0;
 
          // da_dr
-         A(3,0) = da_dr(0,0);
-         A(3,1) = da_dr(0,1);
-         A(3,2) = da_dr(0,2);
-         A(4,0) = da_dr(1,0);
-         A(4,1) = da_dr(1,1);
-         A(4,2) = da_dr(1,2);
-         A(5,0) = da_dr(2,0);
-         A(5,1) = da_dr(2,1);
-         A(5,2) = da_dr(2,2);
-
-         // da_dv
-         A(3,3) = da_dv(0,0);
-         A(3,4) = da_dv(0,1);
-         A(3,5) = da_dv(0,2);
-         A(4,3) = da_dv(1,0);
-         A(4,4) = da_dv(1,1);
-         A(4,5) = da_dv(1,2);
-         A(5,3) = da_dv(2,0);
-         A(5,4) = da_dv(2,1);
-         A(5,5) = da_dv(2,2);
-
-         // da_dp
-         for(int i=0;i<np;i++)
+         for(int i=0; i<3; ++i)
          {
-            A(3,6+i) = da_dp(0,i);
-            A(4,6+i) = da_dp(1,i);
-            A(5,6+i) = da_dp(2,i);
+             for(int j=0; j<3; ++j)
+             {
+                 cMat(i+3,j+0) = da_dr(i,j);
+             }
          }
 
-         return A;
+         // da_dv
+         for(int i=0; i<3; ++i)
+         {
+             for(int j=0; j<3; ++j)
+             {
+                 cMat(i+3,j+3) = da_dv(i,j);
+             }
+         }
 
-      }  // End of method 'getAMatrix()'
+         // da_dp
+         for(int i=0; i<3; ++i)
+         {
+             for(int j=0; j<numOfParam; ++j)
+             {
+                 cMat(i+3,j+6) = da_dp(i,j);
+             }
+         }
 
-      void test()
-      {
-         /*
-         cout<<"test Force Model"<<endl;
+         return cMat;
 
-         a.resize(3,2.0);
-         da_dr.resize(3,3,3.0);
-         da_dv.resize(3,3,4.0);
-         da_dp.resize(3,2,5.0);
-         writeToFile("default.fm");
+      }  // End of method 'ForceModel::getCoeffMatOfEOV()'
 
-         // it work well
-         */
-      }
 
    protected:
 
          /// Acceleration
-      Vector<double> a;         // 3
-      
+      Vector<double> a;          // 3*1
+
          /// Partial derivative of acceleration wrt position
       Matrix<double> da_dr;      // 3*3
-      
+
          /// Partial derivative of acceleration wrt velocity
       Matrix<double> da_dv;      // 3*3
-      
+
          /// Partial derivative of acceleration wrt dynamic parameters
       Matrix<double> da_dp;      // 3*np
-         
-         /// Partial derivative of acceleration wrt Cd
-      Matrix<double> da_dcd;      // 3*1
-         
-         /// Partial derivative of acceleration wrt Cr
-      Matrix<double> da_dcr;      // 3*1
 
-      
+         /// Partial derivatives of acceleration wrt EGM coefficients
+      Matrix<double> da_dEGM;    // 3*n_egm
 
-   }; // End of 'class ForceModel'
+         /// Partial derivatives of acceleration wrt SRP coefficients
+      Matrix<double> da_dSRP;    // 3*n_srp
+
+
+
+   }; // End of class 'ForceModel'
 
       /**
-       * Stream output for CommonTime objects.  Typically used for debugging.
+       * Stream output for CommonTime objects. Typically used for debugging.
        * @param s stream to append formatted CommonTime to.
        * @param t CommonTime to append to stream \c s.
        * @return reference to \c s.
        */
    inline std::ostream& operator<<( std::ostream& s,
-                                    const gpstk::ForceModel& fm )
+                                    const ForceModel& fm )
    {
-      Vector<double> a = fm.getAccel();
-      Matrix<double> da_dr = fm.partialR();
-      Matrix<double> da_dv = fm.partialV();
-      Matrix<double> da_dp = fm.partialP();
+      Vector<double> a = fm.getAcceleration();
+      Matrix<double> da_dr = fm.dA_dR();
+      Matrix<double> da_dv = fm.dA_dV();
+      Matrix<double> da_dp = fm.dA_dP();
 
       s<<"a ["<<a.size()<<"]\n{\n"
-         <<a<<endl<<"}\n\n";
+         <<a<<std::endl<<"}\n\n";
 
       s<<"da/dr ["<<da_dr.rows()<<","<<da_dr.cols()<<"]\n{\n"
-         <<da_dr<<endl<<"}\n\n";
+         <<da_dr<<std::endl<<"}\n\n";
 
       s<<"da/dv ["<<da_dv.rows()<<","<<da_dv.cols()<<"]\n{\n"
-         <<da_dv<<endl<<"}\n\n";
+         <<da_dv<<std::endl<<"}\n\n";
 
       s<<"da/dp ["<<da_dp.rows()<<","<<da_dp.cols()<<"]\n{\n"
-         <<da_dp<<endl<<"}\n\n";
+         <<da_dp<<std::endl<<"}\n\n";
 
-      Matrix<double> A = fm.getAMatrix();
+      Matrix<double> A = fm.getCoeffMatOfEOV();
 
       s<<"A = ["<<A.rows()<<","<<A.cols()<<"]\n{\n"
-         <<A<<endl<<"}\n\n";
+         <<A<<std::endl<<"}\n\n";
 
       return s;
 
@@ -316,5 +311,3 @@ namespace gpstk
 
 
 #endif  // GPSTK_FORCE_MODEL_HPP
-
-

@@ -41,7 +41,6 @@
 
 #include "DataStructures.hpp"
 #include "ProcessingClass.hpp"
-#include "geometry.hpp"             // DEG_TO_RAD 
 
 
 namespace gpstk

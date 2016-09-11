@@ -6,35 +6,54 @@
 //  --------
 //
 //  Estimate GPS satellite clock products using PC/LC observables from global
-//  distribute IGS stations.
+//  distributed IGS tracking stations.
 //
 //  CopyRight
 //  ---------
 //  
 //  Shoujian Zhang, Wuhan University, 2010, 2011 
 //
-//============================================================================
-//
 //  History
 //  -------
 //
 //  2012/05/12  
-//  Create this program at 2012.05.12 
+//
+//  Create this program  
 //
 //  2014/10/14  
-//  clkest is modified from the old version, since many classes has
-//  been changed.
-//  - remove class 'phaseCalibration', instead the 'PhaseCodeAligment'
-//  is used to aligh the phase observables to code ones.
+//
+//  clk is modified from the old version, since many classes has been changed.
+//  remove the 'phaseCalibration' class, instead, the 'PhaseCodeAligment' is used 
+//  to aligh the phase observables to the code ones.
 //
 //  2015/07/24  
-//  Major revsion
+//
 //  This version use a new designed solver, 'SolverGeneral2'. The
 //  new version of clock solver impove the computational speed
 //  greatly by redesign the time udpate and measurement update of
 //  the kalman filter.
 //  In the measurement update, the update is basen on single-
 //  observable each time.
+//
+//  2016/05/23  
+//
+//  The configuration file is greatly changed.
+//  only the parameters related to the models are kept in the
+//  configuration file.
+//  all the data and station-related parameters are given through
+//  the command line.
+//
+//  2016/05/30  
+//
+//  Change the interface of the OceanLoading class.
+//  The BLQ data will be loaded firstly and then inserted into the
+//  OceanLoading class.
+//
+//  2016/06/14 
+//  finish the calling method of this program.
+//
+//  2016/07/08
+//  check and test this program
 //
 //============================================================================
 
@@ -81,7 +100,7 @@
 #include "LICSDetector2.hpp"
 
    // Class to detect cycle slips using the Melbourne-Wubbena combination
-#include "MWCSDetector.hpp"
+#include "MWCSDetector2.hpp"
 
    // Class to compute the effect of solid tides
 #include "SolidTides.hpp"
@@ -138,9 +157,6 @@
 #include "Decimate.hpp"
 
    // Class to solve a general equation.
-#include "SolverPPP.hpp"
-
-   // Class to solve a general equation.
 #include "SolverGeneral2.hpp"
 
    // Class to read configuration files.
@@ -164,6 +180,15 @@
    // Class to filter out the PC outliers using prefit-residual
 #include "PrefitFilter.hpp"
 
+   // Class to read the dcb data from files
+#include "DCBDataReader.hpp"
+
+   // Class to read the MSC data from files
+#include "MSCStore.hpp"
+
+   // Class to correct the P1C1 biases for some receivers
+#include "CC2NONCC.hpp"
+
 
 using namespace std;
 using namespace gpstk;
@@ -172,12 +197,12 @@ using namespace gpstk::StringUtils;
 
    // A new class is declared that will handle program behaviour
    // This class inherits from BasicFramework
-class clkest : public BasicFramework
+class clk : public BasicFramework
 {
 public:
 
       // Constructor declaration
-   clkest(char* arg0);
+   clk(char* arg0);
 
 
 protected:
@@ -208,6 +233,23 @@ private:
 
       // This field represents an option at command line interface (CLI)
    CommandOptionWithArg confFile;
+
+      // Option for several input file list
+   CommandOptionWithAnyArg rnxFileListOpt;
+   CommandOptionWithAnyArg sp3FileListOpt;
+   CommandOptionWithAnyArg clkFileListOpt;
+   CommandOptionWithAnyArg eopFileListOpt;
+   CommandOptionWithAnyArg dcbFileListOpt;
+   CommandOptionWithAnyArg mscFileOpt;
+   CommandOptionWithAnyArg outputFileOpt;
+
+   string rnxFileListName;
+   string sp3FileListName;
+   string clkFileListName;
+   string eopFileListName;
+   string dcbFileListName;
+   string mscFileName;
+   string outputFileName;
 
       // Configuration file reader
    ConfDataReader confReader;
@@ -259,45 +301,70 @@ private:
                         const CommonTime& workEpoch );
 
       // Method to print solution
-   void printClockHeader( ofstream& clockFile );
+   void printClockHeader( ofstream& clockStream );
 
       // Method to print solution
-   void printClockData( ofstream& clockFile );
+   void printClockData( ofstream& clockStream );
 
 
-}; // End of 'clkest' class declaration
+}; // End of 'clk' class declaration
 
 
 
    // Let's implement constructor details
-clkest::clkest(char* arg0)
+clk::clk(char* arg0)
    :
-   BasicFramework(  arg0,
-"\nThis program reads GPS receiver data from a configuration file and\n"
-"process such data applying a 'Precise Orbits Positioning' strategy.\n\n"
-"The output file format is as follows:\n\n"
-" 1) Seconds of day\n"
-" 2) dLat (m)\n"
-" 3) dLon (m)\n"
-" 4) dH (m)\n"
-" 5) Zenital Tropospheric Delay - zpd (m)\n" ),
+   gpstk::BasicFramework(  arg0,
+"\nThis program reads parameters from a configuration file and \n"
+"reads GPS data, ephemeris data, including orbit and ERP data, \n"
+"from the command line, and then estimate satellite clocks by processing\n"
+"the GPS data from global IGS stations.\n\n" ),
       // Option initialization. "true" means a mandatory option
-   confFile( CommandOption::stdType,
-             'c',
-             "conffile",
-   " [-c|--conffile]    Name of configuration file ('clkest.conf' by default).",
-             false )
+   confFile(       CommandOption::stdType,
+                   'c',
+                   "conffile",
+   "Name of configuration file ('clk.conf' by default).",
+                   false ),
+   rnxFileListOpt( 'r',
+                   "rnxFileList",
+   "file storing a list of rinex file name ",
+                   true),
+   sp3FileListOpt( 's',
+                   "sp3FileList",
+   "file storing a list of rinex SP3 file name ",
+                   true),
+   clkFileListOpt( 'k',
+                   "clkFileList",
+   "file storing a list of rinex CLK file name ",
+                   false),
+   eopFileListOpt( 'e',
+                   "eopFileList",
+   "file storing a list of IGS erp file name ",
+                   true),
+      // Warning: because 'd' has been used for degug option,
+      //          here 'D' is used for dcb file reading.
+   dcbFileListOpt( 'D',
+                   "dcbFileList",
+   "file storing a list of the P1C1 DCB file.",
+                   false),
+   mscFileOpt(     'm',
+                   "mscFile",
+   "file storing monitor station coordinates ",
+                   true),
+   outputFileOpt(  'O',
+                   "outputFile",
+   "file storing the computed clock data",
+                   true )
 {
-
       // This option may appear just once at CLI
    confFile.setMaxCount(1);
 
-}  // End of 'clkest::clkest'
+}  // End of 'clk::clk'
 
 
 
    // Method that will be executed AFTER initialization but BEFORE processing
-void clkest::spinUp()
+void clk::spinUp()
 {
 
       // Check if the user provided a configuration file name
@@ -334,12 +401,12 @@ void clkest::spinUp()
       try
       {
             // Try to open default configuration file
-         confReader.open( "clkest.conf" );
+         confReader.open( "clk.conf" );
       }
       catch(...)
       {
 
-         cerr << "Problem opening default configuration file 'clkest.conf'"
+         cerr << "Problem opening default configuration file 'clk.conf'"
               << endl;
          cerr << "Maybe it doesn't exist or you don't have proper read "
               << "permissions. Try providing a configuration file with "
@@ -357,13 +424,42 @@ void clkest::spinUp()
       // 'confReader' will look for it in the 'DEFAULT' section.
    confReader.setFallback2Default(true);
 
+      // Now, Let's parse the command line
+   if(rnxFileListOpt.getCount())
+   {
+      rnxFileListName = rnxFileListOpt.getValue()[0];
+   }
+   if(sp3FileListOpt.getCount())
+   {
+      sp3FileListName = sp3FileListOpt.getValue()[0];
+   }
+   if(clkFileListOpt.getCount())
+   {
+      clkFileListName = clkFileListOpt.getValue()[0];
+   }
+   if(eopFileListOpt.getCount())
+   {
+      eopFileListName = eopFileListOpt.getValue()[0];
+   }
+   if(outputFileOpt.getCount())
+   {
+      outputFileName = outputFileOpt.getValue()[0];
+   }
+   if(mscFileOpt.getCount())
+   {
+      mscFileName = mscFileOpt.getValue()[0];
+   }
+   if(dcbFileListOpt.getCount())
+   {
+      dcbFileListName = dcbFileListOpt.getValue()[0];
+   }
 
-}  // End of method 'clkest::spinUp()'
+}  // End of method 'clk::spinUp()'
 
 
 
    // Method that will really process information
-void clkest::process()
+void clk::process()
 {
        // Preprocessing the gnss data 
    preprocessing();
@@ -375,15 +471,16 @@ void clkest::process()
 
 
    // Method that will really process information
-void clkest::preprocessing()
+void clk::preprocessing()
 {
 
       /////////////////
       // Put here what you want to apply to ALL stations
       /////////////////
-
-
-   //// vvvv Ephemeris handling vvvv
+      
+      ////////////////////////////////////////////////
+      // Now, Let's read SP3 Files
+      ////////////////////////////////////////////////
 
       // Declare a "SP3EphemerisStore" object to handle precise ephemeris
    SP3EphemerisStore SP3EphList;
@@ -393,196 +490,406 @@ void clkest::preprocessing()
    SP3EphList.rejectBadPositions(true);
    SP3EphList.rejectBadClocks(true);
 
-      // Load all the SP3 ephemerides files from variable list
-   string sp3File;
-   while ( (sp3File = confReader.fetchListValue("SP3List", "DEFAULT" ) ) != "" )
-   {
+      // Now read sp3 files from 'sp3FileList'
+   ifstream sp3FileListStream;
 
-         // Try to load each ephemeris file
+   sp3FileListStream.open(sp3FileListName.c_str(), ios::in);
+   if(!sp3FileListStream)
+   {
+         // If file doesn't exist, issue a warning
+      cerr << "SP3 file List Name'" << sp3FileListName << "' doesn't exist or you don't "
+           << "have permission to read it. Skipping it." << endl;
+
+      exit(-1);
+   }
+
+   string sp3File;
+   while( sp3FileListStream >> sp3File )
+   {
       try
       {
          SP3EphList.loadFile( sp3File );
       }
-      catch (...)
+      catch (FileMissingException& e)
       {
             // If file doesn't exist, issue a warning
          cerr << "SP3 file '" << sp3File << "' doesn't exist or you don't "
               << "have permission to read it. Skipping it." << endl;
-
-         exit(-1);
+         continue;
       }
-
-   }  // End of 'while ( (sp3File = confReader.fetchListValue( ... "
-
-      // Read if we will use the cross-correlation receiver data,
-   bool useRinexClock( confReader.getValueAsBoolean( "useRinexClock", "DEFAULT" ) );
-
-   if(useRinexClock)
-   {
-         // Load all the rinex clock files from variable list
-      string rinexClockFile;
-      while ( (rinexClockFile = confReader.fetchListValue("rinexClockList","DEFAULT") ) != "" )
-      {
-         try
-         {
-            SP3EphList.loadRinexClockFile( rinexClockFile );
-         }
-         catch (...)
-         {
-               // If file doesn't exist, issue a warning
-            cerr << "rinex clock file '" << rinexClockFile << "' doesn't exist or you don't "
-                 << "have permission to read it. Skipping it." << endl;
-
-            exit(-1);
-         }
-      }  // End of 'while ( (rinexClockFile = confReader.fetchListValue( ... "
    }
+      // Close file
+   sp3FileListStream.close();
 
-   //// ^^^^ Ephemeris handling ^^^^
+      /////////////////////////
+      // Let's read clock files
+      /////////////////////////
 
-
-   //// vvvv Tides handling vvvv
-
-      // Object to compute tidal effects
-   SolidTides solid;
-
-
-      // Configure ocean loading model
-   OceanLoading ocean;
-   ocean.setFilename( confReader.getValue( "oceanLoadingFile", "DEFAULT" ) );
-
-
-      // Declare a "EOPDataStore" object to handle earth rotation parameter file
-   EOPDataStore eopStore;
-
-      // Load all the EOP files from variable list
-   string eopFile;
-   while ( (eopFile = confReader.fetchListValue("EOPFileList", "DEFAULT" ) ) != "" )
+      // If rinex clock file list is given, then use rinex clock
+   if(clkFileListOpt.getCount())
    {
-         // Try to load each ephemeris file
-      try
-      {
-         eopStore.loadIGSFile( eopFile );
-      }
-      catch (...)
+         // Now read clk files from 'clkFileList'
+      ifstream clkFileListStream;
+
+         // Open clkFileList File
+      clkFileListStream.open(clkFileListName.c_str(), ios::in);
+      if(!clkFileListStream)
       {
             // If file doesn't exist, issue a warning
-         cerr << "EOP file '" << eopFile << "' doesn't exist or you don't "
+         cerr << "clock file List Name'" << clkFileListName << "' doesn't exist or you don't "
               << "have permission to read it. Skipping it." << endl;
 
          exit(-1);
       }
 
-   }  // End of 'while ( (sp3File = confReader.fetchListValue( ... "
+      string clkFile;
+      while( clkFileListStream >> clkFile )
+      {
+         try
+         {
+            SP3EphList.loadRinexClockFile( clkFile );
+         }
+         catch (FileMissingException& e)
+         {
+               // If file doesn't exist, issue a warning
+            cerr << "rinex CLK file '" << clkFile << "' doesn't exist or you don't "
+                 << "have permission to read it. Skipping it." << endl;
+            continue;
+         }
+      }
+
+         // Close file
+      clkFileListStream.close();
+
+   }  // End of 'if(...)'
+
+      //***********************
+      // Let's read ocean loading BLQ data files
+      //***********************
+
+      // BLQ data store object
+   BLQDataReader blqStore;
+
+      // Read BLQ file name from the configure file
+   string blqFile = confReader.getValue( "oceanLoadingFile", "DEFAULT");
+
+   try
+   {
+      blqStore.open( blqFile );
+   }
+   catch (FileMissingException& e)
+   {
+         // If file doesn't exist, issue a warning
+      cerr << "BLQ file '" << blqFile << "' doesn't exist or you don't "
+           << "have permission to read it. Skipping it." << endl;
+      exit(-1);
+   }
+
+      /////////////////////////
+      // Let's read eop files
+      /////////////////////////
+
+      // Declare a "EOPDataStore" object to handle earth rotation parameter file
+   EOPDataStore eopStore;
+
+      // Now read eop files from 'eopFileList'
+   ifstream eopFileListStream;
+
+      // Open eopFileList File
+   eopFileListStream.open(eopFileListName.c_str(), ios::in);
+   if(!eopFileListStream)
+   {
+         // If file doesn't exist, issue a warning
+      cerr << "erp file List Name'" << eopFileListName << "' doesn't exist or you don't "
+           << "have permission to read it. Skipping it." << endl;
+
+      exit(-1);
+   }
+
+   string eopFile;
+   while( eopFileListStream >> eopFile )
+   {
+      try
+      {
+         eopStore.loadIGSFile( eopFile );
+      }
+      catch (FileMissingException& e)
+      {
+            // If file doesn't exist, issue a warning
+         cerr << "EOP file '" << eopFile << "' doesn't exist or you don't "
+              << "have permission to read it. Skipping it." << endl;
+         continue;
+      }
+   }
+      // Close file
+   eopFileListStream.close();
+
+      ////////////////////////////////////////////////
+      // Let's read DCB files
+      ////////////////////////////////////////////////
+      
+      // Read and store dcb data
+   DCBDataReader dcbStore;
+
+   if(dcbFileListOpt.getCount() )
+   {
+         // Now read dcb file from 'dcbFileName'
+      ifstream dcbFileListStream;
+
+         // Open dcbFileList File
+      dcbFileListStream.open(dcbFileListName.c_str(), ios::in);
+      if(!dcbFileListStream)
+      {
+            // If file doesn't exist, issue a warning
+         cerr << "dcb file List Name '" << dcbFileListName << "' doesn't exist or you don't "
+              << "have permission to read it." << endl;
+         exit(-1);
+      }
+
+      string dcbFile;
+
+         // Here is just a dcb file, we only read one month's dcb data.
+      while(dcbFileListStream >> dcbFile)
+      {
+         try
+         {
+            dcbStore.open(dcbFile);
+         }
+         catch(FileMissingException e)
+         {
+            cerr << "Warning! The DCB file '"<< dcbFile <<"' does not exist!" 
+                 << endl;
+            exit(-1);
+         }
+      };
+
+      dcbFileListStream.close();
+
+   }
+
+      ////////////////////////////////////////////////
+      // Now, Let's read MSC data
+      ////////////////////////////////////////////////
+      
+      // Declare a "MSCStore" object to handle msc file 
+   MSCStore mscStore;
+
+   try
+   {
+      mscStore.loadFile( mscFileName );
+   }
+   catch (gpstk::FFStreamError& e)
+   {
+         // If file doesn't exist, issue a warning
+      cerr << e << endl;
+      cerr << "MSC file '" << mscFileName << "' Format is not supported!!!"
+           << "stop." << endl;
+      exit(-1);
+   }
+   catch (FileMissingException& e)
+   {
+         // If file doesn't exist, issue a warning
+      cerr << "MSC file '" << mscFileName << "' doesn't exist or you don't "
+           << "have permission to read it. Skipping it." << endl;
+      exit(-1);
+   }
+
+      //***********************************************
+      // Now, Let's read the rinex files 
+      //***********************************************
+   vector<string> rnxFileListVec;
+      
+      // Now read eop files from 'eopFileList'
+   ifstream rnxFileListStream;
+
+      // Open eopFileList File
+   rnxFileListStream.open(rnxFileListName.c_str());
+   if(!rnxFileListStream)
+   {
+         // If file doesn't exist, issue a warning
+      cerr << "rinex file List Name'" << rnxFileListName << "' doesn't exist or you don't "
+           << "have permission to read it. Skipping it." << endl;
+      exit(-1);
+   }
+
+   string rnxFile;
+   while( rnxFileListStream >> rnxFile )
+   {
+      rnxFileListVec.push_back(rnxFile);
+   }
+      // Close file
+   rnxFileListStream.close();
+
+   if(rnxFileListVec.size() == 0 )
+   {
+      cerr << rnxFileListName  << "rnxFileList is empty!! "
+           << endl;
+      exit(-1);
+   }
+
+   /////////////////////////////
+   //  Now, Let's define some classes that are common to
+   //  all stations.
+   /////////////////////////////
+
+      // Object to compute the tidal effects
+   SolidTides solid;
+
+      // Object to compute the ocean loading model
+   OceanLoading ocean(blqStore);
 
       // Object to model pole tides
    PoleTides pole(eopStore);
 
-   //// ^^^^ Tides handling ^^^^
+   /////////////////////////////
+   //  Now, Let's start preprocessing for ALL stations
+   /////////////////////////////
 
-
-   //// Starting preprocessing for ALL stations ////
-
-      // We will read each section name, which is equivalent to station name
-      // Station names will be read in alphabetical order
-   string station;
-   while ( (station = confReader.getEachSection()) != "" )
+   vector<string>::const_iterator rnxit = rnxFileListVec.begin();
+   while( rnxit != rnxFileListVec.end() )
    {
-
-         // We will skip 'DEFAULT' section because we are waiting for
-         // a specific section for each receiver. However, if data is
-         // missing we will look for it in 'DEFAULT' (see how we use method
-         // 'setFallback2Default()' of 'ConfDataReader' object in 'spinUp()'
-      if( station == "DEFAULT" )
-      {
-         continue;
-      }
-
-
-         // Show a message indicating that we are starting with this station
-      cerr << "Starting processing for station: '" << station << "'." << endl;
+         // Read rinex file from the vector!
+      string rnxFile = (*rnxit);
 
 
          // Create input observation file stream
       RinexObsStream rin;
-
-         // Enable exceptions
-      rin.exceptions(ios::failbit);
+      rin.exceptions(ios::failbit); // Enable exceptions
 
          // Try to open Rinex observations file
       try
       {
-
-            // Open Rinex observations file in read-only mode
-         rin.open( confReader("rinexObsFile", station), std::ios::in );
-
+         rin.open( rnxFile, std::ios::in );
       }
       catch(...)
       {
 
          cerr << "Problem opening file '"
-              << confReader.getValue("rinexObsFile", station)
+              << rnxFile
               << "'." << endl;
 
          cerr << "Maybe it doesn't exist or you don't have "
               << "proper read permissions."
               << endl;
 
-         cerr << "Skipping receiver '" << station << "'."
+         cerr << "Skipping rinex file '" << rnxFile << "'."
               << endl;
 
             // Close current Rinex observation stream
          rin.close();
 
+            // Index for rinex file iterator.
+         ++rnxit;
+
          continue;
 
       }  // End of 'try-catch' block
 
+         //////////////////////
+         // Let's read the header firstly!!!!
+         //////////////////////
+      RinexObsHeader roh;
+      try
+      {
+         rin >> roh;
+      }
+      catch(FFStreamError& e)
+      {
+         cerr << "Problem in reading file '"
+              << rnxFile
+              << "'." << endl;
+         cerr << "Skipping receiver '" << rnxFile << "'."
+              << endl;
 
+            // Close current Rinex observation stream
+         rin.close();
 
-         // Load station nominal position
-      double xn(confReader.fetchListValueAsDouble("nominalPosition",station));
-      double yn(confReader.fetchListValueAsDouble("nominalPosition",station));
-      double zn(confReader.fetchListValueAsDouble("nominalPosition",station));
-         // The former peculiar code is possible because each time we
-         // call a 'fetchListValue' method, it takes out the first element
-         // and deletes it from the given variable list.
+           // Index for rinex file iterator.
+         ++rnxit;
 
-      Position nominalPos( xn, yn, zn );
+         continue;
+      }
 
+         // The Year/DayOfYear/SecOfYear format, you MUST set the timeSystem at 
+         // the same time.
+      YDSTime yds( confReader.getValueAsInt("year"),
+                   confReader.getValueAsInt("dayOfYear"),
+                   confReader.getValueAsDouble("secOfDay"), TimeSystem::GPS );
+
+      CommonTime initialTime( yds.convertToCommonTime() );
+
+         // Get the station name for current rinex file 
+      string station = roh.markerName;
+
+         // Let's check the ocean loading data for current station before
+         // the real data processing.
+      if( ! blqStore.isValid(station) )
+      {
+         cout << "There is no BLQ data for current station:" << station << endl;
+         cout << "we will skip it !!! " << endl;
+         continue;
+      }
+
+         // Show a message indicating that we are starting with this station
+      cout << "Starting processing for station: '" << station << "'." << endl;
+
+        // MSC data for this station
+      initialTime.setTimeSystem(TimeSystem::Unknown);
+      MSCData mscData;
+      try
+      {
+         mscData = mscStore.findMSC( station, initialTime );
+      }
+      catch (InvalidRequest& ie)
+      {
+            // If file doesn't exist, issue a warning
+         cerr << "The station " << station << " isn't included in MSC file." 
+                                           << endl;
+
+            // Warning:you must increase the iterator to process the next file,
+            // or else the program will repeat opening this file
+         ++rnxit;
+
+         continue;
+      }
+
+         // Now, Let's change the system to GPS 
+      initialTime.setTimeSystem(TimeSystem::GPS);
+
+         // Read inital position from given msc data store.
+      Position nominalPos( mscData.coordinates );
 
          // Create a 'ProcessingList' object where we'll store
          // the processing objects in order
       ProcessingList pList;
 
+         //>This object will correct the P1C1 dcb for some receivers
+         //>defined in the 'recTypeFile'.
+      CC2NONCC cc2noncc(dcbStore);
 
-         // This object will check that all required observables are present
+         // Read the receiver type file.
+      cc2noncc.loadRecTypeFile( confReader.getValue("recTypeFile") );
+      cc2noncc.setRecType(roh.recType);
+      cc2noncc.setCopyC1ToP1(true);
+
+         // Add to processing list
+      pList.push_back(cc2noncc);
+
+
+         //>This object will check that all required observables are present
       RequireObservables requireObs;
+      requireObs.addRequiredType(TypeID::P1);
       requireObs.addRequiredType(TypeID::P2);
       requireObs.addRequiredType(TypeID::L1);
       requireObs.addRequiredType(TypeID::L2);
+         // Add 'requireObs' to processing list (it is the first)
+      pList.push_back(requireObs);
 
          // This object will check that code observations are within
          // reasonable limits
       SimpleFilter pObsFilter;
+      pObsFilter.addFilteredType(TypeID::P1);
       pObsFilter.setFilteredType(TypeID::P2);
-
-        // Read if we should use C1 instead of P1
-      bool usingC1( confReader.getValueAsBoolean( "useC1", station ) );
-      if ( usingC1 )
-      {
-         requireObs.addRequiredType(TypeID::C1);
-         pObsFilter.addFilteredType(TypeID::C1);
-      }
-      else
-      {
-         requireObs.addRequiredType(TypeID::P1);
-         pObsFilter.addFilteredType(TypeID::P1);
-      }
-      
-         // Add 'requireObs' to processing list (it is the first)
-      pList.push_back(requireObs);
-
 
          // IMPORTANT NOTE:
          // It turns out that some receivers don't correct their clocks
@@ -594,7 +901,7 @@ void clkest::preprocessing()
          // Thence, the "filterCode" option allows you to deactivate the
          // "SimpleFilter" object that filters out C1, P1 and P2, in case you
          // need to.
-      bool filterCode( confReader.getValueAsBoolean( "filterCode", station ) );
+      bool filterCode( confReader.getValueAsBoolean( "filterCode" ) );
 
          // Check if we are going to use this "SimpleFilter" object or not
       if( filterCode )
@@ -608,66 +915,41 @@ void clkest::preprocessing()
 
          // Object to compute linear combinations for cycle slip detection
       ComputeLinear linear1;
-
-         // Read if we should use C1 instead of P1
-      if ( usingC1 )
-      {
-         linear1.addLinear(comb.pdeltaCombWithC1);
-         linear1.addLinear(comb.mwubbenaCombWithC1);
-      }
-      else
-      {
-         linear1.addLinear(comb.pdeltaCombination);
-         linear1.addLinear(comb.mwubbenaCombination);
-      }
+      linear1.addLinear(comb.pdeltaCombination);
+      linear1.addLinear(comb.mwubbenaCombination);
       linear1.addLinear(comb.ldeltaCombination);
       linear1.addLinear(comb.liCombination);
       pList.push_back(linear1);       // Add to processing list
 
-
          // Objects to mark cycle slips
-      LICSDetector2 markCSLI2;         // Checks LI cycle slips
-      pList.push_back(markCSLI2);      // Add to processing list
-      MWCSDetector  markCSMW;          // Checks Merbourne-Wubbena cycle slips
-      pList.push_back(markCSMW);       // Add to processing list
-
+      LICSDetector markCSLI;         // Checks LI cycle slips
+      pList.push_back(markCSLI);     // Add to processing list
+      MWCSDetector2 markCSMW;      // Checks Merbourne-Wubbena cycle slips
+      pList.push_back(markCSMW);    // Add to processing list
 
          // Object to keep track of satellite arcs
          // Notes: delete unstable satellite may cause discontinuity
          //        in the network processing!
-      SatArcMarker markArc;
+      SatArcMarker2 markArc;
       markArc.setDeleteUnstableSats(true);
       markArc.setUnstablePeriod(151.0);
       pList.push_back(markArc);       // Add to processing list
 
 
-         // The Year/DayOfYear/SecOfYear format, you MUST set the timeSystem at 
-         // the same time.
-      YDSTime yds( confReader.getValueAsInt("year", station),
-                   confReader.getValueAsInt("dayOfYear", station),
-                   confReader.getValueAsDouble("secOfDay", station), TimeSystem::GPS );
-      CommonTime initialTime( yds.convertToCommonTime() );
-
          // Object to decimate data
       Decimate decimateData(
-              confReader.getValueAsDouble( "decimationInterval", station ),
-              confReader.getValueAsDouble( "decimationTolerance", station ),
+              confReader.getValueAsDouble( "decimationInterval" ),
+              confReader.getValueAsDouble( "decimationTolerance" ),
               initialTime);
       pList.push_back(decimateData);       // Add to processing list
-
 
 
          // Declare a basic modeler
       BasicModel basic(nominalPos, SP3EphList);
 
          // Set the minimum elevation
-      basic.setMinElev(confReader.getValueAsDouble("cutOffElevation",station));
-
-         // If we are going to use P1 instead of C1, we must reconfigure 'basic'
-      if( !usingC1 )
-      {
-         basic.setDefaultObservable(TypeID::P1);
-      }
+      basic.setMinElev( confReader.getValueAsDouble("cutOffElevation") );
+      basic.setDefaultObservable(TypeID::P1);
 
          // Add to processing list
       pList.push_back(basic);
@@ -678,9 +960,11 @@ void clkest::preprocessing()
       pList.push_back(elevWeights);       // Add to processing list
 
 
-//       // Object to remove eclipsed satellites
+////////////////////////////////////////////////////
+//       // Object to mark eclipsed satellites
 //    EclipsedSatMarker markEclipse;
 //    pList.push_back(markEclipse);       // Add to processing list
+////////////////////////////////////////////////////
 
 
          // Object to compute gravitational delay effects
@@ -689,30 +973,22 @@ void clkest::preprocessing()
 
 
          // Vector from monument to antenna ARP [UEN], in meters
-      double uARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
-      double eARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
-      double nARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
-      Triple offsetARP( uARP, eARP, nARP );
-
+      Triple offsetARP( roh.antennaOffset );
 
          // Declare some antenna-related variables
-      Triple offsetL1( 0.0, 0.0, 0.0 ), offsetL2( 0.0, 0.0, 0.0 );
       AntexReader antexReader;
       Antenna receiverAntenna;
 
          // Check if we want to use Antex information
-      bool useantex( confReader.getValueAsBoolean( "useAntex", station ) );
+      bool useantex( confReader.getValueAsBoolean( "useAntex") );
       string antennaModel;
       if( useantex )
       {
-            // Read antex file
-         antexFile = confReader.getValue( "antexFile", station );
-
             // Feed Antex reader object with Antex file
-         antexReader.open( antexFile );
+         antexReader.open( confReader.getValue( "antexFile" ) );
 
             // Antenna model 
-         antennaModel = confReader.getValue( "antennaModel", station );
+         antennaModel = roh.antType;
 
             // Get receiver antenna parameters
             // Warning: If no corrections are not found for one specific 
@@ -747,49 +1023,32 @@ void clkest::preprocessing()
       corr.setMonument( offsetARP );
 
          // Check if we want to use Antex patterns
-      bool usepatterns(confReader.getValueAsBoolean("usePCPatterns", station ));
+      bool usepatterns( confReader.getValueAsBoolean("usePCPatterns") );
       if( useantex && usepatterns )
       {
          corr.setAntenna( receiverAntenna );
 
             // Should we use elevation/azimuth patterns or just elevation?
-         corr.setUseAzimuth(confReader.getValueAsBoolean("useAzim", station));
-      }
-      else
-      {
-            // Fill vector from antenna ARP to L1 phase center [UEN], in meters
-         offsetL1[0] = confReader.fetchListValueAsDouble("offsetL1", station);
-         offsetL1[1] = confReader.fetchListValueAsDouble("offsetL1", station);
-         offsetL1[2] = confReader.fetchListValueAsDouble("offsetL1", station);
-
-            // Vector from antenna ARP to L2 phase center [UEN], in meters
-         offsetL2[0] = confReader.fetchListValueAsDouble("offsetL2", station);
-         offsetL2[1] = confReader.fetchListValueAsDouble("offsetL2", station);
-         offsetL2[2] = confReader.fetchListValueAsDouble("offsetL2", station);
-
-         corr.setL1pc( offsetL1 );
-         corr.setL2pc( offsetL2 );
-
+         corr.setUseAzimuth( confReader.getValueAsBoolean("useAzim") );
       }
       pList.push_back(corr);       // Add to processing list
 
 
          // Object to compute wind-up effect
       ComputeWindUp windup( SP3EphList,
-                            nominalPos,
-                            confReader.getValue( "satDataFile", station ) );
+                            nominalPos );
+      if( useantex )
+      {
+            // Feed 'ComputeSatPCenter' object with 'AntexReader' object
+         windup.setAntexReader( antexReader );
+      }
+
       pList.push_back(windup);       // Add to processing list
 
 
-
          // Declare a NeillTropModel object, setting its parameters
-      NeillTropModel neillTM( nominalPos.getAltitude(),
-                              nominalPos.getGeodeticLatitude(),
-                              confReader.getValueAsInt("dayOfYear", station) );
-
-         // We will need this value later for printing
-      double drytropo( neillTM.dry_zenith_delay() );
-
+      NeillTropModel neillTM( nominalPos,
+                              initialTime );
 
          // Object to compute the tropospheric data
       ComputeTropModel computeTropo(neillTM);
@@ -798,18 +1057,8 @@ void clkest::preprocessing()
 
          // Object to compute ambiguity for L1 and L2
       ComputeLinear linear2;
-
-         // Read if we should use C1 instead of P1
-      if ( usingC1 )
-      {
-         linear2.addLinear(comb.q1CombWithC1);
-         linear2.addLinear(comb.q2CombWithC1);
-      }
-      else
-      {
-         linear2.addLinear(comb.q1Combination);
-         linear2.addLinear(comb.q2Combination);
-      }
+      linear2.addLinear(comb.q1Combination);
+      linear2.addLinear(comb.q2Combination);
       pList.push_back(linear2);       // Add to processing list
       
 
@@ -817,35 +1066,21 @@ void clkest::preprocessing()
       PhaseCodeAlignment phaseAlignL1;
       phaseAlignL1.setCodeType(TypeID::Q1);
       phaseAlignL1.setPhaseType(TypeID::L1);
-      phaseAlignL1.setPhaseWavelength(0.190293672798365);
+      phaseAlignL1.setPhaseWavelength( 0.190293672798365 );
       pList.push_back(phaseAlignL1);       // Add to processing list
 
          // Object to align phase with code measurements
       PhaseCodeAlignment phaseAlignL2;
       phaseAlignL2.setCodeType(TypeID::Q2);
       phaseAlignL2.setPhaseType(TypeID::L2);
-      phaseAlignL2.setPhaseWavelength(0.244210213424568);
+      phaseAlignL2.setPhaseWavelength( 0.244210213424568 );
       pList.push_back(phaseAlignL2);       // Add to processing list
 
 
          // Object to compute ionosphere-free combinations to be used
          // as observables in the PPP processing
       ComputeLinear linear3;
-
-         // Read if we should use C1 instead of P1
-      if ( usingC1 )
-      {
-         // WARNING: When using C1 instead of P1 to compute PC combination,
-         //          be aware that instrumental errors will NOT cancel,
-         //          introducing a bias that must be taken into account by
-         //          other means. This won't be taken into account in this
-         //          example.
-         linear3.addLinear(comb.pcCombWithC1);
-      }
-      else
-      {
-         linear3.addLinear(comb.pcCombination);
-      }
+      linear3.addLinear(comb.pcCombination);
       linear3.addLinear(comb.lcCombination);
       pList.push_back(linear3);       // Add to processing list
 
@@ -858,7 +1093,7 @@ void clkest::preprocessing()
          // Like in the "filterCode" case, the "filterPC" option allows you to
          // deactivate the "SimpleFilter" object that filters out PC, in case
          // you need to.
-      bool filterPC( confReader.getValueAsBoolean( "filterPC", station ) );
+      bool filterPC( confReader.getValueAsBoolean( "filterPC" ) );
 
          // Check if we are going to use this "SimpleFilter" object or not
       if( filterPC )
@@ -866,16 +1101,10 @@ void clkest::preprocessing()
          pList.push_back(pcFilter);       // Add to processing list
       }
 
-         // Now, Compute the new MWubbena combinations
+         // Now, After calibrating the L1/L2, let's compute the "new" 
+         // MWubbena combinations
       ComputeLinear linear4;
-      if(usingC1)
-      {
-         linear4.addLinear(comb.mwubbenaCombWithC1);
-      }
-      else
-      {
-         linear4.addLinear(comb.mwubbenaCombination);
-      }
+      linear4.addLinear(comb.mwubbenaCombination);
       pList.push_back(linear4);       // Add to processing list
 
          // Object to compute prefit-residuals for clock estimation
@@ -904,7 +1133,7 @@ void clkest::preprocessing()
 
 
          // Let's check if we are going to print the model
-      bool printmodel( confReader.getValueAsBoolean( "printModel", station ) );
+      bool printmodel( confReader.getValueAsBoolean( "printModel" ) );
 
       string modelName;
       ofstream modelfile;
@@ -912,7 +1141,7 @@ void clkest::preprocessing()
          // Prepare for model printing
       if( printmodel )
       {
-         modelName = confReader.getValue( "modelFile", station );
+         modelName = rnxFile + ".model";
          modelfile.open( modelName.c_str(), ios::out );
       }
 
@@ -922,11 +1151,11 @@ void clkest::preprocessing()
       while(rin >> gRin)
       {
 
-            // Set the nominal position from the IGS solution file
-         gRin.header.source.nominalPos = nominalPos;
-
             // Store current epoch
          CommonTime time(gRin.header.epoch);
+
+            // Set the nominal position from the IGS solution file
+         gRin.header.source.nominalPos = nominalPos;
 
             // Compute solid, oceanic and pole tides effects at this epoch
          Triple tides( solid.getSolidTide( time, nominalPos )  +
@@ -997,6 +1226,7 @@ void clkest::preprocessing()
       }  // End of 'while(rin >> gRin)'
 
 
+
          // Get source
          // NOTE: 'station' is a 'string', and we need a 'SourceID'
       SourceID source( gRin.header.source );
@@ -1008,26 +1238,14 @@ void clkest::preprocessing()
 
          //// Here ends the preprocessing of all data for the given station ////
 
-
          // Let's check what kind of station this is
-      if( confReader.getValueAsBoolean( "masterStation", station ) )
+      if( confReader.getValue( "masterStation" ) == station )
       {
          master = source;
       }
       else
       {
-         if( confReader.getValueAsBoolean( "roverStation", station ) )
-         {
-            rover = source;
-         }
-         else
-         {
-            if( confReader.getValueAsBoolean( "refStation", station ) )
-            {
-                  // Note that 'reference' stations form a set
-               refStationSet.insert( source );
-            }
-         }
+         refStationSet.insert( source );
       }
 
          // Close current Rinex observation stream
@@ -1043,12 +1261,16 @@ void clkest::preprocessing()
 
 
          // We are done with this station. Let's show a message
-      cerr << "Processing finished for station: '" << station;
+      cout << "Processing finished for station: '" << station;
       if ( printmodel )
       {
-         cerr << "'. Model in file: '" << modelName;
+         cout << "'. Model in file: '" << modelName;
       }
-      cerr << "'." << endl;
+      cout << "'." << endl;
+
+
+         // go to process the next station.
+      ++rnxit;
 
 
    }  // End of 'while ( (station = confReader.getEachSection()) != "" )'
@@ -1061,17 +1283,17 @@ void clkest::preprocessing()
    SP3EphList.clear();
 
 
-      // The rest of the processing will be in method 'clkest::shutDown()'
+      // The rest of the processing will be in method 'clk::shutDown()'
    return;
 
-}  // End of 'clkest::process()'
+}  // End of 'clk::process()'
 
 
 
    // Method to print model values
-void clkest::printModel( ofstream& modelfile,
-                         const gnssRinex& gData,
-                         int   precision )
+void clk::printModel( ofstream& modelfile,
+                      const gnssRinex& gData,
+                      int   precision )
 {
 
       // Prepare for printing
@@ -1087,8 +1309,8 @@ void clkest::printModel( ofstream& modelfile,
    {
 
          // Print epoch
-      modelfile << static_cast<YDSTime>(time).year         << "  ";    // Year           #1
-      modelfile << static_cast<YDSTime>(time).doy          << "  ";    // DayOfYear      #2
+      modelfile << static_cast<YDSTime>(time).year  << "  ";    // Year           #1
+      modelfile << static_cast<YDSTime>(time).doy   << "  ";    // DayOfYear      #2
       modelfile << static_cast<YDSTime>(time).sod   << "  ";    // SecondsOfDay   #3
 
          // Print satellite information (Satellite system and ID number)
@@ -1110,12 +1332,12 @@ void clkest::printModel( ofstream& modelfile,
 
    }  // End for (it = gData.body.begin(); ... )
 
-}  // End of method 'clkest::printModel()'
+}  // End of method 'clk::printModel()'
 
 
 
    // Method to generate and solve the general equation system
-void clkest::solve()
+void clk::solve()
 {
 
    ////> In the resolution part we start configuring the general solver 
@@ -1223,7 +1445,7 @@ void clkest::solve()
    SolverGeneral2 solver(system);
 
       // Get if we want 'forwards-backwards' or 'forwards' processing only
-   bool cycles( confReader.getValueAsInt("forwardBackwardCycles", "DEFAULT") );
+   bool cycles( confReader.getValueAsInt("filterCycles", "DEFAULT") );
 
    ////> Variables for the print out 
 
@@ -1245,6 +1467,9 @@ void clkest::solve()
          // Remove first element (i.e., we remove the first epoch)
       gdsMap.pop_front_epoch();
 
+         // print warning if there are no data for the master station 
+         // at current epoch
+
          // Extract current epoch
       CommonTime workEpoch( (*gds.begin()).first );
 
@@ -1260,13 +1485,13 @@ void clkest::solve()
 
    /// We are done ////
 
-}  // End of 'clkest::solve()'
+}  // End of 'clk::solve()'
 
 
    // Method to extract the solutions from solver and 
    // temprorarily store them in the string, which will be 
    // print out to the solutionfile in the method 'printClockData'
-void clkest::getClockSoluts( const SolverGeneral2& solver,
+void clk::getClockSoluts( const SolverGeneral2& solver,
                              const CommonTime& workEpoch )
 {
       // Mulitmap used to store the clock data line 
@@ -1374,35 +1599,31 @@ void clkest::getClockSoluts( const SolverGeneral2& solver,
        ++ begPos;
    }
 
-}  // End of method 'clkest::getClockSoluts()'
+}  // End of method 'clk::getClockSoluts()'
 
 
    // Method that hold code to be run AFTER processing
-void clkest::shutDown()
+void clk::shutDown()
 {
-      // Solution file
-   string solutionName;
-   solutionName = confReader.getValue( "clockFile", "DEFAULT" );
-
-      // Solution output stream
-   ofstream clockFile;
-   clockFile.open( solutionName.c_str(), ios::out );
+      // computed clock data output stream
+   ofstream clockStream;
+   clockStream.open( outputFileName.c_str(), ios::out );
 
       // Print the header information
-   printClockHeader( clockFile );
+   printClockHeader( clockStream );
 
       // print the clock products as the IGS format
-   printClockData( clockFile );
+   printClockData( clockStream );
 
       // close the solution file stream
-   clockFile.close();
+   clockStream.close();
 
 
-}  // End of 'clkest::shutDown()'
+}  // End of 'clk::shutDown()'
 
 
    // Method to print clock data 
-void clkest::printClockHeader( ofstream& clockFile)
+void clk::printClockHeader( ofstream& clockStream)
 {
    using namespace StringUtils;
 
@@ -1437,11 +1658,11 @@ void clkest::printClockHeader( ofstream& clockFile)
    headerRecord += string("CLOCK") + string(15,' ');
    headerRecord += string("GPS") + string(17,' ');      // TD fix
    headerRecord += versionString;         
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
 
       // "PGM / RUN BY / DATE"
       //  Varialbes
-   string program ("clkest");
+   string program ("clk");
    string runby ("SGG");
    Epoch dt;
    dt.setLocalTime();
@@ -1451,7 +1672,7 @@ void clkest::printClockHeader( ofstream& clockFile)
    headerRecord += leftJustify(runby,20);
    headerRecord += leftJustify(dat, 20);
    headerRecord += runByString;          
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
 
 
       // "TIME SYSTEM ID"
@@ -1459,7 +1680,7 @@ void clkest::printClockHeader( ofstream& clockFile)
    headerRecord  = string(3,' ');  // TD
    headerRecord += leftJustify(timeSystem,57);     
    headerRecord += timeSystemString;     
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
 
       // "COMMENT"
    std::vector<std::string> commentList;   
@@ -1467,7 +1688,7 @@ void clkest::printClockHeader( ofstream& clockFile)
    {
       headerRecord  = leftJustify(commentList[i],60);
       headerRecord += commentString;         // "COMMENT"
-      clockFile<< headerRecord << endl;
+      clockStream<< headerRecord << endl;
    }
 
 /*    // "LEAP SECONDS"
@@ -1475,7 +1696,7 @@ void clkest::printClockHeader( ofstream& clockFile)
  * headerRecord  = rightJustify(asString(leapSeconds), 6);
  * headerRecord += string(54,' ');
  * headerRecord += leapSecondsString;     // "LEAP SECONDS"
- * clockFile<< headerRecord << endl;
+ * clockStream<< headerRecord << endl;
  */
 
       // "SYS / DCBS APPLIED"
@@ -1483,14 +1704,14 @@ void clkest::printClockHeader( ofstream& clockFile)
    headerRecord += leftJustify(dcbProgram,17) + string(1, ' ');
    headerRecord += leftJustify(dcbSource,40);
    headerRecord += sysDCBString;          // "SYS / DCBS APPLIED"
-   clockFile<< headerRecord << endl;
+   clockStream<< headerRecord << endl;
 
       // "SYS / PCVS APPLIED"
    headerRecord  = string("G") + string(1,' ');
-   headerRecord += leftJustify("clkest",17) + string(1, ' ');
+   headerRecord += leftJustify("clk",17) + string(1, ' ');
    headerRecord += leftJustify(antexFile, 40);
    headerRecord += sysPCVString;          // "SYS / PCVS APPLIED"
-   clockFile<< headerRecord << endl;
+   clockStream<< headerRecord << endl;
 
      // "# / TYPES OF DATA"
    std::vector<std::string> dataTypes;
@@ -1501,7 +1722,7 @@ void clkest::printClockHeader( ofstream& clockFile)
    for(int i=0; i<dataTypes.size(); ++i) headerRecord += string(4,' ') + dataTypes[i];
    headerRecord += string(60-headerRecord.size(),' ');
    headerRecord += numDataString;         // "# / TYPES OF DATA"
-   clockFile<< headerRecord << endl;
+   clockStream<< headerRecord << endl;
 
       // "ANALYSIS CENTER"
    std::string analCenterDesignator("WHU");
@@ -1511,20 +1732,20 @@ void clkest::printClockHeader( ofstream& clockFile)
    headerRecord += string(2,' ');
    headerRecord += leftJustify(analysisCenter,55);
    headerRecord += analysisCenterString;  // "ANALYSIS CENTER"
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
 
        // "# OF CLK REF"
    int numClkRef(1);
    headerRecord  = rightJustify(asString(numClkRef), 6) + string(54,' ');  // TD
    headerRecord += numClockRefString;     // "# OF CLK REF"
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
 
       // "ANALYSIS CLK REF"
    headerRecord  = leftJustify((master.sourceName),4) + string(1,' ');  // TD
    headerRecord += leftJustify((master.sourceNumber),20) + string(15,' ');
    headerRecord += rightJustify(doub2sci(0.0,19,2), 19) + string(1,' ');
    headerRecord += analysisClkRefrString; // "ANALYSIS CLK REF"
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
 
         // "# OF SOLN STA / TRF"
    string terrRefFrame("IGS05");
@@ -1532,7 +1753,7 @@ void clkest::printClockHeader( ofstream& clockFile)
    headerRecord += string(4,' ');
    headerRecord += leftJustify(terrRefFrame,50);
    headerRecord += numReceiversString;    // "# OF SOLN STA / TRF"
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
   
         // "SOLN STA NAME / NUM"
    for(SourceIDSet::iterator itSource = sourceSet.begin(); 
@@ -1557,14 +1778,14 @@ void clkest::printClockHeader( ofstream& clockFile)
   
          // print the line
       headerRecord += solnStateString;       // "SOLN STA NAME / NUM"
-      clockFile << headerRecord << endl;
+      clockStream << headerRecord << endl;
    }
   
       // "# OF SOLN SATS"
    headerRecord  = rightJustify(asString(satSet.size()), 6);
    headerRecord += string(54,' ');
    headerRecord += numSolnSatsString;     // "# OF SOLN SATS"
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
   
       // "PRN LIST"
    headerRecord = string();
@@ -1585,7 +1806,7 @@ void clkest::printClockHeader( ofstream& clockFile)
            // Add empty to the remaiding places
          headerRecord += string(60-headerRecord.size(),' ');
          headerRecord += prnListString;         // "PRN LIST"
-         clockFile << headerRecord << endl;
+         clockStream << headerRecord << endl;
             // New line  
          headerRecord  = string();
       }
@@ -1596,13 +1817,13 @@ void clkest::printClockHeader( ofstream& clockFile)
       // "END OF HEADER"
    headerRecord = string(60,' ');
    headerRecord+= endOfHeaderString;     // "END OF HEADER"
-   clockFile << headerRecord << endl;
+   clockStream << headerRecord << endl;
 
 }  // End of printClockHeader
 
 
    // Method to print clock data 
-void clkest::printClockData( ofstream& clockFile)
+void clk::printClockData( ofstream& clockStream)
 {
       // Time tolerance  
    double tolerance(0.1);
@@ -1621,7 +1842,7 @@ void clkest::printClockData( ofstream& clockFile)
            pos != endPos; )
       {
       
-         clockFile << pos->second  << endl;
+         clockStream << pos->second  << endl;
             // It is advisable to avoid sawing off the branch we are
             // sitting on
          solutionMap.erase( pos++ );
@@ -1629,7 +1850,7 @@ void clkest::printClockData( ofstream& clockFile)
    }   // End of loop ' while( !( solutionMap.empty() ) ) '
 
 
-}  // End of method 'clkest::printClockData()'
+}  // End of method 'clk::printClockData()'
 
 
 
@@ -1638,11 +1859,11 @@ int main(int argc, char* argv[])
 {
    try
    {
-      clkest program(argv[0]);
+      clk program(argv[0]);
 
          // We are disabling 'pretty print' feature to keep
          // our description format
-      if ( !program.initialize(argc, argv, false) )
+      if ( !program.initialize(argc, argv, true) )
       {
          return 0;
       }

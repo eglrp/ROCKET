@@ -168,7 +168,7 @@ namespace gpstk
          int i;
          DataTableIterator it1, it2, kt;
 
-         if(getTableInterval(sat, ttag, Nhalf, it1, it2, true)) 
+         if(getTableInterval(sat, ttag, Nhalf, it1, it2, true))
          {
 //              // exact match
 //              // @author shjzhang
@@ -181,7 +181,7 @@ namespace gpstk
          vector<double> times,P[3];
          CommonTime ttag0(it1->first);
 
-              
+
          kt = it1;
 
          while(1) {

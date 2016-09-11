@@ -1,17 +1,10 @@
-#pragma ident "$Id$"
-
-/**
-* @file EarthSolidTide.cpp
-* Class to do Earth Solid Tide correction
-*/
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -22,30 +15,35 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  
+//  Copyright 2004, The University of Texas at Austin
+//  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
 
+/**
+* @file EarthSolidTide.cpp
+* Class to do Earth Solid Tide correction.
+*
+*/
 
 #include "EarthSolidTide.hpp"
-#include "IERS.hpp"
-#include "UTCTime.hpp"
-#include "ReferenceFrames.hpp"
-#include <complex>
-#include "ASConstant.hpp"
+#include "GNSSconstants.hpp"
+#include "Legendre.hpp"
+
+using namespace std;
 
 namespace gpstk
 {
-   using namespace std;
-
    // For dC21 and dS21
-   // The coefficients we choose are in-phase(ip) amplitudes and out-of-phase amplitudes of the
-   // corrections for frequency dependence, and multipliers of the Delaunay variables
-   // Refers to Table 6.3a in IERS2003 P64
-
+   // The in-phase (ip) amplitudes and the out-of-phase (op) amplitudes of the
+   // corrections for frequency dependence of k21(0), taking the nominal value
+   // k21 for the diurnal tides as (0.29830 - i*0.00144). Unitis: 10^-12.
+   // see IERS Conventions 2010, Table 6.5a
    const double EarthSolidTide::Argu_C21[48][7]=
    {
+//      Amp.    Amp.    l   l'  F   D   Omega
+//      (ip)    (op)
       {-0.1,    0,       2,    0,  2,  0,  2},
       {-0.1,    0,       0,    0,  2,  2,  2},
       {-0.1,    0,       1,    0,  2,  0,  1},
@@ -53,38 +51,38 @@ namespace gpstk
       {-0.1,    0,      -1,    0,  2,  2,  2},
       {-1.3,    0.1,     0,    0,  2,  0,  1},
       {-6.8,    0.6,     0,    0,  2,  0,  2},
-       {0.1,    0,       0,    0,  0,  2,  0},
-       {0.1,    0,       1,    0,  2, -2,  2},
-       {0.1,    0,      -1,    0,  2,  0,  1},
-       {0.4,    0,      -1,    0,  2,  0,  2},
-       {1.3,   -0.1,     1,    0,  0,  0,  0},
-       {0.3,    0,       1,    0,  0,  0,  1},
-       {0.3,    0,      -1,    0,  0,  2,  0},
-       {0.1,    0,      -1,    0,  0,  2,  1},
+      { 0.1,    0,       0,    0,  0,  2,  0},
+      { 0.1,    0,       1,    0,  2, -2,  2},
+      { 0.1,    0,      -1,    0,  2,  0,  1},
+      { 0.4,    0,      -1,    0,  2,  0,  2},
+      { 1.3,   -0.1,     1,    0,  0,  0,  0},
+      { 0.3,    0,       1,    0,  0,  0,  1},
+      { 0.3,    0,      -1,    0,  0,  2,  0},
+      { 0.1,    0,      -1,    0,  0,  2,  1},
       {-1.9,    0.1,     0,    1,  2, -2,  2},
-       {0.5,    0,       0,    0,  2, -2,  1},
-      {-43.4,    2.9,    0,    0,  2, -2,  2},
-       {0.6,    0,       0,   -1,  2, -2,  2},
-       {1.6,   -0.1,     0,    1,  0,  0,  0},
-       {0.1,    0,      -2,    0,  2,  0,  1},
-       {0.1,    0,       0,    0,  0,  0, -2},
+      { 0.5,    0,       0,    0,  2, -2,  1},
+      {-43.4,   2.9,     0,    0,  2, -2,  2},
+      { 0.6,    0,       0,   -1,  2, -2,  2},
+      { 1.6,   -0.1,     0,    1,  0,  0,  0},
+      { 0.1,    0,      -2,    0,  2,  0,  1},
+      { 0.1,    0,       0,    0,  0,  0, -2},
       {-8.8,    0.5,     0,    0,  0,  0, -1},
-       {470.9, -30.2,    0,    0,  0,  0,  0},
-       {68.1,  -4.6,     0,    0,  0,  0,  1},
+      {470.9, -30.2,     0,    0,  0,  0,  0},
+      { 68.1,  -4.6,     0,    0,  0,  0,  1},
       {-1.6,    0.1,     0,    0,  0,  0,  2},
-       {0.1,    0,      -1,    0,  0,  1,  0},
+      { 0.1,    0,      -1,    0,  0,  1,  0},
       {-0.1,    0,       0,   -1,  0,  0, -1},
       {-20.6,  -0.3,     0,   -1,  0,  0,  0},
-       {0.3,    0,       0,    1, -2,  2, -2},
+      { 0.3,    0,       0,    1, -2,  2, -2},
       {-0.3,    0,       0,   -1,  0,  0,  1},
       {-0.2,    0,      -2,    0,  0,  2,  0},
       {-0.1,    0,      -2,    0,  0,  2,  1},
       {-5.0,    0.3,     0,    0, -2,  2, -2},
-       {0.2,    0,       0,    0, -2,  2, -1},
+      { 0.2,    0,       0,    0, -2,  2, -1},
       {-0.2,    0,       0,   -1, -2,  2, -2},
       {-0.5,    0,       1,    0,  0, -2,  0},
       {-0.1,    0,       1,    0,  0, -2,  1},
-       {0.1,    0,      -1,    0,  0,  0, -1},
+      { 0.1,    0,      -1,    0,  0,  0, -1},
       {-2.1,    0.1,    -1,    0,  0,  0,  0},
       {-0.4,    0,      -1,    0,  0,  0,  1},
       {-0.2,    0,       0,    0,  0, -2,  0},
@@ -96,281 +94,364 @@ namespace gpstk
       {-0.1,    0,      -1,    0, -2,  0, -1}
    };
 
-   // For dC22 and dS22
-   // Refer to Table 6.3c in IERS2003
-   // (0.30102 . i 0.00130).
-   const double EarthSolidTide::Argu_C22[2][6] = 
-   {
-      {-0.3, 1, 0, 2, 0, 2},
-      {-1.2, 0, 0, 2, 0, 2}
-   };
-   
    // For dC20
-   // Refer to Table 6.3b in IERS2003
-   // The nominal value k20 for the zonal tides is taken as 0.30190
+   // Corrections for frequency dependence of k20(0) of the zonal tides due to
+   // anelasticity. Units: 10^-12. The nominal value k20 for the zonal tides is
+   // taken as 0.30190.
+   // see IERS Conventions 2010, Table 6.5b
    const double EarthSolidTide::Argu_C20[21][7]=
    {
-       {16.6, -6.7,  0,  0,  0,  0,  1},
-      {-0.1,   0.1,  0,  0,  0,  0,  2},
-      {-1.2,   0.8,  0, -1,  0,  0,  0},
-      {-5.5,   4.3,  0,  0, -2,  2, -2},
-       {0.1,  -0.1,  0,  0, -2,  2, -1},
-      {-0.3,   0.2,  0, -1, -2,  2, -2},
-      {-0.3,   0.7,  1,  0,  0, -2,  0},
-       {0.1,  -0.2, -1,  0,  0,  0, -1},
-      {-1.2,   3.7, -1,  0,  0,  0,  0},
-       {0.1,  -0.2, -1,  0,  0,  0,  1},
-       {0.1,  -0.2,  1,  0, -2,  0, -2},
-       {0,     0.6,  0,  0,  0, -2,  0},
-       {0,     0.3, -2,  0,  0,  0,  0},
-       {0.6,   6.3,  0,  0, -2,  0, -2},
-       {0.2,   2.6,  0,  0, -2,  0, -1},
-       {0,     0.2,  0,  0, -2,  0,  0},
-       {0.1,   0.2,  1,  0, -2, -2, -2},
-       {0.4,   1.1, -1,  0, -2,  0, -2},
-       {0.2,   0.5, -1,  0, -2,  0, -1},
-       {0.1,   0.2,  0,  0, -2, -2, -2},
-       {0.1,   0.1, -2,  0, -2,  0, -2}
+
+//      Amp.  Amp.    l   l'  F   D   Omega
+//      (ip)  (op)
+      {  16.6,  -6.7,  0,  0,  0,  0,  1 },
+      {  -0.1,   0.1,  0,  0,  0,  0,  2 },
+      {  -1.2,   0.8,  0, -1,  0,  0,  0 },
+      {  -5.5,   4.3,  0,  0, -2,  2, -2 }, 
+      {   0.1,  -0.1,  0,  0, -2,  2, -1 },
+      {  -0.3,   0.2,  0, -1, -2,  2, -2 },
+      {  -0.3,   0.7,  1,  0,  0, -2,  0 },
+      {   0.1,  -0.2, -1,  0,  0,  0, -1 },
+      {  -1.2,   3.7, -1,  0,  0,  0,  0 },
+      {   0.1,  -0.2, -1,  0,  0,  0,  1 },
+      {   0.1,  -0.2,  1,  0, -2,  0, -2 },
+      {   0.0,   0.6,  0,  0,  0, -2,  0 }, 
+      {   0.0,   0.3, -2,  0,  0,  0,  0 },
+      {   0.6,   6.3,  0,  0, -2,  0, -2 },
+      {   0.2,   2.6,  0,  0, -2,  0, -1 }, 
+      {   0.0,   0.2,  0,  0, -2,  0,  0 },
+      {   0.1,   0.2,  1,  0, -2, -2, -2 },
+      {   0.4,   1.1, -1,  0, -2,  0, -2 },
+      {   0.2,   0.5, -1,  0, -2,  0, -1 },
+      {   0.1,   0.2,  0,  0, -2, -2, -2 },
+      {   0.1,   0.1, -2,  0, -2,  0, -2 }
    };
 
-      /**
-       * Solid tide to normalized earth potential coefficients
+   // For dC22 and dS22
+   // Amplitudes of the corrections for frequency dependence of k22, taking the
+   // nominal value k22 for the sectorial tides as (0.30102 - i*0.00130).
+   // Units: 10^-12. The corrections are only to the real part.
+   // see IERS Conventions 2010, Table 6.5c
+   const double EarthSolidTide::Argu_C22[2][6] = 
+   {
+//        Amp.   l   l'  F   D   Omega
+       {  -0.3,  1,  0,  2,  0,  2  },
+       {  -1.2,  0,  0,  2,  0,  2  }
+   };
+
+
+      /** Solid tide to normalized earth potential coefficients
        *
-       * @param mjdUtc  UTC in MJD
-       * @param dC      correction to normalized coefficients dC
-       * @param dS      correction to normalized coefficients dS
+       * @param utc     time in UTC
+       * @param CS      normalized earth potential coefficients
        */
-   void EarthSolidTide::getSolidTide(double mjdUtc, double dC[], double dS[] )
-   {
-      UTCTime utc(mjdUtc);
-          
-      Matrix<double> E = ReferenceFrames::J2kToECEFMatrix(utc);
-      
-      Vector<double> moonReci = ReferenceFrames::getJ2kPosition(utc.asTDB(),SolarSystem::Moon)*1000.0;
-      Vector<double> sunReci = ReferenceFrames::getJ2kPosition(utc.asTDB(),SolarSystem::Sun)*1000.0;
+   void EarthSolidTide::getSolidTide(CommonTime utc, Matrix<double>& CS)
+   { 
+      // TT
+      CommonTime tt( pRefSys->UTC2TT(utc) );
 
-      Vector<double> moonR = E * moonReci;         // in ecef m
-      Vector<double> sunR = E * sunReci;           // in ecef m
-      
-      Position moonP(moonR(0),moonR(1),moonR(2));
-      Position sunP(sunR(0),sunR(1),sunR(2));
-      
-      double r_sun, phi_sun, lamda_sun;
-      r_sun = norm(sunR);
-      phi_sun = sunP.getGeocentricLatitude()*ASConstant::PI/180.0;
-      lamda_sun = sunP.getLongitude()*ASConstant::PI/180.0;
+      // UT1
+      CommonTime ut1( pRefSys->UTC2UT1(utc) );
 
-      double r_lunar, phi_lunar, lamda_lunar;
-      r_lunar = norm(moonR);
-      phi_lunar = moonP.getGeocentricLatitude()*ASConstant::PI/180.0;
-      lamda_lunar = moonP.getLongitude()*ASConstant::PI/180.0;
+      // transformation matrix from ICRS to ITRS
+      Matrix<double> c2t( pRefSys->C2TMatrix(utc) );
 
+      // moon and sun position and velocity in ICRS, unit: km, km/day
+      double jd = JulianDate(tt).jd;
+      double rv_moon[6] = {0.0};
+      pSolSys->computeState(jd,
+                            SolarSystem::Moon,
+                            SolarSystem::Earth,
+                            rv_moon);
+      double rv_sun[6] = {0.0};
+      pSolSys->computeState(jd,
+                            SolarSystem::Sun,
+                            SolarSystem::Earth,
+                            rv_sun);
 
-      // reference bern 5 TIDPT2.f
-      /*
-      PERTURBING ACCELERATION DUE TO TIDES CORRESPONDING TO IERS STANDARDS 2003.
-      STEP 1 CORRECTIONS OF SOLID EARTH TIDES INCLUDED, 
-      STEP 2 ONLY TERM DUE TO K1. SOLID EARTH POLE TIDES INCLUDED
-      OCEAN TIDE TERMS UP TO N=M=4 INCLUDED
-      */
+      // moon and sun position in ICRS, unit: m
+      Vector<double> rm_icrs(3,0.0);
+      rm_icrs(0) = rv_moon[0];
+      rm_icrs(1) = rv_moon[1];
+      rm_icrs(2) = rv_moon[2];
+      rm_icrs *= 1000.0;
 
-      /*       IERS2003,  P60 
-      Elastic Earth           Anelastic Earth
-      n m    knm     k+nm    Reknm   Imknm    k+nm
-      2 0 0.29525 .0.00087 0.30190 .0.00000 .0.00089
-      2 1 0.29470 .0.00079 0.29830 .0.00144 .0.00080
-      2 2 0.29801 .0.00057 0.30102 .0.00130 .0.00057
-      3 0 0.093 ?ก่ ?ก่ ?ก่
-      3 1 0.093 ?ก่ ?ก่ ?ก่
-      3 2 0.093 ?ก่ ?ก่ ?ก่ 
-      3 3 0.094 ?ก่ ?ก่ ?ก่
-      */
-      complex<double> k[10] =      // Anelastic Earth
-      { 
-         complex<double >(0.30190, 0.0),          // 20
-         complex<double >(0.29830,-0.00144),      // 21
-         complex<double >(0.30102,-0.00130),      // 22
-         complex<double >(0.093, 0.0),            // 30
-         complex<double >(0.093, 0.0),            // 31
-         complex<double >(0.093, 0.0),            // 32
-         complex<double >(0.094, 0.0),            // 33
-         complex<double >(-0.00089, 0.0),         // k+ 20
-         complex<double >(-0.00080, 0.0),         // k+ 21
-         complex<double >(-0.00057, 0.0)          // k+ 22
-      };
+      Vector<double> rs_icrs(3,0.0);
+      rs_icrs(0) = rv_sun[0];
+      rs_icrs(1) = rv_sun[1];
+      rs_icrs(2) = rv_sun[2];
+      rs_icrs *= 1000.0;
+//       cout << "rm_icrs: " << rm_icrs << endl;
+//       cout << "rs_icrs: " << rs_icrs << endl;
 
-      complex<double> res[7];
-      
-      //----------------------------------------------------------------------
-      // The first step of the computation ,refer to "IERS conventions 2003" P59
-      // Each iteration for dC[n,m] and dS[n,m]
-      for(int n=2;n<=3;n++)
+      // moon and sun position in ITRS, unit: m
+      Vector<double> rm_itrs = c2t * rm_icrs;
+      Vector<double> rs_itrs = c2t * rs_icrs;
+
+      // IERS Conventions 2010, Chapter 6.2
+      // The computation of the tidal contributions to the geopotential
+      // coefficients is most efficiently done by a three-step procedure.
+
+      /////////////////////////////////////////////////////////////////////////
+      //
+      //   In step 1, the (2m) part of the tidal potential is evaluated in the
+      //   time domain for each m using lunar and solar ephemeris, and the
+      //   corresponding changes dC2m and dS2m are computed using frequency
+      //   independent nominal values k2m for the respective k2m(0). The
+      //   contributions of the degree 3 tides to C3m and S3m through k3m(0)
+      //   and also those of the degree 2 tides to C4m and S4m through k2m(+)
+      //   may be computed by a similar procedure; they are at the level of
+      //   10e-11.
+      //
+      /////////////////////////////////////////////////////////////////////////
+
+      // love numbers for solid earth tides
+      // see IERS Conventions 2010, Table 6.3
+      double k20  =  0.29525;
+      double k21  =  0.29470;
+      double k22  =  0.29801;
+
+      double k20p = -0.00087;
+      double k21p = -0.00079;
+      double k22p = -0.00057;
+
+      double k30  =  0.09300;
+      double k31  =  0.09300;
+      double k32  =  0.09300;
+      double k33  =  0.09400;
+
+      // indexes for degree = 2
+      int id20 = indexTranslator(2,0) - 1;
+      int id21 = indexTranslator(2,1) - 1;
+      int id22 = indexTranslator(2,2) - 1;
+
+      // indexes for degree = 3
+      int id30 = indexTranslator(3,0) - 1;
+      int id31 = indexTranslator(3,1) - 1;
+      int id32 = indexTranslator(3,2) - 1;
+      int id33 = indexTranslator(3,3) - 1;
+
+      // indexes for degree = 4
+      int id40 = indexTranslator(4,0) - 1;
+      int id41 = indexTranslator(4,1) - 1;
+      int id42 = indexTranslator(4,2) - 1;
+
+      // loop
+      for(int j=2; j<=3; ++j)
       {
-         for(int m=0;m<=n;m++)
+         double GSM;
+         Vector<double> rsm;
+
+         if(2 == j)         // Moon
          {
-            int index = n * n - 2 * n + m;          //index in the returning value array
-            
-            double Nnm = normFactor( n, m );        //normalization coefficents of degree n and order m
+            GSM = GM_MOON;
+            rsm = rm_itrs;
+         }
+         else if(3 == j)    // Sun
+         {
+            GSM = GM_SUN;
+            rsm = rs_itrs;
+         }
 
-            // Pnm: normalized Legendre polynomials of degress n and order m
-            // 0 for sun and 1 for lunar each
-            double sunPnm  = Nnm * legendrePoly( n, m, std::sin( phi_sun) );
-            double moonPnm  = Nnm * legendrePoly( n, m, std::sin( phi_lunar) );
-            
-            double sunTemp = (ASConstant::GM_Sun/ASConstant::GM_Earth)*std::pow(ASConstant::R_Earth/r_sun,n+1) * sunPnm;
-            double moonTemp = (ASConstant::GM_Moon/ASConstant::GM_Earth)*std::pow(ASConstant::R_Earth/r_lunar,n+1)*moonPnm;
+         // rho, sin(lat), cos(lat), lat
+         double rho = norm(rsm);
+         double slat = rsm(2)/rho;
+         double clat = std::sqrt(1.0-slat*slat);
+         double lat = std::atan2(slat, clat);
 
-            // Exp(-m*lamda*i) for sun and lunar each
-            complex<double> c_sun   = complex<double>( std::cos( - m * lamda_sun ), std::sin( - m * lamda_sun ) );
-            complex<double> c_lunar = complex<double>( std::cos( - m * lamda_lunar ), std::sin( - m * lamda_lunar ) );
+         // lon
+         double xlon = std::atan2(rsm(1), rsm(0));
 
-            res[index] =  sunTemp * c_sun + moonTemp * c_lunar;
+         // Pnm
+         double P20 = 0.5*(3.0*slat*slat - 1.0);
+         double P21 = 3.0*slat*clat;
+         double P22 = 3.0*clat*clat;
+         double P30 = 0.5*(5.0*slat*slat*slat - 3.0*slat);
+         double P31 = 1.5*(5.0*slat*slat - 1.0)*clat;
+         double P32 = 15.0*slat*clat*clat;
+         double P33 = 15.0*clat*clat*clat;
 
-            dC[index]  =  (k[index]*res[index]).real()/(2.0*n+1.0);
-            dS[index]  = -(k[index]*res[index]).imag()/(2.0*n+1.0);
-            
-         }  // 'for(int m=0;m<=n;m++)'
+//         Vector<double> leg0, leg1, leg2;
+//         legendre(3, lat, leg0, leg1, leg2, 0);
 
-      }  // 'for(int n=2;n<=3;n++)'
+         // temp
+         double temp;
+         temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
 
-      // The correction of dC[4,i] and dS[4,i](i=0,1,2) produced by degree 2 tide
-      // The only difference from the above dC[2,i] and dS[2,i] is value of k replaced by k+
-      for(int n = 0; n <= 2; n ++ )
-      {
-         int index   = 2 * 2 - 2 * 2 + n;                     // liuwk            
-         complex<double> c_temp   = k[n+7 ] * res[ index ];   // liuwk
-         dC[7+n] = c_temp.real() / 5.0;
-         dS[7+n] =-c_temp.imag() / 5.0;
+         // C20, S20
+//         CS(id20, 0) += k20/5.0 * temp * leg0(id20) * 1.0;
+         CS(id20, 0) += k20/std::sqrt(5.0) * temp * P20 * 1.0;
+         CS(id20, 1) += 0.0;
+         // C21, S21
+//         CS(id21, 0) += k21/5.0 * temp * leg0(id21) * std::cos(xlon);
+//         CS(id21, 1) += k21/5.0 * temp * leg0(id21) * std::sin(xlon);
+         CS(id21, 0) += k21/std::sqrt(15.0) * temp * P21 * std::cos(xlon);
+         CS(id21, 1) += k21/std::sqrt(15.0) * temp * P21 * std::sin(xlon);
+         // C22, S22
+//         CS(id22, 0) += k22/5.0 * temp * leg0(id22) * std::cos(2*xlon);
+//         CS(id22, 1) += k22/5.0 * temp * leg0(id22) * std::sin(2*xlon);
+         CS(id22, 0) += k22/std::sqrt(60.0) * temp * P22 * std::cos(2*xlon);
+         CS(id22, 1) += k22/std::sqrt(60.0) * temp * P22 * std::sin(2*xlon);
+
+         temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,4);
+         // C30, S30
+//         CS(id30, 0) += k30/7.0 * temp * leg0(id30) * 1.0;
+         CS(id30, 0) += k30/std::sqrt(7.0) * temp * P30 * 1.0;
+         CS(id30, 1) += 0.0;
+         // C31, S31
+//         CS(id31, 0) += k31/7.0 * temp * leg0(id31) * std::cos(xlon);
+//         CS(id31, 1) += k31/7.0 * temp * leg0(id31) * std::sin(xlon);
+         CS(id31, 0) += k31/std::sqrt(42.0) * temp * P31 * std::cos(xlon);
+         CS(id31, 1) += k31/std::sqrt(42.0) * temp * P31 * std::sin(xlon);
+         // C32, S32
+//         CS(id32, 0) += k32/7.0 * temp * leg0(id32) * std::cos(2*xlon);
+//         CS(id32, 1) += k32/7.0 * temp * leg0(id32) * std::sin(2*xlon);
+         CS(id32, 0) += k32/std::sqrt(420.0) * temp * P32 * std::cos(2*xlon);
+         CS(id32, 1) += k32/std::sqrt(420.0) * temp * P32 * std::sin(2*xlon);
+         // C33, S33
+//         CS(id33, 0) += k33/7.0 * temp * leg0(id33) * std::cos(3*xlon);
+//         CS(id33, 1) += k33/7.0 * temp * leg0(id33) * std::sin(3*xlon);
+         CS(id33, 0) += k33/std::sqrt(2520.0) * temp * P33 * std::cos(3*xlon);
+         CS(id33, 1) += k33/std::sqrt(2520.0) * temp * P33 * std::sin(3*xlon);
+
+         temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
+         // C40, S40
+//         CS(id40, 0) += k20p/5.0 * temp * leg0(id20) * 1.0;
+         CS(id40, 0) += k20p/std::sqrt(5.0) * temp * P20 * 1.0;
+         CS(id40, 1) += 0.0;
+         // C41, S41
+//         CS(id41, 0) += k21p/5.0 * temp * leg0(id21) * std::cos(xlon);
+//         CS(id41, 1) += k21p/5.0 * temp * leg0(id21) * std::sin(xlon);
+         CS(id41, 0) += k21p/std::sqrt(15.0) * temp * P21 * std::cos(xlon);
+         CS(id41, 1) += k21p/std::sqrt(15.0) * temp * P21 * std::sin(xlon);
+         // C42, S42
+//         CS(id42, 0) += k22p/5.0 * temp * leg0(id22) * std::cos(xlon);
+//         CS(id42, 1) += k22p/5.0 * temp * leg0(id22) * std::sin(xlon);
+         CS(id42, 0) += k22p/std::sqrt(60.0) * temp * P22 * std::cos(2*xlon);
+         CS(id42, 1) += k22p/std::sqrt(60.0) * temp * P22 * std::sin(2*xlon);
+
       }
 
-      
-      //-------------------------------------------------------------
-      // The second step 
+      /////////////////////////////////////////////////////////////////////////
+      //
+      //   Step 2 corrects for the deviations of the k21(0) of several of the
+      //   constituent tides of the diurnal band from the constant nominal
+      //   value k21 assumed for this band in the first step. Similar
+      //   corrections need to be applied to a few of the constituents of the
+      //   other two bands also.
+      //
+      /////////////////////////////////////////////////////////////////////////
 
-      //   COMPUTE DOODSON'S FUNDAMENTAL ARGUMENTS (BETA) 
+      // Doodson arguments
       double BETA[6] = {0.0};
-      double Dela[5] = {0.0};
-      ReferenceFrames::doodsonArguments(utc.asUT1(),utc.asTT(),BETA,Dela);
-      double GMST = ReferenceFrames::iauGmst00(utc.asUT1(), utc.asTT());
-      
+      double FNUT[5] = {0.0};
+      pRefSys->DoodsonArguments(ut1, tt, BETA, FNUT);
+      double GMST = pRefSys->GMST06(ut1, tt);
 
-      for(int i=0;i<48;i++)
+      // C20
+      // see IERS Conventions 2010, Equation 6.8a
+      for(int i=0; i<21; ++i)
       {
-         // Computation of thet_f
-         double thet_f = (GMST+ASConstant::PI)-(Argu_C21[i][2]*Dela[0]+Argu_C21[i][3]*Dela[1]+Argu_C21[i][4]*Dela[2]
-         + Argu_C21[i][5]*Dela[3]+Argu_C21[i][6]*Dela[4]);
-         
-         double t_s = std::sin(thet_f);
-         double t_c = std::cos(thet_f);
+         // theta_f
+         double theta_f = -(Argu_C20[i][2]*FNUT[0] + Argu_C20[i][3]*FNUT[1]
+                          + Argu_C20[i][4]*FNUT[2] + Argu_C20[i][5]*FNUT[3]
+                          + Argu_C20[i][6]*FNUT[4]);
 
-         // Resulted from formula 5b in chapter 6.1
-         dC[1] += ((Argu_C21[i][0]*t_s+Argu_C21[i][1]*t_c )*1e-12);
-         dS[1] += ((Argu_C21[i][0]*t_c-Argu_C21[i][1]*t_s )*1e-12);
+         // sine and cosine of theta_f
+         double stf = std::sin(theta_f);
+         double ctf = std::cos(theta_f);
+
+         // correction
+         CS(id20, 0) += (Argu_C20[i][0]*ctf - Argu_C20[i][1]*stf)*1e-12;
       }
 
-      for(int i=0;i<2;i++)
+
+
+      // C21, S21
+      // see IERS Conventions 2010, Equation 6.8b
+      for(int i=0; i<48; ++i)
       {
-         // Input the computation of thet_f
-         double thet_f = 2*(GMST+ASConstant::PI)-(Argu_C22[i][1]*Dela[0]+Argu_C22[i][2]*Dela[1]+Argu_C22[i][3]*Dela[2]
-         + Argu_C22[i][4]*Dela[3]+Argu_C22[i][5]*Dela[4]);
-         
-         double t_s = std::sin(thet_f);
-         double t_c = std::cos(thet_f);
+//         if(std::abs(Argu_C21[i][0]) < 5.0) continue;
 
-         // Resulted from formula 5b in chapter 6.1
-         // The corrections are only to the real part.
-         dC[2] += ((Argu_C22[i][0]*t_c)*1e-12 );
-         dS[2] += ((-Argu_C22[i][0]*t_s)*1e-12 );
-      }
-      
+         // theta_f
+         double theta_f = 1*(GMST+PI) - (Argu_C21[i][2]*FNUT[0]
+                          + Argu_C21[i][3]*FNUT[1] + Argu_C21[i][4]*FNUT[2]
+                          + Argu_C21[i][5]*FNUT[3] + Argu_C21[i][6]*FNUT[4]);
 
-      for(int i=0;i<21;i++)
-      {
-         // Input the computation of thet_f
-         double thet_f = -(Argu_C20[i][2]*Dela[0]+Argu_C20[i][3]*Dela[1]+Argu_C20[i][4]*Dela[2]
-         + Argu_C20[i][5]*Dela[3]+Argu_C20[i][6]*Dela[4]);
+         // sine and cosine of theta_f
+         double stf = std::sin(theta_f);
+         double ctf = std::cos(theta_f);
 
-         double t_s = std::sin(thet_f);
-         double t_c = std::cos(thet_f);
-
-         // Resulted from formula 5a in chapter 6.1
-         // Modified, 05.12.2009
-         //         dC[0] += ( ( Argu_C20[i][0] * t_c - Argu_C20[i][1] * t_s ) * 1e-12 );
-         dC[0]+=((Argu_C20[i][0]*t_c+Argu_C20[i][1]*t_s)*1e-12);
+         // corrections
+         CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
+         CS(id21, 1) += (Argu_C21[i][0]*ctf + Argu_C21[i][1]*stf)*1e-12;
+//         CS(id21, 0) += (Argu_C21[i][0]*stf)*1e-12;
+//         CS(id21, 1) += (Argu_C21[i][0]*ctf)*1e-12;
       }
 
-      //--------------------------------------------------------------------------------
-      // the third step
-      // 
-      //C REMOVE PREMANENT TIDE FROM C02 (FOR JGM-3 NOT FOR GEM-T3)
-      //C ---------------------------------------------------------
-      //IF (IZTID.EQ.1) CPOT(4)=CPOT(4)+1.3914129D-8*K20
-   
-   }
 
-   // Nnm IERS2003 P60
-   double EarthSolidTide::normFactor(int n, int m) 
-   {
-      // The input should be n >= m >= 0
 
-      double fac(1.0);
-      for(int i = (n-m+1); i <= (n+m); i++)
+/*
+      CS(id21, 0) += 470.9e-12 * std::sin(GMST+PI);
+      CS(id21, 1) += 470.9e-12 * std::cos(GMST+PI);
+
+      double ARG;
+
+      ARG = BETA[0] + BETA[1] + BETA[4];
+      CS(id21, 0) += 68.1e-12 * std::sin(ARG);
+      CS(id21, 1) += 68.1e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1] - 2*BETA[2];
+      CS(id21, 0) += -43.4e-12 * std::sin(ARG);
+      CS(id21, 1) += -43.4e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1] + BETA[2] - BETA[5];
+      CS(id21, 0) += -20.6e-12 * std::sin(ARG);
+      CS(id21, 1) += -20.6e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1] - BETA[4];
+      CS(id21, 0) += -8.8e-12 * std::sin(ARG);
+      CS(id21, 1) += -8.8e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1];
+      CS(id21, 0) += -6.8e-12 * std::sin(ARG);
+      CS(id21, 1) += -6.8e-12 * std::cos(ARG);
+
+      ARG = BETA[0] + BETA[1] + 2*BETA[2];
+      CS(id21, 0) += -5.0e-12 * std::sin(ARG);
+      CS(id21, 1) += -5.0e-12 * std::cos(ARG);
+*/
+
+
+      // C22, S22
+      // see IERS Conventions 2010, Equation 6.8b
+      for(int i=0; i<2; ++i)
       {
-         fac = fac * double(i);
+         // theta_f
+         double theta_f = 2*(GMST+PI) - (Argu_C22[i][1]*FNUT[0]
+                          + Argu_C22[i][2]*FNUT[1] + Argu_C22[i][3]*FNUT[2]
+                          + Argu_C22[i][4]*FNUT[3] + Argu_C22[i][5]*FNUT[4]);
+
+         // sine and cosine of theta_f
+         double stf = std::sin(theta_f);
+         double ctf = std::cos(theta_f);
+
+         // corrections
+         CS(id22, 0) += ( Argu_C22[i][0]*ctf)*1e-12;
+         CS(id22, 1) += (-Argu_C22[i][0]*stf)*1e-12;
       }
 
-      double delta  = (m == 0) ? 1.0 : 0.0;
-
-      double num = (2.0 * n + 1.0) * (2.0 - delta);
-
-      // We should make sure fac!=0, but it won't happen on the case,
-      // so we just skip handling it
-      double out = std::sqrt(num/fac);                  
-      
-      return out;
-
-   }  // End of method 'EarthSolidTide::normFactor'
-   
-  
-      //  Legendre polynomial
-   double EarthSolidTide::legendrePoly(int n, int m, double u)
-   {
-      // reference:Satellite Orbits Montenbruck. P66
-      if(0==n && 0==m)
-      {
-         return 1.0;
-      }
-      else if(m==n)
-      {
-         return (2.0*m-1.0)*std::sqrt(1.0-u*u)*legendrePoly(n-1,m-1,u);
-      }
-      else if(n==m+1)
-      {
-         return (2.0*m+1)*u*legendrePoly(m,m,u);
-      }
-      else
-      {
-         return ((2.0*n-1.0)*u*legendrePoly(n-1,m,u)-(n+m-1.0)*legendrePoly(n-2,m,u))/(n-m);
-      }
-      
-   }  // End of method 'EarthSolidTide::legendrePoly()'
 
 
-   void EarthSolidTide::test()
-   {   
-      cout<<"testing solid tide"<<endl;
-      // debuging
-      double mjdUtc = 2454531 + 0.49983796296296296 - 2400000.5;
-      double dc[10]={0.0},ds[10]={0.0};
-      getSolidTide(mjdUtc,dc,ds);
+      /////////////////////////////////////////////////////////////////////////
+      //
+      //   Treatment of the permanent tide
+      //
+      //   It does not need to do permanent tide correction for tide-free EGM08.
+      //
+      /////////////////////////////////////////////////////////////////////////
 
-
-   }	// End of method 'EarthSolidTide::test()'
-
+   }  // End of method 'EarthSolidTide::getSolidTide()'
 
 
 }	// End of namespace 'gpstk'
-
-
-
-

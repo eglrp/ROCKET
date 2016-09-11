@@ -1,12 +1,10 @@
-/// @file TimeSystem.hpp
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -17,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -25,16 +23,18 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software.
+//duplicate, distribute, disclose, or release this software. 
 //
-//Pursuant to DoD Directive 523024
+//Pursuant to DoD Directive 523024 
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
 //                           release, distribution is unlimited.
 //
 //=============================================================================
+
+/// @file TimeSystem.hpp
 
 #ifndef GPSTK_TIMESYSTEM_HPP
 #define GPSTK_TIMESYSTEM_HPP
@@ -65,6 +65,7 @@ namespace gpstk
          QZS,         ///< QZSS system Time
          BDT,         ///< BeiDou system Time
          UTC,         ///< Coordinated Universal Time (e.g., from NTP)
+         UT1,         ///< UT1
          TAI,         ///< International Atomic Time
          TT,          ///< Terrestrial time (used in IERS conventions)
          TDB,         ///< Barycentric dynamical time (JPL ephemeris); very near TT
@@ -73,7 +74,7 @@ namespace gpstk
       };
 
       /// Constructor, including empty constructor
-      TimeSystem(Systems sys = Unknown)
+      TimeSystem(const Systems sys = Unknown)
       {
          if(sys < 0 || sys >= count)
             system = Unknown;
@@ -106,7 +107,7 @@ namespace gpstk
 
       /// define system based on input string
       /// @param str input string, expected to match output string for given system
-      void fromString(const std::string str);
+      void fromString(const std::string& str);
 
       /// boolean operator==
       bool operator==(const TimeSystem& right) const
@@ -144,7 +145,7 @@ namespace gpstk
       /// NB. BDT = GPS - 15 but this does not include RINEX::TIME SYSTEM CORR::BDUT
       /// NB. BDT is actually UTC(NTSC) China
       /// @param  yr, mon, day give the day of interest
-      static double getLeapSeconds(const int& yr, const int& mon, const double& day);
+      static double getLeapSeconds(const int yr, const int mon, const double day);
 
       /// Compute the conversion (in seconds) from one time system (inTS) to another
       /// (outTS), given the year and month of the time to be converted.
@@ -158,8 +159,25 @@ namespace gpstk
       /// @return double dt, correction (sec) to be added to t(in) to yield t(out).
       /// @throw if input system(s) are invalid or Unknown.
       static double Correction(const TimeSystem& inTS, const TimeSystem& outTS,
-                               const int& year, const int& month, const double& day);
+                               const int year, const int month, const double day);
 
+/*
+      /// set the value of UT1mUTC
+      /// Before do the conversion between UT1 and UTC, we MUST set the value
+      /// of UT1mUTC first.
+      /// NB. |UTCmUT1| < 0.9s.
+      void setUT1mUTC(const double& dt)
+      {
+          if(dt >= 0.9 || dt <= -0.9)
+              std::cerr << "wrong value for UT1mUTC." << std::endl;
+          else
+              UT1mUTC = dt;
+      }
+
+      /// get the value of UT1mUTC
+      double getUT1mUTC() const
+      { return UT1mUTC; }
+*/
    private:
 
       /// time system (= element of Systems enum) for this object
@@ -167,6 +185,9 @@ namespace gpstk
 
       /// set of string labels for elements of Systems
       static const std::string Strings[];
+
+      /// UT1 - UTC in seconds, |UT1mUTC| < 0.9s
+//      double UT1mUTC;
 
    };   // end class TimeSystem
 

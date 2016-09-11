@@ -14,8 +14,14 @@
 //
 //  Revision
 //
-//  2015/07/02  This clkZap application is inherited from the updzap by 
-//              fixing and removing the undifferenced ambiguities 
+//  2015/07/02  
+//
+//  create this program by Shoujian Zhang.
+//
+//  2016/06/20
+//
+//  Modify the usage method of this program. The eph/clk/erp files are 
+//  provided from the command line.
 //
 //============================================================================
 

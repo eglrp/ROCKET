@@ -47,11 +47,12 @@
  * as GM for sun and moon.
  */
 
-#include "geometry.hpp"             // for DEG_TO_RAD
+#include "SolidEarthTides.hpp"
 
 #include "logstream.hpp"
 #include "GeodeticFrames.hpp"
-#include "SolidEarthTides.hpp"
+#include "GNSSconstants.hpp"
+
 
 using namespace std;
 using namespace gpstk;

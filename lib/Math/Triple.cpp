@@ -46,14 +46,15 @@
  * Three element double vectors, for use with geodetic coordinates
  */
 
-#include "geometry.hpp"
-#include "Triple.hpp"
 #include <cmath>
+#include "Triple.hpp"
+#include "GNSSconstants.hpp"
+
+using namespace std;
+
 
 namespace gpstk
 {
-   using namespace std;
-
    Triple :: Triple()
          : theArray(3)
    {

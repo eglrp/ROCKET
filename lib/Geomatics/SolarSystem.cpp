@@ -1,4 +1,38 @@
-#pragma ident "$Id$"
+//============================================================================
+//
+//  This file is part of GPSTk, the GPS Toolkit.
+//
+//  The GPSTk is free software; you can redistribute it and/or modify
+//  it under the terms of the GNU Lesser General Public License as published
+//  by the Free Software Foundation; either version 3.0 of the License, or
+//  any later version.
+//
+//  The GPSTk is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with GPSTk; if not, write to the Free Software Foundation,
+//  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
+//  
+//  Copyright 2004, The University of Texas at Austin
+//
+//============================================================================
+
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
 
 /**
  * @file SolarSystem.cpp
@@ -10,16 +44,6 @@
  * to convert to your own binary files; this avoids compiler- and platform-dependent
  * differences in the binary files.
  */
-
-// ======================================================================
-// This software was developed by Applied Research Laboratories, The
-// University of Texas at Austin under contract to an agency or agencies
-// within the U.S. Department of Defense. The U.S. Government retains all
-// rights to use, duplicate, distribute, disclose, or release this
-// software.
-// 
-// Copyright 2008 The University of Texas at Austin
-// ======================================================================
 
 //------------------------------------------------------------------------------------
 #include "CommonTime.hpp"
@@ -129,7 +153,7 @@ try {
          }
          else if(group == 1041) {
             if(n++ == 0) {
-               if(Nconst != asInt(word)) {
+               if((int)Nconst != asInt(word)) {
                   Exception e("Nconst does not match N in GROUP 1041 : " +
                               asString(Nconst) + " != " + word);
                   GPSTK_THROW(e);
@@ -247,7 +271,6 @@ try {
    int ntot=0;                      // counts the total number of lines
    int n=0;                         // counts the lines within a set of coefficients
    int nc=0;                        // count coefficients within a record
-   int rec;
    vector<double> data_vector;
    while(1) {
       getline(strm,line);
@@ -260,7 +283,7 @@ try {
       }
 
       if(n == 0) {
-         rec = asInt(stripFirstWord(line));           // 1st word is the record number
+         (void)asInt(stripFirstWord(line));           // 1st word is the record number
          int ncc = asInt(stripFirstWord(line));       // 2nd word is ncoeff
          if(ncc != Ncoeff) {
             Exception e("readASCIIdata finds conflicting sizes in header ("
@@ -622,7 +645,7 @@ try {
    }
 
    // define computeID's for target and center
-   computeID TARGET,CENTER;
+   computeID TARGET = NONE, CENTER = NONE;
 
    if(target <= Sun)                        TARGET = computeID(target-1);
    else if(target == SolarSystemBarycenter) TARGET = NONE;
@@ -688,11 +711,10 @@ Position SolarSystem::WGS84Position(Planet body, const CommonTime time,
    const EarthOrientation& eo) throw(Exception)
 {
 try {
-   int iret;
    double PV[6];
 
    double JD = static_cast<JulianDate>(time).jd;
-   iret = computeState(JD, body, Earth, PV);          // result in km, km/day
+   (void)computeState(JD, body, Earth, PV);          // result in km, km/day
 
    Matrix<double> Rot;
    Rot = GeodeticFrames::ECEFtoInertial(time, eo.xp, eo.yp, eo.UT1mUTC);
@@ -1002,7 +1024,7 @@ void SolarSystem::computeState(double tt, SolarSystem::computeID which, double P
 {
 try {
    int i,i0,ncomp;
-   size_t j;
+   long j;
 
    for(i=0; i<6; i++) PV[i]=0.0;
    if(which == NONE) return;
@@ -1029,7 +1051,7 @@ try {
    T = 2.0*(tt-Tbeg)/Tspan - 1.0;
 
    // interpolate
-   unsigned int N=c_ncoeff[which];
+   long N=c_ncoeff[which];
    vector<double> C(N,0.0);     // Chebyshev
    vector<double> U(N,0.0);     // derivative of Chebyshev
    for(i=0; i<ncomp; i++) {     // loop over components

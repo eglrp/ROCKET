@@ -47,12 +47,12 @@
 #include "AntexData.hpp"
 #include "AntexStream.hpp"
 #include "StringUtils.hpp"
-#include "geometry.hpp"
 #include "TimeString.hpp"
 #include "CivilTime.hpp"
+#include "GNSSconstants.hpp"
 
-using namespace gpstk::StringUtils;
 using namespace std;
+using namespace gpstk::StringUtils;
 
 namespace gpstk
 {

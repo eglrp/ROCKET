@@ -1,18 +1,10 @@
-
-#pragma ident "$Id$"
-
-/**
-* @file Spacecraft.cpp
-* The Spacecraft class encapsulates physical parameters.
-*/
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -24,444 +16,282 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
-//  Wei Yan - Chinese Academy of Sciences . 2009, 2010
+//  Copyright 2004, The University of Texas at Austin
+//  Kaifa Kuang - Kaifa Kuang . 2016
 //
 //============================================================================
 
+/**
+* @file Spacecraft.cpp
+* Class to encapsulate Spacecraft related parameters.
+*/
+
 #include "Spacecraft.hpp"
 #include "Exception.hpp"
+#include "CivilTime.hpp"
+
+
+using namespace std;
+
 
 namespace gpstk
 {
 
-      // Default constructor
-   Spacecraft::Spacecraft(std::string name)
-   {
-      scName = name;
-
-      reflectCoeff= 1.0;      //
-      dragCoeff   = 2.0;      //
-      crossArea   = 5;         // m^2
-      dryMass      = 1000;      // kg
-
-      resetState();
-
-   }
-
-
+      /// Reset state
    void Spacecraft::resetState()
    {
-      // resize
+      // reset state vector
       r.resize(3,0.0);
       v.resize(3,0.0);
-      p.resize(0,0.0);
 
-      dr_dr0.resize(9,0.0);      // I
-      dr_dv0.resize(9,0.0);      // 0
-      dr_dp0.resize(0,0.0);      // 0
+      // reset partial derivatives
+      dr_dr0.resize(9,0.0);
+      dr_dv0.resize(9,0.0);
+      dr_dp0.resize(0,0.0);
+      dv_dr0.resize(9,0.0);
+      dv_dv0.resize(9,0.0);
+      dv_dp0.resize(0,0.0);
 
-      dv_dr0.resize(9,0.0);      // 0
-      dv_dv0.resize(9,0.0);      // I
-      dv_dp0.resize(0,0.0);      // 0
+      dr_dr0(0) = 1.0; dr_dr0(4) = 1.0; dr_dr0(8) = 1.0;
+      dv_dv0(0) = 1.0; dv_dv0(4) = 1.0; dv_dv0(8) = 1.0;
 
-      // set eye elements to 1
-      dr_dr0(0) = 1.0;
-      dr_dr0(4) = 1.0;
-      dr_dr0(8) = 1.0;
+   }  // End of method 'Spacecraft::resetState()'
 
-      dv_dv0(0) = 1.0;
-      dv_dv0(4) = 1.0;
-      dv_dv0(8) = 1.0;
-   }
 
-   void Spacecraft::initStateVector(Vector<double> rv, Vector<double> dp)
+      /// Set state vector
+   Spacecraft& Spacecraft::setStateVector(const Vector<double>& sv)
    {
-      // first the size of input vector should be checked
-      if(rv.size()!=6)
+      // check the size of sv
+      if(sv.size() == (42+6*numOfParam))
       {
-         Exception e("Error in Spacecraft::initStateVector(): the size of rv should be 6.");
-         GPSTK_THROW(e);
+         // resize dr_dp0 and dv_dp0
+         dr_dp0.resize(3*numOfParam, 0.0);
+         dv_dp0.resize(3*numOfParam, 0.0);
+
+         // set position
+         r(0) = sv(0); r(1) = sv(1); r(2) = sv(2);
+
+         // set velocity
+         v(0) = sv(3); v(1) = sv(4); v(2) = sv(5);
+
+
+         // set position related partial derivatives
+         for(int i=0; i<3*3; ++i)
+         {
+             dr_dr0(i) = sv( 6+i);
+             dr_dv0(i) = sv(15+i);
+         }
+
+         for(int i=0; i<3*numOfParam; ++i)
+         {
+             dr_dp0(i) = sv(24+i);
+         }
+
+         // set velocity related partial derivatives
+         for(int i=0; i<3*3; ++i)
+         {
+             dv_dr0(i) = sv(24+3*numOfParam+i);
+             dv_dv0(i) = sv(33+3*numOfParam+i);
+         }
+
+         for(int i=0; i<3*numOfParam; ++i)
+         {
+             dv_dp0(i) = sv(42+3*numOfParam+i);
+         }
+
+      }
+      else
+      {
+         cerr << "Spacecraft::setStateVector() error, the size does not match." << endl;
       }
 
-      resetState();
-      
-      // set position
-      r(0) = rv(0);
-      r(1) = rv(1);
-      r(2) = rv(2);
+      return (*this);
 
-      // set velocity
-      v(0) = rv(3);
-      v(1) = rv(4);
-      v(2) = rv(5);
-      
-      // set force model parameters
-      p = dp;
+   }  // End of method 'Spacecraft::setStateVector()'
 
-      // set dr_dp0 and dv_dp0
-      const int np = p.size();
 
-      dr_dp0.resize(3*np,0.0);
-      dv_dp0.resize(3*np,0.0);
-
-   }  // End of method 'Spacecraft::initStateVector()'
-
-      // Get Transition Matrix
-   Matrix<double> Spacecraft::getTransitionMatrix()
+      /// Get state vector of Spacecraft
+   Vector<double> Spacecraft::getStateVector() const
    {
-      /* Transition Matrix
-          |                          |
-          | dr_dr0   dr_dv0   dr_dp0 |
-          |                          |
-      phi=| dv_dr0   dv_dv0   dv_dp0 |
-          |                          |
-          | 0         0           I    |
-          |                          |
-      */
-      
-      const int np=p.size();
 
-      Matrix<double> phiMatrix(np+6,np+6,0.0);
-      
-      /// dr/dr0
-      phiMatrix(0,0)=dr_dr0(0);
-      phiMatrix(0,1)=dr_dr0(1);
-      phiMatrix(0,2)=dr_dr0(2);
-      phiMatrix(1,0)=dr_dr0(3);
-      phiMatrix(1,1)=dr_dr0(4);
-      phiMatrix(1,2)=dr_dr0(5);
-      phiMatrix(2,0)=dr_dr0(6);
-      phiMatrix(2,1)=dr_dr0(7);
-      phiMatrix(2,2)=dr_dr0(8);
-      /// dr/dv0
-      phiMatrix(0,3)=dr_dv0(0);
-      phiMatrix(0,4)=dr_dv0(1);
-      phiMatrix(0,5)=dr_dv0(2);
-      phiMatrix(1,3)=dr_dv0(3);
-      phiMatrix(1,4)=dr_dv0(4);
-      phiMatrix(1,5)=dr_dv0(5);
-      phiMatrix(2,3)=dr_dv0(6);
-      phiMatrix(2,4)=dr_dv0(7);
-      phiMatrix(2,5)=dr_dv0(8);
-      /// dv/dr0
-      phiMatrix(3,0)=dv_dr0(0);
-      phiMatrix(3,1)=dv_dr0(1);
-      phiMatrix(3,2)=dv_dr0(2);
-      phiMatrix(4,0)=dv_dr0(3);
-      phiMatrix(4,1)=dv_dr0(4);
-      phiMatrix(4,2)=dv_dr0(5);
-      phiMatrix(5,0)=dv_dr0(6);
-      phiMatrix(5,1)=dv_dr0(7);
-      phiMatrix(5,2)=dv_dr0(8);
-      /// dv/dv0
-      phiMatrix(3,3)=dv_dv0(0);
-      phiMatrix(3,4)=dv_dv0(1);
-      phiMatrix(3,5)=dv_dv0(2);
-      phiMatrix(4,3)=dv_dv0(3);
-      phiMatrix(4,4)=dv_dv0(4);
-      phiMatrix(4,5)=dv_dv0(5);
-      phiMatrix(5,3)=dv_dv0(6);
-      phiMatrix(5,4)=dv_dv0(7);
-      phiMatrix(5,5)=dv_dv0(8);
+      Vector<double> sv(42+6*numOfParam, 0.0);
 
-      /// dr/dp0
-      for(int i=0;i<np;i++)
+
+      //// Parameters related to equation of motion ////
+
+      // position
+      sv(0) = r(0); sv(1) = r(1); sv(2) = r(2);
+
+      // velocity
+      sv(3) = v(0); sv(4) = v(1); sv(5) = v(2);
+
+
+      //// parameters related to equation of variation ////
+
+      // position related partial derivatives
+
+      // dr_dr0, dr_dv0
+      for(int i=0; i<3*3; ++i)
       {
-         phiMatrix(0,i+6) = dr_dp0(i+0*np);
-         phiMatrix(1,i+6) = dr_dp0(i+1*np);
-         phiMatrix(2,i+6) = dr_dp0(i+2*np);
-
-         phiMatrix(3,i+6) = dv_dp0(i+0*np);
-         phiMatrix(4,i+6) = dv_dp0(i+1*np);
-         phiMatrix(5,i+6) = dv_dp0(i+2*np);
-
-         phiMatrix(i+6,i+6) = 1.0;
-         phiMatrix(i+6,i+6) = 1.0;
-         phiMatrix(i+6,i+6) = 1.0;
+          sv( 6+i) = dr_dr0(i);
+          sv(15+i) = dr_dv0(i);
       }
 
-      return phiMatrix;
-
-   }  // End of method 'Spacecraft::getTransitionMatrix()'
-
-
-   void Spacecraft::setTransitionMatrix(Matrix<double> phiMatrix)
-   {
-      /* Transition Matrix
-          |                          |
-          | dr_dr0   dr_dv0   dr_dp0 |
-          |                          |
-      phi=| dv_dr0   dv_dv0   dv_dp0 |
-          |                          |
-          | 0         0          I     |
-          |                          |
-      */
-
-      const int np = phiMatrix.rows()-6;
-
-      // resize the vectors
-      p.resize(np,0.0);
-      dr_dp0.resize(3*np,0.0);
-      dv_dp0.resize(3*np,0.0);
-
-      // dr/dr0
-      dr_dr0(0) = phiMatrix(0,0);
-      dr_dr0(1) = phiMatrix(0,1);
-      dr_dr0(2) = phiMatrix(0,2);
-      dr_dr0(3) = phiMatrix(1,0);
-      dr_dr0(4) = phiMatrix(1,1);
-      dr_dr0(5) = phiMatrix(1,2);
-      dr_dr0(6) = phiMatrix(2,0);
-      dr_dr0(7) = phiMatrix(2,1);
-      dr_dr0(8) = phiMatrix(2,2);
-      // dr/dv0
-      dr_dv0(0) = phiMatrix(0,3);
-      dr_dv0(1) = phiMatrix(0,4);
-      dr_dv0(2) = phiMatrix(0,5);
-      dr_dv0(3) = phiMatrix(1,3);
-      dr_dv0(4) = phiMatrix(1,4);
-      dr_dv0(5) = phiMatrix(1,5);
-      dr_dv0(6) = phiMatrix(2,3);
-      dr_dv0(7) = phiMatrix(2,4);
-      dr_dv0(8) = phiMatrix(2,5);
-      // dv/dr0
-      dv_dr0(0) = phiMatrix(3,0);
-      dv_dr0(1) = phiMatrix(3,1);
-      dv_dr0(2) = phiMatrix(3,2);
-      dv_dr0(3) = phiMatrix(4,0);
-      dv_dr0(4) = phiMatrix(4,1);
-      dv_dr0(5) = phiMatrix(4,2);
-      dv_dr0(6) = phiMatrix(5,0);
-      dv_dr0(7) = phiMatrix(5,1);
-      dv_dr0(8) = phiMatrix(5,2);
-      // dv/dv0
-      dv_dv0(0) = phiMatrix(3,3);
-      dv_dv0(1) = phiMatrix(3,4);
-      dv_dv0(2) = phiMatrix(3,5);
-      dv_dv0(3) = phiMatrix(4,3);
-      dv_dv0(4) = phiMatrix(4,4);
-      dv_dv0(5) = phiMatrix(4,5);
-      dv_dv0(6) = phiMatrix(5,3);
-      dv_dv0(7) = phiMatrix(5,4);
-      dv_dv0(8) = phiMatrix(5,5);
-
-      // dr/dp0
-      for(int i=0;i<np;i++)
+      // dr_dp0
+      for(int i=0; i<3*numOfParam; ++i)
       {
-         dr_dp0(i+0*np) = phiMatrix(0,i+6);
-         dr_dp0(i+1*np) = phiMatrix(1,i+6);
-         dr_dp0(i+2*np) = phiMatrix(2,i+6);
-
-         dv_dp0(i+0*np) = phiMatrix(3,i+6);
-         dv_dp0(i+1*np) = phiMatrix(4,i+6);
-         dv_dp0(i+2*np) = phiMatrix(5,i+6);
+          sv(24+i) = dr_dp0(i);
       }
 
-   }  // End of method 'Spacecraft::setTransitionMatrix()'
+      // velocity related partial derivatives
 
-
-   // get State Transition Matrix 6*6
-   Matrix<double> Spacecraft::getStateTransitionMatrix()
-   {
-      /* Transition Matrix
-          |                  |
-          | dr_dr0   dr_dv0  |
-      phi=|                  |
-          | dv_dr0   dv_dv0  |
-          |                  |
-      */
-      const int np=p.size();
-#pragma unused(np)
-
-      Matrix<double> phiMatrix(6,6,0.0);
-
-      /// dr/dr0
-      phiMatrix(0,0)=dr_dr0(0);
-      phiMatrix(0,1)=dr_dr0(1);
-      phiMatrix(0,2)=dr_dr0(2);
-      phiMatrix(1,0)=dr_dr0(3);
-      phiMatrix(1,1)=dr_dr0(4);
-      phiMatrix(1,2)=dr_dr0(5);
-      phiMatrix(2,0)=dr_dr0(6);
-      phiMatrix(2,1)=dr_dr0(7);
-      phiMatrix(2,2)=dr_dr0(8);
-      /// dr/dv0
-      phiMatrix(0,3)=dr_dv0(0);
-      phiMatrix(0,4)=dr_dv0(1);
-      phiMatrix(0,5)=dr_dv0(2);
-      phiMatrix(1,3)=dr_dv0(3);
-      phiMatrix(1,4)=dr_dv0(4);
-      phiMatrix(1,5)=dr_dv0(5);
-      phiMatrix(2,3)=dr_dv0(6);
-      phiMatrix(2,4)=dr_dv0(7);
-      phiMatrix(2,5)=dr_dv0(8);
-      /// dv/dr0
-      phiMatrix(3,0)=dv_dr0(0);
-      phiMatrix(3,1)=dv_dr0(1);
-      phiMatrix(3,2)=dv_dr0(2);
-      phiMatrix(4,0)=dv_dr0(3);
-      phiMatrix(4,1)=dv_dr0(4);
-      phiMatrix(4,2)=dv_dr0(5);
-      phiMatrix(5,0)=dv_dr0(6);
-      phiMatrix(5,1)=dv_dr0(7);
-      phiMatrix(5,2)=dv_dr0(8);
-      /// dv/dv0
-      phiMatrix(3,3)=dv_dv0(0);
-      phiMatrix(3,4)=dv_dv0(1);
-      phiMatrix(3,5)=dv_dv0(2);
-      phiMatrix(4,3)=dv_dv0(3);
-      phiMatrix(4,4)=dv_dv0(4);
-      phiMatrix(4,5)=dv_dv0(5);
-      phiMatrix(5,3)=dv_dv0(6);
-      phiMatrix(5,4)=dv_dv0(7);
-      phiMatrix(5,5)=dv_dv0(8);
-
-      return phiMatrix;
-
-   }  // End of method 'Spacecraft::getStateTransitionMatrix()'
-
-   // get Sensitivity Matrix 6*np
-   Matrix<double> Spacecraft::getSensitivityMatrix()
-   {
-      /* Transition Matrix
-          |        |
-          | dr_dp0 |
-      s = |        |
-          | dv_dp0 |
-          |        |
-      */
-      const int np=p.size();
-
-      Matrix<double> sMatrix(6,np,0.0);
-      
-      for(int i=0;i<np;i++)
+      // dv_dr0, dv_dv0
+      for(int i=0; i<3*3; ++i)
       {
-         sMatrix(0,i) = dr_dp0(i+0*np);
-         sMatrix(1,i) = dr_dp0(i+1*np);
-         sMatrix(2,i) = dr_dp0(i+2*np);
-
-         sMatrix(3,i) = dv_dp0(i+0*np);
-         sMatrix(4,i) = dv_dp0(i+1*np);
-         sMatrix(5,i) = dv_dp0(i+2*np);
+          sv(24+3*numOfParam+i) = dv_dr0(i);
+          sv(33+3*numOfParam+i) = dv_dv0(i);
       }
 
-      return sMatrix;
-
-   }  // End of method 'Spacecraft::getSensitivityMatrix()'
-
-
-   Vector<double> Spacecraft::getStateVector()
-   {
-      const int np=p.size();
-      Vector<double> y(6*np+42);
-
-      y(0) = r(0);
-      y(1) = r(1);
-      y(2) = r(2);
-      y(3) = v(0);
-      y(4) = v(1); 
-      y(5) = v(2);
-      
-      for(int i=0;i<9;i++)
+      // dv_dp0
+      for(int i=0; i<3*numOfParam; ++i)
       {
-         y(6+i) = dr_dr0(i);
-         y(15+i) = dr_dv0(i);
-         
-         y(24+3*np+i) = dv_dr0(i);
-         y(33+3*np+i) = dv_dv0(i);
-      }
-      for(int i=0;i<3*np;i++)
-      {
-         y(24+i) = dr_dp0(i);
-         y(42+3*np+i) = dv_dp0(i);
+          sv(42+3*numOfParam+i) = dv_dp0(i);
       }
 
-      return y;
+      return sv;
 
    }  // End of method 'Spacecraft::getStateVector()'
 
 
-   void Spacecraft::setStateVector(Vector<double> y)
+
+      /// Get transition matrix
+   Matrix<double> Spacecraft::getTransitionMatrix() const
    {
-      const int dim = y.size();
-      const int np = (dim-42)/6;
-      
-      // resize the vectors
-      p.resize(np,0.0);
-      dr_dp0.resize(3*np,0.0);
-      dv_dp0.resize(3*np,0.0);
-      
-      r(0) = y(0);
-      r(1) = y(1);
-      r(2) = y(2);
-      v(0) = y(3);
-      v(1) = y(4);
-      v(2) = y(5);
+      ////////////////// Transition Matrix ////////////////
+      //                                                 //
+      //             |                          |        //
+      //             | dr_dr0   dr_dv0   dr_dp0 |        //
+      //             |                          |        //
+      //    tMat  =  | dv_dr0   dv_dv0   dv_dp0 |        //
+      //             |                          |        //
+      //             | 0        0        I      |        //
+      //             |                          |        //
+      //                                                 //
+      /////////////////////////////////////////////////////
 
-      for(int i=0;i<9;i++)
-      {
-         dr_dr0(i) = y(6+i);
-         dr_dv0(i) = y(15+i);
+      Matrix<double> tMat(6+numOfParam,6+numOfParam, 0.0);
 
-         dv_dr0(i) = y(24+3*np+i);
-         dv_dv0(i) = y(33+3*np+i);
-      }
-      
-      for(int i=0;i<3*np;i++)
+      // state transition matrix
+      for(int i=0; i<3; ++i)
       {
-         dr_dp0(i) = y(24+i);
-         dv_dp0(i) = y(42+3*np+i);
+          for(int j=0; j<3; ++j)
+          {
+              tMat(i+0,j+0)   =   dr_dr0(i*3+j);
+              tMat(i+0,j+3)   =   dr_dv0(i*3+j);
+
+              tMat(i+3,j+0)   =   dv_dr0(i*3+j);
+              tMat(i+3,j+3)   =   dv_dv0(i*3+j);
+          }
       }
 
-   }  // End of method 'Spacecraft::setStateVector(Vector<double> y)'
+      // sensitivity matrix
+      for(int i=0; i<3; ++i)
+      {
+          for(int j=0; j<numOfParam; ++j)
+          {
+              tMat(i+0,j+6)   =   dr_dp0(i*numOfParam+j);
 
-   void Spacecraft::test()
+              tMat(i+3,j+6)   =   dv_dp0(i*numOfParam+j);
+          }
+      }
+
+      // identity part
+      for(int i=6; i<6+numOfParam; ++i)
+      {
+          tMat(i,i) = 1.0;
+      }
+
+      return tMat;
+
+   }  // End of method 'Spacecraft::getTransitionMatrix()'
+
+
+      // Get state transition matrix
+   Matrix<double> Spacecraft::getStateTransitionMatrix() const
    {
-      cout<<"testing Spacecraft"<<endl;
-      
-      /*
-      r.resize(3,8.0);
-      v.resize(3,8.0);
-      p.resize(2,0.0);
+      ////////////// State Transition Matrix //////////////
+      //                                                 //
+      //             |                  |                //
+      //             | dr_dr0   dr_dv0  |                //
+      //    stMat =  |                  |                //
+      //             | dv_dr0   dv_dv0  |                //
+      //             |                  |                //
+      //                                                 //
+      /////////////////////////////////////////////////////
 
-      dr_dr0.resize(9,0.0);      // I
-      dr_dv0.resize(9,0.0);      // 0
-      dr_dp0.resize(6,3.0);      // 0
+      Matrix<double> stMat(6,6,0.0);
 
-      dv_dr0.resize(9,0.0);      // 0
-      dv_dv0.resize(9,0.0);      // I
-      dv_dp0.resize(6,4.0);      // 0
+      // state transition matrix
+      for(int i=0; i<3; ++i)
+      {
+          for(int j=0; j<3; ++j)
+          {
+              stMat(i+0,j+0)  =  dr_dr0(i*3+j);
+              stMat(i+0,j+3)  =  dr_dv0(i*3+j);
 
-      // set eye elements to 1
-      dr_dr0(0) = 1.0;
-      dr_dr0(4) = 1.0;
-      dr_dr0(8) = 1.0;
+              stMat(i+3,j+0)  =  dv_dr0(i*3+j);
+              stMat(i+3,j+3)  =  dv_dv0(i*3+j);
+          }
+      }
 
-      dv_dv0(0) = 1.0;
-      dv_dv0(4) = 1.0;
-      dv_dv0(8) = 1.0;
-      
-   
-      writeToFile("default.sc");
+      return stMat;
 
-      // it work well
-      */
-
-   }   // End of method 'Spacecraft::test()'
+   }  // End of method 'Spacecraft::getStateTransitionMatrix()'
 
 
-      // Stream output for CommonTime objects.  Typically used for debugging.
-      // @param s stream to append formatted CommonTime to.
-      // @param t Spacecraft to append to stream \c s.
-      // @return reference to \c s.
-   ostream& operator<<( ostream& s, 
+   // Get sensitivity matrix
+   Matrix<double> Spacecraft::getSensitivityMatrix() const
+   {
+      ////////// Sensitivity Matrix //////////////
+      //                                        //
+      //                |        |              //
+      //                | dr_dp0 |              //
+      //       sMat  =  |        |              //
+      //                | dv_dp0 |              //
+      //                |        |              //
+      //                                        //
+      ////////////////////////////////////////////
+
+      Matrix<double> sMat(6,numOfParam, 0.0);
+
+      // sensitivity matrix
+      for(int i=0; i<3; ++i)
+      {
+          for(int j=0; j<numOfParam; ++j)
+          {
+              sMat(i+0,j)  =  dr_dp0(i*numOfParam+j);
+              sMat(i+3,j)  =  dv_dp0(i*numOfParam+j);
+          }
+      }
+
+      return sMat;
+
+   }  // End of method 'Spacecraft::getSensitivityMatrix()'
+
+
+      /** Stream output for Spacecraft objects. Typically used for debugging.
+       * @param s    stream to append formatted Spacecraft to
+       * @param sc   Spacecraft to append to stream \c s
+       */
+   ostream& operator<<( ostream& s,
                         const gpstk::Spacecraft& sc )
    {
-      // s << endl;
+       s << sc.getSatID() << ' ' << CivilTime(sc.getCurrentTime()) << ' '
+         << sc.getBlockType() << ' ' << sc.getMass();
 
-      return s;
+       return s;
 
    }  // End of 'ostream& operator<<()'
 
-}  // End of namespace 'gpstk'
 
+}  // End of namespace 'gpstk'

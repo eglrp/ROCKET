@@ -98,7 +98,7 @@ namespace gpstk
                                        const gpstk::Matrix<double>& inState,
                                        gpstk::Matrix<double>& inStateDot) = 0;
 
-         /// Return the currnet time of the system.
+         /// Return the current time of the system.
       double getTime(void) 
       { return currentTime; }
 

@@ -21,7 +21,3 @@ echo ""
 
 export CPPUNIT_INC=$CppInc
 
-
-
-
-
