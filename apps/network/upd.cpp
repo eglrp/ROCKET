@@ -289,7 +289,7 @@ private:
 	CommandOptionWithAnyArg sp3FileListOpt;
 	CommandOptionWithAnyArg clkFileListOpt;
 	CommandOptionWithAnyArg eopFileListOpt;
-	CommandOptionWithAnyArg dcbFileListOpt;
+//	CommandOptionWithAnyArg dcbFileListOpt;
 	CommandOptionWithAnyArg mscFileOpt;
 	CommandOptionWithAnyArg outputFileListOpt;
 
@@ -297,7 +297,7 @@ private:
 	string sp3FileListName;
 	string clkFileListName;
 	string eopFileListName;
-	string dcbFileListName;
+//	string dcbFileListName;
 	string mscFileName;
 	string outputFileName;
 
@@ -402,10 +402,10 @@ upd::upd(char* arg0)
 						 true),
 		// Warning: because 'd' has been used for degug option,
 		//          here 'D' is used for dcb file reading.
-	dcbFileListOpt( 'D',
-						 "dcbFileList",
-	"file storing a list of the P1C1 DCB file.",
-						 false),
+//	dcbFileListOpt( 'D',
+//						 "dcbFileList",
+//	"file storing a list of the P1C1 DCB file.",
+//						 false),
 	mscFileOpt(     'm',
 						 "mscFile",
 	"file storing monitor station coordinates ",
@@ -504,18 +504,18 @@ void upd::spinUp()
    {
       eopFileListName = eopFileListOpt.getValue()[0];
    }
-   if(outputFileOpt.getCount())
+   if(outputFileListOpt.getCount())
    {
-      outputFileName = outputFileOpt.getValue()[0];
+      outputFileName = outputFileListOpt.getValue()[0];
    }
    if(mscFileOpt.getCount())
    {
       mscFileName = mscFileOpt.getValue()[0];
    }
-   if(dcbFileListOpt.getCount())
-   {
-      dcbFileListName = dcbFileListOpt.getValue()[0];
-   }
+//   if(dcbFileListOpt.getCount())
+//   {
+//      dcbFileListName = dcbFileListOpt.getValue()[0];
+//   }
 
 
 	// ^^^ 
@@ -630,20 +630,6 @@ void upd::preprocessing()
 		clkFileListStream.close();
 	}  // End of ' if( clkFileListOpt.getCount() ) '
 
-
-
-   //// vvvv Tides handling vvvv
-
-      // Object to compute tidal effects
-   SolidTides solid;
-
-
-
-      // Configure ocean loading model
-   OceanLoading ocean;
-   ocean.setFilename( confReader.getValue( "oceanLoadingFile", "DEFAULT" ) );
-
-
 		/////////////////////////
 		// Let's read eop files
 		/////////////////////////
@@ -684,44 +670,44 @@ void upd::preprocessing()
 		// Let's read DCB files
 		////////////////////////////////////////////////
 
-		// Read and store dcb data
-	DCBDataReader dcbStore;
-
-	if(dcbFileListOpt.getCount() )
-	{
-			// Now read dcb file from 'dcbFileName'
-		ifstream dcbFileListStream;
-
-			// Open dcbFileList File
-		dcbFileListStream.open( dcbFileListName.c_str(), ios::in );
-		if( !dcbFileListStream )
-		{
-			cerr << "dcb file List Name '" << dcbFileListName << "' doesn't exist or you don't "
-				  << "have permission to read it." << endl;
-			exit(-1);
-		}  // End of ' if( !dcbFileListStream ) '
-
-		string dcbFile;
-
-			// Here is just a dcb file, we only read one month's dcb data.
-		while( dcbFileListStream >> dcbFile )
-		{
-			try
-			{
-				dcbStore.open(dcbFile);
-			}
-			catch( FileMissingException e )
-			{
-				cerr << "Warning! The DCB file '"<< dcbFile <<"' does not exist!"
-					  << endl;
-				exit(-1);
-			}
-		}  // End of ' while( dcbFileListStream >> dcbFile ) '
-
-			// Close dcblist file
-		dcbFileListStream.close();
-
-	}  // End of ' if(dcbFileListOpt.getCount() ) '
+//		// Read and store dcb data
+//	DCBDataReader dcbStore;
+//
+//	if(dcbFileListOpt.getCount() )
+//	{
+//			// Now read dcb file from 'dcbFileName'
+//		ifstream dcbFileListStream;
+//
+//			// Open dcbFileList File
+//		dcbFileListStream.open( dcbFileListName.c_str(), ios::in );
+//		if( !dcbFileListStream )
+//		{
+//			cerr << "dcb file List Name '" << dcbFileListName << "' doesn't exist or you don't "
+//				  << "have permission to read it." << endl;
+//			exit(-1);
+//		}  // End of ' if( !dcbFileListStream ) '
+//
+//		string dcbFile;
+//
+//			// Here is just a dcb file, we only read one month's dcb data.
+//		while( dcbFileListStream >> dcbFile )
+//		{
+//			try
+//			{
+//				dcbStore.open(dcbFile);
+//			}
+//			catch( FileMissingException e )
+//			{
+//				cerr << "Warning! The DCB file '"<< dcbFile <<"' does not exist!"
+//					  << endl;
+//				exit(-1);
+//			}
+//		}  // End of ' while( dcbFileListStream >> dcbFile ) '
+//
+//			// Close dcblist file
+//		dcbFileListStream.close();
+//
+//	}  // End of ' if(dcbFileListOpt.getCount() ) '
 
 		////////////////////////////////////////////////
 	   // Now, Let's read MSC data
@@ -730,86 +716,195 @@ void upd::preprocessing()
 		// Declare a "MSCStore" object to handle msc file 
 	MSCStore mscStore;
 
+	try
+	{
+		mscStore.loadFile( mscFileName );
+	}
+	catch( gpstk::FFStreamError& e)
+	{
+         // If file doesn't exist, issue a warning
+      cerr << e << endl;
+      cerr << "MSC file '" << mscFileName << "' Format is not supported!!!"
+           << "stop." << endl;
+      exit(-1);
+	}
+   catch (FileMissingException& e)
+   {
+         // If file doesn't exist, issue a warning
+      cerr << "MSC file '" << mscFileName << "' doesn't exist or you don't "
+           << "have permission to read it. Skipping it." << endl;
+      exit(-1);
+   }
+
+		//***********************************************
+		// Now, Let's read the rinex files 
+	   //***********************************************
+	vector<string> rnxFileListVec;
+
+		// Now read rinex file from 'rnxFileList'
+	ifstream rnxFileListStream;
+
+		// Open rnxFileList file
+	rnxFileListStream.open( rnxFileListName.c_str(), ios::in);
+	if( !rnxFileListStream )
+	{
+		cerr << "rinex file List Name'" << rnxFileListName << "' doesn't exist or you don't "
+			  << "have permission to read it. Skipping it." << endl;
+		exit(-1);
+	}
+
+	string rnxFile;
+	while( rnxFileListStream >> rnxFile )
+	{
+		rnxFileListVec.push_back( rnxFile );
+	}  // End of ' while( rnxFileListStream >> rnxFile ) '
+
+		// Close file
+	rnxFileListStream.close();
+
+	if( rnxFileListVec.size() == 0 )
+	{
+		cerr << rnxFileListName  << "rnxFileList is empty!! "
+			  << endl;
+		exit(-1);
+	}  // End of ' if( rnxFileListVec.size() == 0 ) '
+
+		/////////////////////////////
+		//  Now, Let's define some classes that are common to
+		//  all stations.
+		/////////////////////////////
+
+      // Object to compute tidal effects
+   SolidTides solid;
+
+
+      // Configure ocean loading model
+   OceanLoading ocean;
+   ocean.setFilename( confReader.getValue( "oceanLoadingFile", "DEFAULT" ) );
+
       // Object to model pole tides
    PoleTides pole(eopStore);
 
-   //// ^^^^ Tides handling ^^^^
+	/////////////////////////////
+	//  Now, Let's start preprocessing for ALL stations
+	/////////////////////////////
 
+	vector<string>::const_iterator rnxit = rnxFileListVec.begin();
+	while( rnxit != rnxFileListVec.end() )
+	{
+			// Read rinex file from the vector
+		string rnxFile = (*rnxit);
 
-   //// Starting preprocessing for ALL stations ////
+			// Create input observation file stream
+		RinexObsStream rin;
+		rin.exceptions( ios::failbit ); // Enable exceptions, please notice this!!
 
-      // We will read each section name, which is equivalent to station name
-      // Station names will be read in alphabetical order
-   string station;
-   while ( (station = confReader.getEachSection()) != "" )
-   {
-
-         // We will skip 'DEFAULT' section because we are waiting for
-         // a specific section for each receiver. However, if data is
-         // missing we will look for it in 'DEFAULT' (see how we use method
-         // 'setFallback2Default()' of 'ConfDataReader' object in 'spinUp()'
-      if( station == "DEFAULT" )
-      {
-         continue;
-      }
-
-
-         // Show a message indicating that we are starting with this station
-      cout << "Starting processing for station: '" << station << "'." << endl;
-
-
-         // Create input observation file stream
-      RinexObsStream rin;
-
-         // Enable exceptions
-      rin.exceptions(ios::failbit);
-
-         // Try to open Rinex observations file
-      try
-      {
-
-            // Open Rinex observations file in read-only mode
-         rin.open( confReader("rinexObsFile", station), std::ios::in );
-
-      }
-      catch(...)
-      {
-
-         cerr << "Problem opening file '"
-              << confReader.getValue("rinexObsFile", station)
+			// Try to rinex observation file
+		try
+		{
+			rin.open( rnxFile, std::ios::in );
+		}
+		catch( ... )
+		{
+			cerr << "Problem opening file '"
+              << rnxFile
               << "'." << endl;
 
          cerr << "Maybe it doesn't exist or you don't have "
               << "proper read permissions."
               << endl;
 
-         cerr << "Skipping receiver '" << station << "'."
+         cerr << "Skipping rinex file '" << rnxFile << "'."
               << endl;
 
             // Close current Rinex observation stream
          rin.close();
 
+            // Index for rinex file iterator.
+         ++rnxit;
+
+         continue;
+		}  // End of 'try-catch block'
+		
+			//////////////////////
+			// Let's read the header firstly!!!!
+			//////////////////////
+		RinexObsHeader roh;
+		try
+		{
+			rin >> roh;
+		}
+		catch( FFStreamError& e )
+		{
+			cerr << "Problem in reading file '"
+              << rnxFile
+              << "'." << endl;
+         cerr << "Skipping receiver '" << rnxFile << "'."
+              << endl;
+
+            // Close current Rinex observation stream
+         rin.close();
+
+           // Index for rinex file iterator.
+         ++rnxit;
+
          continue;
 
-      }  // End of 'try-catch' block
+		}  // End of 'try-catch' block
+
+			// The Year/DayOfYear/SecOfYear format, you MUST set the timeSystem at
+			// the same time.
+		YDSTime yds( confReader.getValueAsInt( "year" ),
+						 confReader.getValueAsInt( "dayOfYear" ),
+						 confReader.getValueAsDouble( "secOfDay" ), TimeSystem::GPS );
+		
+		CommonTime initialTime( yds.convertToCommonTime() );
+
+			// Get the station name for current rinex file
+		string station = roh.markerName;
+
+			// Show a message indicating that we are starting with this station
+		cout << "Starting processing for station: '" << station << "'." << endl;
+
+			// MSC data for this station
+		initialTime.setTimeSystem(TimeSystem::Unknown);
+		MSCData mscData;
+		try
+		{
+			mscData = mscStore.findMSC( station, initialTime );
+		}
+		catch( InvalidRequest& ie)
+		{
+			cerr << "The station " << station << " isn't included in MSC file."
+				  << endl;
+
+			// Warning:you must increase the iterator to process the next file,
+			// or else the program will repeat opening this file
+			continue;
+		}  // End of 'try-catch' block
 
 
-
-         // Load station nominal position
-      double xn(confReader.fetchListValueAsDouble("nominalPosition",station));
-      double yn(confReader.fetchListValueAsDouble("nominalPosition",station));
-      double zn(confReader.fetchListValueAsDouble("nominalPosition",station));
-         // The former peculiar code is possible because each time we
-         // call a 'fetchListValue' method, it takes out the first element
-         // and deletes it from the given variable list.
-
-      Position nominalPos( xn, yn, zn );
-
+			// Now, Let's change the system to GPS 
+		initialTime.setTimeSystem(TimeSystem::GPS);
+		
+			// Read inital position from given msc data store.
+      Position nominalPos( mscData.coordinates );
 
          // Create a 'ProcessingList' object where we'll store
          // the processing objects in order
       ProcessingList pList;
 
+//			//>This object will correct the P1C1 dcb for some receivers
+//			//>defined in the 'recTypeFile'.
+//		CC2NONCC cc2noncc( dcbStore );
+//
+//			// Read the receiver type file.
+//		cc2noncc.loadRecTypeFile( confReader.getValue("recTypeFile") );
+//		cc2noncc.setRecType(roh.recType);
+//		cc2noncc.setCopyC1ToP1(true);
+//
+//			// Add to processing list
+//		pList.push_back(cc2noncc);
 
          // This object will check that all required observables are present
       RequireObservables requireObs;
@@ -817,8 +912,6 @@ void upd::preprocessing()
       requireObs.addRequiredType(TypeID::L1);
       requireObs.addRequiredType(TypeID::L2);
 
-         // Add 'requireObs' to processing list
-      pList.push_back(requireObs);
 
          // This object will check that code observations are within
          // reasonable limits
@@ -839,9 +932,8 @@ void upd::preprocessing()
          pObsFilter.addFilteredType(TypeID::P1);
       }
       
-         // Add 'requireObs' to processing list (it is the first)
+         // Add 'requireObs' to processing list
       pList.push_back(requireObs);
-
 
          // IMPORTANT NOTE:
          // It turns out that some receivers don't correct their clocks
@@ -933,31 +1025,32 @@ void upd::preprocessing()
       pList.push_back(grDelay);       // Add to processing list
 
 
+
          // Vector from monument to antenna ARP [UEN], in meters
-      double uARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
-      double eARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
-      double nARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
-      Triple offsetARP( uARP, eARP, nARP );
+//      double uARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
+//      double eARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
+//      double nARP(confReader.fetchListValueAsDouble( "offsetARP", station ) );
+      Triple offsetARP( roh.antennaOffset );
 
 
          // Declare some antenna-related variables
-      Triple offsetL1( 0.0, 0.0, 0.0 ), offsetL2( 0.0, 0.0, 0.0 );
+//      Triple offsetL1( 0.0, 0.0, 0.0 ), offsetL2( 0.0, 0.0, 0.0 );
       AntexReader antexReader;
       Antenna receiverAntenna;
 
          // Check if we want to use Antex information
-      bool useantex( confReader.getValueAsBoolean( "useAntex", station ) );
+      bool useantex( confReader.getValueAsBoolean( "useAntex" ) );
       string antennaModel;
       if( useantex )
       {
             // Read antex file
-         antexFile = confReader.getValue( "antexFile", station );
+         antexFile = confReader.getValue( "antexFile" );
 
             // Feed Antex reader object with Antex file
          antexReader.open( antexFile );
 
             // Antenna model 
-         antennaModel = confReader.getValue( "antennaModel", station );
+         antennaModel = roh.antType; 
 
             // Get receiver antenna parameters
             // Warning: If no corrections are not found for one specific 
@@ -992,45 +1085,33 @@ void upd::preprocessing()
       corr.setMonument( offsetARP );
 
          // Check if we want to use Antex patterns
-      bool usepatterns(confReader.getValueAsBoolean("usePCPatterns", station ));
+      bool usepatterns(confReader.getValueAsBoolean("usePCPatterns"));
       if( useantex && usepatterns )
       {
          corr.setAntenna( receiverAntenna );
 
             // Should we use elevation/azimuth patterns or just elevation?
-         corr.setUseAzimuth(confReader.getValueAsBoolean("useAzim", station));
+         corr.setUseAzimuth(confReader.getValueAsBoolean("useAzim"));
       }
-      else
-      {
-            // Fill vector from antenna ARP to L1 phase center [UEN], in meters
-         offsetL1[0] = confReader.fetchListValueAsDouble("offsetL1", station);
-         offsetL1[1] = confReader.fetchListValueAsDouble("offsetL1", station);
-         offsetL1[2] = confReader.fetchListValueAsDouble("offsetL1", station);
 
-            // Vector from antenna ARP to L2 phase center [UEN], in meters
-         offsetL2[0] = confReader.fetchListValueAsDouble("offsetL2", station);
-         offsetL2[1] = confReader.fetchListValueAsDouble("offsetL2", station);
-         offsetL2[2] = confReader.fetchListValueAsDouble("offsetL2", station);
-
-         corr.setL1pc( offsetL1 );
-         corr.setL2pc( offsetL2 );
-
-      }
       pList.push_back(corr);       // Add to processing list
 
 
          // Object to compute wind-up effect
       ComputeWindUp windup( SP3EphList,
-                            nominalPos,
-                            confReader.getValue( "satDataFile", station ) );
+                            nominalPos );
+                           // confReader.getValue( "satDataFile", station ) );
+		if( useantex )
+		{
+			windup.setAntexReader( antexReader );
+		}
       pList.push_back(windup);       // Add to processing list
 
 
 
          // Declare a NeillTropModel object, setting its parameters
-      NeillTropModel neillTM( nominalPos.getAltitude(),
-                              nominalPos.getGeodeticLatitude(),
-                              confReader.getValueAsInt("dayOfYear", station) );
+      NeillTropModel neillTM( nominalPos,
+                              initialTime );
 
          // We will need this value later for printing
       double drytropo( neillTM.dry_zenith_delay() );
@@ -1103,7 +1184,7 @@ void upd::preprocessing()
          // Like in the "filterCode" case, the "filterPC" option allows you to
          // deactivate the "SimpleFilter" object that filters out PC, in case
          // you need to.
-      bool filterPC( confReader.getValueAsBoolean( "filterPC", station ) );
+      bool filterPC( confReader.getValueAsBoolean( "filterPC" ) );
 
          // Check if we are going to use this "SimpleFilter" object or not
       if( filterPC )
@@ -1148,7 +1229,7 @@ void upd::preprocessing()
       
 
          // Get if we want results in ECEF or NEU reference system
-      bool isNEU( confReader.getValueAsBoolean( "USENEU", station ) );
+      bool isNEU( confReader.getValueAsBoolean( "USENEU" ) );
 
          // Declare ppp solver
       SolverPPP pppSolver(isNEU);
@@ -1177,17 +1258,6 @@ void upd::preprocessing()
       smoothMW.setWindowSize( windowSize );
       pList.push_back(smoothMW);
 
-
-         //>Now, decimating the data
-
-         // The Year/DayOfYear/SecOfYear format, you MUST set the timeSystem at 
-         // the same time.
-      YDSTime yds( confReader.getValueAsInt("year", station),
-                   confReader.getValueAsInt("dayOfYear", station),
-                   confReader.getValueAsDouble("secOfDay", station), TimeSystem::GPS );
-      CommonTime initialTime( yds.convertToCommonTime() );
-
-
          // Object to decimate data
       Decimate decimateData(
               confReader.getValueAsDouble( "decimationInterval", station ),
@@ -1201,10 +1271,10 @@ void upd::preprocessing()
       gnssRinex gRin;
 
          // Prepare for printing
-      int precision( confReader.getValueAsInt( "precision", station ) );
+      int precision( confReader.getValueAsInt( "precision") );
 
          // Let's check if we are going to print the model
-      bool printmodel( confReader.getValueAsBoolean( "printModel", station ) );
+      bool printmodel( confReader.getValueAsBoolean( "printModel") );
 
       string modelName;
       ofstream modelfile;
@@ -1212,7 +1282,7 @@ void upd::preprocessing()
          // Prepare for model printing
       if( printmodel )
       {
-         modelName = confReader.getValue( "modelFile", station );
+         modelName = rnxFile + ".model";
          modelfile.open( modelName.c_str(), ios::out );
       }
 
@@ -1275,7 +1345,8 @@ void upd::preprocessing()
          if ( printmodel )
          {
             printModel( modelfile,
-                        gRin );
+                        gRin,
+								precision );
 
          }
 
@@ -1313,23 +1384,23 @@ void upd::preprocessing()
 
 
          // Let's check what kind of station this is
-      if( confReader.getValueAsBoolean( "masterStation", station ) )
+      if( confReader.getValue( "masterStation" ) ==  station )
       {
          master = source;
       }
       else
       {
-         if( confReader.getValueAsBoolean( "roverStation", station ) )
+         if( confReader.getValue( "roverStation" ) ==  station )
          {
             rover = source;
          }
          else
          {
-            if( confReader.getValueAsBoolean( "refStation", station ) )
-            {
+            //if( confReader.getValueAsBoolean( "refStation" ) )
+            //{
                   // Note that 'reference' stations form a set
-               refStationSet.insert( source );
-            }
+            refStationSet.insert( source );
+            //}
          }
       }
 
@@ -1354,8 +1425,9 @@ void upd::preprocessing()
       }
       cerr << "'." << endl;
 
-
-   }  // End of 'while ( (station = confReader.getEachSection()) != "" )'
+			// Go to process the next station
+		++rnxit;
+	}  // End of ' while( rnxit != rnxFileListVec.end() ) '
 
 
    //// End of preprocessing for ALL stations ////
