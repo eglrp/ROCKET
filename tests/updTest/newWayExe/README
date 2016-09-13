@@ -1,0 +1,18 @@
+###========================
+### Read Me First !!!
+###========================
+
+# Before you execute the script "upd.sh", please make sure that the current
+# directory contains following files:
+# 1. station.list
+
+# You will notice that "upd.sh" employs other scripts as below:
+# 1. get_rnx.sh 
+#
+#    Execution of this script will externally produce "$project.rnxlist"
+#
+# 2. get_eph.sh
+#	  
+#	  Execution of this script will externally produce files related to type.list 
+#	  , for example: "$project.ephlist", "$project.clklist", "$project.erplist",
+#	  , "$project.atxlist", "$project.ssclist" 
