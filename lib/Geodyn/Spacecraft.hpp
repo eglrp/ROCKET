@@ -170,6 +170,21 @@ namespace gpstk
       }
 
 
+         /// Set isEclipsed of Spacecraft
+      inline Spacecraft& setIsEclipsed(const bool& b)
+      {
+          isEclipsed = b;
+
+          return (*this);
+      }
+
+         /// Get isEclipsed of Spacecraft
+      inline bool getIsEclipsed() const
+      {
+          return isEclipsed;
+      }
+
+
          /// Get partial derivatives of currrent position to initial position
       inline Vector<double> dR_dR0() const
       {
@@ -259,6 +274,9 @@ namespace gpstk
 
          /// Number of parameters
       int numOfParam;
+
+         /// Is eclipsed
+      bool isEclipsed;
 
          /// Partial derivatives
       Vector<double> dr_dr0;  // 3*3

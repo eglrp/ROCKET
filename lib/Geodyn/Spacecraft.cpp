@@ -44,6 +44,9 @@ namespace gpstk
       r.resize(3,0.0);
       v.resize(3,0.0);
 
+      // reset isEclipsed
+      isEclipsed = false;
+
       // reset partial derivatives
       dr_dr0.resize(9,0.0);
       dr_dv0.resize(9,0.0);

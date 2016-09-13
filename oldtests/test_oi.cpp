@@ -100,12 +100,20 @@ int main(void)
 
 
    // Initial time
-   CivilTime cv0(2015,1,1,12,0,0.0, TimeSystem::GPS);
+   int year = confReader.getValueAsInt("YEAR", "DEFAULT");
+   int mon  = confReader.getValueAsInt("MON", "DEFAULT");
+   int day  = confReader.getValueAsInt("DAY", "DEFAULT");
+   int hour = confReader.getValueAsInt("HOUR", "DEFAULT");
+   int min  = confReader.getValueAsInt("MIN", "DEFAULT");
+   double sec  = confReader.getValueAsDouble("SEC", "DEFAULT");
+
+   CivilTime cv0(year,mon,day,hour,min,sec, TimeSystem::GPS);
    CommonTime gps0( cv0.convertToCommonTime() );
    CommonTime utc0( refSys.GPS2UTC(gps0) );
 
    // Satellite ID
-   SatID sat(1, SatID::systemGPS);
+   int prn = confReader.getValueAsInt("PRN", "DEFAULT");
+   SatID sat(prn, SatID::systemGPS);
 
    // IGS SP3 File
    SP3EphemerisStore sp3Eph;
@@ -154,17 +162,18 @@ int main(void)
    v0_icrs = t2c * v0_itrs + dt2c * r0_itrs;
 
    // p0
-   int np(9);
+   int np = confReader.getValueAsInt("SRP_NUM", "DEFAULT");
    Vector<double> p0(np,0.0);
-   p0(0) = 1.0;   // D0
-   p0(1) = 0.0;   // Dc
-   p0(2) = 0.0;   // Ds
-   p0(3) = 0.0;   // Y0
-   p0(4) = 0.0;   // Yc
-   p0(5) = 0.0;   // Ys
-   p0(6) = 0.0;   // B0
-   p0(7) = 0.0;   // Bc
-   p0(8) = 0.0;   // Bs
+
+   p0(0) = confReader.getValueAsDouble("D0", "DEFAULT");
+   p0(1) = confReader.getValueAsDouble("DC", "DEFAULT");
+   p0(2) = confReader.getValueAsDouble("DS", "DEFAULT");
+   p0(3) = confReader.getValueAsDouble("Y0", "DEFAULT");
+   p0(4) = confReader.getValueAsDouble("YC", "DEFAULT");
+   p0(5) = confReader.getValueAsDouble("YS", "DEFAULT");
+   p0(6) = confReader.getValueAsDouble("B0", "DEFAULT");
+   p0(7) = confReader.getValueAsDouble("BC", "DEFAULT");
+   p0(8) = confReader.getValueAsDouble("BS", "DEFAULT");
 
 
    // SatData File
@@ -265,36 +274,38 @@ int main(void)
 
 
    // Sun gravitation
-   SunGravitation sg;
-   sg.setSolarSystem(solSys);
-   sg.setReferenceSystem(refSys);
+   SunGravitation sun;
+   sun.setSolarSystem(solSys);
+   sun.setReferenceSystem(refSys);
 
    // Moon gravitation
-   MoonGravitation mg;
-   mg.setSolarSystem(solSys);
-   mg.setReferenceSystem(refSys);
+   MoonGravitation moon;
+   moon.setSolarSystem(solSys);
+   moon.setReferenceSystem(refSys);
 
    // Solar pressure
-   CODEPressure sp;
-   sp.setReferenceSystem(refSys);
-   sp.setSolarSystem(solSys);
-   sp.setSRPCoeff(p0);
+   CODEPressure srp;
+   srp.setReferenceSystem(refSys);
+   srp.setSolarSystem(solSys);
+   srp.setSRPCoeff(p0);
 
    // Relativity effect
-   RelativityEffect re;
+   RelativityEffect rel;
 
    // GNSS orbit
    GNSSOrbit gnss;
+
    gnss.setRefEpoch(utc0);
    gnss.setSpacecraft(sc);
+
    gnss.setEarthGravitation(egm);
-   gnss.setSunGravitation(sg);
-   gnss.setMoonGravitation(mg);
-   gnss.setSolarPressure(sp);
-   gnss.setRelativityEffect(re);
+   gnss.setSunGravitation(sun);
+   gnss.setMoonGravitation(moon);
+   gnss.setSolarPressure(srp);
+   gnss.setRelativityEffect(rel);
 
 
-   // RungeKuttaFehlberg integrator
+   // RKF integrator
    RungeKuttaFehlberg rkf;
 
    double stepSize = confReader.getValueAsDouble("STEPSIZE", "DEFAULT");
@@ -302,115 +313,152 @@ int main(void)
 
    double length = confReader.getValueAsDouble("LENGTH", "DEFAULT");
 
-   //
-   double t0(0.0);
+   // Debug
+   int debug = confReader.getValueAsInt("DEBUG", "DEFAULT");
 
-   int total(int(length*3600.0/900.0));
+   double t = 0.0;
 
-//   Matrix<double> b(3,total, 0.0);
-//   Matrix<double> l(3,total, 0.0);
-
-   for(int i=0; i<=total; ++i)
+   while(true)
    {
       // Current time
-      CommonTime gps = gps0 + t0;
+      CommonTime gps = gps0 + t;
       CommonTime utc = refSys.GPS2UTC(gps);
 
       // Transformation matrix
-      Matrix<double>  c2t( refSys.C2TMatrix(utc) );
+      Matrix<double> c2t( refSys.C2TMatrix(utc) );
+      Matrix<double> t2c( transpose(c2t) );
 
       // SP3 position
       Vector<double> r_sp3(3,0.0);
+
       try
       {
-         r_sp3 = transpose(c2t) * sp3Eph.getXvt(sat,gps).x.toVector();
+         r_sp3 = t2c * sp3Eph.getXvt(sat,gps).x.toVector();
       }
       catch(...)
       {
-         cerr << "Get sp3 position error." << endl;
+         cerr << "Get SP3 position error." << endl;
          continue;
       }
 
       // OI position
-      Vector<double> y(sc.getStateVector());
+      Vector<double> y = sc.getStateVector();
+
+      Vector<double> rv_oi(6,0.0);
+      rv_oi(0) = y(0);
+      rv_oi(1) = y(1);
+      rv_oi(2) = y(2);
+      rv_oi(3) = y(3);
+      rv_oi(4) = y(4);
+      rv_oi(5) = y(5);
 
       // Difference position
       Vector<double> r_diff(3,0.0);
-      r_diff(0) = y(0) - r_sp3(0);
-      r_diff(1) = y(1) - r_sp3(1);
-      r_diff(2) = y(2) - r_sp3(2);
-
+      r_diff(0) = rv_oi(0) - r_sp3(0);
+      r_diff(1) = rv_oi(1) - r_sp3(1);
+      r_diff(2) = rv_oi(2) - r_sp3(2);
 
       // Output
       cout << fixed;
-
-      cout << CivilTime(gps) << endl;
-
       cout << setprecision(9);
-/*
-      for(int j=0; j<3; ++j)
+
+      if(0 == debug)
       {
-          cout << setw(20) << r_diff(j) << ' ';
+          cout << setw(20) << YDSTime(gps).sod/3600.0;
+          // dr
+          cout << setw(20) << r_diff(0)
+               << setw(20) << r_diff(1)
+               << setw(20) << r_diff(2)
+               << endl;
+      }
 
-          cout << setw(20) << y( 6+j*3) << ' '
-               << setw(20) << y( 7+j*3) << ' '
-               << setw(20) << y( 8+j*3) << ' '
-               << setw(20) << y(15+j*3) << ' '
-               << setw(20) << y(16+j*3) << ' '
-               << setw(20) << y(17+j*3) << ' ';
+      if(1 == debug)
+      {
+          // t
+          cout << CivilTime(gps) << endl;
 
-          for(int k=0; k<np; ++k)
+          // r_oi
+          cout << setw(20) << rv_oi(0)
+               << setw(20) << rv_oi(1)
+               << setw(20) << rv_oi(2)
+               << endl;
+
+          // r_sp3
+          cout << setw(20) << r_sp3(0)
+               << setw(20) << r_sp3(1)
+               << setw(20) << r_sp3(2)
+               << endl;
+
+          // dr
+          cout << setw(20) << r_diff(0)
+               << setw(20) << r_diff(1)
+               << setw(20) << r_diff(2)
+               << endl;
+
+          // dr/dr0
+          for(int j=0; j<3; ++j)
           {
-              cout << setw(20) << y(24+j*np+k) << ' ';
+              cout << setw(20) << y( 6+j)
+                   << setw(20) << y( 9+j)
+                   << setw(20) << y(12+j)
+                   << endl;
+          }
+
+          // dr/dv0
+          for(int j=0; j<3; ++j)
+          {
+              cout << setw(20) << y(15+j)
+                   << setw(20) << y(18+j)
+                   << setw(20) << y(21+j)
+                   << endl;
+          }
+
+          // dr/dp0
+          for(int j=0; j<np; ++j)
+          {
+              cout << setw(20) << y(24+0*np+j)
+                   << setw(20) << y(24+1*np+j)
+                   << setw(20) << y(24+2*np+j)
+                   << endl;
           }
 
           cout << endl;
+
       }
-*/
 
-      // r
-      cout << setw(20) << y(0) << ' '
-           << setw(20) << y(1) << ' '
-           << setw(20) << y(2) << endl;
-      cout << setw(20) << r_sp3(0) << ' '
-           << setw(20) << r_sp3(1) << ' '
-           << setw(20) << r_sp3(2) << endl;
-
-      // dr
-      cout << setw(20) << r_diff(0) << ' '
-           << setw(20) << r_diff(1) << ' '
-           << setw(20) << r_diff(2) << endl;
-
-      // dr/dr0
-      for(int j=0; j<3; ++j)
+      if(2 == debug)
       {
-          cout << setw(20) << y( 6+j) << ' '
-               << setw(20) << y( 9+j) << ' '
-               << setw(20) << y(12+j) << endl;
-      }
+          for(int j=0; j<3; ++j)
+          {
+              // dr
+              cout << setw(20) << r_diff(j);
 
-      // dr/dv0
-      for(int j=0; j<3; ++j)
-      {
-          cout << setw(20) << y(15+j) << ' '
-               << setw(20) << y(18+j) << ' '
-               << setw(20) << y(21+j) << endl;
-      }
+              // dr/dr0
+              for(int k=0; k<3; ++k)
+              {
+                  cout << setw(20) << y( 6+3*j+k);
+              }
 
-      // dr/dp0
-      for(int j=0; j<np; ++j)
-      {
-          cout << setw(20) << y(24+0*np+j) << ' '
-               << setw(20) << y(24+1*np+j) << ' '
-               << setw(20) << y(24+2*np+j) << endl;
-      }
+              // dr/dv0
+              for(int k=0; k<3; ++k)
+              {
+                  cout << setw(20) << y(15+3*j+k);
+              }
 
-      cout << endl;
+              // dr/dp0
+              for(int k=0; k<np; ++k)
+              {
+                  cout << setw(20) << y(24+3*j+k);
+              }
+
+              cout << endl;
+          }
+
+      }
 
 
       // Integration
-      rkf.integrateTo(t0, y, &gnss, t0+900.0);
-
+      rkf.integrateTo(t, y, &gnss, t+900.0);
 
       // Update spacecraft
       sc.setCurrentTime(utc);
@@ -421,10 +469,9 @@ int main(void)
       // Update gnss orbit
       gnss.setSpacecraft(sc);
 
-//      if(i > 5) break;
+      if(t >= length*3600) break;
 
    }
-
 
    return 0;
 }

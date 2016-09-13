@@ -27,6 +27,12 @@ target_link_libraries(test_oi rocket)
 add_executable(test_jpl test_jpl.cpp)
 target_link_libraries(test_jpl rocket)
 
-#add_executable(test_thirdbody test_thirdbody.cpp)
-#target_link_libraries(test_thirdbody rocket)
+add_executable(test_thirdbody test_thirdbody.cpp)
+target_link_libraries(test_thirdbody rocket)
+
+add_executable(test_legendre test_legendre.cpp)
+target_link_libraries(test_legendre rocket)
+
+add_executable(test_tides test_tides.cpp)
+target_link_libraries(test_tides rocket)
 

@@ -1,7 +1,7 @@
 /*************************************************************************
 	> File Name: test_rkf.cpp
-	> Author: 
-	> Mail: 
+	> Author:
+	> Mail:
 	> Created Time: 2016年07月24日 星期日 15时04分51秒
  ************************************************************************/
 
@@ -49,7 +49,7 @@ int main(void)
    RungeKuttaFehlberg rkf;
    rkf.setStepSize(0.25);
 
-   for(int i=0; i<10; ++i)
+   for(int i=0; i<100000; ++i)
    {
       rkf.integrateTo(t0, y0, &eom, t0+h);
 

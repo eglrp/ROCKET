@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -23,13 +23,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -71,7 +71,7 @@ namespace gpstk
     *
     * Ref: E.Fantino, J Geod(2009), Methods of harmonic synthesis for global
     * geopotential models and their first-, second- and third-order gradients
-    */ 
+    */
    void legendre(const int&      deg,
                  const double&   lat,
                  Vector<double>& leg0,
@@ -109,7 +109,7 @@ namespace gpstk
 //      cout << "sin(lat): " << slat << endl;
 //      cout << "cos(lat): " << clat << endl;
 //      cout << "tan(lat): " << tlat << endl;
-      
+
       // first, the leg0
       for(int n=1; n<=deg; ++n)
       {
@@ -126,7 +126,7 @@ namespace gpstk
                // P(n,m) = fn * cos(lat) * P(n-1,m-1)
                leg0( indexTranslator(n,m)-1 ) = fn*clat*leg0( indexTranslator(n-1,m-1)-1 );
             }
-            // zonals and tesserals 
+            // zonals and tesserals
             else
             {
                double gnm = std::sqrt((2*n+1.0)*(2*n-1.0)/(n+m)/(n-m));
@@ -192,7 +192,7 @@ namespace gpstk
          for(int m=0; m<=n; ++m)
          {
             leg2( indexTranslator(n,m)-1 ) = (m*m/clat/clat-n*(n+1))*leg0( indexTranslator(n,m)-1 )
-                                 + tlat*leg1( indexTranslator(n,m)-1 ); 
+                                 + tlat*leg1( indexTranslator(n,m)-1 );
          }
       }
 

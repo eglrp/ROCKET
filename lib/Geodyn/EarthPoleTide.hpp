@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
 //
@@ -25,7 +25,7 @@
 /**
 * @file EarthPoleTide.hpp
 * Class to do Earth Pole Tide correction.
-* 
+*
 */
 
 #ifndef GPSTK_EARTH_POLE_TIDE_HPP
@@ -73,10 +73,10 @@ namespace gpstk
 
          /** Pole tide to normalized earth potential coefficients
           *
-          * @param utc     time in UTC
-          * @param CS      normalized earth potential coefficients
+          * @param utc      time in UTC
+          * @param dCS      normalized earth potential coefficients
           */
-      void getPoleTide(CommonTime utc, Matrix<double>& CS);
+      void getPoleTide(CommonTime utc, Matrix<double>& dCS);
 
    protected:
 

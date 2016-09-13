@@ -1,13 +1,18 @@
+/*
+ * Test for Solar Radiation Pressure.
+ *
+ */
+
 #include <iostream>
 
 #include "ConfDataReader.hpp"
 
 #include "ReferenceSystem.hpp"
-
 #include "SolarSystem.hpp"
 
 #include "CODEPressure.hpp"
 
+#include "SP3EphemerisStore.hpp"
 #include "SatDataReader.hpp"
 
 #include "Epoch.hpp"
@@ -19,7 +24,7 @@ using namespace gpstk;
 
 int main(void)
 {
-   // Configuration Data
+   // Conf File
    ConfDataReader confReader;
 
    try
@@ -28,18 +33,17 @@ int main(void)
    }
    catch(...)
    {
-      cerr << "Configuration File Open Error." << endl;
+      cerr << "Conf File Open Error." << endl;
 
       return 1;
    }
 
-   // EOP Data
+   // EOP File
    EOPDataStore2 eopDataStore;
-
-   string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
 
    try
    {
+      string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
       eopDataStore.loadIERSFile(eopFile);
    }
    catch(...)
@@ -49,17 +53,17 @@ int main(void)
       return 1;
    }
 
+   // LeapSec File
    LeapSecStore leapSecStore;
-
-   string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
 
    try
    {
+      string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
       leapSecStore.loadFile(lsFile);
    }
    catch(...)
    {
-      cerr << "LS File Load Error." << endl;
+      cerr << "LeapSec File Load Error." << endl;
 
       return 1;
    }
@@ -72,94 +76,189 @@ int main(void)
    // Solar System
    SolarSystem solSys;
 
-   string ephFile = confReader.getValue("JPLEPHFile", "DEFAULT");
-
    try
    {
+      string ephFile = confReader.getValue("JPLEPHFile", "DEFAULT");
       solSys.initializeWithBinaryFile(ephFile);
    }
    catch(...)
    {
-      cerr << "EPH File Load Error." << endl;
+      cerr << "SolarSystem Initialize Error." << endl;
 
       return 1;
    }
 
-   // sat ID
-   SatID sat(1, SatID::systemGPS);
-
-   // time
-   CivilTime ct(2015,1,1,12,1,15.0, TimeSystem::GPS);
-   CommonTime gps( ct.convertToCommonTime() );
-   CommonTime utc( refSys.GPS2UTC(gps) );
-
-   // initial conditions
-   Vector<double> r0(3,0.0);
-   r0[0] =  17253.546071e3;
-   r0[1] = -19971.1571565e3;
-   r0[2] =   3645.8013286e3;
-
-   Vector<double> v0(3,0.0);
-   v0[0] =  1.9732093e3;
-   v0[1] =  1.1233114e3;
-   v0[2] = -3.1241455e3;
-
-   Vector<double> p0(9,0.0);
-   p0[0] = 0.999989506;
-   p0[1] = 0.015272206;
-   p0[2] = 0.000216184;
-
-   p0[3] = -0.000367154;
-   p0[4] = -0.000701573;
-   p0[5] =  0.000985358;
-
-   p0[6] = -0.003625165;
-   p0[7] =  0.009091403;
-   p0[8] = -0.001752761;
-
-   EarthBody rb;
-
-   // Sat Data
-   SatDataReader satReader;
-
-   string satFile = confReader.getValue("SatDataFile", "DEFAULT");
+   // Sat ID
+   int prn;
 
    try
    {
-      satReader.open(satFile);
+       prn = confReader.getValueAsInt("PRN", "DEFAULT");
    }
    catch(...)
    {
-      cerr << "Sat File Load Error." << endl;
+       cerr << "Get Sat PRN Error." << endl;
+
+       return 1;
+   }
+
+   SatID sat(prn, SatID::systemGPS);
+
+   // Initial Time
+   int year, mon, day, hour, min;
+   double sec;
+
+   try
+   {
+       year = confReader.getValueAsInt("YEAR", "DEFAULT");
+       mon  = confReader.getValueAsInt("MON", "DEFAULT");
+       day  = confReader.getValueAsInt("DAY", "DEFAULT");
+       hour = confReader.getValueAsInt("HOUR", "DEFAULT");
+       min  = confReader.getValueAsInt("MIN", "DEFAULT");
+       sec = confReader.getValueAsDouble("SEC", "DEFAULT");
+   }
+   catch(...)
+   {
+       cerr << "Get Initial Time Error." << endl;
+
+       return 1;
+   }
+
+   CivilTime ct0(year,mon,day,hour,min,sec, TimeSystem::GPS);
+   CommonTime gps0( ct0.convertToCommonTime() );
+   CommonTime utc0( refSys.GPS2UTC(gps0) );
+
+   // SP3 File
+   SP3EphemerisStore sp3Eph;
+   sp3Eph.rejectBadPositions(true);
+   sp3Eph.setPosGapInterval(900+1);
+   sp3Eph.setPosMaxInterval(9*900+1);
+
+   string sp3File;
+   while(true)
+   {
+       try
+       {
+           sp3File = confReader.fetchListValue("IGSSP3LIST", "DEFAULT");
+
+           if(sp3File == "") break;
+
+           sp3Eph.loadFile(sp3File);
+       }
+       catch(...)
+       {
+           cerr << "IGS SP3 File Load Error." << endl;
+
+           return 1;
+       }
+   }
+
+   // Earth Body
+   EarthBody eb;
+
+   // SatData File
+   SatDataReader satReader;
+
+   try
+   {
+      string satDataFile = confReader.getValue("SATDATAFILE", "DEFAULT");
+      satReader.open(satDataFile);
+   }
+   catch(...)
+   {
+      cerr << "SatData File Load Error." << endl;
 
       return 1;
    }
 
    // Spacecraft
    Spacecraft sc;
-   sc.setPosition(r0);
-   sc.setVelocity(v0);
    sc.setNumOfParam(9);
-
    sc.setSatID(sat);
-   sc.setCurrentTime(utc);
-   sc.setBlockType( satReader.getBlock(sat,utc) );
-   sc.setMass( satReader.getMass(sat,utc) );
 
    // CODE SRP
+   Vector<double> p0(9,0.0);
+   p0(0) = 1.0;
+
    CODEPressure code;
    code.setReferenceSystem(refSys);
    code.setSolarSystem(solSys);
    code.setSRPCoeff(p0);
 
-   code.doCompute(utc, rb, sc);
 
-   Vector<double> f_srp(3,0.0);
-   f_srp = code.getAcceleration();
+   double length;
 
-   cout << setprecision(8);
-   cout << "CODE SRP: " << endl
-        << f_srp << endl;
+   try
+   {
+       length = confReader.getValueAsDouble("LENGTH", "DEFAULT");
+   }
+   catch(...)
+   {
+       cerr << "Get Time Length Error." << endl;
 
-    return 0;
+       return 1;
+   }
+
+   cout << fixed << setprecision(12);
+
+   int i = 0;
+
+   while(true)
+   {
+       // Current Time
+       CommonTime gps( gps0 + i*900.0 );
+       CommonTime utc( refSys.GPS2UTC(gps) );
+
+       // Current Position and Velocity in ITRS
+       Vector<double> r_itrs, v_itrs;
+
+       try
+       {
+           r_itrs = sp3Eph.getXvt(sat, gps).x.toVector();
+           v_itrs = sp3Eph.getXvt(sat, gps).v.toVector();
+       }
+       catch(...)
+       {
+           cerr << "Get Position and Velocity from SP3 File Error." << endl;
+
+           return 1;
+       }
+
+       // Current Transform Matrix
+       Matrix<double> c2t ( refSys.C2TMatrix(utc) );
+       Matrix<double> t2c ( transpose(c2t) );
+
+       // Current Transform Matrix Time Dot
+       Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
+       Matrix<double> dt2c( transpose(dc2t) );
+
+       // Current Position and Velocity in ICRS
+       Vector<double> r_icrs = t2c * r_itrs;
+       Vector<double> v_icrs = t2c * v_itrs + dt2c * r_itrs;
+
+       // Current Spacecraft
+       sc.setPosition(r_icrs);
+       sc.setVelocity(v_icrs);
+       sc.setCurrentTime(utc);
+       sc.setBlockType(satReader.getBlock(sat,utc));
+       sc.setMass(satReader.getMass(sat,utc));
+
+       // Current Acceleration
+       code.doCompute(utc, eb, sc);
+
+       Vector<double> a_icrs( code.getAcceleration() );
+
+       cout << setw(18) << i*900.0/3600.0;
+       cout << setw(18) << a_icrs(0)
+            << setw(18) << a_icrs(1)
+            << setw(18) << a_icrs(2)
+            << setw(18) << sc.getIsEclipsed()
+            << endl;
+
+       i++;
+
+       if(i >= length*3600/900) break;
+   }
+
+   return 0;
 }

@@ -57,33 +57,27 @@ namespace gpstk
       sc.setStateVector(y);
 
       // current acceleration and partial derivatives
-      peg->doCompute(utc,eb,sc);
-      psg->doCompute(utc,eb,sc);
-      pmg->doCompute(utc,eb,sc);
-      psp->doCompute(utc,eb,sc);
-      pre->doCompute(utc,eb,sc);
-/*
-      cout << "earth: " << peg->getAcceleration() << endl;
-      cout << "sun:   " << psg->getAcceleration() << endl;
-      cout << "moon:  " << pmg->getAcceleration() << endl;
-      cout << "srp:   " << psp->getAcceleration() << endl;
-      cout << "rel:   " << pre->getAcceleration() << endl;
-*/
+      pEGM->doCompute(utc,eb,sc);
+      pSun->doCompute(utc,eb,sc);
+      pMoon->doCompute(utc,eb,sc);
+      pSRP->doCompute(utc,eb,sc);
+      pRel->doCompute(utc,eb,sc);
+
       // a
       Vector<double> a(3,0.0);
-      a = peg->getAcceleration()
-        + psg->getAcceleration()
-        + pmg->getAcceleration()
-        + psp->getAcceleration()
-        + pre->getAcceleration();
+      a = pEGM->getAcceleration()
+        + pSun->getAcceleration()
+        + pMoon->getAcceleration()
+        + pSRP->getAcceleration()
+        + pRel->getAcceleration();
 
       // da/dr
       Matrix<double> da_dr(3,3,0.0);
-      da_dr = peg->dA_dR()
-            + psg->dA_dR()
-            + pmg->dA_dR()
-            + psp->dA_dR()
-            + pre->dA_dR();
+      da_dr = pEGM->dA_dR()
+            + pSun->dA_dR()
+            + pMoon->dA_dR()
+            + pSRP->dA_dR()
+            + pRel->dA_dR();
 
       // da/dv
       Matrix<double> da_dv(3,3,0.0);
@@ -93,7 +87,7 @@ namespace gpstk
 
       Matrix<double> da_dp(3,np,0.0);
 
-      da_dp = psp->dA_dSRP();
+      da_dp = pSRP->dA_dSRP();
 
 
       /* Transition Matrix, (6+np, 6+np)

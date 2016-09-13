@@ -55,10 +55,14 @@ namespace gpstk
    public:
 
          /// Default constructor
-      GNSSOrbit() {}
+      GNSSOrbit()
+      {
+      }
 
          /// Default destructor
-      virtual ~GNSSOrbit() {}
+      virtual ~GNSSOrbit()
+      {
+      }
 
          /// Set reference epoch
       inline GNSSOrbit& setRefEpoch(CommonTime utc)
@@ -90,9 +94,9 @@ namespace gpstk
 
 
          /// Set earth gravitation
-      inline GNSSOrbit& setEarthGravitation(EarthGravitation& eg)
+      inline GNSSOrbit& setEarthGravitation(EarthGravitation& egm)
       {
-         peg = &eg;
+         pEGM = &egm;
 
          return (*this);
       }
@@ -100,14 +104,14 @@ namespace gpstk
          /// Get earth gravitation
       inline EarthGravitation* getEarthGravitation() const
       {
-         return peg;
+         return pEGM;
       }
 
 
          /// Set sun gravitation
-      inline GNSSOrbit& setSunGravitation(SunGravitation& sg)
+      inline GNSSOrbit& setSunGravitation(SunGravitation& sun)
       {
-         psg = &sg;
+         pSun = &sun;
 
          return (*this);
       }
@@ -115,14 +119,14 @@ namespace gpstk
          /// Get sun gravitation
       inline SunGravitation* getSunGravitation() const
       {
-         return psg;
+         return pSun;
       }
 
 
          /// Set moon gravitation
-      inline GNSSOrbit& setMoonGravitation(MoonGravitation& mg)
+      inline GNSSOrbit& setMoonGravitation(MoonGravitation& moon)
       {
-         pmg = &mg;
+         pMoon = &moon;
 
          return (*this);
       }
@@ -130,14 +134,14 @@ namespace gpstk
          /// Get moon gravitation
       inline MoonGravitation* getMoonGravitation() const
       {
-         return pmg;
+         return pMoon;
       }
 
 
          /// Set solar pressure
-      inline GNSSOrbit& setSolarPressure(SolarPressure& sp)
+      inline GNSSOrbit& setSolarPressure(SolarPressure& srp)
       {
-         psp = &sp;
+         pSRP = &srp;
 
          return (*this);
       }
@@ -145,14 +149,14 @@ namespace gpstk
          /// Get solar pressure
       inline SolarPressure* getSolarPressure() const
       {
-         return psp;
+         return pSRP;
       }
 
 
          /// Set relativity effect
-      inline GNSSOrbit& setRelativityEffect(RelativityEffect& re)
+      inline GNSSOrbit& setRelativityEffect(RelativityEffect& rel)
       {
-         pre = &re;
+         pRel = &rel;
 
          return (*this);
       }
@@ -160,7 +164,7 @@ namespace gpstk
          /// Get relativity effect
       inline RelativityEffect* getRelativityEffect() const
       {
-         return pre;
+         return pRel;
       }
 
 
@@ -180,18 +184,18 @@ namespace gpstk
       EarthBody eb;
 
          /// Force models
-      EarthGravitation* peg;
-      SunGravitation*   psg;
-      MoonGravitation*  pmg;
-      SolarPressure*    psp;
-      RelativityEffect* pre;
+      EarthGravitation* pEGM;
+      SunGravitation*   pSun;
+      MoonGravitation*  pMoon;
+      SolarPressure*    pSRP;
+      RelativityEffect* pRel;
 
       // Force models configuration
-      bool bGeoEarth;
-      bool bGeoSun;
-      bool bGeoMoon;
+      bool bEGM;
+      bool bSun;
+      bool bMoon;
       bool bSRP;
-      bool bREL;
+      bool bRel;
 
    }; // End of class 'GNSSOrbit'
 

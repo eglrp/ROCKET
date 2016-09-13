@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  kaifa Kuang - Wuhan University . 2016
 //
@@ -24,20 +24,20 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
 
 /**
 * @file EarthOceanTide.cpp
-* 
+*
 */
 
 #include "EarthOceanTide.hpp"
@@ -129,11 +129,14 @@ namespace gpstk
       /* Ocean pole tide to normalized earth potential coefficients
        *
        * @param utc     time in UTC
-       * @param dC      Correction to normalized coefficients dC
-       * @param dS      Correction to normalized coefficients dS
+       * @param dCS     correction to normalized earth potential coefficients
        */
-   void EarthOceanTide::getOceanTide(CommonTime utc, Matrix<double>& CS)
+   void EarthOceanTide::getOceanTide(CommonTime utc, Matrix<double>& dCS)
    {
+      // resize dCS
+      int size = indexTranslator(desiredDegree,desiredOrder) - 1;
+      dCS.resize(size,2, 0.0);
+
       // TT
       CommonTime tt( pRefSys->UTC2TT(utc) );
 
@@ -147,7 +150,7 @@ namespace gpstk
       pRefSys->DoodsonArguments(ut1, tt, BETA, FNUT);
 
 
-      vector<OceanTideData>::iterator itr;
+      vector<OceanTideData>::const_iterator itr;
       for(itr=otDataVec.begin(); itr!=otDataVec.end(); ++itr)
       {
          // theta_f
@@ -169,11 +172,11 @@ namespace gpstk
          double DelSm = (*itr).DelSm;
 
          // corrections
-         CS(id, 0) += (DelCp + DelCm)*ctf + (DelSp + DelSm)*stf;
-         CS(id, 1) += (DelSp - DelSm)*ctf - (DelCp - DelCm)*stf;
+         dCS(id, 0) += (DelCp + DelCm)*ctf + (DelSp + DelSm)*stf;
+         dCS(id, 1) += (DelSp - DelSm)*ctf - (DelCp - DelCm)*stf;
 
       }  // End of 'for()'
-      
+
    }	// End of method 'EarthOceanTide::getOceanTide()'
 
 
