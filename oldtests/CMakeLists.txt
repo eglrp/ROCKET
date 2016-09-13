@@ -36,3 +36,6 @@ target_link_libraries(test_legendre rocket)
 add_executable(test_tides test_tides.cpp)
 target_link_libraries(test_tides rocket)
 
+add_executable(test_gds_serialize test_gds_serialize.cpp)
+target_link_libraries(test_gds_serialize rocket)
+

@@ -489,7 +489,14 @@ namespace gpstk
 
       TypeID(ValueType vt)
          : type(vt) {};
-
+      
+		
+		 /** Explicit constructor
+		  *	@param name   string name for ValueType, first search tString and 	
+		  *				  then search mapUserTypeID, if it is not found, create
+		  *				  it.
+		  */
+	  TypeID(std::string name);
 
          /// Equality requires all fields to be the same
       virtual bool operator==(const TypeID& right) const
