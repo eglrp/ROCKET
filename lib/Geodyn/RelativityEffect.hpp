@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
@@ -49,7 +49,7 @@ namespace gpstk
 
          /// Default destructor
       virtual ~RelativityEffect() {}
-      
+
          /** Compute acceleration (and related partial derivatives).
           * @param utc     time in UTC
           * @param rb      earth body

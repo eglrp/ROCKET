@@ -1,5 +1,5 @@
 /*
- * Test for Solar Radiation Pressure.
+ * Test for Relativity Effect.
  *
  */
 
@@ -7,10 +7,7 @@
 
 #include "ConfDataReader.hpp"
 
-#include "ReferenceSystem.hpp"
-#include "SolarSystem.hpp"
-
-#include "CODEPressure.hpp"
+#include "RelativityEffect.hpp"
 
 #include "SP3EphemerisStore.hpp"
 #include "SatDataReader.hpp"
@@ -38,12 +35,13 @@ int main(void)
       return 1;
    }
 
+
    // EOP File
    EOPDataStore2 eopDataStore;
 
    try
    {
-      string eopFile = confReader.getValue("IERSEOPFile", "DEFAULT");
+      string eopFile = confReader.getValue("IERSEOPFILE", "DEFAULT");
       eopDataStore.loadIERSFile(eopFile);
    }
    catch(...)
@@ -58,7 +56,7 @@ int main(void)
 
    try
    {
-      string lsFile = confReader.getValue("IERSLSFile", "DEFAULT");
+      string lsFile  = confReader.getValue("IERSLSFILE", "DEFAULT");
       leapSecStore.loadFile(lsFile);
    }
    catch(...)
@@ -73,24 +71,8 @@ int main(void)
    refSys.setEOPDataStore(eopDataStore);
    refSys.setLeapSecStore(leapSecStore);
 
-   // Solar System
-   SolarSystem solSys;
-
-   try
-   {
-      string ephFile = confReader.getValue("JPLEPHFile", "DEFAULT");
-      solSys.initializeWithBinaryFile(ephFile);
-   }
-   catch(...)
-   {
-      cerr << "SolarSystem Initialize Error." << endl;
-
-      return 1;
-   }
-
    // Sat ID
    int prn;
-
    try
    {
        prn = confReader.getValueAsInt("PRN", "DEFAULT");
@@ -115,7 +97,7 @@ int main(void)
        day  = confReader.getValueAsInt("DAY", "DEFAULT");
        hour = confReader.getValueAsInt("HOUR", "DEFAULT");
        min  = confReader.getValueAsInt("MIN", "DEFAULT");
-       sec = confReader.getValueAsDouble("SEC", "DEFAULT");
+       sec  = confReader.getValueAsDouble("SEC", "DEFAULT");
    }
    catch(...)
    {
@@ -137,20 +119,20 @@ int main(void)
    string sp3File;
    while(true)
    {
-       try
-       {
-           sp3File = confReader.fetchListValue("IGSSP3LIST", "DEFAULT");
+      try
+      {
+         sp3File = confReader.fetchListValue("IGSSP3LIST", "DEFAULT");
 
-           if(sp3File == "") break;
+         if(sp3File == "") break;
 
-           sp3Eph.loadFile(sp3File);
-       }
-       catch(...)
-       {
-           cerr << "IGS SP3 File Load Error." << endl;
+         sp3Eph.loadFile(sp3File);
+      }
+      catch(...)
+      {
+         cerr << "IGS SP3 File Load Error." << endl;
 
-           return 1;
-       }
+         return 1;
+      }
    }
 
    // Earth Body
@@ -161,29 +143,23 @@ int main(void)
 
    try
    {
-      string satDataFile = confReader.getValue("SATDATAFILE", "DEFAULT");
-      satReader.open(satDataFile);
+       string satDataFile = confReader.getValue("SatDataFile", "DEFAULT");
+       satReader.open(satDataFile);
    }
    catch(...)
    {
-      cerr << "SatData File Load Error." << endl;
+       cerr << "SatData File Open Error." << endl;
 
-      return 1;
+       return 1;
    }
 
    // Spacecraft
    Spacecraft sc;
-   sc.setNumOfParam(9);
+   sc.setNumOfParam(0);
    sc.setSatID(sat);
 
-   // CODE SRP
-   Vector<double> p0(9,0.0);
-   p0(0) = 1.0;
-
-   CODEPressure code;
-   code.setReferenceSystem(refSys);
-   code.setSolarSystem(solSys);
-   code.setSRPCoeff(p0);
+   // Relativity Effect
+   RelativityEffect rel;
 
 
    double length;
@@ -225,7 +201,7 @@ int main(void)
        }
 
        // Current Transform Matrix
-       Matrix<double> c2t ( refSys.C2TMatrix(utc) );
+       Matrix<double> c2t ( refSys.C2TMatrix(utc)  );
        Matrix<double> t2c ( transpose(c2t) );
 
        // Current Transform Matrix Time Dot
@@ -244,15 +220,14 @@ int main(void)
        sc.setMass(satReader.getMass(sat,utc));
 
        // Current Acceleration
-       code.doCompute(utc, eb, sc);
-
-       Vector<double> a_icrs( code.getAcceleration() );
+       rel.doCompute(utc, eb, sc);
+       Vector<double> a_icrs( rel.getAcceleration() );
+       Vector<double> a_itrs( c2t * a_icrs );
 
        cout << setw(20) << i*900.0/3600.0;
        cout << setw(20) << a_icrs(0)
             << setw(20) << a_icrs(1)
             << setw(20) << a_icrs(2)
-            << setw(20) << sc.getIsEclipsed()
             << endl;
 
        i++;

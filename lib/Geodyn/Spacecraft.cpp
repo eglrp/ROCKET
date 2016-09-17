@@ -27,8 +27,9 @@
 */
 
 #include "Spacecraft.hpp"
+#include "GNSSconstants.hpp"
 #include "Exception.hpp"
-#include "CivilTime.hpp"
+#include "Epoch.hpp"
 
 
 using namespace std;
@@ -280,6 +281,76 @@ namespace gpstk
       return sMat;
 
    }  // End of method 'Spacecraft::getSensitivityMatrix()'
+
+
+
+   // Convert position and velocity from kepler orbit elements
+   Spacecraft& Spacecraft::convertFromKepler(const Vector<double>& kepler)
+   {
+
+       return (*this);
+
+   }    // End of method 'Spacecraft::convertFromKepler()'
+
+
+   // Convert position and velocity to kepler orbit elements
+   Vector<double> Spacecraft::convertToKepler() const
+   {
+       // z-axis vector
+       Vector<double> zv(3,0.0);
+       zv(2) = 1.0;
+
+       // angular momentum
+       Vector<double> h = cross(r,v);
+
+       // eccentricity vector
+       Vector<double> ev = cross(v,h) - r/norm(r);
+
+       // eccentricity
+       double e = norm(ev);
+
+       // semimajor axis
+       double a = -GM_EARTH/(norm(v)-2*GM_EARTH/norm(r));
+
+       Vector<double> vnu = cross(zv,h);
+       Vector<double> eta = cross(h,vnu);
+
+       // argument of perifocus
+       double omega = std::atan2(dot(ev,eta)/norm(h), dot(ev,vnu));
+
+       // right ascension of the ascending node if in a celestial system
+       // longitude of the ascending node if in an earth-fixed coordinate system
+       double OMEGA = std::atan2(vnu(1), vnu(0));
+
+       if(omega < 0.0) omega += TWO_PI;
+       if(OMEGA < 0.0) OMEGA += TWO_PI;
+
+       // orbital inclination
+       double i = std::atan2(std::sqrt(h(0)*h(0)+h(1)*h(1)), h(2));
+       if(i < 0.0) i+= TWO_PI;
+
+       // eccentric anomaly
+       double E0 = std::atan2(dot(r,v)/std::sqrt(GM_EARTH*a),
+                              norm(r)*norm(v)/GM_EARTH-1.0);
+
+       // mean anomaly
+       double M0 = E0 - e*std::sin(E0);
+       if(M0 < 0.0) M0 += TWO_PI;
+
+       // kepler orbit elements
+       Vector<double> kepler(6,0.0);
+       kepler(0) = a;
+       kepler(1) = e;
+       kepler(2) = i;
+       kepler(3) = OMEGA;
+       kepler(4) = omega;
+       kepler(5) = M0;
+
+       // return
+       return kepler;
+
+   }    // End of method 'Spacecraft::convertToKepler()'
+
 
 
       /** Stream output for Spacecraft objects. Typically used for debugging.

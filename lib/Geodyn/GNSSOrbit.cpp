@@ -58,24 +58,28 @@ namespace gpstk
 
       // current acceleration and partial derivatives
       pEGM->doCompute(utc,eb,sc);
-      pSun->doCompute(utc,eb,sc);
-      pMoon->doCompute(utc,eb,sc);
+//      pSun->doCompute(utc,eb,sc);
+//      pMoon->doCompute(utc,eb,sc);
+      pThird->doCompute(utc, eb, sc);
       pSRP->doCompute(utc,eb,sc);
       pRel->doCompute(utc,eb,sc);
 
       // a
       Vector<double> a(3,0.0);
       a = pEGM->getAcceleration()
-        + pSun->getAcceleration()
-        + pMoon->getAcceleration()
+//        + pSun->getAcceleration()
+//        + pMoon->getAcceleration()
+
+        + pThird->getAcceleration()
         + pSRP->getAcceleration()
         + pRel->getAcceleration();
 
       // da/dr
       Matrix<double> da_dr(3,3,0.0);
       da_dr = pEGM->dA_dR()
-            + pSun->dA_dR()
-            + pMoon->dA_dR()
+//            + pSun->dA_dR()
+//            + pMoon->dA_dR()
+            + pThird->dA_dR()
             + pSRP->dA_dR()
             + pRel->dA_dR();
 

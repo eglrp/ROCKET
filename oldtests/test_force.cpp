@@ -296,7 +296,7 @@ int main(void)
 
    cout << CivilTime(gps0) << endl;
 
-   cout << setprecision(12);
+   cout << setprecision(15);
 
    cout << r0_icrs << endl;
 

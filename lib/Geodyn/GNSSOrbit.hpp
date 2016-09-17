@@ -37,6 +37,7 @@
 #include "EGM08GravityModel.hpp"
 #include "MoonGravitation.hpp"
 #include "SunGravitation.hpp"
+#include "ThirdBody.hpp"
 #include "CODEPressure.hpp"
 #include "RelativityEffect.hpp"
 
@@ -138,6 +139,21 @@ namespace gpstk
       }
 
 
+         /// Set ThirdBody
+      inline GNSSOrbit& setThirdBody(ThirdBody& third)
+      {
+          pThird = &third;
+
+          return (*this);
+      }
+
+         /// Get ThirdBody
+      inline ThirdBody* getThirdBody() const
+      {
+          return pThird;
+      }
+
+
          /// Set solar pressure
       inline GNSSOrbit& setSolarPressure(SolarPressure& srp)
       {
@@ -187,6 +203,7 @@ namespace gpstk
       EarthGravitation* pEGM;
       SunGravitation*   pSun;
       MoonGravitation*  pMoon;
+      ThirdBody*        pThird;
       SolarPressure*    pSRP;
       RelativityEffect* pRel;
 
@@ -194,6 +211,7 @@ namespace gpstk
       bool bEGM;
       bool bSun;
       bool bMoon;
+      bool bThird;
       bool bSRP;
       bool bRel;
 

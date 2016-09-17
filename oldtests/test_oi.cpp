@@ -13,8 +13,7 @@
 
 #include "EGM08GravityModel.hpp"
 
-#include "MoonGravitation.hpp"
-#include "SunGravitation.hpp"
+#include "ThirdBody.hpp"
 
 #include "CODEPressure.hpp"
 
@@ -100,19 +99,43 @@ int main(void)
 
 
    // Initial time
-   int year = confReader.getValueAsInt("YEAR", "DEFAULT");
-   int mon  = confReader.getValueAsInt("MON", "DEFAULT");
-   int day  = confReader.getValueAsInt("DAY", "DEFAULT");
-   int hour = confReader.getValueAsInt("HOUR", "DEFAULT");
-   int min  = confReader.getValueAsInt("MIN", "DEFAULT");
-   double sec  = confReader.getValueAsDouble("SEC", "DEFAULT");
+   int year, mon, day, hour, min;
+   double sec;
+
+   try
+   {
+       year = confReader.getValueAsInt("YEAR", "DEFAULT");
+       mon  = confReader.getValueAsInt("MON", "DEFAULT");
+       day  = confReader.getValueAsInt("DAY", "DEFAULT");
+       hour = confReader.getValueAsInt("HOUR", "DEFAULT");
+       min  = confReader.getValueAsInt("MIN", "DEFAULT");
+       sec  = confReader.getValueAsDouble("SEC", "DEFAULT");
+   }
+   catch(...)
+   {
+       cerr << "Get Initial Time Error." << endl;
+
+       return 1;
+   }
 
    CivilTime cv0(year,mon,day,hour,min,sec, TimeSystem::GPS);
    CommonTime gps0( cv0.convertToCommonTime() );
    CommonTime utc0( refSys.GPS2UTC(gps0) );
 
    // Satellite ID
-   int prn = confReader.getValueAsInt("PRN", "DEFAULT");
+   int prn;
+
+   try
+   {
+       prn = confReader.getValueAsInt("PRN", "DEFAULT");
+   }
+   catch(...)
+   {
+       cerr << "Get Sat PRN Error." << endl;
+
+       return 1;
+   }
+
    SatID sat(prn, SatID::systemGPS);
 
    // IGS SP3 File
@@ -165,15 +188,24 @@ int main(void)
    int np = confReader.getValueAsInt("SRP_NUM", "DEFAULT");
    Vector<double> p0(np,0.0);
 
-   p0(0) = confReader.getValueAsDouble("D0", "DEFAULT");
-   p0(1) = confReader.getValueAsDouble("DC", "DEFAULT");
-   p0(2) = confReader.getValueAsDouble("DS", "DEFAULT");
-   p0(3) = confReader.getValueAsDouble("Y0", "DEFAULT");
-   p0(4) = confReader.getValueAsDouble("YC", "DEFAULT");
-   p0(5) = confReader.getValueAsDouble("YS", "DEFAULT");
-   p0(6) = confReader.getValueAsDouble("B0", "DEFAULT");
-   p0(7) = confReader.getValueAsDouble("BC", "DEFAULT");
-   p0(8) = confReader.getValueAsDouble("BS", "DEFAULT");
+   try
+   {
+       p0(0) = confReader.getValueAsDouble("D0", "DEFAULT");
+       p0(1) = confReader.getValueAsDouble("DC", "DEFAULT");
+       p0(2) = confReader.getValueAsDouble("DS", "DEFAULT");
+       p0(3) = confReader.getValueAsDouble("Y0", "DEFAULT");
+       p0(4) = confReader.getValueAsDouble("YC", "DEFAULT");
+       p0(5) = confReader.getValueAsDouble("YS", "DEFAULT");
+       p0(6) = confReader.getValueAsDouble("B0", "DEFAULT");
+       p0(7) = confReader.getValueAsDouble("BC", "DEFAULT");
+       p0(8) = confReader.getValueAsDouble("BS", "DEFAULT");
+   }
+   catch(...)
+   {
+       cerr << "Get SRP Parameters Error." << endl;
+
+       return 1;
+   }
 
 
    // SatData File
@@ -272,16 +304,12 @@ int main(void)
       egm.setEarthPoleTide(poleTide);
    }
 
-
-   // Sun gravitation
-   SunGravitation sun;
-   sun.setSolarSystem(solSys);
-   sun.setReferenceSystem(refSys);
-
-   // Moon gravitation
-   MoonGravitation moon;
-   moon.setSolarSystem(solSys);
-   moon.setReferenceSystem(refSys);
+   // ThirdBody
+   ThirdBody third;
+   third.setSolarSystem(solSys);
+   third.setReferenceSystem(refSys);
+   third.enableSun();
+   third.enableMoon();
 
    // Solar pressure
    CODEPressure srp;
@@ -299,8 +327,7 @@ int main(void)
    gnss.setSpacecraft(sc);
 
    gnss.setEarthGravitation(egm);
-   gnss.setSunGravitation(sun);
-   gnss.setMoonGravitation(moon);
+   gnss.setThirdBody(third);
    gnss.setSolarPressure(srp);
    gnss.setRelativityEffect(rel);
 

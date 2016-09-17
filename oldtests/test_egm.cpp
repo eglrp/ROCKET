@@ -13,7 +13,7 @@
 #include "SP3EphemerisStore.hpp"
 #include "SatDataReader.hpp"
 
-#include "CivilTime.hpp"
+#include "Epoch.hpp"
 
 
 using namespace std;
@@ -312,7 +312,7 @@ int main(void)
        return 1;
    }
 
-   cout << fixed << setprecision(12);
+   cout << fixed << setprecision(15);
 
    int i = 0;
 
@@ -361,10 +361,10 @@ int main(void)
        Vector<double> a_icrs( egm.getAcceleration() );
        Vector<double> a_itrs( c2t * a_icrs );
 
-       cout << setw(18) << i*900.0/3600.0;
-       cout << setw(18) << a_icrs(0)
-            << setw(18) << a_icrs(1)
-            << setw(18) << a_icrs(2)
+       cout << setw(20) << i*900.0/3600.0;
+       cout << setw(20) << a_icrs(0)
+            << setw(20) << a_icrs(1)
+            << setw(20) << a_icrs(2)
             << endl;
 
        i++;

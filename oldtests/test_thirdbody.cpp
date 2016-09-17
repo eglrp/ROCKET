@@ -1,5 +1,5 @@
 /*
- * Test for Third-Body Gravitation.
+ * Test for ThirdBody Gravitation.
  *
  */
 
@@ -9,6 +9,7 @@
 
 #include "SunGravitation.hpp"
 #include "MoonGravitation.hpp"
+#include "ThirdBody.hpp"
 
 #include "SP3EphemerisStore.hpp"
 #include "SatDataReader.hpp"
@@ -216,6 +217,14 @@ int main(void)
     moon.setReferenceSystem(refSys);
 
 
+    // ThirdBody
+    ThirdBody third;
+    third.setSolarSystem(solSys);
+    third.setReferenceSystem(refSys);
+    third.enableSun();
+    third.enableMoon();
+
+
     double length;
 
     try
@@ -229,7 +238,7 @@ int main(void)
         return 1;
     }
 
-    cout << fixed << setprecision(12);
+    cout << fixed << setprecision(15);
 
     int i = 0;
 
@@ -276,17 +285,17 @@ int main(void)
         // Current Acceleration
         sun.doCompute(utc, eb, sc);
         moon.doCompute(utc, eb, sc);
+        third.doCompute(utc, eb, sc);
 
         Vector<double> a_sun  = sun.getAcceleration();
         Vector<double> a_moon = moon.getAcceleration();
+        Vector<double> a_third = third.getAcceleration();
+        Vector<double> a_diff = a_third - a_sun - a_moon;
 
-        cout << setw(18) << YDSTime(gps).sod/3600;
-        cout << setw(18) << a_sun(0)
-             << setw(18) << a_sun(1)
-             << setw(18) << a_sun(2)
-             << setw(18) << a_moon(0)
-             << setw(18) << a_moon(1)
-             << setw(18) << a_moon(2)
+        cout << setw(20) << i*900.0/3600.0;
+        cout << setw(20) << a_diff(0)
+             << setw(20) << a_diff(1)
+             << setw(20) << a_diff(2)
              << endl;
 
         i++;

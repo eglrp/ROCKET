@@ -160,7 +160,7 @@ int main(void)
    // Cnm and Snm
    Matrix<double> CS(20,20,0.0);
 
-   cout << fixed << setprecision(12);
+   cout << fixed << setprecision(15);
 
    int i = 0;
 
