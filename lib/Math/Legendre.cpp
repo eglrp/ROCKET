@@ -51,8 +51,8 @@ namespace gpstk
     * For example:
     * (n,m) = (0,0) <===> return = 1
     *         (1,0) <===>          2
-    *         (1,0) <===>          3
-    *         (1,0) <===>          4
+    *         (1,1) <===>          3
+    *         (2,0) <===>          4
     *          ...  <===>         ...
     */
    int indexTranslator(int n, int m)

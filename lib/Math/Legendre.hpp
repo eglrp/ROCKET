@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -23,13 +23,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -56,8 +56,8 @@ namespace gpstk
     * For example:
     * (n,m) = (0,0) <===> return = 1
     *         (1,0) <===>          2
-    *         (1,0) <===>          3
-    *         (1,0) <===>          4
+    *         (1,1) <===>          3
+    *         (2,0) <===>          4
     *          ...  <===>         ...
     */
    int indexTranslator(int n, int m);
@@ -73,7 +73,7 @@ namespace gpstk
     *
     * Ref: E.Fantino, J Geod(2009), Methods of harmonic synthesis for global
     * geopotential models and their first-, second- and third-order gradients
-    */ 
+    */
    void legendre(const int&      deg,
                  const double&   lat,
                  Vector<double>& leg0,
