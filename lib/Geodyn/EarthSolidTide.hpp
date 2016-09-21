@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
 //
@@ -89,10 +89,10 @@ namespace gpstk
 
          /** Solid tide to normalized earth potential coefficients
           *
-          * @param utc     time in UTC
-          * @param CS      normalized earth potential coefficients
+          * @param utc      time in UTC
+          * @param dCS      correction to normalized earth potential coefficients
           */
-      void getSolidTide(CommonTime utc, Matrix<double>& CS);
+      void getSolidTide(CommonTime utc, Matrix<double>& dCS);
 
 
    protected:
@@ -107,7 +107,7 @@ namespace gpstk
 
          /// Solar System
       SolarSystem* pSolSys;
-      
+
    }; // End of class 'EarthSolidTide'
 
       // @}

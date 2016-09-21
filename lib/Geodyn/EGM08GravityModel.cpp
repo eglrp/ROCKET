@@ -149,6 +149,8 @@ namespace gpstk
        */
    void EGM08GravityModel::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
+      // make a copy of gmData.normalizedCS
+      Matrix<double> CS( gmData.normalizedCS );
 
       // compute time in years since J2000
       double MJD_UTC = MJD(utc).mjd;
@@ -163,8 +165,8 @@ namespace gpstk
       const double value[3] =
       {
          // the value of C20, C30 and C40 at 2000.0
-         -0.48416514e-3, 0.9571612e-6, 0.5399659e-6
-//         -0.48416531e-3, 0.9571612e-6, 0.5399659e-6
+//         -0.48416514e-3, 0.9571612e-6, 0.5399659e-6
+         -0.48416531e-3, 0.9571612e-6, 0.5399659e-6
 //         -0.48416948e-3
       };
       const double rate[3]  =
@@ -199,9 +201,9 @@ namespace gpstk
       // The instantaneous value of coefficients Cn0 to be used when computing
       // orbits
       // see IERS Conventions 2010, Equations 6.4
-      gmData.normalizedCS(id20, 0) = value[0] + ly1*rate[0];  // C20
-      gmData.normalizedCS(id30, 0) = value[1] + ly1*rate[1];  // C30
-      gmData.normalizedCS(id40, 0) = value[2] + ly1*rate[2];  // C40
+      CS(id20, 0) = value[0] + ly1*rate[0];  // C20
+      CS(id30, 0) = value[1] + ly1*rate[1];  // C30
+      CS(id40, 0) = value[2] + ly1*rate[2];  // C40
 
 
       // Coefficients of the IERS (2010) mean pole model
@@ -242,37 +244,53 @@ namespace gpstk
       // C21 = +sqrt(3)*xpm*C20 - xpm*C22 + ypm*S22
       // S21 = -sqrt(3)*ypm*C20 - ypm*C22 - xpm*S22
       //
-      double C20 = gmData.normalizedCS(id20, 0);
-      double C22 = gmData.normalizedCS(id22, 0);
-      double S22 = gmData.normalizedCS(id22, 1);
+      CS(id21,0) = +std::sqrt(3.0)*xpm*CS(id20,0) - xpm*CS(id22,0) + ypm*CS(id22,1);
+      CS(id21,1) = -std::sqrt(3.0)*ypm*CS(id20,0) - ypm*CS(id22,0) - xpm*CS(id22,1);
 
-      double C21 = +std::sqrt(3.0)*xpm*C20 - xpm*C22 + ypm*S22;
-      double S21 = -std::sqrt(3.0)*ypm*C20 - ypm*C22 - xpm*S22;
-
-//      cout << "EGM08" << endl;
-//      cout << gmData.normalizedCS(id21, 0) << ' '
-//           << gmData.normalizedCS(id21, 1) << endl;
-//      cout << C21 << ' ' << S21 << endl;
-
-      gmData.normalizedCS(id21, 0) = C21;   // C21
-      gmData.normalizedCS(id21, 1) = S21;   // S21
 
       // solid tide
       if(pSolidTide != NULL)
       {
-         pSolidTide->getSolidTide(utc, gmData.normalizedCS);
+         Matrix<double> dCS;
+         pSolidTide->getSolidTide(utc, dCS);
+
+         int row = dCS.rows();
+
+         for(int i=0; i<row; ++i)
+         {
+             CS(i,0) += dCS(i,0);
+             CS(i,1) += dCS(i,1);
+         }
       }
 
       // ocean tide
       if(pOceanTide != NULL)
       {
-         pOceanTide->getOceanTide(utc, gmData.normalizedCS);
+         Matrix<double> dCS;
+         pOceanTide->getOceanTide(utc, dCS);
+
+         int row = dCS.rows();
+
+         for(int i=0; i<row; ++i)
+         {
+             CS(i,0) += dCS(i,0);
+             CS(i,1) += dCS(i,1);
+         }
       }
 
       // pole tide
-      if(pOceanTide != NULL)
+      if(pPoleTide != NULL)
       {
-         pPoleTide->getPoleTide(utc, gmData.normalizedCS);
+         Matrix<double> dCS;
+         pPoleTide->getPoleTide(utc, dCS);
+
+         int row = dCS.rows();
+
+         for(int i=0; i<row; ++i)
+         {
+             CS(i,0) += dCS(i,0);
+             CS(i,1) += dCS(i,1);
+         }
       }
 
 
@@ -290,8 +308,9 @@ namespace gpstk
       double rz = r_sat_itrs(2);
 
       // geocentric distance, latitude and longitude of satellite
+      // the latitude is in [-PI/2,+PI/2], the longitude is in [-PI,+PI]
       double rho = norm(r_sat_itrs);
-      double lat = std::atan2( rz, std::sqrt(rx*rx + ry*ry) );
+      double lat = std::atan( rz / std::sqrt(rx*rx + ry*ry) );
       double lon = std::atan2( ry, rx );
 
       // sine and cosine of geocentric latitude and longitude of satellite
@@ -373,7 +392,7 @@ namespace gpstk
       /////////////////////////////////////////////////////////////////////////
       Vector<double> c_rll(3,0.0), s_rll(3,0.0);
       Matrix<double> df_itrs_dcs;
-      if(satGravimetry)
+      if(satGravimetry)     // need to do: consider Sn0 = 0 !!!
       {
          int size = indexTranslator(desiredDegree,desiredOrder) - 1;
          df_itrs_dcs.resize(3,size*2,0.0);
@@ -410,8 +429,8 @@ namespace gpstk
 //                 << setw(20) << P2 << endl;
 
             // Cnm, Snm
-            double Cnm = gmData.normalizedCS(idnm, 0);
-            double Snm = gmData.normalizedCS(idnm, 1);
+            double Cnm = CS(idnm, 0);
+            double Snm = CS(idnm, 1);
 //            cout << setw(20) << Cnm << " "
 //                 << setw(20) << Snm << endl;
 
@@ -467,6 +486,10 @@ namespace gpstk
 
 
       // gravitation acceleration in ICRS
+//      a(0) = b(0,0)*f_rll(0) + b(1,0)*f_rll(1) + b(2,0)*f_rll(2);
+//      a(1) = b(0,1)*f_rll(0) + b(1,1)*f_rll(1) + b(2,1)*f_rll(2);
+//      a(2) = b(0,2)*f_rll(0) + b(1,2)*f_rll(1) + b(2,2)*f_rll(2);
+//      a = T2C * a;
       a = T2C * transpose(b) * f_rll;
 
 

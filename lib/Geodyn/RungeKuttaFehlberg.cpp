@@ -244,6 +244,13 @@ namespace gpstk
          // Truncation error
          Vector<double> TE;
          TE = c1[0] * stepSize * (k0 + k10 - k11 - k12);
+         Vector<double> RV_TE(6,0.0);
+         RV_TE(0) = TE(0);
+         RV_TE(1) = TE(1);
+         RV_TE(2) = TE(2);
+         RV_TE(3) = TE(3);
+         RV_TE(4) = TE(4);
+         RV_TE(5) = TE(5);
 //         cout << "TE: " << norm(TE) << endl;
 
          /// The formula used by ESA is as follows:
@@ -252,10 +259,10 @@ namespace gpstk
          ///
          /// Currently, we use a simplified formula instead.
          double A;
-         A = norm(TE)/errorTol;
+         A = norm(RV_TE)/errorTol;
 //         cout << "A: " << A << endl;
 
-         if(count > 20) break;
+//         if(count > 20) break;
 
          if(A < 1)   // if yes
          {

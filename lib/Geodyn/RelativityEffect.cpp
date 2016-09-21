@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
@@ -41,7 +41,7 @@ namespace gpstk
       */
       const double GM = GM_EARTH;
       const double C = C_MPS;
-      
+
       Vector<double> r = sc.getPosition();
       Vector<double> v = sc.getVelocity();
 
@@ -56,13 +56,13 @@ namespace gpstk
       double r3 = r2 * r_mag;
 
       double p = GM/c2/r3;
-      
+
       // a
       a.resize(3,0.0);
-      
+
       double pr = 2.0 * (beta + gama) * GM / r_mag - gama * v2;
       double pv = 2.0 * (1.0 + gama) * dot(r,v);
-      
+
       a = p * ( pr * r + pv * v );
 
       // da_dr
@@ -78,17 +78,17 @@ namespace gpstk
          for(int j=0; j<3; j++)
          {
             double det = (i == j) ? 1.0 : 0.0;
-            
+
             da_dr(i,j) = prr*r(i)*r(j)
                + pvv*v(i)*v(j)
                + par*a(i)*r(j)
                + ppr*det;
          }
       }
-      
+
       // da_dv
       da_dv.resize(3,3,0.0);
-      
+
       double prv = -(GM/r3)*(2.0*gama/c2);
       double pvr = (GM/r3)*(2.0*(1.0+gama)/c2);
       double ppv = pvr*dot(r,v);
@@ -107,7 +107,7 @@ namespace gpstk
 
       // da_dp  add it later...
       //da_GM da_dbeta da_gama
-      
+
    }  // End of method 'RelativityEffect::doCompute()'
 
 

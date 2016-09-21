@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -23,13 +23,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -124,6 +124,38 @@ namespace gpstk
    static const double GM_MOON      = GM_EARTH * RATIO_ME;
       /// Mean radius of the Moon (m)
    static const double RE_MOON      = 1738000.0;
+
+      /// Sun-Mercury mass ratio
+   static const double RATIO_SMe    = 6.0236e6;
+   static const double GM_MERCURY   = GM_SUN / RATIO_SMe;
+
+      /// Sun-Venus mass ratio
+   static const double RATIO_SVe    = 4.08523719e5;
+   static const double GM_VENUS     = GM_SUN / RATIO_SVe;
+
+      /// Sun-Mars mass ratio
+   static const double RATIO_SMa    = 3.09870359e6;
+   static const double GM_MARS      = GM_SUN / RATIO_SMa;
+
+      /// Sun-Jupiter mass ratio
+   static const double RATIO_SJ     = 1.047348644e3;
+   static const double GM_JUPITER   = GM_SUN / RATIO_SJ;
+
+      /// Sun-Saturn mass ratio
+   static const double RATIO_SSa    = 3.4979018e3;
+   static const double GM_SATURN    = GM_SUN / RATIO_SSa;
+
+      /// Sun-Uranus mass ratio
+   static const double RATIO_SU     = 2.290298e4;
+   static const double GM_URANUS    = GM_SUN / RATIO_SU;
+
+      /// Sun-Neptune mass ratio
+   static const double RATIO_SN     = 1.941226e4;
+   static const double GM_NEPTUNE   = GM_SUN / RATIO_SN;
+
+      /// Sun-Pluto mass ratio
+   static const double RATIO_SP     = 1.36566e8;
+   static const double GM_PLUTO     = GM_SUN / RATIO_SP;
 
 
    // ---------------- GPS --------------------------------------
@@ -410,7 +442,7 @@ namespace gpstk
    }
 
       //@}
-   
+
 } // namespace
 
 #endif //GPSTK_GNSS_CONSTANTS_HPP

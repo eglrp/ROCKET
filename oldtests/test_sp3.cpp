@@ -28,8 +28,8 @@ int main(void)
    // sp3 files
    SP3EphemerisStore sp3Eph;
    sp3Eph.rejectBadPositions(true);
-	sp3Eph.setPosGapInterval(901);
-	sp3Eph.setPosMaxInterval(8101);
+   sp3Eph.setPosGapInterval(901);
+   sp3Eph.setPosMaxInterval(8101);
 
    string sp3File;
    while( (sp3File=confReader.fetchListValue("IGSSP3List", "DEFAULT")) != "" )
@@ -82,13 +82,23 @@ int main(void)
    refSys.setEOPDataStore(eopDataStore);
    refSys.setLeapSecStore(leapSecStore);
 
-   CivilTime ct0(2015,1,1,12,0,0.0, TimeSystem::GPS);
+   // Initial Time
+   int year = confReader.getValueAsInt("YEAR", "DEFAULT");
+   int mon  = confReader.getValueAsInt("MON", "DEFAULT");
+   int day  = confReader.getValueAsInt("DAY", "DEFAULT");
+   int hour = confReader.getValueAsInt("HOUR", "DEFAULT");
+   int min  = confReader.getValueAsInt("MIN", "DEFAULT");
+   double sec = confReader.getValueAsDouble("SEC", "DEFAULT");
+
+   CivilTime ct0(year,mon,day,hour,min,sec, TimeSystem::GPS);
    CommonTime gps0( ct0.convertToCommonTime() );
 
-   SatID sat(1,SatID::systemGPS);
+   // Sat ID
+   int prn = confReader.getValueAsInt("PRN", "DEFAULT");
+   SatID sat(prn,SatID::systemGPS);
 
 
-   for(int i=0; i<=12*3600/900; i++)
+   for(int i=0; i<=24*3600/900; i++)
    {
       CommonTime gps = gps0 + i*900.0;
 
@@ -109,18 +119,18 @@ int main(void)
          eciVel = transpose(c2t) * sp3Vel + transpose(dc2t) * sp3Pos;
 
          cout << fixed << setprecision(3);
-         cout << setw( 9)  << gps.getSecondOfDay()
-              << setw(12) << eciPos
-//            << setw(12) << eciVel
+         cout << setw( 9)  << CivilTime(gps);
+         cout << setw(18) << eciPos(0)
+              << setw(18) << eciPos(1)
+              << setw(18) << eciPos(2)
               << endl;
       }
       catch(...)
       {
          break;
-//         continue;
       }
 
    }
 
-	return 0;
+   return 0;
 }

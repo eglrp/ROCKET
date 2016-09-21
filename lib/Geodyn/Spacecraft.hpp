@@ -75,6 +75,7 @@ namespace gpstk
          return curTime;
       }
 
+
          /// Set SatID of Spacecraft
       inline Spacecraft& setSatID(const SatID& si)
       {
@@ -104,6 +105,7 @@ namespace gpstk
          return blockType;
       }
 
+
          /// Set mass of Spacecraft
       inline Spacecraft& setMass(const double& m)
       {
@@ -111,7 +113,6 @@ namespace gpstk
 
          return (*this);
       }
-
 
          /// Get mass of Spacecraft
       inline double getMass() const
@@ -128,7 +129,6 @@ namespace gpstk
          return (*this);
       }
 
-
          /// Get position of Spacecraft
       inline Vector<double> getPosition() const
       {
@@ -144,11 +144,30 @@ namespace gpstk
          return (*this);
       }
 
-
          /// Get velocity of Spacecraft
       inline Vector<double> getVelocity() const
       {
          return v;
+      }
+
+
+         /// Set position and velocity of Spacecraft
+      inline Spacecraft& setPosVel(const Vector<double>& rv)
+      {
+          r(0) = rv(0); r(1) = rv(1); r(2) = rv(2);
+          v(0) = rv(3); v(1) = rv(4); v(2) = rv(5);
+
+          return (*this);
+      }
+
+         /// Get position and velocity of Spacecraft
+      inline Vector<double> getPosVel() const
+      {
+          Vector<double> rv(6,0.0);
+          rv(0) = r(0); rv(1) = r(1); rv(2) = r(2);
+          rv(3) = v(0); rv(4) = v(1); rv(5) = v(2);
+
+          return rv;
       }
 
 
@@ -167,6 +186,21 @@ namespace gpstk
       inline int getNumOfParam() const
       {
          return numOfParam;
+      }
+
+
+         /// Set isEclipsed of Spacecraft
+      inline Spacecraft& setIsEclipsed(const bool& b)
+      {
+          isEclipsed = b;
+
+          return (*this);
+      }
+
+         /// Get isEclipsed of Spacecraft
+      inline bool getIsEclipsed() const
+      {
+          return isEclipsed;
       }
 
 
@@ -234,6 +268,13 @@ namespace gpstk
       Matrix<double> getSensitivityMatrix() const;
 
 
+         /// Convert position and velocity from kepler orbit elements
+      Spacecraft& convertFromKepler(const Vector<double>& kepler);
+
+         /// Convert position and velocity of Spacecraft to kepler orbit elements
+      Vector<double> convertToKepler() const;
+
+
    private:
 
          /// Reset state of Spacecraft
@@ -259,6 +300,9 @@ namespace gpstk
 
          /// Number of parameters
       int numOfParam;
+
+         /// Is eclipsed
+      bool isEclipsed;
 
          /// Partial derivatives
       Vector<double> dr_dr0;  // 3*3

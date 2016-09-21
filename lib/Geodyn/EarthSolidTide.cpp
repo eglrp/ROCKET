@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
 //
@@ -30,6 +30,7 @@
 #include "EarthSolidTide.hpp"
 #include "GNSSconstants.hpp"
 #include "Legendre.hpp"
+#include "CivilTime.hpp"
 
 using namespace std;
 
@@ -107,7 +108,7 @@ namespace gpstk
       {  16.6,  -6.7,  0,  0,  0,  0,  1 },
       {  -0.1,   0.1,  0,  0,  0,  0,  2 },
       {  -1.2,   0.8,  0, -1,  0,  0,  0 },
-      {  -5.5,   4.3,  0,  0, -2,  2, -2 }, 
+      {  -5.5,   4.3,  0,  0, -2,  2, -2 },
       {   0.1,  -0.1,  0,  0, -2,  2, -1 },
       {  -0.3,   0.2,  0, -1, -2,  2, -2 },
       {  -0.3,   0.7,  1,  0,  0, -2,  0 },
@@ -115,10 +116,10 @@ namespace gpstk
       {  -1.2,   3.7, -1,  0,  0,  0,  0 },
       {   0.1,  -0.2, -1,  0,  0,  0,  1 },
       {   0.1,  -0.2,  1,  0, -2,  0, -2 },
-      {   0.0,   0.6,  0,  0,  0, -2,  0 }, 
+      {   0.0,   0.6,  0,  0,  0, -2,  0 },
       {   0.0,   0.3, -2,  0,  0,  0,  0 },
       {   0.6,   6.3,  0,  0, -2,  0, -2 },
-      {   0.2,   2.6,  0,  0, -2,  0, -1 }, 
+      {   0.2,   2.6,  0,  0, -2,  0, -1 },
       {   0.0,   0.2,  0,  0, -2,  0,  0 },
       {   0.1,   0.2,  1,  0, -2, -2, -2 },
       {   0.4,   1.1, -1,  0, -2,  0, -2 },
@@ -132,7 +133,7 @@ namespace gpstk
    // nominal value k22 for the sectorial tides as (0.30102 - i*0.00130).
    // Units: 10^-12. The corrections are only to the real part.
    // see IERS Conventions 2010, Table 6.5c
-   const double EarthSolidTide::Argu_C22[2][6] = 
+   const double EarthSolidTide::Argu_C22[2][6] =
    {
 //        Amp.   l   l'  F   D   Omega
        {  -0.3,  1,  0,  2,  0,  2  },
@@ -143,10 +144,14 @@ namespace gpstk
       /** Solid tide to normalized earth potential coefficients
        *
        * @param utc     time in UTC
-       * @param CS      normalized earth potential coefficients
+       * @param dCS     correction to normalized earth potential coefficients
        */
-   void EarthSolidTide::getSolidTide(CommonTime utc, Matrix<double>& CS)
-   { 
+   void EarthSolidTide::getSolidTide(CommonTime utc, Matrix<double>& dCS)
+   {
+      // resize dCS
+      int size = indexTranslator(4, 4) - 1;
+      dCS.resize(size,2, 0.0);
+
       // TT
       CommonTime tt( pRefSys->UTC2TT(utc) );
 
@@ -188,6 +193,7 @@ namespace gpstk
       Vector<double> rm_itrs = c2t * rm_icrs;
       Vector<double> rs_itrs = c2t * rs_icrs;
 
+
       // IERS Conventions 2010, Chapter 6.2
       // The computation of the tidal contributions to the geopotential
       // coefficients is most efficiently done by a three-step procedure.
@@ -207,18 +213,18 @@ namespace gpstk
 
       // love numbers for solid earth tides
       // see IERS Conventions 2010, Table 6.3
-      double k20  =  0.29525;
-      double k21  =  0.29470;
-      double k22  =  0.29801;
+      const double k20  =  0.29525;
+      const double k21  =  0.29470;
+      const double k22  =  0.29801;
 
-      double k20p = -0.00087;
-      double k21p = -0.00079;
-      double k22p = -0.00057;
+      const double k20p = -0.00087;
+      const double k21p = -0.00079;
+      const double k22p = -0.00057;
 
-      double k30  =  0.09300;
-      double k31  =  0.09300;
-      double k32  =  0.09300;
-      double k33  =  0.09400;
+      const double k30  =  0.09300;
+      const double k31  =  0.09300;
+      const double k32  =  0.09300;
+      const double k33  =  0.09400;
 
       // indexes for degree = 2
       int id20 = indexTranslator(2,0) - 1;
@@ -236,12 +242,13 @@ namespace gpstk
       int id41 = indexTranslator(4,1) - 1;
       int id42 = indexTranslator(4,2) - 1;
 
+
+      double GSM(0.0);
+      Vector<double> rsm(3,0.0);
+
       // loop
       for(int j=2; j<=3; ++j)
       {
-         double GSM;
-         Vector<double> rsm;
-
          if(2 == j)         // Moon
          {
             GSM = GM_MOON;
@@ -257,78 +264,60 @@ namespace gpstk
          double rho = norm(rsm);
          double slat = rsm(2)/rho;
          double clat = std::sqrt(1.0-slat*slat);
-         double lat = std::atan2(slat, clat);
+         double lat = std::atan(slat/clat);
 
          // lon
-         double xlon = std::atan2(rsm(1), rsm(0));
+         double lon = std::atan2(rsm(1),rsm(0));
 
          // Pnm
-         double P20 = 0.5*(3.0*slat*slat - 1.0);
-         double P21 = 3.0*slat*clat;
-         double P22 = 3.0*clat*clat;
-         double P30 = 0.5*(5.0*slat*slat*slat - 3.0*slat);
-         double P31 = 1.5*(5.0*slat*slat - 1.0)*clat;
-         double P32 = 15.0*slat*clat*clat;
-         double P33 = 15.0*clat*clat*clat;
+         Vector<double> leg0, leg1, leg2;
+         legendre(3, lat, leg0, leg1, leg2, 0);
 
-//         Vector<double> leg0, leg1, leg2;
-//         legendre(3, lat, leg0, leg1, leg2, 0);
+         double temp(0.0);
 
-         // temp
-         double temp;
+         // N = 2
          temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
 
-         // C20, S20
-//         CS(id20, 0) += k20/5.0 * temp * leg0(id20) * 1.0;
-         CS(id20, 0) += k20/std::sqrt(5.0) * temp * P20 * 1.0;
-         CS(id20, 1) += 0.0;
-         // C21, S21
-//         CS(id21, 0) += k21/5.0 * temp * leg0(id21) * std::cos(xlon);
-//         CS(id21, 1) += k21/5.0 * temp * leg0(id21) * std::sin(xlon);
-         CS(id21, 0) += k21/std::sqrt(15.0) * temp * P21 * std::cos(xlon);
-         CS(id21, 1) += k21/std::sqrt(15.0) * temp * P21 * std::sin(xlon);
-         // C22, S22
-//         CS(id22, 0) += k22/5.0 * temp * leg0(id22) * std::cos(2*xlon);
-//         CS(id22, 1) += k22/5.0 * temp * leg0(id22) * std::sin(2*xlon);
-         CS(id22, 0) += k22/std::sqrt(60.0) * temp * P22 * std::cos(2*xlon);
-         CS(id22, 1) += k22/std::sqrt(60.0) * temp * P22 * std::sin(2*xlon);
+         // dC20, dS20
+         dCS(id20, 0) += k20/5.0 * temp * leg0(id20) * 1.0;
+         dCS(id20, 1) += 0.0;
+         // dC21, dS21
+         dCS(id21, 0) += k21/5.0 * temp * leg0(id21) * std::cos(lon);
+         dCS(id21, 1) += k21/5.0 * temp * leg0(id21) * std::sin(lon);
+         // dC22, dS22
+         dCS(id22, 0) += k22/5.0 * temp * leg0(id22) * std::cos(2*lon);
+         dCS(id22, 1) += k22/5.0 * temp * leg0(id22) * std::sin(2*lon);
 
+
+         // N = 3
          temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,4);
-         // C30, S30
-//         CS(id30, 0) += k30/7.0 * temp * leg0(id30) * 1.0;
-         CS(id30, 0) += k30/std::sqrt(7.0) * temp * P30 * 1.0;
-         CS(id30, 1) += 0.0;
-         // C31, S31
-//         CS(id31, 0) += k31/7.0 * temp * leg0(id31) * std::cos(xlon);
-//         CS(id31, 1) += k31/7.0 * temp * leg0(id31) * std::sin(xlon);
-         CS(id31, 0) += k31/std::sqrt(42.0) * temp * P31 * std::cos(xlon);
-         CS(id31, 1) += k31/std::sqrt(42.0) * temp * P31 * std::sin(xlon);
-         // C32, S32
-//         CS(id32, 0) += k32/7.0 * temp * leg0(id32) * std::cos(2*xlon);
-//         CS(id32, 1) += k32/7.0 * temp * leg0(id32) * std::sin(2*xlon);
-         CS(id32, 0) += k32/std::sqrt(420.0) * temp * P32 * std::cos(2*xlon);
-         CS(id32, 1) += k32/std::sqrt(420.0) * temp * P32 * std::sin(2*xlon);
-         // C33, S33
-//         CS(id33, 0) += k33/7.0 * temp * leg0(id33) * std::cos(3*xlon);
-//         CS(id33, 1) += k33/7.0 * temp * leg0(id33) * std::sin(3*xlon);
-         CS(id33, 0) += k33/std::sqrt(2520.0) * temp * P33 * std::cos(3*xlon);
-         CS(id33, 1) += k33/std::sqrt(2520.0) * temp * P33 * std::sin(3*xlon);
 
+         // dC30, dS30
+         dCS(id30, 0) += k30/7.0 * temp * leg0(id30) * 1.0;
+         dCS(id30, 1) += 0.0;
+         // dC31, dS31
+         dCS(id31, 0) += k31/7.0 * temp * leg0(id31) * std::cos(lon);
+         dCS(id31, 1) += k31/7.0 * temp * leg0(id31) * std::sin(lon);
+         // dC32, dS32
+         dCS(id32, 0) += k32/7.0 * temp * leg0(id32) * std::cos(2*lon);
+         dCS(id32, 1) += k32/7.0 * temp * leg0(id32) * std::sin(2*lon);
+         // dC33, dS33
+         dCS(id33, 0) += k33/7.0 * temp * leg0(id33) * std::cos(3*lon);
+         dCS(id33, 1) += k33/7.0 * temp * leg0(id33) * std::sin(3*lon);
+
+
+         // N = 4
          temp = GSM/GM_EARTH * std::pow(RE_EARTH/rho,3);
-         // C40, S40
-//         CS(id40, 0) += k20p/5.0 * temp * leg0(id20) * 1.0;
-         CS(id40, 0) += k20p/std::sqrt(5.0) * temp * P20 * 1.0;
-         CS(id40, 1) += 0.0;
-         // C41, S41
-//         CS(id41, 0) += k21p/5.0 * temp * leg0(id21) * std::cos(xlon);
-//         CS(id41, 1) += k21p/5.0 * temp * leg0(id21) * std::sin(xlon);
-         CS(id41, 0) += k21p/std::sqrt(15.0) * temp * P21 * std::cos(xlon);
-         CS(id41, 1) += k21p/std::sqrt(15.0) * temp * P21 * std::sin(xlon);
-         // C42, S42
-//         CS(id42, 0) += k22p/5.0 * temp * leg0(id22) * std::cos(xlon);
-//         CS(id42, 1) += k22p/5.0 * temp * leg0(id22) * std::sin(xlon);
-         CS(id42, 0) += k22p/std::sqrt(60.0) * temp * P22 * std::cos(2*xlon);
-         CS(id42, 1) += k22p/std::sqrt(60.0) * temp * P22 * std::sin(2*xlon);
+
+         // dC40, dS40
+         dCS(id40, 0) += k20p/5.0 * temp * leg0(id20) * 1.0;
+         dCS(id40, 1) += 0.0;
+         // dC41, dS41
+         dCS(id41, 0) += k21p/5.0 * temp * leg0(id21) * std::cos(lon);
+         dCS(id41, 1) += k21p/5.0 * temp * leg0(id21) * std::sin(lon);
+         // dC42, dS42
+         dCS(id42, 0) += k22p/5.0 * temp * leg0(id22) * std::cos(2*lon);
+         dCS(id42, 1) += k22p/5.0 * temp * leg0(id22) * std::sin(2*lon);
 
       }
 
@@ -362,7 +351,7 @@ namespace gpstk
          double ctf = std::cos(theta_f);
 
          // correction
-         CS(id20, 0) += (Argu_C20[i][0]*ctf - Argu_C20[i][1]*stf)*1e-12;
+         dCS(id20, 0) += (Argu_C20[i][0]*ctf - Argu_C20[i][1]*stf)*1e-12;
       }
 
 
@@ -383,44 +372,9 @@ namespace gpstk
          double ctf = std::cos(theta_f);
 
          // corrections
-         CS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
-         CS(id21, 1) += (Argu_C21[i][0]*ctf + Argu_C21[i][1]*stf)*1e-12;
-//         CS(id21, 0) += (Argu_C21[i][0]*stf)*1e-12;
-//         CS(id21, 1) += (Argu_C21[i][0]*ctf)*1e-12;
+         dCS(id21, 0) += (Argu_C21[i][0]*stf + Argu_C21[i][1]*ctf)*1e-12;
+         dCS(id21, 1) += (Argu_C21[i][0]*ctf - Argu_C21[i][1]*stf)*1e-12;
       }
-
-
-
-/*
-      CS(id21, 0) += 470.9e-12 * std::sin(GMST+PI);
-      CS(id21, 1) += 470.9e-12 * std::cos(GMST+PI);
-
-      double ARG;
-
-      ARG = BETA[0] + BETA[1] + BETA[4];
-      CS(id21, 0) += 68.1e-12 * std::sin(ARG);
-      CS(id21, 1) += 68.1e-12 * std::cos(ARG);
-
-      ARG = BETA[0] + BETA[1] - 2*BETA[2];
-      CS(id21, 0) += -43.4e-12 * std::sin(ARG);
-      CS(id21, 1) += -43.4e-12 * std::cos(ARG);
-
-      ARG = BETA[0] + BETA[1] + BETA[2] - BETA[5];
-      CS(id21, 0) += -20.6e-12 * std::sin(ARG);
-      CS(id21, 1) += -20.6e-12 * std::cos(ARG);
-
-      ARG = BETA[0] + BETA[1] - BETA[4];
-      CS(id21, 0) += -8.8e-12 * std::sin(ARG);
-      CS(id21, 1) += -8.8e-12 * std::cos(ARG);
-
-      ARG = BETA[0] + BETA[1];
-      CS(id21, 0) += -6.8e-12 * std::sin(ARG);
-      CS(id21, 1) += -6.8e-12 * std::cos(ARG);
-
-      ARG = BETA[0] + BETA[1] + 2*BETA[2];
-      CS(id21, 0) += -5.0e-12 * std::sin(ARG);
-      CS(id21, 1) += -5.0e-12 * std::cos(ARG);
-*/
 
 
       // C22, S22
@@ -437,10 +391,16 @@ namespace gpstk
          double ctf = std::cos(theta_f);
 
          // corrections
-         CS(id22, 0) += ( Argu_C22[i][0]*ctf)*1e-12;
-         CS(id22, 1) += (-Argu_C22[i][0]*stf)*1e-12;
+         dCS(id22, 0) += ( Argu_C22[i][0]*ctf)*1e-12;
+         dCS(id22, 1) += (-Argu_C22[i][0]*stf)*1e-12;
       }
 
+//      cout << fixed << setprecision(12);
+//      cout << setw(15) << dCS(id20,0) << ' '
+//           << setw(15) << dCS(id21,0) << ' '
+//           << setw(15) << dCS(id21,1) << ' '
+//           << setw(15) << dCS(id22,0) << ' '
+//           << setw(15) << dCS(id22,1) << endl;
 
 
       /////////////////////////////////////////////////////////////////////////

@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
 //
@@ -25,7 +25,7 @@
 /**
 * @file EarthPoleTide.cpp
 * Class to do Earth Solid Tide correction.
-* 
+*
 */
 
 #include "EarthPoleTide.hpp"
@@ -41,10 +41,14 @@ namespace gpstk
       /* Pole tide to normalized earth potential coefficients
        *
        * @param utc     time in UTC
-       * @param CS      normalized earth potential coefficients
+       * @param dCS     normalized earth potential coefficients
        */
-   void EarthPoleTide::getPoleTide(CommonTime utc, Matrix<double>& CS)
+   void EarthPoleTide::getPoleTide(CommonTime utc, Matrix<double>& dCS)
    {
+      // resize dCS
+      int size = indexTranslator(2,1) - 1;
+      dCS.resize(size,2, 0.0);
+
       // compute time in years since J2000
       double MJD_UTC = MJD(utc).mjd;
       double ly1 = (MJD_UTC - MJD_J2000) / 365.25;
@@ -64,7 +68,7 @@ namespace gpstk
       // mean pole, unit: arcsec
       // see IERS Conventions 2010, equation 7.25
       double xpm(0.0), ypm(0.0);
-      
+
       if(MJD_UTC < 55197.0)   // until 2010.0
       {
          xpm = ( xp1[0] + xp1[1]*ly1 + xp1[2]*ly2 + xp1[3]*ly3 )*1e-3;
@@ -92,14 +96,14 @@ namespace gpstk
 
       // solid earth pole tide
       // see IERS Conventions 2010, section 6.4
-      CS(id21, 0) += -1.333e-9 * (m1 + 0.0115*m2);
-      CS(id21, 1) += -1.333e-9 * (m2 - 0.0115*m1);
+      dCS(id21, 0) += -1.333e-9 * (m1 + 0.0115*m2);
+      dCS(id21, 1) += -1.333e-9 * (m2 - 0.0115*m1);
 
       // ocean pole tide
       // see IERS Conventions 2010, section 6.5
       // only (n,m) = (2,1) considered
-      CS(id21, 0) += -2.1778e-10 * (m1 - 0.01724*m2);
-      CS(id21, 1) += -1.7232e-10 * (m2 - 0.03365*m1);
+      dCS(id21, 0) += -2.1778e-10 * (m1 - 0.01724*m2);
+      dCS(id21, 1) += -1.7232e-10 * (m2 - 0.03365*m1);
 
    }  // End of method 'EarthPoleTide::getPoleTide()'
 

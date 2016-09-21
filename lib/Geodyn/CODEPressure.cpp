@@ -46,7 +46,7 @@ namespace gpstk
       // get satellite block type
       const string type = sc.getBlockType();
 
-      // get satellite mass
+      // get satellite mass, unit: kg
       const double mass = sc.getMass();
 
       // get srp coefficients
@@ -88,14 +88,18 @@ namespace gpstk
                             SolarSystem::Earth,
                             rv_moon);
 
-      // sun position in ITRS, unit: m
+      // sun position in ICRS, unit: m
       Vector<double> r_sun(3,0.0);
-      r_sun(0) = rv_sun[0]; r_sun(1) = rv_sun[1]; r_sun(2) = rv_sun[2];
+      r_sun(0) = rv_sun[0];
+      r_sun(1) = rv_sun[1];
+      r_sun(2) = rv_sun[2];
       r_sun *= 1000.0;
 
-      // moon position in ITRS, unit: m
+      // moon position in ICRS, unit: m
       Vector<double> r_moon(3,0.0);
-      r_moon(0) = rv_moon[0]; r_moon(1) = rv_moon[1]; r_moon(2) = rv_moon[2];
+      r_moon(0) = rv_moon[0];
+      r_moon(1) = rv_moon[1];
+      r_moon(2) = rv_moon[2];
       r_moon *= 1000.0;
 
 
@@ -110,6 +114,10 @@ namespace gpstk
       // satellite position wrt sun in ICRS, unit: m
       Vector<double> r_sunsat(3,0.0);
       r_sunsat = r_sat - r_sun;
+
+//      cout << "SV wrt Earth: " << r_sat << endl;
+//      cout << "SV wrt Sun: " << r_sunsat << endl;
+//      cout << "Earth wrt Sun: " << -r_sun << endl;
 
       /// CODE model, GAMIT 10.5 ertorb.f
 
@@ -170,7 +178,7 @@ namespace gpstk
 
       // beta is the angle ( [-90,+90] ) of the Sun above (+) the orbital
       // plane
-      double beta = PI / 2.0 - std::acos(dot(hvec,esvec));
+      double beta = PI / 2.0 - std::acos(dot(hvec,-esvec));
 
       // z-axis is (0,0,1) in ICRS
       Vector<double> zaxis(3,0.0); zaxis(2) = 1.0;
@@ -180,10 +188,10 @@ namespace gpstk
       // then get a perpendicular to the orbit normal and sun (will be in
       // orbit plane)
       Vector<double> savec = cross(hvec, esvec);
-      savec = norm(savec);
+      savec = normalize(savec);
       // finally get the projection of the sun in the orbit plane
       Vector<double> spvec = cross(savec, hvec);
-      spvec = norm(spvec);
+      spvec = normalize(spvec);
 
       // temp Vector
       Vector<double> temp(3,0.0);
@@ -230,6 +238,8 @@ namespace gpstk
       // shadow factor
       double lambda(1.0);
       lambda = getShadowFunction(r_sat, r_sun, r_moon, SM_CONICAL);
+
+      if(lambda != 1.0) sc.setIsEclipsed(true);
 
       // acceleration
       double Du = lambda*D0 + Dc*cosu + Ds*sinu;

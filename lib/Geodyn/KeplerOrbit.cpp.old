@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
@@ -65,7 +65,7 @@ namespace gpstk
          f = E - e*std::sin(E) - M;
          E = E - f / ( 1.0 - e*std::cos(E) );
          ++i;
-         if (i == maxit) 
+         if (i == maxit)
          {
             cerr << " convergence problems in EccAnom" << endl;
             break;
@@ -115,8 +115,8 @@ namespace gpstk
        * @param tau     Normalized time (sqrt(GM)*(t_a-t_b))
        * @return        Sector-triangle ratio
         */
-   double KeplerOrbit::FindEta (const Vector<double>& r_a, 
-                                const Vector<double>& r_b, 
+   double KeplerOrbit::FindEta (const Vector<double>& r_a,
+                                const Vector<double>& r_b,
                                 double tau)
    {
       // Constants
@@ -136,7 +136,7 @@ namespace gpstk
 
       kappa = std::sqrt ( 2.0*(s_a*s_b+dot(r_a,r_b)) );
 
-      m = tau*tau / std::pow(kappa,3);   
+      m = tau*tau / std::pow(kappa,3);
       l = (s_a+s_b) / (2.0*kappa) - 0.5;
 
       eta_min = std::sqrt(m/(l+1.0));
@@ -178,43 +178,43 @@ namespace gpstk
        * @dt       Time since epoch
        * @return   State vector(position and velocity)
        *
-       * @warning  The semimajor axis a=Kep(0), dt and GM must be given in 
-       *           consistent units 
+       * @warning  The semimajor axis a=Kep(0), dt and GM must be given in
+       *           consistent units
        */
    Vector<double> KeplerOrbit::State( double GM, const Vector<double>& Kep, double dt )
    {
-      
+
       // Keplerian elements at epoch
-      const double a     = Kep(0);  
-      const double e     = Kep(1);  
-      const double i     = Kep(2);  
+      const double a     = Kep(0);
+      const double e     = Kep(1);
+      const double i     = Kep(2);
       const double Omega = Kep(3);
-      const double omega = Kep(4); 
+      const double omega = Kep(4);
       const double M0    = Kep(5);
-      
+
       // Mean anomaly
       double M = M0 + std::sqrt(GM/(a*a*a)) * dt;
 
       // Eccentric anomaly
 
-      double E  = EccentricAnomaly(M,e);   
+      double E  = EccentricAnomaly(M,e);
 
-      double cosE = std::cos(E); 
+      double cosE = std::cos(E);
       double sinE = std::sin(E);
 
       // Perifocal coordinates
 
-      double fac = std::sqrt( (1.0-e)*(1.0+e) );  
+      double fac = std::sqrt( (1.0-e)*(1.0+e) );
 
       double R = a*(1.0-e*cosE);       // Distance
       double V = std::sqrt(GM*a)/R;    // Velocity
 
       Vector<double>  r(3,0.0),v(3,0.0);
-      r(0) = a * (cosE - e); 
-      r(1) = a * fac * sinE;  
+      r(0) = a * (cosE - e);
+      r(1) = a * fac * sinE;
       r(2) = 0.0;
 
-      v(0) = -V * sinE;    
+      v(0) = -V * sinE;
       v(1) = +V * fac * cosE;
       v(2) = 0.0;
 
@@ -250,56 +250,56 @@ namespace gpstk
       return rv;
    }
 
-   
-      /*Computes the partial derivatives of the satellite state vector with 
+
+      /*Computes the partial derivatives of the satellite state vector with
        * respect to the orbital elements for elliptic, Keplerian orbits
        *
        * @param GM   Gravitational coefficient
-       * @param Kep  Keplerian elements (a,e,i,Omega,omega,M) 
+       * @param Kep  Keplerian elements (a,e,i,Omega,omega,M)
        * @param dt   Time since epoch
-       * @return     Partials derivatives of the state vector (x,y,z,vx,vy,vz) 
+       * @return     Partials derivatives of the state vector (x,y,z,vx,vy,vz)
        *             at time dt with respect to the epoch orbital elements
-       * warning The semimajor axis a=Kep(0), dt and GM must be given in consistent units, 
+       * warning The semimajor axis a=Kep(0), dt and GM must be given in consistent units,
        * The function cannot be used with circular or non-inclined orbit.
        */
    Matrix<double> KeplerOrbit::StatePartials ( double GM, const Vector<double>& Kep, double dt )
    {
 
       // Variables
-      
-      
-      Vector<double>  dPdi(3),dPdO(3),dPdo(3),dQdi(3),dQdO(3),dQdo(3); 
+
+
+      Vector<double>  dPdi(3),dPdO(3),dPdo(3),dQdi(3),dQdO(3),dQdo(3);
       Vector<double>  dYda(6),dYde(6),dYdi(6),dYdO(6),dYdo(6),dYdM(6);
       Matrix<double>  dYdA(6,6);
 
       // Keplerian elements at epoch
 
-      const double a     = Kep(0);  
-      const double e     = Kep(1);  
-      const double i     = Kep(2);  
+      const double a     = Kep(0);
+      const double e     = Kep(1);
+      const double i     = Kep(2);
       const double Omega = Kep(3);
-      const double omega = Kep(4); 
+      const double omega = Kep(4);
       const double M0    = Kep(5);
 
       // Mean and eccentric anomaly
 
       double n = std::sqrt (GM/(a*a*a));
       double M = M0 +n*dt;
-      double E = EccentricAnomaly(M,e);   
+      double E = EccentricAnomaly(M,e);
 
       // Perifocal coordinates
 
-      double cosE = std::cos(E); 
+      double cosE = std::cos(E);
       double sinE = std::sin(E);
-      double fac  = std::sqrt((1.0-e)*(1.0+e));  
+      double fac  = std::sqrt((1.0-e)*(1.0+e));
 
       double r = a*(1.0-e*cosE);  // Distance
       double v = std::sqrt(GM*a)/r;    // Velocity
 
-      double x  = +a*(cosE-e); 
+      double x  = +a*(cosE-e);
       double y  = +a*fac*sinE;
-      double vx = -v*sinE;     
-      double vy = +v*fac*cosE; 
+      double vx = -v*sinE;
+      double vy = +v*fac*cosE;
 
       // Transformation to reference system (Gaussian vectors) and partials
       Matrix<double>  PQW(3,3,0.0);
@@ -314,28 +314,28 @@ namespace gpstk
       Q(0) = PQW(0,1);
       Q(1) = PQW(1,1);
       Q(2) = PQW(2,1);
-      
+
       W(0) = PQW(0,2);
       W(1) = PQW(1,2);
       W(2) = PQW(2,2);
-      
-      //e_z = Vector(0,0,1);  
+
+      //e_z = Vector(0,0,1);
       e_z(0) = 0.0;
       e_z(1) = 0.0;
       e_z(2) = 1.0;
-      
-      
+
+
       N = cross(e_z,W); N = N/norm(N);
-      
+
       dPdi = cross(N,P);  dPdO = cross(e_z,P); dPdo =  Q;
       dQdi = cross(N,Q);  dQdO = cross(e_z,Q); dQdo = -1.0*P;
-      
-      // Partials w.r.t. semimajor axis, eccentricity and mean anomaly at time dt      
+
+      // Partials w.r.t. semimajor axis, eccentricity and mean anomaly at time dt
       dYda = Stack ( (x/a)*P + (y/a)*Q,
          (-vx/(2*a))*P + (-vy/(2*a))*Q );
 
 
-      dYde = Stack ( (-a-std::pow(y/fac,2)/r)*P + (x*y/(r*fac*fac))*Q , 
+      dYde = Stack ( (-a-std::pow(y/fac,2)/r)*P + (x*y/(r*fac*fac))*Q ,
          (vx*(2*a*x+e*std::pow(y/fac,2))/(r*r))*P
          + ((n/fac)*std::pow(a/r,2)*(x*x/r-std::pow(y/fac,2)/a))*Q );
 
@@ -344,21 +344,21 @@ namespace gpstk
 
 
       // Partials w.r.t. inlcination, node and argument of pericenter
-      dYdi = Stack ( x*dPdi+y*dQdi, vx*dPdi+vy*dQdi ); 
-      dYdO = Stack ( x*dPdO+y*dQdO, vx*dPdO+vy*dQdO ); 
-      dYdo = Stack ( x*dPdo+y*dQdo, vx*dPdo+vy*dQdo ); 
+      dYdi = Stack ( x*dPdi+y*dQdi, vx*dPdi+vy*dQdi );
+      dYdO = Stack ( x*dPdO+y*dQdO, vx*dPdO+vy*dQdO );
+      dYdo = Stack ( x*dPdo+y*dQdo, vx*dPdo+vy*dQdo );
 
       // Derivative of mean anomaly at time dt w.r.t. the semimajor axis at epoch
 
-      double dMda = -1.5*(n/a)*dt;  
+      double dMda = -1.5*(n/a)*dt;
 
       // Combined partial derivative matrix of state with respect to epoch elements
 
-      for (int k=0; k<6; k++) 
+      for (int k=0; k<6; k++)
       {
-         dYdA(k,0) = dYda(k) + dYdM(k)*dMda;  
-         dYdA(k,1) = dYde(k); 
-         dYdA(k,2) = dYdi(k); 
+         dYdA(k,0) = dYda(k) + dYdM(k)*dMda;
+         dYdA(k,1) = dYde(k);
+         dYdA(k,2) = dYdi(k);
          dYdA(k,3) = dYdO(k);
          dYdA(k,4) = dYdo(k);
          dYdA(k,5) = dYdM(k);
@@ -369,7 +369,7 @@ namespace gpstk
    }  // End of method 'KeplerOrbit::StatePartials()'
 
 
-      /* Computes the osculating Keplerian elements from the satellite 
+      /* Computes the osculating Keplerian elements from the satellite
        * state vector for elliptic orbits.
        * @param GM       Gravitational coefficient
        * @param y        State vector(position and velocity)
@@ -390,28 +390,28 @@ namespace gpstk
       Vector<double> h = cross(r,v);                           // Areal velocity
       double H = norm(h);
 
-      double Omega = std::atan2( h(0), -h(1) );                     // Long. ascend. node 
+      double Omega = std::atan2( h(0), -h(1) );                     // Long. ascend. node
       Omega = Modulo(Omega,TWO_PI);
 
-      double i     = std::atan2( std::sqrt(h(0)*h(0)+h(1)*h(1)), h(2) ); // Inclination        
-      
-      double u  = std::atan2( r(2)*H, -r(0)*h(1)+r(1)*h(0) );    // Arg. of latitude   
-      double R  = norm(r);                                       // Distance           
+      double i     = std::atan2( std::sqrt(h(0)*h(0)+h(1)*h(1)), h(2) ); // Inclination
 
-      double a = 1.0 / (2.0/R-dot(v,v)/GM);                     // Semi-major axis    
+      double u  = std::atan2( r(2)*H, -r(0)*h(1)+r(1)*h(0) );    // Arg. of latitude
+      double R  = norm(r);                                       // Distance
 
-      double eCosE = 1.0-R/a;                                   // e*cos(E)           
-      double eSinE = dot(r,v)/std::sqrt(GM*a);                  // e*sin(E)           
+      double a = 1.0 / (2.0/R-dot(v,v)/GM);                     // Semi-major axis
+
+      double eCosE = 1.0-R/a;                                   // e*cos(E)
+      double eSinE = dot(r,v)/std::sqrt(GM*a);                  // e*sin(E)
 
       double e2 = eCosE*eCosE +eSinE*eSinE;
-      double e  = std::sqrt(e2);                                     // Eccentricity 
-      double E  = std::atan2(eSinE,eCosE);                           // Eccentric anomaly  
+      double e  = std::sqrt(e2);                                     // Eccentricity
+      double E  = std::atan2(eSinE,eCosE);                           // Eccentric anomaly
 
       double M  = Modulo(E-eSinE,TWO_PI);                // Mean anomaly
 
       double nu = std::atan2(std::sqrt(1.0-e2)*eSinE, eCosE-e2);     // True anomaly
 
-      double omega = Modulo(u-nu,2.0*TWO_PI);                // Arg. of perihelion 
+      double omega = Modulo(u-nu,2.0*TWO_PI);                // Arg. of perihelion
 
       // Keplerian elements vector
 
@@ -423,13 +423,13 @@ namespace gpstk
       Kep(4) = omega;
       Kep(5) = M;
 
-      return Kep; 
+      return Kep;
 
    }  // End of method 'KeplerOrbit::Elements()'
 
-   
-      /*Computes orbital elements from two given position vectors and 
-       *associated times 
+
+      /*Computes orbital elements from two given position vectors and
+       *associated times
        * @param GM        Gravitational coefficient
        * @param Mjda     Time ta (Modified Julian Date)
        * @param Mjdb     Time tb (Modified Julian Date)
@@ -437,54 +437,54 @@ namespace gpstk
        * @param rb       Position vector at time t_b
        * @return>   Keplerian elements (a,e,i,Omega,omega,M) at ta
        *
-       * @warning   The function cannot be used with state vectors describing a 
+       * @warning   The function cannot be used with state vectors describing a
        *            circular or non-inclined orbit.
        */
-   Vector<double> KeplerOrbit::Elements( double GM, double Mjda, double Mjdb, 
+   Vector<double> KeplerOrbit::Elements( double GM, double Mjda, double Mjdb,
       const Vector<double>& ra, const Vector<double>& rb )
    {
 
       // Variables
       double  a, e, i, Omega, omega, M;
 
-      // Calculate vector r_0 (fraction of r_b perpendicular to r_a) 
+      // Calculate vector r_0 (fraction of r_b perpendicular to r_a)
       // and the magnitudes of r_a,r_b and r_0
 
-      double s_a = norm(ra);  
+      double s_a = norm(ra);
       Vector<double> e_a = ra/s_a;
 
-      double s_b = norm(rb); 
-      double fac = dot(rb,e_a); 
+      double s_b = norm(rb);
+      double fac = dot(rb,e_a);
       Vector<double> r_0 = rb-fac*e_a;
 
-      double s_0 = norm(r_0);  
+      double s_0 = norm(r_0);
       Vector<double> e_0 = r_0/s_0;
 
-      // Inclination and ascending node 
+      // Inclination and ascending node
 
       Vector<double> W = cross(e_a,e_0);
-      Omega = std::atan2( W(0), -W(1) );                     // Long. ascend. node 
+      Omega = std::atan2( W(0), -W(1) );                     // Long. ascend. node
       Omega = Modulo(Omega,TWO_PI);
-      i     = std::atan2( std::sqrt(W(0)*W(0)+W(1)*W(1)), W(2) ); // Inclination        
-      
+      i     = std::atan2( std::sqrt(W(0)*W(0)+W(1)*W(1)), W(2) ); // Inclination
+
       double u(0.0);
-      if (i==0.0) 
+      if (i==0.0)
          u = std::atan2( ra(1), ra(0) );
-      else 
+      else
          u = std::atan2( +e_a(2) , -e_a(0)*W(1)+e_a(1)*W(0) );
 
       // Semilatus rectum
 
-      double tau = std::sqrt(GM) * 86400.0*fabs(Mjdb-Mjda);   
+      double tau = std::sqrt(GM) * 86400.0*fabs(Mjdb-Mjda);
       double eta = FindEta( ra, rb, tau );
-      double p   = std::pow( s_a*s_0*eta/tau, 2 );   
+      double p   = std::pow( s_a*s_0*eta/tau, 2 );
 
       // Eccentricity, true anomaly and argument of perihelion
 
-      double cos_dnu = fac / s_b;    
+      double cos_dnu = fac / s_b;
       double sin_dnu = s_0 / s_b;
 
-      double ecos_nu = p / s_a - 1.0;  
+      double ecos_nu = p / s_a - 1.0;
       double esin_nu = ( ecos_nu * cos_dnu - (p/s_b-1.0) ) / sin_dnu;
 
       e  = std::sqrt( ecos_nu*ecos_nu + esin_nu*esin_nu );
@@ -502,7 +502,7 @@ namespace gpstk
          double E = std::atan2( std::sqrt((1.0-e)*(1.0+e)) * esin_nu,  ecos_nu + e*e );
          M = Modulo( E - e*std::sin(E), TWO_PI );
       }
-      else 
+      else
       {
          double sinhH = std::sqrt((e-1.0)*(e+1.0)) * esin_nu / ( e + e * ecos_nu );
          M = e * sinhH - std::log ( sinhH + std::sqrt(1.0+sinhH*sinhH) );
@@ -523,7 +523,7 @@ namespace gpstk
    }  // End of method 'KeplerOrbit::Elements()'
 
 
-      /**Propagates a given state vector and computes the state transition  
+      /**Propagates a given state vector and computes the state transition
        * matrix for elliptical Keplerian orbits
        *
        * @param GM        Gravitational coefficient
@@ -531,11 +531,11 @@ namespace gpstk
        * @param dt        Time since epoch
        * @param Y         State vector (position and velocity)
        * @param dYdY0     State transition matrix d(x,y,z,vx,vy,vz)/d(x,y,z,vx,vy,vz)_0
-       * @warning         The state vector, dt and GM must be given in consistent units. 
+       * @warning         The state vector, dt and GM must be given in consistent units.
        *   Due to the internal use of Keplerian elements, the function cannot be used with
        *   epoch state vectors describing a circular or non-inclined orbit.
        */
-   void KeplerOrbit::TwoBody( double GM, const Vector<double>& Y0, double dt, 
+   void KeplerOrbit::TwoBody( double GM, const Vector<double>& Y0, double dt,
       Vector<double>& Y, Matrix<double>& dYdY0 )
    {
       double  a,e,i,n, sqe2,naa;
@@ -550,7 +550,7 @@ namespace gpstk
 
       n = std::sqrt(GM/(a*a*a));
 
-      // Propagated state 
+      // Propagated state
 
       Y = State(GM,A0,dt);
 
@@ -558,7 +558,7 @@ namespace gpstk
 
       dY0dA0 = StatePartials(GM,A0,0.0);
       dYdA0  = StatePartials(GM,A0,dt);
-      
+
       // Poisson brackets
 
       sqe2 = std::sqrt((1.0-e)*(1.0+e));
@@ -572,7 +572,7 @@ namespace gpstk
 
       // Partials of epoch elements w.r.t. epoch state
 
-      for(int k=0;k<3;k++) 
+      for(int k=0;k<3;k++)
       {
 
          dA0dY0(0,k)   = + P_aM*dY0dA0(k+3,5);
@@ -600,7 +600,7 @@ namespace gpstk
 
    }  // End of method 'KeplerOrbit::TwoBody()'
 
-      
+
       // F : local function for use by FindEta()
       // F = 1 - eta +(m/eta**2)*W(m/eta**2-l)
       //
@@ -611,25 +611,25 @@ namespace gpstk
 
       double  w,W,a,n,g;
 
-      w = m/(eta*eta)-l; 
+      w = m/(eta*eta)-l;
 
-      if (std::fabs(w)<0.1) 
-      { 
+      if (std::fabs(w)<0.1)
+      {
          W = a = 4.0/3.0; n = 0.0;
-         do 
+         do
          {
-            n += 1.0;  a *= w*(n+2.0)/(n+1.5);  W += a; 
+            n += 1.0;  a *= w*(n+2.0)/(n+1.5);  W += a;
          }
          while (std::fabs(a) >= eps);
       }
-      else 
+      else
       {
-         if (w > 0.0) 
+         if (w > 0.0)
          {
-            g = 2.0 * std::asin(std::sqrt(w));  
+            g = 2.0 * std::asin(std::sqrt(w));
             W = (2.0*g - std::sin(2.0*g)) / std::pow(std::sin(g), 3);
          }
-         else 
+         else
          {
             g = 2.0*std::log(std::sqrt(-w)+std::sqrt(1.0-w));  // =2.0*arsinh(sqrt(-w))
             W = (std::sinh(2.0*g) - 2.0*g) / std::pow(std::sinh(g), 3);
@@ -645,7 +645,7 @@ namespace gpstk
       const double n = std::sqrt(GM / std::pow(Kep(0),3));
       return TWO_PI / n;
    }
-   
+
    double KeplerOrbit::getApogee(double GM, const Vector<double>& Kep)
    {
       // p =  a*(1-e*e)
@@ -666,9 +666,9 @@ namespace gpstk
    void KeplerOrbit::test()
    {
       const double GM_Earth    = 398600.4415e+9;    // [m^3/s^2]; JGM3
-      
+
       const double Deg = 180.0 / PI;
-      
+
       double rv[6]={-6345.000e3, -3723.000e3,  -580.000e3, +2.169000e3, -9.266000e3, -1.079000e3 };
 
       Vector<double> Y0_ref(6);
@@ -692,14 +692,14 @@ namespace gpstk
          << "  True anomaly     " << setw(10) << ceta*Deg << " deg"<< endl
          << "  Eccentric anomaly" << setw(10) << ecc*Deg << " deg"<< endl
          << endl;
-      
+
 
       Vector<double> Y_ref = State(GM_Earth,Kep,0);
       Vector<double> Y(6);
       Matrix<double> phi(6,6);
 
       KeplerOrbit::TwoBody ( GM_Earth,Y0_ref,0, Y,phi); // State vector
-      
+
       cout<<fixed<<setw(12)<<setprecision(8);
       for(int i=0;i<6;i++)
       {
@@ -723,8 +723,8 @@ namespace gpstk
       {
          cout<<diff(i)<<endl;
       }
-      
-  
+
+
    }  // End of method 'KeplerOrbit::test()'
 
 
