@@ -180,7 +180,8 @@
    // Class to deal with the ambiguity constraints for solver
 #include "AmbiguityDatum.hpp"
 
-   // Class to filter out the PC outliers using prefit-residual
+   // Class to filter out the PC 
+   // outliers using prefit-residual
 #include "PrefitFilter.hpp"
 
    // Class to read the dcb data from files
@@ -192,6 +193,7 @@
    // Class to correct the P1C1 biases for some receivers
 #include "CC2NONCC.hpp"
 
+#include "YDSTime.hpp"
 
 using namespace std;
 using namespace gpstk;
@@ -1342,7 +1344,6 @@ void clk::printModel( ofstream& modelfile,
    // Method to generate and solve the general equation system
 void clk::solve()
 {
-
    ////> In the resolution part we start configuring the general solver 
 
       // Declare stochastic models to be used
@@ -1457,6 +1458,9 @@ void clk::solve()
    cout << fixed << setprecision( precision );
 
    ////> Now, Let's solve the equation system 
+   
+   ofstream sourcesInfo("sourcesData.txt", ios::out);
+
 
       // Repeat while there is preprocesed data available
    while( !gdsMap.empty() )
@@ -1469,9 +1473,65 @@ void clk::solve()
 
          // Remove first element (i.e., we remove the first epoch)
       gdsMap.pop_front_epoch();
+      
+
+      bool bValid = true;
+      bool bFindMaster = false;
 
          // print warning if there are no data for the master station 
          // at current epoch
+      for( gnssDataMap::const_iterator gdsMapIt = gds.begin(); 
+            gdsMapIt != gds.end(); gdsMapIt++ ){
+         
+         /// find master station in gnssDataMap
+         sourceDataMap::const_iterator sdMapIt = gdsMapIt->second.find( master );
+
+         if( sdMapIt != gdsMapIt->second.end() ){
+            
+            bFindMaster = true;
+
+            /// if master station has no data and then skip this epoch 
+            if( sdMapIt->second.numSats() <= 0 ) {
+               
+               cout << "Skip epoch:" << gds.begin()->first << endl;
+               bValid = false;
+               break;
+
+            }
+
+            //cout << "station name :"<< sdMapIt->first << ",numSats:"<< sdMapIt->second.numSats()<<",time:"<<gds.begin()->first<<endl;
+         
+         }
+            
+      }
+
+      /// if current epoch cannot process, continue to next epoch 
+      if( !bValid || !bFindMaster) continue;
+      
+      
+      /////  print source information each epoch
+      SatIDSet satellites = gds.getSatIDSet();
+      
+      YDSTime time_tag( gds.begin()->first );
+
+      //  print CommonTime
+      sourcesInfo << time_tag << " "<< satellites.size() << endl;
+
+      for( SatIDSet::iterator it = satellites.begin();
+           it != satellites.end(); it++ ){
+         
+         SourceIDSet sources = gds.getSourceIDSet( *it, gds.begin()->first );
+
+         sourcesInfo << "G" << it->id << " " << sources.size()<<" ";
+
+         for( SourceIDSet::iterator sit = sources.begin();
+               sit != sources.end(); sit++ ){
+            sourcesInfo<< sit->sourceName << " ";
+         }
+
+         sourcesInfo<<endl;
+      }
+
 
          // Extract current epoch
       CommonTime workEpoch( (*gds.begin()).first );
@@ -1484,7 +1544,7 @@ void clk::solve()
 
    }  // End of 'while( !gdsMap.empty() )'
 
-   
+   sourcesInfo.close();
 
    /// We are done ////
 

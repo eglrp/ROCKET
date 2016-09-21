@@ -2395,7 +2395,43 @@ in matrix and number of types do not match") );
 
    }  // End of method 'gnssDataMap::getSourceIDSet()'
 
+   SourceIDSet gnssDataMap::getSourceIDSet( const SatID& satellite,
+                                            const CommonTime& time )
+   throw( CommonTimeNotFound )
+   {
+      
+      gnssDataMap gdsMap( getDataFromEpoch( time ) );
+      
+      SourceIDSet  sourceIDSet;
 
+      if( !gdsMap.empty() ){
+            
+         for( gnssDataMap::const_iterator gdsMapIt = gdsMap.begin();
+               gdsMapIt != gdsMap.end(); gdsMapIt++ ){
+            
+            for( sourceDataMap::const_iterator sdMapIt = gdsMapIt->second.begin();
+                  sdMapIt != gdsMapIt->second.end(); sdMapIt++ ){
+                  
+               /// find satellite in map
+               satTypeValueMap::const_iterator stvMapIt = sdMapIt->second.find( satellite );
+
+               if( stvMapIt != sdMapIt->second.end() ){
+                  
+                  /// insert SourceID to Set
+                  sourceIDSet.insert( sdMapIt->first );
+                  break;
+
+               } 
+
+            } // End of "sourceDataMap::const_iterator sdMapIt = ..."
+
+         } // End of "gnssDataMap::const_iterator gdsMapIt = ..."
+
+      }
+
+      return sourceIDSet;
+
+   }
 
       /* Get a set with all the SatID's in this data structure.
        *

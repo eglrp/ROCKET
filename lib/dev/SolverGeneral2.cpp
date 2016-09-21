@@ -42,6 +42,12 @@
 
 #include "SolverGeneral2.hpp"
 #include "SystemTime.hpp"
+#include "Counter.hpp"
+
+
+#ifdef USE_OPENMP
+#include <omp.h>
+#endif
 
 namespace gpstk
 {
@@ -202,10 +208,9 @@ namespace gpstk
    {
 
       try
-      {
-      clock_t start,finish;
-      double totaltime;
-      start=clock();
+      {  
+         /// time counter begin
+         Counter::begin();
 
          oldUnknowns = currentUnknowns;
 
@@ -214,15 +219,16 @@ namespace gpstk
 
             // Get current unknowns
          currentUnknowns = equSystem.getCurrentUnknowns();
-
-      finish=clock();
-      totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
-      cout << "cputtime equSystem:" << totaltime << endl;
+         
+         cout << "cputime equSystem:" << Counter::end() << endl;
 
             // Get the number of unknowns being processed
          int numUnknowns( currentUnknowns.size() );
 
-         cout << "numUnknowns" << numUnknowns << endl;
+         cout << "numUnknowns=" << numUnknowns << endl;
+         
+         /// preCompute time begin
+         Counter::begin();
 
             // Feed the filter with the correct state and covariance matrix
          if(firstTime)
@@ -281,7 +287,7 @@ namespace gpstk
                   // Fill the diagonal element
                  
                   // Check if '(*itVar1)' belongs to 'covarianceMap'
-               if( covarianceMap.find( (*itVar1) ) != covarianceMap.end() )
+              /* if( covarianceMap.find( (*itVar1) ) != covarianceMap.end() )
                {
                      // If it belongs, get element from 'covarianceMap'
                   currentErrorCov(i, i) = covarianceMap[ (*itVar1) ][ (*itVar1) ];
@@ -290,14 +296,24 @@ namespace gpstk
                {     
                      // If it doesn't belong, ask for default covariance
                   currentErrorCov(i, i) = (*itVar1).getInitialVariance();
+               }*/
+
+               int now_index = itVar1->getNowIndex();
+               int pre_index = itVar1->getPreIndex();
+
+               if( -1 == pre_index ){
+                  currentErrorCov( now_index, now_index ) = (*itVar1).getInitialVariance();
+               }else{
+                  currentErrorCov( now_index, now_index ) = mCoVarMatrix( pre_index, pre_index );
                }
 
-               int j(i+1);      // Set 'j' index
+
+               //int j(i+1);      // Set 'j' index
 
                   // Remove current Variable from 'tempSet'
                tempSet.erase( (*itVar1) );
 
-               for( VariableSet::const_iterator itVar2 = tempSet.begin();
+               /*for( VariableSet::const_iterator itVar2 = tempSet.begin();
                     itVar2 != tempSet.end();
                     ++itVar2 )
                {
@@ -306,9 +322,25 @@ namespace gpstk
                         covarianceMap[ (*itVar1) ][ (*itVar2) ];
 
                   ++j;
-               }
+               }*/
 
-               ++i;
+               //++i;
+               for( VariableSet::const_iterator itVar2 = tempSet.begin();
+                     itVar2 != tempSet.end() ; itVar2++ ){
+                  
+                  int now_index_2 = itVar2->getNowIndex();
+                  int pre_index_2 = itVar2->getPreIndex();
+
+                  if( -1 == pre_index || -1 == pre_index_2 ){
+                     currentErrorCov( now_index, now_index_2 ) =
+                        currentErrorCov( now_index_2, now_index ) = 0;
+                  }else{
+                     currentErrorCov( now_index, now_index_2 ) =
+                        currentErrorCov( now_index_2, now_index ) =
+                           mCoVarMatrix( pre_index, pre_index_2 );
+                  }
+
+               }
 
             }  // End of for( VariableSet::const_iterator itVar1 = unkSet...'
 
@@ -318,15 +350,17 @@ namespace gpstk
 
          }  // End of 'if(firstTime)'
 
-      finish=clock();
-      totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
-      cout << "cputtime preCompute" << totaltime << endl;
+      //finish=clock();
+      //totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
+      cout << "cputtime preCompute" << Counter::end() << endl;
 
             ////////////////////////////////////////////
             //
             // Time update based on block multiplication
             //
             ////////////////////////////////////////////
+      
+      Counter::begin();
 
          std::list<Equation> equList;
          equList = equSystem.getCurrentEquationsList();
@@ -374,13 +408,15 @@ namespace gpstk
 
                       // Now, Let's get the position of this variable in 
                       // 'currentUnknowns'
-                   int index(0);
+                  /* int index(0);
                    VariableSet::const_iterator itVar1=currentUnknowns.begin();
                    while( (*itVar1) != var )
                    {
                       index++;
                       itVar1++;
-                   }
+                   }*/
+                  
+                   int index = var.getNowIndex(); 
 
                       // phi/q for current model
                    double phiValue, qValue;
@@ -461,9 +497,9 @@ namespace gpstk
             Pminus(i,i) = Pminus(i,i) + qMatrix(i,i); 
          }
 
-      finish=clock();
-      totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
-      cout << "cputtime TimeUpdate" << totaltime << endl;
+      //finish=clock();
+      //totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
+      cout << "cputtime TimeUpdate" << Counter::end() << endl;
 
       }
       catch(Exception& u)
@@ -498,10 +534,10 @@ namespace gpstk
             //
             ////////////////////////////////////////////
             
-      clock_t start,finish;
-      double totaltime;
-      start=clock();
-
+      //clock_t start,finish;
+      //double totaltime;
+      //start=clock();
+         Counter::begin();
             // Now, Let's copy the predicted state/covariance to 
             // xhat/P
          xhat = xhatminus;
@@ -518,7 +554,11 @@ namespace gpstk
 
          Vector<double> prefitResiduals(numEqu);
          Matrix<double> hMatrix( numEqu, numUnknowns, 0.0 );
-            
+         
+         // declare here for memory reuse
+         Vector<double> M( numUnknowns, 0.0 );
+         Vector<double> K( numUnknowns, 0.0 );
+
             // Visit each Equation in "equList"
          int row(0);
          for( std::list<Equation>::const_iterator itEq = equList.begin();
@@ -537,6 +577,19 @@ namespace gpstk
                // Weight
             double weight;
 
+               // number of Variables in current Equation
+            int numVar = itEq->body.size();
+            
+               // holding current Equation Variable index in Unknowns
+            Vector<int> index(numVar);
+
+               // holding current Equation Variable coeffience
+            Vector<double> G(numVar);
+            
+            /// resize the Matrix and Vector, it just reset all element as zero
+            M.resize( M.size(), 0.0 );
+            K.resize( K.size(), 0.0 );
+
                // First, fill weights matrix
                // Check if current 'tData' has weight info. If you don't want those
                // weights to get into equations, please don't put them in GDS
@@ -551,13 +604,17 @@ namespace gpstk
             }
 
                // Second, fill geometry matrix: Look for equation coefficients
-            VariableDataMap tempCoeffMap;
-               
+            // VariableDataMap tempCoeffMap;
+            
+            /// allocator double array to holding coeffience for Variable
+            /// double *tempCoefArray = new double[ numVar ];
+            
                // Now, let's visit all Variables and the corresponding 
                // coefficient in this equation description
+            int i = 0;
             for( VarCoeffMap::const_iterator vcmIter = (*itEq).body.begin();
                  vcmIter != (*itEq).body.end();
-                 ++vcmIter )
+                 ++vcmIter, i++ )
             {
                   // We will work with a copy of current Variable
                Variable var( (*vcmIter).first );
@@ -598,19 +655,24 @@ namespace gpstk
 
                }  // End of 'if( (*itCol).isDefaultForced() ) ...'
 
-               tempCoeffMap[var] = tempCoef ;
+               //tempCoeffMap[var] = tempCoef ;
+               //tempCoefArray[ var->getNowIndex() ] = tempCoef;
+               hMatrix( row, var.getNowIndex() ) = tempCoef;
+               index(i) = var.getNowIndex();
+               G(i) = tempCoef;
 
+              // cout << "index="<<var.getNowIndex()<<",coef="<<tempCoef<<endl;
             }  // End of 'for( VarCoeffMap::const_iterator vcmIter = ...'
-
                // Now, Let's create the index for current float unks
 
                // Float unks number for current equation
-            int numVar(tempCoeffMap.size());
-            Vector<int> index(numVar);
-            Vector<double> G(numVar);
+            //int numVar(tempCoeffMap.size());
+            //Vector<int> index(numVar);
+            //Vector<double> G(numVar);
 
                // Loop the tempCoeffMap
-            int i(0);
+            //int i(0);
+            /*i=0;
             for( VariableDataMap::const_iterator itvdm=tempCoeffMap.begin();
                  itvdm != tempCoeffMap.end();
                  ++itvdm )
@@ -630,7 +692,7 @@ namespace gpstk
 
                   // Incrment of the float variable 
                i++;
-            }
+            }*/
 
                // Temp measurement
             double z(tempPrefit);
@@ -639,8 +701,8 @@ namespace gpstk
             double inv_W(1.0/weight);  
 
                // M to store the value of  P*G
-            Vector<double> M(numUnknowns,0.0);
-
+            //Vector<double> M(numUnknowns,0.0);
+            
                // Now, let's compute M=P*G.
             for(int i=0; i<numUnknowns; i++)
             {
@@ -657,7 +719,7 @@ namespace gpstk
             }
 
                // Compute the Kalman gain
-            Vector<double> K(numUnknowns,0.0); 
+            //Vector<double> K(numUnknowns,0.0); 
 
             double beta(inv_W + dotGM);
 
@@ -668,15 +730,19 @@ namespace gpstk
             {
                dotGX = dotGX + G(i)*xhat(index(i)); 
             }
+
                // State update
             xhat = xhat + K*( z - dotGX );
-
+            
                // Covariance update
                // old version:
                // P = P - outer(K,M);
                // Considering that the P and KM matrix are symetric, 
                // thus the computation can be accelerated by operating 
-               // the upper triangular matrix. 
+               // the upper triangular matrix.
+#ifdef USE_OPENMP            
+   #pragma omp parallel for
+#endif
             for(int i=0;i<numUnknowns;i++)
             {
                   // The diagonal element
@@ -698,10 +764,11 @@ namespace gpstk
 
          }  // End of 'for( std::list<Equation>::const_iterator itEq = ...'
 
-      finish=clock();
-      totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
-      cout << "cputtime measupdate" << totaltime << endl;
-      start=finish;
+      //finish=clock();
+      //totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
+      cout << "cputtime measupdate" << Counter::end() << endl;
+      //start=finish;
+      Counter::begin();
 
             // Reset
          xhatminus = xhat;
@@ -714,10 +781,10 @@ namespace gpstk
             // Compute the postfit residuals Vector
          postfitResiduals = prefitResiduals - (hMatrix* solution);
 
-      finish=clock();
-      totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
-      cout << "cputtime postfitResiduals" << totaltime << endl;
-      start=finish;
+      //finish=clock();
+      //totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
+      cout << "cputtime postfitResiduals" << Counter::end() << endl;
+      //start=finish;
 
          //////////// //////////// //////////// ////////////
          //
@@ -735,6 +802,8 @@ namespace gpstk
          VariableSet unkSet( equSystem.getCurrentUnknowns() );
 
             // Store values of current state
+         
+         mCoVarMatrix = Matrix<double>( covMatrix );
 
          int i(0);      // Set an index
          for( VariableSet::const_iterator itVar = unkSet.begin();
@@ -747,7 +816,7 @@ namespace gpstk
 
             // Store values of covariance matrix
             // We need a copy of 'unkSet'
-         VariableSet tempSet( unkSet );
+         /*VariableSet tempSet( unkSet );
          i = 0;         // Reset 'i' index
          for( VariableSet::const_iterator itVar1 = unkSet.begin();
               itVar1 != unkSet.end();
@@ -767,7 +836,7 @@ namespace gpstk
             }
             ++i;
          }  // End of for( VariableSet::const_iterator itVar1 = unkSet...'
-
+         */
 
             // Store the postfit residuals in the GNSS Data Structure
          i = 0;         // Reset 'i' index
