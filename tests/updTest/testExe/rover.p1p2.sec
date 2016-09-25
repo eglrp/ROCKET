@@ -1,0 +1,140 @@
+[ADIS]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/adis16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk =  4913652.719  3945922.696   995383.363, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.0010   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = TRM29659.00     NONE # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/adis16577.model 
+outputFile = ./rinex/adis16577.out
+
+[DUBO]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/dubo16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk =  -417603.814 -4064529.820  4881432.156, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.1000   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = AOAD/M_T        NONE # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/dubo16577.model 
+outputFile = ./rinex/dubo16577.out
+
+[GOLD]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/gold16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk = -2353614.428 -4641385.284  3676976.405, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.0254   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = AOAD/M_T        NONE # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/gold16577.model 
+outputFile = ./rinex/gold16577.out
+
+[AREQ]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/areq16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk =  1942826.218 -5804070.342 -1796894.205, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.0610   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = AOAD/M_T        NONE # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/areq16577.model 
+outputFile = ./rinex/areq16577.out
+
+[LPGS]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/lpgs16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk =  2780102.991 -4437418.977 -3629404.448, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.0460   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = AOAD/M_T        NONE # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/lpgs16577.model 
+outputFile = ./rinex/lpgs16577.out
+
+[BRUS]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/brus16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk =  4027893.658   307045.945  4919475.187, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   3.9702   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = ASH701945B_M    NONE # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/brus16577.model 
+outputFile = ./rinex/brus16577.out
+
+[WSRT]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/wsrt16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk =  3828735.759   443305.066  5064884.774, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.3888   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = AOAD/M_T        DUTD # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/wsrt16577.model 
+outputFile = ./rinex/wsrt16577.out
+
+[ISTA]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/ista16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk =  4208830.182  2334850.422  4171267.306, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.0610   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = ASH700936D_M    SNOW # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/ista16577.model 
+outputFile = ./rinex/ista16577.out
+
+[BJNM]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/bjnm16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk = -2154287.528  4373440.031  4098885.661, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.0000   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = NOV702GG        NONE # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/bjnm16577.model 
+outputFile = ./rinex/bjnm16577.out
+
+[SYDN]
+  
+# Rinex observation file 
+rinexObsFile, Rinex observation file = ./rinex/sydn16577.11o
+# nominal position extracted from the IGS weekly solutions 
+nominalPosition, ECEF-GPSTk = -4648240.578  2560636.463 -3526318.170, meters            
+# offset of ARP 
+offsetARP, dH dLon dLat (UEN) =   0.0300   0.0000   0.0000, meters  
+# antenna model 
+antennaModel = ASH701945C_M    NONE # Antenna model 
+printModel = TRUE 
+modelFile = ./rinex/sydn16577.model 
+outputFile = ./rinex/sydn16577.out
+

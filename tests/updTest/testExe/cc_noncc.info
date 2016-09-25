@@ -1,0 +1,74 @@
++cc2noncc/rcvr
+*============================================================================
+*
+* Listed below are the receiver types that are recognized by cc2noncc and
+* for which observables will be modified.  The receiver type is read from
+* the the RINEX headers and so must be reliable (unless the forcing option
+* is exercised in the runstring parameters).  Comment lines start with
+* non-blank characters.
+* 
+* Cross-correlation style receivers (both C1 and P2' are modified):
+ cc2noncc-type:C1P2
+ AOA ICS-4000Z
+ ROGUE SNR-
+ ROGUE SNR-12
+ ROGUE SNR-12 RM
+ ROGUE SNR-8
+ ROGUE SNR-800
+ ROGUE SNR-8000
+ ROGUE SNR-8100
+ ROGUE SNR-8C
+ SPP GEOTRACER100
+ TOPCON GP-DX1
+ TOPCON TT4000SSI
+ TRIMBLE 4000
+ TRIMBLE 4000SSE
+ TRIMBLE 4000SSI
+ TRIMBLE 4000SST
+* 
+* Non-cross-correlator receivers reporting C1 instead of P1 (only C1 is
+* modified):
+ cc2noncc-type:C1
+ LEICA CRS1000
+ LEICA GMX902
+ LEICA GMX902GG
+ LEICA GRX1200
+ LEICA GRX1200+GNSS
+ LEICA GRX1200GGPRO
+ LEICA GRX1200PRO
+ LEICA GX1230
+ LEICA GX1230GG
+ LEICA MC1000
+ LEICA MC500
+ LEICA RS500
+ LEICA SR399E
+ LEICA SR520
+ LEICA SR530
+ LEICA SR9500
+ LEICA SR9600
+ NOV 15A
+ NOV EURO4-1.00-222
+ NOV MILLEN-RT2
+ NOV MILLEN-STD
+ NOV MILLEN-STDW
+ NOV OEM4-G2
+ NOV OEMV1
+ NOV OEMV1G
+ NOV OEMV2
+ NOV OEMV3
+ NOV OEMV3-RT2
+ NOV WAASGII
+ TRIMBLE 4700
+ TRIMBLE 5700
+ TRIMBLE 7400MSI
+ TRIMBLE MS750
+ TRIMBLE NETR3
+ TRIMBLE NETR5
+ TRIMBLE NETR8
+ TRIMBLE NETR9
+ TRIMBLE NETRS
+ TRIMBLE R7
+ TRIMBLE R8
+* 
+*============================================================================
+-cc2noncc/rcvr
