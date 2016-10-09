@@ -16,7 +16,7 @@
 # get the rinex file list
 ##############################
 > clk.rnxlist
-get_rnx.sh -b "2011 10 1 0 0 0" -e "2011 10 2 24 0 0" -i 24 -m -a "IGS" -u "../../tables/url.list" -s "clk.60.reflist" -l "clk" -p "$HOME/data/IGS/data" > get_rnx.log 
+get_rnx.sh -b "2015 10 1 0 0 0" -e "2015 10 4 0 0 0" -i 24 -m -a "IGS" -u "../../tables/url.list" -s "clk.90.reflist" -l "clk" -p "$HOME/data/IGS/data" > get_rnx.log 
 
 echo "finish downloading the data"
 
@@ -27,7 +27,7 @@ echo "finish downloading the data"
 > clk.clklist
 > clk.erplist
 > clk.ssclist
-get_eph.sh -b "2011 10 1 0 0 0" -e "2011 10 2 0 0 0" -a "COD" -i 24 -u "../../tables/url.list" -t "type.list" -l "clk" -p "$HOME/data/IGS/data" > get_eph.log 
+get_eph.sh -b "2015 10 1 0 0 0" -e "2015 10 4 0 0 0" -a "COD" -i 24 -u "../../tables/url.list" -t "type.list" -l "clk" -p "$HOME/data/IGS/data" > get_eph.log 
 
 ##############################
 # get the msc file list
@@ -51,6 +51,6 @@ done
 
 # now, Let's compute the satellite clock products
 # warning, please pay attention to the option CASE.
-clk -m msc.txt -r clk.rnxlist -s clk.ephlist -e clk.erplist -D clk.dcb_p1c1list -O whu2740_2760.clk
+clk -m msc.txt -r clk.rnxlist -s clk.ephlist -e clk.erplist -D clk.dcb_p1c1list -O whu20152740_2770.clk
 #clk -m msc.txt -r splice_clk.rnxlist -s clk.ephlist -e clk.erplist -D clk.dcb_p1c1list -O whu2740_2760.clk
 
