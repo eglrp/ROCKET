@@ -39,6 +39,8 @@
 //  - Add 'zwd', which will be useful for RTK correction computation.
 //    shjzhang, 2014/06/17
 //
+//  - Deal with 'staticFlag' in constructor function 
+//		Lei Zhao, 2016/10/06
 //============================================================================
 
 
@@ -84,14 +86,14 @@ namespace gpstk
 
          /// empty constructor, creates an unknown source data object
       SourceID()
-         : type(Unknown), sourceName("")
+         : type(Unknown), sourceName(""), staticFlag(true)
       {};
 
 
          /// Explicit constructor
       SourceID( SourceType st,
                 std::string name )
-         : type(st), sourceName(name)
+         : type(st), sourceName(name), staticFlag(true)
       {};
 
 
