@@ -90,6 +90,9 @@ namespace gpstk
    void SolverPPP::Init(void)
    {
 
+			// Flag of fixing coor 
+		fixPos = false;
+
          // Set qdot value for default random walk stochastic model
       rwalkModel.setQprime(3e-8);
 
@@ -533,7 +536,14 @@ covariance matrix.");
                // Second, the coordinates
             for( int i=1; i<4; i++ )
             {
-               initialErrorCovariance(i,i) = 10000.0;    // (100 m)**2
+					if( fixPos )
+					{
+						initialErrorCovariance(i,i) = 1.0e-04;
+					}
+					else 
+					{
+						initialErrorCovariance(i,i) = 10000.0;    // (100 m)**2
+					}  // End of ' if( fixPos ) '
             }
 
                // Third, the receiver clock

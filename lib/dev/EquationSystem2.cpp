@@ -192,8 +192,14 @@ namespace gpstk
          // Let's prepare current sources and satellites
       prepareCurrentSourceSat(gdsMap); 
 
-         // Prepare set of current unknowns and list of current equations
+      // store old unknowns parameters
+      VariableSet temp_old_unknowns(currentUnknowns);
+         
+       // Prepare set of current unknowns and list of current equations
       currentUnknowns = prepareUnknownsAndEquations(gdsMap);
+      
+      // Set up index for Variables now
+      setUpEquationIndex( temp_old_unknowns );
 
          // Set this object as "prepared"
       isPrepared = true;
@@ -201,8 +207,47 @@ namespace gpstk
       return (*this);
 
    }  // End of method 'EquationSystem2::Prepare()'
+   
+   void EquationSystem2::setUpEquationIndex( VariableSet& old_variable_set){
 
+      /// Setup variable list
+      int now_index  = 0;
+      for( VariableSet::const_iterator now_it = currentUnknowns.begin();
+            now_it != currentUnknowns.end(); now_it++ ){
+         
+         /// set current index
+         ( (Variable&)(*now_it) ).setNowIndex( now_index++ );
+         
+         /// find previous index in old variable set
+         VariableSet::const_iterator pre_it = old_variable_set.find(*now_it);
+         if( old_variable_set.end() != pre_it){
+            Variable preVar( *pre_it );
+            ( (Variable&)(*now_it) ).setPreIndex( preVar.getNowIndex() );
+         }
+      }
 
+    /// Setup Variable index in EquationList  
+     
+      for( std::list<Equation>::const_iterator itEq = currentEquationsList.begin();
+            itEq != currentEquationsList.end(); itEq++ ){
+
+         for( VarCoeffMap::const_iterator varIt = itEq->body.begin();
+               varIt != itEq->body.end(); varIt++ ){
+            
+            VariableSet::const_iterator it = currentUnknowns.find( varIt->first );
+
+            if( it != currentUnknowns.end() ){
+               
+               ( (Variable&)( varIt->first ) ).setNowIndex( ( (Variable&)(*it) ).getNowIndex() );
+               ( (Variable&)( varIt->first ) ).setPreIndex( ( (Variable&)(*it) ).getPreIndex() );
+
+            }
+
+         }
+
+      }
+
+   }
 
       // Get current sources (SourceID's) and satellites (SatID's)
    void EquationSystem2::prepareCurrentSourceSat( gnssDataMap& gdsMap )
@@ -229,6 +274,7 @@ namespace gpstk
       // Prepare set of current unknowns and list of current equations
    VariableSet EquationSystem2::prepareUnknownsAndEquations( gnssDataMap& gdsMap )
    {
+
          // Let's clear the current equations list
       currentEquationsList.clear();
 
@@ -317,16 +363,16 @@ namespace gpstk
                      for( VarCoeffMap::const_iterator vcmIter = (*itEq).body.begin();
                           vcmIter != (*itEq).body.end();
                           ++vcmIter )
-                     {
+                     { 
                            // We will work with a copy of current Variable
                         Variable var( (*vcmIter).first );
                           
                            // Take out the coefficient information from equation
                            // description
                         Coefficient coef( (*vcmIter).second);
-
+                        
                            // Check what type of variable we are working on
-                           
+                     
                            // If variable is source-indexed, set SourceID
                         if( var.getSourceIndexed() )
                         {

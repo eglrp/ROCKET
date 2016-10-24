@@ -29,7 +29,11 @@
 //  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2008, 2009, 2011
 //
 //============================================================================
-
+//
+// 2016/10/21
+// Add interface of fixCoordinates
+// Lei Zhao
+//============================================================================
 
 #include <deque>
 #include "CodeKalmanSolver.hpp"
@@ -486,6 +490,13 @@ namespace gpstk
       virtual SolverPPP& setBufferSize(int size )
       { bufferSize = size; return(*this); };
 
+
+          /** Fix coor or not 
+           */
+      virtual SolverPPP& fixCoordinates( bool flag )
+      { fixPos = flag; return(*this); };
+
+
          /** Return the converged flag
           */
       virtual bool getConverged() const
@@ -510,6 +521,9 @@ namespace gpstk
 
 
    private:
+
+			/// Flag of fixing coordinate
+		bool fixPos; 
 
 
          /// Number of variables

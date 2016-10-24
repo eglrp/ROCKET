@@ -64,6 +64,12 @@
 //              the equations directly, then after measurement update, 
 //              the ambiguities will be fixed in 'AmbiguityFixing'.
 //
+//  2016/10/16
+//  Modify Predict function. A new matrix mCoVarMatrix is declared to 
+//  replace covarianceMap. Use index of Variable. 
+//  I donot follow the modification of measUpdate function as these steps
+//  does little contribution to the computational effeciency. 
+//  Lei Zhao, WHU
 //============================================================================
 
 
@@ -72,6 +78,15 @@
 #include "CommonTime.hpp"
 #include "Epoch.hpp"
 #include "TimeString.hpp"
+
+// Added by Lei Zhao, 2016/10/05 vvv (^_^)
+#include "Counter.hpp"
+
+#ifdef USE_OPENMP
+#include <omp.h>
+#endif
+// ^^^ (^_^)
+
 #include <time.h>
 
 using namespace gpstk::StringUtils;
@@ -184,14 +199,36 @@ namespace gpstk
 
       try
       {
+			// Test code vvv
+			CivilTime ctime(gdsMap.begin() -> first);
+			cout << ctime.year << " " << ctime.month << " " 
+					<< ctime.day << " " << ctime.hour << " "
+						<< ctime.minute << " " << ctime.second << endl;
+			Counter::begin();
+			// Test code ^^^ 
 
             // Prepare everything before computing
          Predict( gdsMap );
 
 
+
+			// Test code vvv
+			cout << " cpu time for Predict function in SolverGenWL.cpp: " 
+					<< Counter::end() << endl;
+			// Test code ^^^
+
+
+			// Test code vvv
+			Counter::begin();
+			// Test code ^^^ 
+			
             // Call the Compute() method with the defined equation model.
          Correct( gdsMap );
 
+			// Test code vvv
+			cout << " cpu time for Correct function in SolverGenWL.cpp: " 
+					<< Counter::end() << endl;
+			// Test code ^^^
             // return
          return gdsMap;
 
@@ -287,38 +324,74 @@ namespace gpstk
                  itVar1 != currentUnknowns.end();
                  ++itVar1 )
             {
-                  // Fill the diagonal element
+//                  // Fill the diagonal element
+//
+//                  // Check if '(*itVar1)' belongs to 'covarianceMap'
+//               if( covarianceMap.find( (*itVar1) ) != covarianceMap.end() )
+//               {
+//                     // If it belongs, get element from 'covarianceMap'
+//                  currentErrorCov(i, i) = covarianceMap[ (*itVar1) ][ (*itVar1) ];
+//               }
+//               else  
+//               {     
+//                     // If it doesn't belong, ask for default covariance
+//                  currentErrorCov(i, i) = (*itVar1).getInitialVariance();
+//               }
+//
+//
+//               int j(i+1);      // Set 'j' index
 
-                  // Check if '(*itVar1)' belongs to 'covarianceMap'
-               if( covarianceMap.find( (*itVar1) ) != covarianceMap.end() )
-               {
-                     // If it belongs, get element from 'covarianceMap'
-                  currentErrorCov(i, i) = covarianceMap[ (*itVar1) ][ (*itVar1) ];
-               }
-               else  
-               {     
-                     // If it doesn't belong, ask for default covariance
-                  currentErrorCov(i, i) = (*itVar1).getInitialVariance();
-               }
+					// Test code vvv
+					int now_index = itVar1->getNowIndex();
+					int pre_index = itVar1->getPreIndex();
+					if( -1 == pre_index )
+					{
+						currentErrorCov( now_index, now_index ) = 
+							(*itVar1).getInitialVariance();
+					}
+					else
+					{
+						currentErrorCov( now_index, now_index ) =
+							mCoVarMatrix( pre_index, pre_index );
+					}  // End of 'if( -1 == pre_index )' 
 
-
-               int j(i+1);      // Set 'j' index
-
+					// Test code ^^^
                   // Remove current Variable from 'tempSet'
                tempSet.erase( (*itVar1) );
 
-               for( VariableSet::const_iterator itVar2 = tempSet.begin();
-                    itVar2 != tempSet.end();
-                    ++itVar2 )
-               {
-                     // If it belongs, get element from 'covarianceMap'
-                  currentErrorCov(i, j) =
-                     currentErrorCov(j, i) =
-                        covarianceMap[ (*itVar1) ][ (*itVar2) ];
-                  ++j;
-               }
+//               for( VariableSet::const_iterator itVar2 = tempSet.begin();
+//                    itVar2 != tempSet.end();
+//                    ++itVar2 )
+//               {
+//                     // If it belongs, get element from 'covarianceMap'
+//                  currentErrorCov(i, j) =
+//                     currentErrorCov(j, i) =
+//                        covarianceMap[ (*itVar1) ][ (*itVar2) ];
+//                  ++j;
+//               }
+//
+//               ++i;
 
-               ++i;
+					for( VariableSet::const_iterator itVar2 = tempSet.begin();
+                     itVar2 != tempSet.end() ; itVar2++ )
+					{
+                  
+                  int now_index_2 = itVar2->getNowIndex();
+                  int pre_index_2 = itVar2->getPreIndex();
+
+                  if( -1 == pre_index || -1 == pre_index_2 )
+						{
+                     currentErrorCov( now_index, now_index_2 ) =
+                        currentErrorCov( now_index_2, now_index ) = 0;
+                  }
+						else
+						{
+                     currentErrorCov( now_index, now_index_2 ) =
+                        currentErrorCov( now_index_2, now_index ) =
+                           mCoVarMatrix( pre_index, pre_index_2 );
+                  }
+
+               }  // End of 'for( VariableSet::const_iterator itVar2 = ...'
 
             }  // End of for( VariableSet::const_iterator itVar1 = currentUnknowns...'
 
@@ -447,13 +520,17 @@ namespace gpstk
 
                      // Now, Let's get the position of this variable in 
                      // 'currentUnknowns'
-                  int index(0);
-                  VariableSet::const_iterator itVar1=currentUnknowns.begin();
-                  while( (*itVar1) != var )
-                  {
-                     index++;
-                     itVar1++;
-                  }
+//                  int index(0);
+//                  VariableSet::const_iterator itVar1=currentUnknowns.begin();
+//                  while( (*itVar1) != var )
+//                  {
+//                     index++;
+//                     itVar1++;
+//                  }
+
+						// Test code vvv
+						int index( var.getNowIndex() );
+						// Test code ^^^
 
                      // phi/q for current model
                   double phiValue, qValue;
@@ -576,17 +653,44 @@ namespace gpstk
 
       try
       {
+
+				// Added by Lei Zhao, 2016/10/05 vvv (^_^)
+				// Time Counter setting
+			//Counter::begin();
+				// ^^^ (^_^)
+
             // Ambiguity Constraints
          MeasUpdate( gdsMap );
 
 
+				// Added by Lei Zhao, 2016/10/05 vvv (^_^)
+				// Time Counter setting
+			//std::cout << "cpu time for MeasUpdate function in SolverGenWL.cpp: "
+			//		<< Counter::end() << std::endl;
+				// ^^^ (^_^)
+
+			// Test code vvv
+			//Counter::begin();
+			// Test code ^^^
             // Ambiguity Constraints
          AmbiguityFixing( gdsMap );
 
+			// Test code vvv
+			//std::cout << "cpu time for AmbiguityFixing function in SolverGenWL.cpp: "
+			//		<< Counter::end() << std::endl;
+			// Test code ^^^
 
+
+			// Test code vvv
+//			Counter::begin();
+			// Test code ^^^
              // Post compute
          postCompute(gdsMap);
 
+			// Test code vvv
+//			std::cout << "cpu time for postCompute function in SolverGenWL.cpp: "
+//					<< Counter::end() << std::endl;
+			// Test code ^^^ 
       }
       catch(Exception& u)
       {
@@ -622,6 +726,9 @@ namespace gpstk
       double totaltime;
       start=clock();
 
+		// Test code vvv 
+		//Counter::begin();
+		// Test code ^^^
          VariableSet currentUnknowns( equSystem.getCurrentUnknowns() );
 
             // Fill the initialState vector  
@@ -699,9 +806,16 @@ namespace gpstk
 
          }  // End of 'If(...)'
 
+			// Test code vvv
+//			cout << "cpu time for acquisition of ambFixedMap in MeasUpdate function: "
+//					<< Counter::end() << endl;
+//			Counter::begin();
+			// Test code ^^^
             //
             // Now, Let's preform the measurment udpate
             //
+
+
          xhat = xhatminus;
          P = Pminus;
 
@@ -716,6 +830,11 @@ namespace gpstk
             // To be modified
             // apply the ambiguity constraint equations
             //
+
+				// test code vvv
+			//	Counter::begin();
+				// test code ^^^
+
          for( VariableDataMap::const_iterator itamb=ambFixedMap.begin();
               itamb !=ambFixedMap.end();
               ++itamb )
@@ -813,6 +932,10 @@ namespace gpstk
                // Considering that the P and KM matrix are symetric, 
                // thus the computation can be accelerated by operating 
                // the upper triangular matrix. 
+#ifdef USE_OPENMP
+	#pragma omp parallel for
+#endif
+
             for(int i=0;i<numVar;i++)
             {
                   // The diagonal element
@@ -828,7 +951,14 @@ namespace gpstk
 
          }
 
-            //
+			
+			// Test code vvv
+//			cout << "cpu time for ambiguity constraint in MeasUpdate function: "
+//					<< Counter::end() << endl;
+//			Counter::begin();
+			// Test code ^^^
+
+			   //
             // Let's perform the measurement update one observable by one
             //
          std::list<Equation> equList;
@@ -838,6 +968,11 @@ namespace gpstk
          prefitResiduals.resize(numEqu,0.0);
          hMatrix.resize( numEqu, numVar, 0.0 );
 
+			// Test code vvv
+				// declare here for memory reuse
+			//Vector<double> M( numVar, 0.0 );
+			//Vector<double> K( numVar, 0.0 );
+			// Test code ^^^
          int row(0);
          for( std::list<Equation>::const_iterator itEq = equList.begin();
               itEq != equList.end();
@@ -854,6 +989,19 @@ namespace gpstk
 
                // Weight
             double weight;
+
+//				// Test code vvv
+//					// number of Variables in current Equation
+//				int numNowVar = (itEq -> body).size();
+//					// holding current Equation Variable index in Unknowns
+//				Vector<int> index(numNowVar);
+//					// holding current Equation Variable coeffience
+//				Vector<double> G(numNowVar);
+//				
+//					// resize the Matrix and Vector, it just reset all element as zero
+//				M.resize( M.size(), 0.0 );
+//				K.resize( K.size(), 0.0 );
+//				// Test code ^^^
 
                // First, fill weights matrix
                // Check if current 'tData' has weight info. If you don't want those
@@ -873,9 +1021,12 @@ namespace gpstk
                
                // Now, let's visit all Variables and the corresponding 
                // coefficient in this equation description
+				// Test code vvv
+//				int i = 0;
+				// Test code ^^^
             for( VarCoeffMap::const_iterator vcmIter = (*itEq).body.begin();
                  vcmIter != (*itEq).body.end();
-                 ++vcmIter )
+                 ++vcmIter, i++)
             {
                   // We will work with a copy of current Variable
                Variable var( (*vcmIter).first );
@@ -916,6 +1067,11 @@ namespace gpstk
 
                }  // End of 'if( (*itCol).isDefaultForced() ) ...'
 
+					// Test code vvv
+//					hMatrix( row, var.getNowIndex() ) = tempCoef;
+//					index(i) = var.getNowIndex();
+//					G(i) = tempCoef;
+					// Test code ^^^
                   // Now, Let's get the position of this variable in 
                   // 'currentUnknowns'
                VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
@@ -931,6 +1087,9 @@ namespace gpstk
                // Now, Let's create the index for current float unks
 
                // Float unks number for current equation
+				// Test code ^^^
+//            int numUnks(numNowVar);
+				// Test code ^^^ 
             int numUnks(tempCoeffMap.size());
             Vector<int> index(numUnks);
             Vector<double> G(numUnks);
@@ -983,7 +1142,7 @@ namespace gpstk
             }
 
                // Compute the Kalman gain
-            Vector<double> K(numVar,0.0); 
+           Vector<double> K(numVar,0.0); 
 
             double beta(inv_W + dotGM);
             K = M/beta;
@@ -1003,6 +1162,9 @@ namespace gpstk
                // Considering that the P and KM matrix are symetric, 
                // thus the computation can be accelerated by operating 
                // the upper triangular matrix. 
+#ifdef USE_OPENMP
+	#pragma omp parallel for
+#endif
             for(int i=0;i<numVar;i++)
             {
                   // The diagonal element
@@ -1024,6 +1186,12 @@ namespace gpstk
 
 
          }  // End of 'for( std::list<Equation>::const_iterator itEq = ...'
+
+
+			// Test code vvv
+//			cout << "cpu time for measurement update in MeasUpdate function: "
+//					<< Counter::end() << endl;
+			// Test code ^^^
 
             // Reset
          xhatminus = xhat;
@@ -1066,7 +1234,11 @@ namespace gpstk
             /**
              * Firstly, fix the widelane ambiguities
              */
-         int numUnknowns(currentUnknowns.size());
+			// Test code vvv
+//			Counter::begin();
+			// Test code ^^^
+         
+			int numUnknowns(currentUnknowns.size());
 
             // Flags indicating whether this unknown variable has been fixed.
          Vector<double> stateFlag(numUnknowns, 0.0);
@@ -1164,6 +1336,11 @@ namespace gpstk
                 
          }  // End of 'while(done)'
 
+			// Test code vvv
+//			cout << "cpu time for WL amb fixing in AmbiguityFixing: " 
+//					<< Counter::end() << endl;
+//			Counter::begin();
+			// Test code ^^^
 
             // Now, Let's compute the new postfitRediduals
             // using the fixed solution
@@ -1259,7 +1436,13 @@ namespace gpstk
    
          }  // End of 'for( std::list<Equation>::const_iterator itEq = ...'
 
+			// Test code vvv
+//			cout << "cpu time for validation of fixed solution in AmbiguityFixing: " 
+//					<< Counter::end() << endl;
+//			Counter::begin();
+			// Test code ^^^
 
+			
          Vector<double> newState2;
          Matrix<double> newCov2;
 
@@ -1299,8 +1482,9 @@ namespace gpstk
 
             // Clean up the map
          stateMapFixed.clear();
-         covMapFixed.clear();
+//         covMapFixed.clear();
 
+			// CoMmEnT by Lei Zhao vvv
             // Store values of the fixed solution
          int i(0);      // Set an index
          for( VariableSet::const_iterator itVar = currentUnknowns.begin();
@@ -1310,34 +1494,41 @@ namespace gpstk
             stateMapFixed[ (*itVar) ] = newState2(i);
             ++i;
          }
+//
+//            // Store values of covariance matrix
+//            // We need a copy of 'currentUnknowns'
+//         VariableSet tempSet( currentUnknowns );
+//         i = 0;         // Reset 'i' index
+//         for( VariableSet::const_iterator itVar1 = currentUnknowns.begin();
+//              itVar1 != currentUnknowns.end();
+//              ++itVar1 )
+//         {
+//               // Fill the diagonal element
+//            covMapFixed[ (*itVar1) ][ (*itVar1) ] = newCov2(i, i);
+//
+//            int j(i+1);      // Set 'j' index
+//               // Remove current Variable from 'tempSet'
+//            tempSet.erase( (*itVar1) );
+//            for( VariableSet::const_iterator itVar2 = tempSet.begin();
+//                 itVar2 != tempSet.end();
+//                 ++itVar2 )
+//            {
+//               covMapFixed[ (*itVar1) ][ (*itVar2) ] = newCov2(i, j);
+//
+//               ++j;
+//            }
+//            
+//            ++i;
+//
+//         }  // End of for( VariableSet::const_iterator itVar1 = currentUnknowns...'
 
-            // Store values of covariance matrix
-            // We need a copy of 'currentUnknowns'
-         VariableSet tempSet( currentUnknowns );
-         i = 0;         // Reset 'i' index
-         for( VariableSet::const_iterator itVar1 = currentUnknowns.begin();
-              itVar1 != currentUnknowns.end();
-              ++itVar1 )
-         {
-               // Fill the diagonal element
-            covMapFixed[ (*itVar1) ][ (*itVar1) ] = newCov2(i, i);
+			// CoMmEnT by Lei Zhao ^^^ 
 
-            int j(i+1);      // Set 'j' index
-               // Remove current Variable from 'tempSet'
-            tempSet.erase( (*itVar1) );
-            for( VariableSet::const_iterator itVar2 = tempSet.begin();
-                 itVar2 != tempSet.end();
-                 ++itVar2 )
-            {
-               covMapFixed[ (*itVar1) ][ (*itVar2) ] = newCov2(i, j);
-
-               ++j;
-            }
-            
-            ++i;
-
-         }  // End of for( VariableSet::const_iterator itVar1 = currentUnknowns...'
-
+			// Test code vvv
+//			cout << "cpu time for fixed WL amb storing in AmbiguityFixing: " 
+//					<< Counter::end() << endl;
+			// Test code ^^^
+			
             // Transfer the 'newState2/newCov2'
          if(fixAndHold)
          {
@@ -1485,28 +1676,32 @@ namespace gpstk
             ++i;
          }
 
-            // Store values of covariance matrix
-            // We need a copy of 'currentUnknowns'
-         VariableSet tempSet( currentUnknowns );
-         i = 0;         // Reset 'i' index
-         for( VariableSet::const_iterator itVar1 = currentUnknowns.begin();
-              itVar1 != currentUnknowns.end();
-              ++itVar1 )
-         {
-               // Fill the diagonal element
-            covarianceMap[ (*itVar1) ][ (*itVar1) ] = covMatrix(i, i);
-            int j(i+1);      // Set 'j' index
-               // Remove current Variable from 'tempSet'
-            tempSet.erase( (*itVar1) );
-            for( VariableSet::const_iterator itVar2 = tempSet.begin();
-                 itVar2 != tempSet.end();
-                 ++itVar2 )
-            {
-               covarianceMap[ (*itVar1) ][ (*itVar2) ] = covMatrix(i, j);
-               ++j;
-            }
-            ++i;
-         }  // End of for( VariableSet::const_iterator itVar1 = currentUnknowns...'
+			// Test code vvv
+			mCoVarMatrix = Matrix<double>( covMatrix );
+			// Test code ^^^
+
+//            // Store values of covariance matrix
+//            // We need a copy of 'currentUnknowns'
+//         VariableSet tempSet( currentUnknowns );
+//         i = 0;         // Reset 'i' index
+//         for( VariableSet::const_iterator itVar1 = currentUnknowns.begin();
+//              itVar1 != currentUnknowns.end();
+//              ++itVar1 )
+//         {
+//               // Fill the diagonal element
+//            covarianceMap[ (*itVar1) ][ (*itVar1) ] = covMatrix(i, i);
+//            int j(i+1);      // Set 'j' index
+//               // Remove current Variable from 'tempSet'
+//            tempSet.erase( (*itVar1) );
+//            for( VariableSet::const_iterator itVar2 = tempSet.begin();
+//                 itVar2 != tempSet.end();
+//                 ++itVar2 )
+//            {
+//               covarianceMap[ (*itVar1) ][ (*itVar2) ] = covMatrix(i, j);
+//               ++j;
+//            }
+//            ++i;
+//         }  // End of for( VariableSet::const_iterator itVar1 = currentUnknowns...'
 
             /**
              *  Now, get the ambigity number and fixing rate for 
