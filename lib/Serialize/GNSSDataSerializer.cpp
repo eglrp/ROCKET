@@ -62,6 +62,15 @@ string GDSSerializer::serializeToString(SourceID& data){
 	sourceName.SetString(data.sourceName.c_str(), doc.GetAllocator() );
 	doc.AddMember( "sourceName", sourceName, doc.GetAllocator() );
 		
+		// Source coordinate
+	double XCoor( data.nominalPos.X() );
+	double YCoor( data.nominalPos.Y() );
+	double ZCoor( data.nominalPos.Z() );
+
+	doc.AddMember( "XCoor", XCoor, doc.GetAllocator() );
+	doc.AddMember( "YCoor", YCoor, doc.GetAllocator() );
+	doc.AddMember( "ZCoor", ZCoor, doc.GetAllocator() );
+
 	// convert to string 
 	StringBuffer buffer;
 	Writer<StringBuffer> writer(buffer);
@@ -297,11 +306,20 @@ bool GDSSerializer::deserializeFromString(SourceID& data, string dataString){
 	Value& sourceTypeValue = doc["sourceType"];
 	Value& sourceNameValue = doc["sourceName"];
 
+	Value& sourceXCoor = doc["XCoor"];
+	Value& sourceYCoor = doc["YCoor"];
+	Value& sourceZCoor = doc["ZCoor"];
+
 	if( sourceTypeValue.IsInt() && 
 		sourceNameValue.IsString() ){
 		
 		data = SourceID( (SourceID::SourceType)sourceTypeValue.GetInt(),
 					     string( sourceNameValue.GetString() ) );
+
+		Position pos( sourceXCoor.GetDouble(), 
+						  sourceYCoor.GetDouble(),
+						  sourceZCoor.GetDouble() );
+		data.nominalPos = pos;
 
 		return data.isValid();
 
