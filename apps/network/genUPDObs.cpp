@@ -69,18 +69,14 @@
 //  Reset the weight of MW, because the MW UPD is not smooth
 //
 //	 2016/09/09 ~ 2016/09/14
-//	 Change the interface of this progrom to the user, referenced to clk.cpp
+//	 Change the interface of this progrom to the user, with reference to clk.cpp
 //  Lei Zhao, a Ph.D. candidate 
 //	 School of Geodesy and Geomatics, Wuhan University 
 //
-//
-//	 2016/10/09
-//	 Use GDSDerializer class written by Kang Gao to store processing results 
-//	 of all stations in json formatted file, for the convenience of
-//	 debug.
-//  Lei Zhao, a Ph.D. candidate 
+//  2016/10/12 ~ 2016/10/1
+//	 Add dcb option with reference to clk.cpp
+//  Lei Zhao, a Ph.D. candidate
 //	 School of Geodesy and Geomatics, Wuhan University 
-//
 //============================================================================
 
 
@@ -232,8 +228,15 @@
 	// Class to read the MSC data from files
 #include "MSCStore.hpp"
 
+
 	// Class to serialize data struture
 #include "GNSSDataSerializer.hpp"
+
+	// Class to read the dcb data from files
+#include "DCBDataReader.hpp"
+
+	// Class to correct the P1C1 biases for some receivers
+#include "CC2NONCC.hpp"
 
 
 using namespace std;
@@ -285,16 +288,15 @@ private:
 	CommandOptionWithAnyArg sp3FileListOpt;
 	CommandOptionWithAnyArg clkFileListOpt;
 	CommandOptionWithAnyArg eopFileListOpt;
+	CommandOptionWithAnyArg dcbFileListOpt;
 	CommandOptionWithAnyArg mscFileOpt;
 	CommandOptionWithAnyArg outputFileListOpt;
-//	CommandOptionWithAnyArg outputGDSMapFileOpt;
-//	CommandOptionWithAnyArg outputRefStaFileOpt;
-//	CommandOptionWithAnyArg outputMasterStaFileOpt;
 
 	string rnxFileListName;
 	string sp3FileListName;
 	string clkFileListName;
 	string eopFileListName;
+	string dcbFileListName;
 	string mscFileName;
 	string outputFileListName;
 
@@ -304,7 +306,6 @@ private:
 
 		// Dummy source to store ref stations
 	sourceDataMap dummySourceDataMap; 
-
 	// ^^^ 
 
       // Configuration file reader
@@ -408,22 +409,18 @@ upd::upd(char* arg0)
 						 "eopFileList",
 						 "file storing a list of IGS erp file name ",
 						 true ),
+	dcbFileListOpt( 'D',
+						  "dcbFileList",
+						  "file storing a list of the P1C1 DCB file.",
+						  false),
 	outputFileListOpt(  'O',
 								"outputFileNameList",
 								"output file names list",
 								true )
-//	outputGDSMapFileOpt( 'M',
-//								"outputGDSMapFile",
-//							   "file storing the gdsMap of all stations in json format",
-//								true ),
-//	outputRefStaFileOpt( 'R',
-//								"outputRefStaFile",
-//								"file storing the reference stations in json format",
-//								true ),
-//	outputMasterStaFile( 'M',
-//								"outputMasterStaFile",
-//								"file storing the master station in json format",
-//								true )
+//	outputFileOpt(  'O',
+//						 "outputFile",
+//						 "file storing the computed clock data",
+//						  true )
 	// ^^^ 
 {
 
@@ -516,22 +513,18 @@ void upd::spinUp()
 	{
 		eopFileListName = eopFileListOpt.getValue()[0];
 	}
+//	if(outputFileOpt.getCount())
+//	{
+//		outputFileName = outputFileOpt.getValue()[0];
+//	}
 	if(outputFileListOpt.getCount())
 	{
 		outputFileListName = outputFileListOpt.getValue()[0];
 	}
-//	if(outputGDSMapFileOpt.getCount())
-//	{
-//		outputGDSMapFileName = outputGDSMapFileOpt.getValue()[0];
-//	}
-//	if(outputRefStaFileOpt.getCount())
-//	{
-//		outputRefStaFileName = outputRefStaFileOpt.getValue()[0];
-//	}
-//	if(outputMasterStaFileOpt.getCount())
-//	{
-//		outputMasterStaFileName = outputMasterStaFileOpt.getValue()[0];
-//	}
+	if(dcbFileListOpt.getCount())
+	{
+		dcbFileListName = dcbFileListOpt.getValue()[0];
+	}
 	// ^^^ 
 
 }  // End of method 'upd::spinUp()'
@@ -545,7 +538,7 @@ void upd::process()
    preprocessing();
 
        // Generate and solve equations
-//   solve();
+   //solve();
 }
 
 
@@ -746,6 +739,50 @@ void upd::preprocessing()
 		exit(-1);
 	}
 
+      ////////////////////////////////////////////////
+      // Let's read DCB files
+      ////////////////////////////////////////////////
+      
+      // Read and store dcb data
+   DCBDataReader dcbStore;
+
+   if(dcbFileListOpt.getCount() )
+   {
+         // Now read dcb file from 'dcbFileName'
+      ifstream dcbFileListStream;
+
+         // Open dcbFileList File
+      dcbFileListStream.open(dcbFileListName.c_str(), ios::in);
+      if(!dcbFileListStream)
+      {
+            // If file doesn't exist, issue a warning
+         cerr << "dcb file List Name '" << dcbFileListName << "' doesn't exist or you don't "
+              << "have permission to read it." << endl;
+         exit(-1);
+      }
+
+      string dcbFile;
+
+         // Here is just a dcb file, we only read one month's dcb data.
+      while(dcbFileListStream >> dcbFile)
+      {
+         try
+         {
+            dcbStore.open(dcbFile);
+         }
+         catch(FileMissingException e)
+         {
+            cerr << "Warning! The DCB file '"<< dcbFile <<"' does not exist!" 
+                 << endl;
+            exit(-1);
+         }
+      };
+
+      dcbFileListStream.close();
+
+   }
+
+
 
 	////////////////////////////////////////////////////////////////
 	/// Load other common configuration for all the station from 'upd.conf' 
@@ -819,6 +856,9 @@ void upd::preprocessing()
 			<< "outputRefStaFileName: " << outputRefStaFileName << endl
 				<< "outputMasterStaFileName: " << outputMasterStaFileName << endl;
 	// debug code ^^^
+
+
+
 
 
    //// Starting preprocessing for ALL stations ////
@@ -967,9 +1007,37 @@ void upd::preprocessing()
 		Position nominalPos( mscData.coordinates );
 
 
+//		// debug code vvv
+//		std::cout << "station: " << station << " X Y Z: " 
+//						<< nominalPos << std::endl;
+//		// debug code ^^^
+
          // Create a 'ProcessingList' object where we'll store
          // the processing objects in order
       ProcessingList pList;
+
+			//>This object will correct the P1C1 dcb for some receivers
+			//>defined in the 'recTypeFile'.
+
+//		CC2NONCC cc2noncc;
+//		if(dcbFileListOpt.getCount())  // There is a dcb file
+//		{
+//
+//			cc2noncc.setDCBDataReader(dcbStore);
+//
+//				// Read the receiver type file.
+//			cc2noncc.loadRecTypeFile( confReader.getValue("recTypeFile") );
+//			cc2noncc.setRecType(roh.recType);
+//	
+//		}  // End of ' if(dcbFileListOpt.getCount())  '
+//
+//		cc2noncc.setCopyC1ToP1(true);
+//
+//			// Add tp processing list
+//		pList.push_back(cc2noncc);
+
+
+
 
 
          // This object will check that all required observables are present
@@ -985,7 +1053,6 @@ void upd::preprocessing()
          // This object will check that code observations are within
          // reasonable limits
       SimpleFilter pObsFilter;
-		pObsFilter.addFilteredType(TypeID::P1);
       pObsFilter.addFilteredType(TypeID::P2);
 
 
@@ -1002,7 +1069,7 @@ void upd::preprocessing()
 //         pObsFilter.addFilteredType(TypeID::P1);
 //      }
       
-      requireObs.addRequiredType(TypeID::P1);
+//      requireObs.addRequiredType(TypeID::P1);
       pObsFilter.addFilteredType(TypeID::P1);
       
 			// Add 'requireObs' to processing list (it is the first)
@@ -1182,7 +1249,7 @@ void upd::preprocessing()
          // Declare a NeillTropModel object, setting its parameters
 //      NeillTropModel neillTM( nominalPos.getAltitude(),
 //                              nominalPos.getGeodeticLatitude(),
-//                              confReader.getValueAsInt("dayOfYear", station) );
+//                              confReader.getValueAsInt("dayOfYear") );
 
 			NeillTropModel neillTM( nominalPos,
 											initialTime ); 
@@ -1313,14 +1380,8 @@ void upd::preprocessing()
          // Declare ppp solver
       SolverPPP pppSolver(isNEU);
 
-		// Added by Lei Zhao, 2016/09/30 vvv
-			// Fix the coordinate
-	   bool fixCoorsFlag( confReader.getValueAsBoolean( "fixCoordinate" ) );
-
+		bool fixCoorsFlag( confReader.getValueAsBoolean( "fixCoordinate" ) );
 		pppSolver.fixCoordinates( fixCoorsFlag );
-		// ^^^
-
-
 
          // Add to processing list
       pList.push_back(pppSolver);
@@ -1465,6 +1526,7 @@ void upd::preprocessing()
 
          }
 
+
             // Only keep the necessary types for 'SolverGeneralFB' 
          TypeIDSet types;
          types.insert(TypeID::weight);
@@ -1481,12 +1543,14 @@ void upd::preprocessing()
          gdsMap.addGnssRinex(gRin);
 
 
+
+
          // The given epoch has been preprocessed. Let's get the next one
 
       }  // End of 'while(rin >> gRin)'
 
 
-			// Get source
+         // Get source
          // NOTE: 'station' is a 'string', and we need a 'SourceID'
       SourceID source( gRin.header.source );
 
@@ -1524,14 +1588,10 @@ void upd::preprocessing()
 		}
 		else
 		{
-//			typeValueMap tvMap;
-//			tvMap[TypeID::Unknown] = 0.0;
-			
 			satTypeValueMap dummyMap;
 			dummySourceDataMap[source] = dummyMap;
 
-
-			refStationSet.insert( source );
+//			refStationSet.insert( source );
 		}
 
          // Close current Rinex observation stream
@@ -1562,7 +1622,7 @@ void upd::preprocessing()
 
 
    //// End of preprocessing for ALL stations ////
-	
+
 		// Now store gdsMap, 
 		//				 refStationSet
 		//				 master 
@@ -1577,6 +1637,9 @@ void upd::preprocessing()
    SP3EphList.clear();
 
 
+//	// debug code vvv
+//	exit(-1);
+//	// debug code ^^^
       // The rest of the processing will be in method 'upd::shutDown()'
    return;
 
@@ -1801,8 +1864,11 @@ void upd::solve()
    ////> Variables for the print out 
 
       // Prepare for printing
-   int precision( confReader.getValueAsInt( "precision", "DEFAULT" ) );
+   int precision( confReader.getValueAsInt( "precision" ) );
    cout << fixed << setprecision( precision );
+
+			// Issue a message 
+	cout << "Starting computing UPDs  ... " << endl;
 
       // Repeat while there is preprocesed data available
    while( !gdsMap.empty() )
@@ -1841,6 +1907,7 @@ clock_t start,finish;
 double totaltime;
 start=clock();
 
+
          // Compute the widelane biases by fixing widelane ambiguities
       solverUpdWL.Process(gds);
 
@@ -1853,6 +1920,7 @@ totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
 
 start=finish;
   
+
          // Compute the widelane biases by fixing widelane ambiguities
       solverUpdNL.Process(gds);
 
@@ -2024,12 +2092,17 @@ void upd::shutDown()
 //
 //      // close the solution file stream
 //   solutionFile.close();
+//
+//		// Show a message indicating that we've finished calculating upd
+//	cout << "UPD solution is in file: " << outputFileName << endl;
 
 		// Show a message indicating that we've finished calculating upd
 	cout << "Your 3 output files are: " 
-			<< outputGDSMapFileName 
-			<< outputRefStaFileName 
+			<< outputGDSMapFileName << " "  
+			<< outputRefStaFileName << " "
 			<< outputMasterStaFileName << endl;
+
+
 
 
 }  // End of 'upd::shutDown()'
