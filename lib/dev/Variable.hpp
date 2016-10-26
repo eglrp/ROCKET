@@ -29,6 +29,8 @@
 //  2014/02/20      Add the new class "Coefficient" to store the coefficients
 //                  for variables.
 //
+//	 2016/10/25		  Add several static variables.
+//						  Lei Zhao, SGG, WHU
 //============================================================================
 
 
@@ -287,6 +289,37 @@ namespace gpstk
 
          /// Default stochastic model to be assigned to variables.
       static WhiteNoiseModel defaultModel;
+
+				// Header type
+		static Variable MW;
+
+//				// MW Receiver bias variable
+		static RecBiasRandomWalkModel updMWModel;
+		static Variable updMW;
+//
+//				// Ambiguity variable
+		static PhaseAmbiguityModel ambWLModel;
+		static Variable ambWL; 
+//
+//				// MW Satellite bias variable
+		static SatBiasRandomWalkModel updSatMWModel;
+//		static updSatMWModel.setQprime(3.0e-7);
+		static Variable updSatMW;
+//
+		static Variable BLC;
+//
+//			// LC Receiver bias variable
+		static RecBiasRandomWalkModel updLCModel;
+		static Variable updLC;
+//
+//			// Ambiguity variable
+		static PhaseAmbiguityModel ambNLModel;
+		static Variable ambNL;
+//
+//			// LC satellite bias variable
+		static SatBiasRandomWalkModel updSatLCModel;
+		static Variable updSatLC;
+
 
 
          /// Destructor

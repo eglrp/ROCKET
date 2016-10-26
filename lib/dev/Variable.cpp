@@ -73,6 +73,36 @@ namespace gpstk
       // Default stochastic model to be assigned to variables.
    WhiteNoiseModel Variable::defaultModel;
 
+		// Initialization for static members	
+	Variable Variable::MW(TypeID::MWubbena);
+
+	RecBiasRandomWalkModel Variable::updMWModel;
+
+	Variable Variable::updMW( TypeID::updMW, &updMWModel, true, false, 9.0e10 );
+
+	PhaseAmbiguityModel Variable::ambWLModel;
+
+	Variable Variable::ambWL( TypeID::BWL, &ambWLModel, true, true );
+
+	SatBiasRandomWalkModel Variable::updSatMWModel( 3.0e-7 );
+
+	Variable Variable::updSatMW( TypeID::updSatMW, &updSatMWModel, false, true);
+
+	Variable Variable::BLC( TypeID::BLC );
+
+	RecBiasRandomWalkModel Variable::updLCModel;
+
+	Variable Variable::updLC( TypeID::updLC, &updLCModel, true, false, 9.0e10 );
+
+	PhaseAmbiguityModel Variable::ambNLModel;
+
+	Variable Variable::ambNL( TypeID::BL1, &ambNLModel, true, true );
+
+	SatBiasRandomWalkModel Variable::updSatLCModel;
+
+	Variable Variable::updSatLC( TypeID::updSatLC, &updSatLCModel, false, true );
+
+
 
 
       // Default constructor for Variable
