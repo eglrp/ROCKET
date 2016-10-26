@@ -10,7 +10,7 @@ ln -f -s /Users/zhaolei/ROCKET/tables/type.list ppp_type.list
 proj="updTest"
 dir=/Users/zhaolei/Documents/Data/IGS/
 ##get_rnx.sh -b "2011 10 9 0 0 0" -e "2011 10 10 0 0 0" -i 24 -a "IGS" -u "url.list" -s "$proj.stalist.test" -l "$proj" -p "./rinex/" 
-#get_rnx.sh -b "2011 10 9 0 0 0" -e "2011 10 10 0 0 0" -i 24 -a "IGS" -u "url.list" -s "reference.p1p2.40.list.order" -l "$proj" -p "$dir" 
+##get_rnx.sh -b "2011 10 9 0 0 0" -e "2011 10 10 0 0 0" -i 24 -a "IGS" -u "url.list" -s "reference.p1p2.40.list.order" -l "$proj" -p "$dir" 
 get_rnx.sh -b "2011 10 9 0 0 0" -e "2011 10 10 0 0 0" -i 24 -a "IGS" -u "url.list" -s "tmp.sta" -l "$proj" -p "$dir" 
 
 get_eph.sh -b "2011 10 9 0 0 0" -e "2011 10 10 0 0 0" -i 24 -a IGS -u "url.list" -t "ppp_type.list" -l "$proj" -p "$dir"
