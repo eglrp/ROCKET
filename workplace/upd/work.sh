@@ -31,7 +31,7 @@ done
 
 date
 
-upd4 -m msc.txt -r $proj.rnxlist -s $proj.ephlist -k $proj.clklist -e $proj.erplist -O whu2820.3p1p2.11upd_upd4_again 
+upd_test -m msc.txt -r $proj.rnxlist -s $proj.ephlist -k $proj.clklist -e $proj.erplist -O whu2820.3p1p2.11upd_upd_test3 
 
 date
 
