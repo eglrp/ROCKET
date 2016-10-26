@@ -51,6 +51,39 @@ namespace gpstk
 	{
 	public:
 
+			// Variables used in description of equMWMaster and equMWRef
+				
+				// Header type
+//		static Variable MW;
+//
+////				// MW Receiver bias variable
+//		static RecBiasRandomWalkModel updMWModel;
+//		static Variable updMW;
+////
+////				// Ambiguity variable
+//		static PhaseAmbiguityModel ambWLModel;
+//		static Variable ambWL; 
+////
+////				// MW Satellite bias variable
+//		static SatBiasRandomWalkModel updSatMWModel;
+////		static updSatMWModel.setQprime(3.0e-7);
+//		static Variable updSatMW;
+////
+//		static Variable BLC;
+////
+////			// LC Receiver bias variable
+//		static RecBiasRandomWalkModel updLCModel;
+//		static Variable updLC;
+////
+////			// Ambiguity variable
+//		static PhaseAmbiguityModel ambNLModel;
+//		static Variable ambNL;
+////
+////			// LC satellite bias variable
+//		static SatBiasRandomWalkModel updSatLCModel;
+//		static Variable updSatLC;
+
+
 			/// Default constructor
 		CommonlyUsedEquations();
 
