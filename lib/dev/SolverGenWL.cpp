@@ -200,11 +200,11 @@ namespace gpstk
       try
       {
 			// Test code vvv
-			CivilTime ctime(gdsMap.begin() -> first);
-			cout << ctime.year << " " << ctime.month << " " 
-					<< ctime.day << " " << ctime.hour << " "
-						<< ctime.minute << " " << ctime.second << endl;
-			Counter::begin();
+			//CivilTime ctime(gdsMap.begin() -> first);
+			//cout << ctime.year << " " << ctime.month << " " 
+			//		<< ctime.day << " " << ctime.hour << " "
+			//			<< ctime.minute << " " << ctime.second << endl;
+			//Counter::begin();
 			// Test code ^^^ 
 
             // Prepare everything before computing
@@ -213,21 +213,21 @@ namespace gpstk
 
 
 			// Test code vvv
-			cout << " cpu time for Predict function in SolverGenWL.cpp: " 
-					<< Counter::end() << endl;
+			//cout << " cpu time for Predict function in SolverGenWL.cpp: " 
+			//		<< Counter::end() << endl;
 			// Test code ^^^
 
 
 			// Test code vvv
-			Counter::begin();
+			//Counter::begin();
 			// Test code ^^^ 
 			
             // Call the Compute() method with the defined equation model.
          Correct( gdsMap );
 
 			// Test code vvv
-			cout << " cpu time for Correct function in SolverGenWL.cpp: " 
-					<< Counter::end() << endl;
+			//cout << " cpu time for Correct function in SolverGenWL.cpp: " 
+			//		<< Counter::end() << endl;
 			// Test code ^^^
             // return
          return gdsMap;

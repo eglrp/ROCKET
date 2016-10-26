@@ -350,6 +350,9 @@ namespace gpstk
          /// Map holding covariance information
       std::map<Variable, VariableDataMap > covarianceMap;
 
+			/// holding covariance information new !!!!
+      Matrix<double> mCoVarMatrix;
+
          /// Boolean indicating if this filter was run at least once
       bool firstTime;
 
