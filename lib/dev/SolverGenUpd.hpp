@@ -29,6 +29,13 @@
 //  Shoujian Zhang, Wuhan University, 2010
 //
 //============================================================================
+//
+//  2016/10/26
+//	 Create this program 
+//  Lei Zhao, SGG, WHU
+// 
+//============================================================================
+
 
 
 #include <list>
@@ -42,7 +49,7 @@
 #include "SolverBase.hpp"
 #include "TypeID.hpp"
 #include "GNSSconstants.hpp"
-
+#include "SimpleKalmanFilter2.hpp"
 
 namespace gpstk
 {
@@ -426,6 +433,8 @@ namespace gpstk
          /// Index belonging to this object.
       int index;
 
+			/// SimpleKalmanFilter2
+		SimpleKalmanFilter2 kFilter;
 
          /// Sets the index and increment classIndex.
       void setIndex(void)

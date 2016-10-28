@@ -97,6 +97,36 @@ add_library (rocket ${STADYN} ${SOURCES} ${SOURCES2})
 install (TARGETS rocket DESTINATION lib)
 install (FILES ${HEADERS} ${HEADERS2} DESTINATION include/rocket )
 
+## Parallel Options
+option(USE_OPENMP "Option for parallel computing, default value is OFF" OFF)
+
+message("openmp=${USE_OPENMP}")
+
+if (USE_OPENMP)
+
+   # add macros
+   add_definitions(-DUSE_OPENMP)
+
+   if (APPLE)
+      set (CMAKE_CXX_COMPILER clang-omp)
+      include_directories("/usr/local/include")
+      include_directories("/usr/local/include/libiomp")
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+      set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lstdc++")
+      set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lstdc++")
+      target_link_libraries(rocket "/usr/local/lib/libiomp5.dylib")
+   elseif ( ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+      set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lstdc++" )
+      set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lstdc++")
+   else (APPLE)
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+      set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -lstdc++" )
+      set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lstdc++")
+   endif (APPLE)
+
+endif(USE_OPENMP)
+
 
 # GPSTk Subdirectories
 add_subdirectory (apps)

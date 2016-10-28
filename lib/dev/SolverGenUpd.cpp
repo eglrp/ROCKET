@@ -422,74 +422,7 @@ namespace gpstk
             // Let's get current time
          gnssDataMap::const_iterator it=gdsMap.begin();
          CommonTime epoch((*it).first);
-//
-/////////////////////// /////////////////////// /////////////////////// ///////////////////////
-//             // Let's get stochastic model set
-//          for(varcoeffMap)
-//          {
-//             stoVarMap => stochastic model -> multiple variables
-//             stoSet.insert();
-//          }
-//
-//          for(stoSet::)
-//          {
-//             stoVarMap.find( (*itSto) );
-//
-//             beg = stoVarMap.lower_bound( (*itSto) );
-//             end = stoVarMap.upper_bound( (*itSto) );
-//
-//             while(beg!=end)
-//             {
-//                varSet.insert( beg->second );
-//                ++beg;
-//             }
-//             
-//             if(varSet.size==1)
-//             {
-//                Variable var( varSet.begin() );
-//
-//             }
-//             else
-//             {
-//                  // Let's get the first variable owing to this 
-//                  // stochastic model
-//                Variable var( varSet.begin() );
-//                VariableSet::const_iterator itVar=varUnkPrepared.find(var);
-//
-//                  // not prepared! 
-//                if( itVar != varUnkPrepared.end() )
-//                {
-//                      // Prepare variable's stochastic model
-//                   var.getModel()->Prepare(epoch,
-//                                           varSource, 
-//                                           varSat, 
-//                                           tData);
-//                }
-//
-//                  // Now, let's get the phiMatrix/qMatrix for varSet!
-//                Matrix<double> phiMatrix, qMatrix;
-//                phiMatrix = var.getModel()->getPhiMatrix();
-//                qMatrix = var.getModel()->getQMatrix();
-//
-//                  // Now, Let's perform the time update according to 
-//                  // the block matrix multiplication
-//
-//                  // Firstly, Let's get the sub-block of the P matrix
-//                  // corresponding to the current 'varSet'
-//                Matrix<numUnknowns, numVar> pMatrix;
-//                for(int i=currentUnknowns)
-//                {
-//                   pMatrix(i,j) = P(i,colIndex);
-//                }
-//
-//                phiMatrix*pMatrix;
-//
-//             }
-//
-//          }
-//
-/////////////////////// /////////////////////// /////////////////////// ///////////////////////
-//
+
             // Visit each Equation in "equList"
          for( std::list<Equation>::const_iterator itEq = equList.begin();
               itEq != equList.end();
@@ -515,6 +448,7 @@ namespace gpstk
                   SatID varSat(var.getSatellite());
                   SourceID varSource(var.getSource());
                   typeValueMap tData( (*itEq).header.typeValueData );
+
 
                      // Prepare variable's stochastic model
                   var.getModel()->Prepare(epoch,
@@ -556,7 +490,9 @@ namespace gpstk
 //
 ////////////////////////// //////////////////////////
 
-                        // Now, Let's update the state and covariance
+
+			
+//                        // Now, Let's update the state and covariance
                      if(phiValue != 1.0)
                      {
                            // Update the state
@@ -848,8 +784,11 @@ namespace gpstk
             //
 
 
-         xhat = xhatminus;
-         P = Pminus;
+//         xhat = xhatminus;
+//         P = Pminus;
+			// Test code vvv
+			kFilter.Reset(xhat, P);
+			// Test code ^^^
 
             //
             // Measurement update using single observables each time.
@@ -920,68 +859,74 @@ namespace gpstk
                i++;
             }
 
-               // Temp measurement
-            double z(tempPrefit);
+					// True measurement update
+				kFilter.Correct( tempPrefit, 
+									  weight,
+									  G,
+									  index );
 
-               // Inverse weight
-            double inv_W(1.0/weight);  
-
-               // M to store the value of  P*G
-            Vector<double> M(numVar,0.0);
-
-               // Now, let's compute M=P*G.
-            for(int i=0; i<numVar; i++)
-            {
-               for(int j=0; j<numUnks; j++)
-               {
-                  M(i) = M(i) + P(i,index(j)) * G(j);
-               }
-            }
-
-            double dotGM(0.0);
-            for(int i=0; i<numUnks; i++)
-            {
-               dotGM = dotGM + G(i)*M(index(i)); 
-            }
-
-               // Compute the Kalman gain
-            Vector<double> K(numVar,0.0); 
-
-            double beta(inv_W + dotGM);
-            K = M/beta;
-
-            double dotGX(0.0);
-            for(int i=0; i<numUnks; i++)
-            {
-               dotGX = dotGX + G(i)*xhat(index(i)); 
-            }
-               // State update
-            xhat = xhat + K*( z - dotGX );
-
-               // Covariance update
-               // old version:
-               // P = P - outer(K,M);
-               // Considering that the P and KM matrix are symetric, 
-               // thus the computation can be accelerated by operating 
-               // the upper triangular matrix. 
-#ifdef USE_OPENMP
-	#pragma omp parallel for
-#endif
-
-            for(int i=0;i<numVar;i++)
-            {
-                  // The diagonal element
-               P(i,i) = P(i,i) -  K(i)*M(i);
-
-                  // The upper/lower triangular element
-               for(int j=(i+1);j<numVar;j++)
-               {
-                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
-               }
-
-            }  // End of 'for(int i = 0; ...)'
-
-         }
+//               // Temp measurement
+//            double z(tempPrefit);
+//
+//               // Inverse weight
+//            double inv_W(1.0/weight);  
+//
+//               // M to store the value of  P*G
+//            Vector<double> M(numVar,0.0);
+//
+//               // Now, let's compute M=P*G.
+//            for(int i=0; i<numVar; i++)
+//            {
+//               for(int j=0; j<numUnks; j++)
+//               {
+//                  M(i) = M(i) + P(i,index(j)) * G(j);
+//               }
+//            }
+//
+//            double dotGM(0.0);
+//            for(int i=0; i<numUnks; i++)
+//            {
+//               dotGM = dotGM + G(i)*M(index(i)); 
+//            }
+//
+//               // Compute the Kalman gain
+//            Vector<double> K(numVar,0.0); 
+//
+//            double beta(inv_W + dotGM);
+//            K = M/beta;
+//
+//            double dotGX(0.0);
+//            for(int i=0; i<numUnks; i++)
+//            {
+//               dotGX = dotGX + G(i)*xhat(index(i)); 
+//            }
+//               // State update
+//            xhat = xhat + K*( z - dotGX );
+//
+//               // Covariance update
+//               // old version:
+//               // P = P - outer(K,M);
+//               // Considering that the P and KM matrix are symetric, 
+//               // thus the computation can be accelerated by operating 
+//               // the upper triangular matrix. 
+//#ifdef USE_OPENMP
+//	#pragma omp parallel for
+//#endif
+//
+//            for(int i=0;i<numVar;i++)
+//            {
+//                  // The diagonal element
+//               P(i,i) = P(i,i) -  K(i)*M(i);
+//
+//                  // The upper/lower triangular element
+//               for(int j=(i+1);j<numVar;j++)
+//               {
+//                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
+//               }
+//
+//            }  // End of 'for(int i = 0; ...)'
+//
+         }  // End of 'for( VariableDataMap::const_iterator ... '
 
 			
 			// Test code vvv
