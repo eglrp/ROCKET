@@ -309,6 +309,22 @@ namespace gpstk
       { return ambFixedMap.size(); }
 
 
+	  	
+	  		/**  Single measurement correction  
+			 * 
+			 * @param z					Measurement
+			 * @param weight			Weight of measurement
+			 * @param G					Vector holding the coefficients of variables
+			 * @param index			Vector holding index of above variables in 
+			 *								the unknown vector
+			 */ 
+		virtual int singleMeasCorrect( const double& z,
+					  				   const double& weight,
+					  				   const Vector<double>& G,
+					  				   const Vector<int>& index )
+		throw(InvalidSolver);
+
+
 
          /// Returns an index identifying this object.
       virtual int getIndex(void) const;

@@ -108,6 +108,83 @@ namespace gpstk
    { return "SolverGenUpd"; }
 
 
+		/**  Single measurement correction  
+		 * 
+		 * @param z					Measurement
+		 * @param weight			Weight of measurement
+		 * @param G					Vector holding the coefficients of variables
+		 * @param index			Vector holding index of above variables in 
+		 *								the unknown vector
+		 */ 
+   int SolverGenUpd::singleMeasCorrect( const double& z,
+					  					 const double& weight,
+					  					 const Vector<double>& G,
+					  					 const Vector<int>& index )
+   throw(InvalidSolver)
+   {
+			// Inverse weight
+		double inv_W(1.0/weight);
+
+			// Num of var in xhat
+		int numVar( xhat.size() );
+
+			// Size of G and index vector
+		int numUnks( index.size() );
+
+			// M to store the value of  P*G
+		Vector<double> M(numVar,0.0);
+
+			// Now, let's compute M=P*G.
+		for(int i=0; i<numVar; i++)
+		{
+			for(int j=0; j<numUnks; j++)
+			{
+				M(i) = M(i) + P(i,index(j)) * G(j);
+			}  // End of ' for(int j=0; j<numUnks; j++) ' 
+		}  // End of ' for(int i=0; i<numVar; i++) '
+
+		double dotGM(0.0);
+		for(int i=0; i<numUnks; i++)
+		{
+			dotGM = dotGM + G(i)*M(index(i));
+		}  // End of ' for(int i=0; i<numUnks; i++) '
+
+			// Compute the Kalman gain
+		Vector<double> K(numVar,0.0);
+
+		double beta(inv_W + dotGM);
+		K = M/beta; 
+
+		double dotGX(0.0);
+		for(int i=0; i<numUnks; i++)
+		{
+			dotGX = dotGX + G(i)*xhat(index(i));
+		}  // End of ' for(int i=0; i<numUnks; i++) '
+
+			// State update
+		xhat = xhat + K*( z - dotGX );
+
+				// Covariance update
+#ifdef USE_OPENMP
+	#pragma omp parallel for
+#endif
+		for(int i=0;i<numVar;i++)
+		{
+				// The diagonal element
+			P(i,i) = P(i,i) -  K(i)*M(i);
+
+				// The upper/lower triangular element
+			for(int j=(i+1);j<numVar;j++)
+			{
+				P(j,i) = P(i,j) = P(i,j) - K(i)*M(j);
+			}  // End of ' for(int j=(i+1);j<numVar;j++) '
+		}  // End of ' for(int i=0;i<numVar;i++) '
+
+		return 0;
+
+   }
+
+
       /* Returns a reference to a gnnsSatTypeValue object after
        * solving the previously defined equation system.
        *
@@ -199,40 +276,14 @@ namespace gpstk
 
       try
       {
-			// Test code vvv
-//			CivilTime ctime(gdsMap.begin() -> first);
-//			cout << ctime.year << " " << ctime.month << " " 
-//					<< ctime.day << " " << ctime.hour << " "
-//						<< ctime.minute << " " << ctime.second << endl;
-//			Counter::begin();
-		
-			std::cout << "before Predict" << std::endl;
-			// Test code ^^^ 
-
-		
+				
             // Prepare everything before computing
          Predict( gdsMap );
 
-
-
-			// Test code vvv
-//			cout << " cpu time for Predict function in SolverGenUpd.cpp: " 
-//					<< Counter::end() << endl;
-			// Test code ^^^
-
-			std::cout << "before Correct" << std::endl;
-
-			// Test code vvv
-//			Counter::begin();
-			// Test code ^^^ 
-			
+					
             // Call the Compute() method with the defined equation model.
          Correct( gdsMap );
 
-			// Test code vvv
-//			cout << " cpu time for Correct function in SolverGenUpd.cpp: " 
-//					<< Counter::end() << endl;
-			// Test code ^^^
             // return
          return gdsMap;
 
@@ -329,22 +380,6 @@ namespace gpstk
                  ++itVar1 )
             {
 //                  // Fill the diagonal element
-//
-//                  // Check if '(*itVar1)' belongs to 'covarianceMap'
-//               if( covarianceMap.find( (*itVar1) ) != covarianceMap.end() )
-//               {
-//                     // If it belongs, get element from 'covarianceMap'
-//                  currentErrorCov(i, i) = covarianceMap[ (*itVar1) ][ (*itVar1) ];
-//               }
-//               else  
-//               {     
-//                     // If it doesn't belong, ask for default covariance
-//                  currentErrorCov(i, i) = (*itVar1).getInitialVariance();
-//               }
-//
-//
-//               int j(i+1);      // Set 'j' index
-
 					// Test code vvv
 					int now_index = itVar1->getNowIndex();
 					int pre_index = itVar1->getPreIndex();
@@ -362,19 +397,6 @@ namespace gpstk
 					// Test code ^^^
                   // Remove current Variable from 'tempSet'
                tempSet.erase( (*itVar1) );
-
-//               for( VariableSet::const_iterator itVar2 = tempSet.begin();
-//                    itVar2 != tempSet.end();
-//                    ++itVar2 )
-//               {
-//                     // If it belongs, get element from 'covarianceMap'
-//                  currentErrorCov(i, j) =
-//                     currentErrorCov(j, i) =
-//                        covarianceMap[ (*itVar1) ][ (*itVar2) ];
-//                  ++j;
-//               }
-//
-//               ++i;
 
 					for( VariableSet::const_iterator itVar2 = tempSet.begin();
                      itVar2 != tempSet.end() ; itVar2++ )
@@ -455,16 +477,6 @@ namespace gpstk
                                           varSource, 
                                           varSat, 
                                           tData);
-
-                     // Now, Let's get the position of this variable in 
-                     // 'currentUnknowns'
-//                  int index(0);
-//                  VariableSet::const_iterator itVar1=currentUnknowns.begin();
-//                  while( (*itVar1) != var )
-//                  {
-//                     index++;
-//                     itVar1++;
-//                  }
 
 						// Test code vvv
 						int index( var.getNowIndex() );
@@ -594,46 +606,18 @@ namespace gpstk
       try
       {
 
-				// Added by Lei Zhao, 2016/10/05 vvv (^_^)
-				// Time Counter setting
-			//Counter::begin();
-			std::cout << "before measUpdate" << std::endl;
-				// ^^^ (^_^)
-
-            // Ambiguity Constraints
+				// Ambiguity Constraints
          MeasUpdate( gdsMap );
 
 
-				// Added by Lei Zhao, 2016/10/05 vvv (^_^)
-				// Time Counter setting
-			//std::cout << "cpu time for MeasUpdate function in SolverGenUpd.cpp: "
-			//		<< Counter::end() << std::endl;
-			std::cout << "before AmbiguityFixing" << std::endl;
-				// ^^^ (^_^)
-
-			// Test code vvv
-			//Counter::begin();
-			// Test code ^^^
-            // Ambiguity Constraints
+				// Ambiguity Constraints
          AmbiguityFixing( gdsMap );
 
-			// Test code vvv
-			//std::cout << "cpu time for AmbiguityFixing function in SolverGenUpd.cpp: "
-			//		<< Counter::end() << std::endl;
-			// Test code ^^^
 
 
-			// Test code vvv
-//			Counter::begin();
-			// Test code ^^^
              // Post compute
-			std::cout << "before preCompute" << std::endl;
          postCompute(gdsMap);
 
-			// Test code vvv
-//			std::cout << "cpu time for postCompute function in SolverGenUpd.cpp: "
-//					<< Counter::end() << std::endl;
-			// Test code ^^^ 
       }
       catch(Exception& u)
       {
@@ -684,9 +668,6 @@ namespace gpstk
       double totaltime;
       start=clock();
 
-		// Test code vvv 
-		//Counter::begin();
-		// Test code ^^^
          VariableSet currentUnknowns( equSystem.getCurrentUnknowns() );
 
             // Fill the initialState vector  
@@ -774,21 +755,13 @@ namespace gpstk
 
          }  // End of 'If(...)'
 
-			// Test code vvv
-//			cout << "cpu time for acquisition of ambFixedMap in MeasUpdate function: "
-//					<< Counter::end() << endl;
-//			Counter::begin();
-			// Test code ^^^
             //
             // Now, Let's preform the measurment udpate
             //
 
 
-//         xhat = xhatminus;
-//         P = Pminus;
-			// Test code vvv
-			kFilter.Reset(xhat, P);
-			// Test code ^^^
+         xhat = xhatminus;
+         P = Pminus;
 
             //
             // Measurement update using single observables each time.
@@ -802,9 +775,6 @@ namespace gpstk
             // apply the ambiguity constraint equations
             //
 
-				// test code vvv
-			//	Counter::begin();
-				// test code ^^^
 
          for( VariableDataMap::const_iterator itamb=ambFixedMap.begin();
               itamb !=ambFixedMap.end();
@@ -860,81 +830,14 @@ namespace gpstk
             }
 
 					// True measurement update
-				kFilter.Correct( tempPrefit, 
-									  weight,
-									  G,
-									  index );
+				singleMeasCorrect( tempPrefit, 
+										 weight,
+									    G,
+									    index );
 
-//               // Temp measurement
-//            double z(tempPrefit);
-//
-//               // Inverse weight
-//            double inv_W(1.0/weight);  
-//
-//               // M to store the value of  P*G
-//            Vector<double> M(numVar,0.0);
-//
-//               // Now, let's compute M=P*G.
-//            for(int i=0; i<numVar; i++)
-//            {
-//               for(int j=0; j<numUnks; j++)
-//               {
-//                  M(i) = M(i) + P(i,index(j)) * G(j);
-//               }
-//            }
-//
-//            double dotGM(0.0);
-//            for(int i=0; i<numUnks; i++)
-//            {
-//               dotGM = dotGM + G(i)*M(index(i)); 
-//            }
-//
-//               // Compute the Kalman gain
-//            Vector<double> K(numVar,0.0); 
-//
-//            double beta(inv_W + dotGM);
-//            K = M/beta;
-//
-//            double dotGX(0.0);
-//            for(int i=0; i<numUnks; i++)
-//            {
-//               dotGX = dotGX + G(i)*xhat(index(i)); 
-//            }
-//               // State update
-//            xhat = xhat + K*( z - dotGX );
-//
-//               // Covariance update
-//               // old version:
-//               // P = P - outer(K,M);
-//               // Considering that the P and KM matrix are symetric, 
-//               // thus the computation can be accelerated by operating 
-//               // the upper triangular matrix. 
-//#ifdef USE_OPENMP
-//	#pragma omp parallel for
-//#endif
-//
-//            for(int i=0;i<numVar;i++)
-//            {
-//                  // The diagonal element
-//               P(i,i) = P(i,i) -  K(i)*M(i);
-//
-//                  // The upper/lower triangular element
-//               for(int j=(i+1);j<numVar;j++)
-//               {
-//                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
-//               }
-//
-//            }  // End of 'for(int i = 0; ...)'
-//
          }  // End of 'for( VariableDataMap::const_iterator ... '
 
 			
-			// Test code vvv
-//			cout << "cpu time for ambiguity constraint in MeasUpdate function: "
-//					<< Counter::end() << endl;
-//			Counter::begin();
-			// Test code ^^^
-
 			   //
             // Let's perform the measurement update one observable by one
             //
@@ -945,11 +848,6 @@ namespace gpstk
          prefitResiduals.resize(numEqu,0.0);
          hMatrix.resize( numEqu, numVar, 0.0 );
 
-			// Test code vvv
-				// declare here for memory reuse
-			//Vector<double> M( numVar, 0.0 );
-			//Vector<double> K( numVar, 0.0 );
-			// Test code ^^^
          int row(0);
          for( std::list<Equation>::const_iterator itEq = equList.begin();
               itEq != equList.end();
@@ -966,19 +864,6 @@ namespace gpstk
 
                // Weight
             double weight;
-
-//				// Test code vvv
-//					// number of Variables in current Equation
-//				int numNowVar = (itEq -> body).size();
-//					// holding current Equation Variable index in Unknowns
-//				Vector<int> index(numNowVar);
-//					// holding current Equation Variable coeffience
-//				Vector<double> G(numNowVar);
-//				
-//					// resize the Matrix and Vector, it just reset all element as zero
-//				M.resize( M.size(), 0.0 );
-//				K.resize( K.size(), 0.0 );
-//				// Test code ^^^
 
                // First, fill weights matrix
                // Check if current 'tData' has weight info. If you don't want those
@@ -998,9 +883,6 @@ namespace gpstk
                
                // Now, let's visit all Variables and the corresponding 
                // coefficient in this equation description
-				// Test code vvv
-//				int i = 0;
-				// Test code ^^^
             for( VarCoeffMap::const_iterator vcmIter = (*itEq).body.begin();
                  vcmIter != (*itEq).body.end();
                  ++vcmIter, i++)
@@ -1044,11 +926,6 @@ namespace gpstk
 
                }  // End of 'if( (*itCol).isDefaultForced() ) ...'
 
-					// Test code vvv
-//					hMatrix( row, var.getNowIndex() ) = tempCoef;
-//					index(i) = var.getNowIndex();
-//					G(i) = tempCoef;
-					// Test code ^^^
                   // Now, Let's get the position of this variable in 
                   // 'currentUnknowns'
                VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
@@ -1064,9 +941,6 @@ namespace gpstk
                // Now, Let's create the index for current float unks
 
                // Float unks number for current equation
-				// Test code ^^^
-//            int numUnks(numNowVar);
-				// Test code ^^^ 
             int numUnks(tempCoeffMap.size());
             Vector<int> index(numUnks);
             Vector<double> G(numUnks);
@@ -1094,66 +968,12 @@ namespace gpstk
                i++;
             }
 
-               // Temp measurement
-            double z(tempPrefit);
+					// True measurement update
+				singleMeasCorrect( tempPrefit, 
+										 weight,
+									    G,
+									    index );
 
-               // Inverse weight
-            double inv_W(1.0/weight);  
-
-               // M to store the value of  P*G
-            Vector<double> M(numVar,0.0);
-
-               // Now, let's compute M=P*G.
-            for(int i=0; i<numVar; i++)
-            {
-               for(int j=0; j<numUnks; j++)
-               {
-                  M(i) = M(i) + P(i,index(j)) * G(j);
-               }
-            }
-
-            double dotGM(0.0);
-            for(int i=0; i<numUnks; i++)
-            {
-               dotGM = dotGM + G(i)*M(index(i)); 
-            }
-
-               // Compute the Kalman gain
-           Vector<double> K(numVar,0.0); 
-
-            double beta(inv_W + dotGM);
-            K = M/beta;
-
-            double dotGX(0.0);
-            for(int i=0; i<numUnks; i++)
-            {
-               dotGX = dotGX + G(i)*xhat(index(i)); 
-            }
-
-               // State update
-            xhat = xhat + K*( z - dotGX );
-
-               // Covariance update
-               // old version:
-               // P = P - outer(K,M);
-               // Considering that the P and KM matrix are symetric, 
-               // thus the computation can be accelerated by operating 
-               // the upper triangular matrix. 
-#ifdef USE_OPENMP
-	#pragma omp parallel for
-#endif
-            for(int i=0;i<numVar;i++)
-            {
-                  // The diagonal element
-               P(i,i) = P(i,i) -  K(i)*M(i);
-
-                  // The upper/lower triangular element
-               for(int j=(i+1);j<numVar;j++)
-               {
-                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
-               }
-
-            }  // End of 'for(int i = 0; ...)'
 
                // insert current 'prefit' into 'prefitResiduals'
             prefitResiduals(row) = tempPrefit;
