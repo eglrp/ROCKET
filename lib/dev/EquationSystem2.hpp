@@ -302,6 +302,8 @@ namespace gpstk
       virtual std::list<Equation> getCurrentEquationsList() const
       { return currentEquationsList; };
 
+         /// Setup Equation Index
+      void setUpEquationIndex(VariableSet& old_variable_set);
 
          /// Destructor
       virtual ~EquationSystem2() {};

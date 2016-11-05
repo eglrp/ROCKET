@@ -109,7 +109,9 @@ namespace gpstk
                        bool satIndexed,
                        double variance,
                        double coef,
-                       bool forceCoef )
+                       bool forceCoef,
+                       int  now_index,
+                       int  pre_index)
    {
 
          // Call Init method
@@ -117,7 +119,9 @@ namespace gpstk
             pModel,
             variance,
             coef,
-            forceCoef );
+            forceCoef,
+            now_index,
+            pre_index);
 
          // This couple lines override settings by Init.
       isSourceIndexed = sourceIndexed;
@@ -142,7 +146,9 @@ namespace gpstk
                         double variance,
                         double coef,
                         bool forceCoef, 
-                        bool typeIndex)
+                        bool typeIndex,
+                        int now_index,
+                        int pre_index)
    {
 
       varType = type;
@@ -171,7 +177,10 @@ namespace gpstk
 
       isTypeIndexed = typeIndex;    // default is true, this is important YAN Wei added
 
-     
+      m_now_index = now_index;
+
+      m_pre_index = pre_index;
+
       return;
 
    }  // End of method 'Variable::Init()'
@@ -191,7 +200,7 @@ namespace gpstk
                ( forceDefault == right.isDefaultForced() )              &&
                ( varSource == right.getSource() )                       &&
                ( varSat == right.getSatellite() )                       &&
-               ( isTypeIndexed == right.getTypeIndexed() )
+               ( isTypeIndexed == right.getTypeIndexed() )                               
                );            
 
    }  // End of 'Variable::operator=='
@@ -317,6 +326,10 @@ namespace gpstk
       setSatellite( right.getSatellite() );
 
       setTypeIndexed(right.getTypeIndexed());              
+
+      setNowIndex(right.getNowIndex());
+
+      setPreIndex(right.getPreIndex());
 
 
       return *this;

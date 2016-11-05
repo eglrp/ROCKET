@@ -75,7 +75,9 @@ namespace gpstk
                 bool satIndexed           = false,
                 double variance           = 1.0e10,
                 double coef               = 1.0,
-                bool forceCoef            = false );
+                bool forceCoef            = false,
+                int  now_index          = -1, 
+                int  pre_index          = -1 );
 
 
          /// Get variable type
@@ -213,6 +215,21 @@ namespace gpstk
       Variable& setSatellite(const SatID& satellite)
       { varSat = satellite; return (*this); };
 
+      void  setNowIndex( int index){
+         m_now_index = index;
+      }
+      
+      void setPreIndex( int index){
+         m_pre_index = index;
+      }
+
+      int getNowIndex() const {
+         return m_now_index;
+      }
+
+      int getPreIndex() const{
+         return m_pre_index;
+      }
 
          /// Equality operator
       virtual bool operator==(const Variable& right) const;
@@ -339,6 +356,11 @@ namespace gpstk
          /// Internal satellite this variable is assigned to (if any).
       SatID varSat;
 
+         /// the index about this Variable in tariableSet now. 
+      int m_now_index;
+
+         /// the index about this Variable in VariableSet previous
+      int m_pre_index;
 
          /** Initializing function
           *
@@ -355,11 +377,12 @@ namespace gpstk
                  double variance = 4.0e14,
                  double coef     = 1.0,
                  bool forceCoef  = false,
-                 bool typeIndex  = true);
-
+                 bool typeIndex  = true,
+                 int now_index   = -1,
+                 int pre_index   = -1);
+      
 
    }; // End of class 'Variable'
-
 
       /// A structure used to store the coefficent information for a Variable.
       /// created by shjzhang
@@ -394,6 +417,8 @@ namespace gpstk
    };
 
    /// Handy type definition
+   
+   typedef std::vector<Variable> VariableVector;
 
    typedef std::set<Variable> VariableSet;
 
@@ -402,7 +427,6 @@ namespace gpstk
    typedef std::map<Variable, double> VariableDataMap;
 
    typedef std::map<Variable, Coefficient> VarCoeffMap;
-
 
    namespace StringUtils
    {

@@ -1328,7 +1328,13 @@ namespace gpstk
           * costly operation.
           */
       SourceIDSet getSourceIDSet( void ) const;
-
+      
+         /** Get SourceIDSet which relative to satellite
+          *  in CommonTime.
+          */
+      SourceIDSet getSourceIDSet( const SatID& satellite,
+                                  const CommonTime& time)
+         throw( CommonTimeNotFound );
 
          /** Get a set with all the SatID's in this data structure.
           *
