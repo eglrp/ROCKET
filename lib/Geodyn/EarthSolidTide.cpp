@@ -146,11 +146,11 @@ namespace gpstk
        * @param utc     time in UTC
        * @param dCS     correction to normalized earth potential coefficients
        */
-   void EarthSolidTide::getSolidTide(CommonTime utc, Matrix<double>& dCS)
+   Matrix<double> EarthSolidTide::getSolidTide(CommonTime utc)
    {
       // resize dCS
-      int size = indexTranslator(4, 4) - 1;
-      dCS.resize(size,2, 0.0);
+      int size = indexTranslator(4, 2) - 1;
+      Matrix<double> dCS(size,2, 0.0);
 
       // TT
       CommonTime tt( pRefSys->UTC2TT(utc) );
@@ -410,6 +410,8 @@ namespace gpstk
       //   It does not need to do permanent tide correction for tide-free EGM08.
       //
       /////////////////////////////////////////////////////////////////////////
+
+      return dCS;
 
    }  // End of method 'EarthSolidTide::getSolidTide()'
 

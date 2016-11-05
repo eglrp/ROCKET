@@ -8,7 +8,6 @@
 #include "ConfDataReader.hpp"
 
 #include "EGM08GravityModel.hpp"
-#include "SolarSystem.hpp"
 
 #include "SP3EphemerisStore.hpp"
 #include "SatDataReader.hpp"
@@ -91,7 +90,7 @@ int main(void)
    int prn;
    try
    {
-       prn = confReader.getValueAsInt("PRN", "DEFAULT");
+       prn = confReader.getValueAsInt("SATPRN", "DEFAULT");
    }
    catch(...)
    {
@@ -122,9 +121,9 @@ int main(void)
        return 1;
    }
 
-   CivilTime ct0(year,mon,day,hour,min,sec, TimeSystem::GPS);
-   CommonTime gps0( ct0.convertToCommonTime() );
-   CommonTime utc0( refSys.GPS2UTC(gps0) );
+   CivilTime CT(year,mon,day,hour,min,sec, TimeSystem::GPS);
+   CommonTime GPS0( CT.convertToCommonTime() );
+   CommonTime UTC0( refSys.GPS2UTC(GPS0) );
 
    // SP3 File
    SP3EphemerisStore sp3Eph;
@@ -155,12 +154,12 @@ int main(void)
    EarthBody eb;
 
    // SatData File
-   SatDataReader satReader;
+   SatDataReader satData;
 
    try
    {
        string satDataFile = confReader.getValue("SatDataFile", "DEFAULT");
-       satReader.open(satDataFile);
+       satData.open(satDataFile);
    }
    catch(...)
    {
@@ -173,6 +172,7 @@ int main(void)
    Spacecraft sc;
    sc.setNumOfParam(0);
    sc.setSatID(sat);
+   sc.setSatData(satData);
 
    // EGM08 Gravity Model
    EGM08GravityModel egm;
@@ -181,8 +181,8 @@ int main(void)
    int degree, order;
    try
    {
-       degree = confReader.getValueAsInt("EGMDEG", "DEFAULT");
-       order  = confReader.getValueAsInt("EGMORD", "DEFAULT");
+       degree = confReader.getValueAsInt("EGMDEG", "FORCEMODEL");
+       order  = confReader.getValueAsInt("EGMORD", "FORCEMODEL");
    }
    catch(...)
    {
@@ -197,7 +197,7 @@ int main(void)
    // EGM File
    try
    {
-      string egmFile = confReader.getValue("EGMFILE", "DEFAULT");
+      string egmFile = confReader.getValue("EGMFILE", "FORCEMODEL");
       egm.loadFile(egmFile);
    }
    catch(...)
@@ -215,7 +215,7 @@ int main(void)
    bool correctSolidTide;
    try
    {
-      correctSolidTide = confReader.getValueAsBoolean("SOLIDTIDE", "DEFAULT");
+      correctSolidTide = confReader.getValueAsBoolean("SOLIDTIDE", "FORCEMODEL");
    }
    catch(...)
    {
@@ -235,8 +235,8 @@ int main(void)
 
    try
    {
-       degree = confReader.getValueAsInt("EOTDEG", "DEFAULT");
-       order  = confReader.getValueAsInt("EOTORD", "DEFAULT");
+       degree = confReader.getValueAsInt("EOTDEG", "FORCEMODEL");
+       order  = confReader.getValueAsInt("EOTORD", "FORCEMODEL");
    }
    catch(...)
    {
@@ -250,7 +250,7 @@ int main(void)
    // EOT File
    try
    {
-      string eotFile = confReader.getValue("EOTFILE", "DEFAULT");
+      string eotFile = confReader.getValue("EOTFILE", "FORCEMODEL");
       oceanTide.loadFile(eotFile);
    }
    catch(...)
@@ -263,7 +263,7 @@ int main(void)
    bool correctOceanTide;
    try
    {
-       correctOceanTide = confReader.getValueAsBoolean("OCEANTIDE", "DEFAULT");
+       correctOceanTide = confReader.getValueAsBoolean("OCEANTIDE", "FORCEMODEL");
    }
    catch(...)
    {
@@ -285,7 +285,7 @@ int main(void)
 
    try
    {
-       correctPoleTide = confReader.getValueAsBoolean("POLETIDE", "DEFAULT");
+       correctPoleTide = confReader.getValueAsBoolean("POLETIDE", "FORCEMODEL");
    }
    catch(...)
    {
@@ -299,11 +299,12 @@ int main(void)
       egm.setEarthPoleTide(poleTide);
    }
 
+   // Length
    double length;
 
    try
    {
-       length = confReader.getValueAsDouble("LENGTH", "DEFAULT");
+       length = confReader.getValueAsDouble("ARCLENGTH", "INTEGRATOR");
    }
    catch(...)
    {
@@ -312,23 +313,23 @@ int main(void)
        return 1;
    }
 
-   cout << fixed << setprecision(15);
+   cout << fixed;
 
    int i = 0;
 
    while(true)
    {
        // Current Time
-       CommonTime gps( gps0 + i*900.0 );
-       CommonTime utc( refSys.GPS2UTC(gps) );
+       CommonTime GPS( GPS0 + i*900.0 );
+       CommonTime UTC( refSys.GPS2UTC(GPS) );
 
        // Current Position and Velocity in ITRS
        Vector<double> r_itrs, v_itrs;
 
        try
        {
-           r_itrs = sp3Eph.getXvt(sat, gps).x.toVector();
-           v_itrs = sp3Eph.getXvt(sat, gps).v.toVector();
+           r_itrs = sp3Eph.getXvt(sat, GPS).x.toVector();
+           v_itrs = sp3Eph.getXvt(sat, GPS).v.toVector();
        }
        catch(...)
        {
@@ -338,11 +339,11 @@ int main(void)
        }
 
        // Current Transform Matrix
-       Matrix<double> c2t ( refSys.C2TMatrix(utc)  );
+       Matrix<double> c2t ( refSys.C2TMatrix(UTC)  );
        Matrix<double> t2c ( transpose(c2t) );
 
        // Current Transform Matrix Time Dot
-       Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
+       Matrix<double> dc2t( refSys.dC2TMatrix(UTC) );
        Matrix<double> dt2c( transpose(dc2t) );
 
        // Current Position and Velocity in ICRS
@@ -350,18 +351,18 @@ int main(void)
        Vector<double> v_icrs = t2c * v_itrs + dt2c * r_itrs;
 
        // Current Spacecraft
-       sc.setPosition(r_icrs);
-       sc.setVelocity(v_icrs);
-       sc.setCurrentTime(utc);
-       sc.setBlockType(satReader.getBlock(sat,utc));
-       sc.setMass(satReader.getMass(sat,utc));
+       sc.setCurrentTime(UTC);
+       sc.setCurrentPos(r_icrs);
+       sc.setCurrentVel(v_icrs);
 
        // Current Acceleration
-       egm.doCompute(utc, eb, sc);
+       egm.doCompute(UTC, eb, sc);
        Vector<double> a_icrs( egm.getAcceleration() );
        Vector<double> a_itrs( c2t * a_icrs );
 
-       cout << setw(20) << i*900.0/3600.0;
+       cout << CivilTime(GPS);
+
+       cout << setprecision(12);
        cout << setw(20) << a_icrs(0)
             << setw(20) << a_icrs(1)
             << setw(20) << a_icrs(2)
@@ -369,7 +370,7 @@ int main(void)
 
        i++;
 
-       if(i >= length*3600/900) break;
+       if(i > length*3600/900) break;
    }
 
    return 0;

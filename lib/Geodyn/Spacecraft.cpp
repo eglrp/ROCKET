@@ -63,71 +63,71 @@ namespace gpstk
 
 
       /// Set state vector
-   Spacecraft& Spacecraft::setStateVector(const Vector<double>& sv)
+   Spacecraft& Spacecraft::setCurrentState(const Vector<double>& state)
    {
       // check the size of sv
-      if(sv.size() == (42+6*numOfParam))
+      if(state.size() == (42+6*numOfParam))
       {
          // resize dr_dp0 and dv_dp0
          dr_dp0.resize(3*numOfParam, 0.0);
          dv_dp0.resize(3*numOfParam, 0.0);
 
          // set position
-         r(0) = sv(0); r(1) = sv(1); r(2) = sv(2);
+         r(0) = state(0); r(1) = state(1); r(2) = state(2);
 
          // set velocity
-         v(0) = sv(3); v(1) = sv(4); v(2) = sv(5);
+         v(0) = state(3); v(1) = state(4); v(2) = state(5);
 
 
          // set position related partial derivatives
          for(int i=0; i<3*3; ++i)
          {
-             dr_dr0(i) = sv( 6+i);
-             dr_dv0(i) = sv(15+i);
+             dr_dr0(i) = state( 6+i);
+             dr_dv0(i) = state(15+i);
          }
 
          for(int i=0; i<3*numOfParam; ++i)
          {
-             dr_dp0(i) = sv(24+i);
+             dr_dp0(i) = state(24+i);
          }
 
          // set velocity related partial derivatives
          for(int i=0; i<3*3; ++i)
          {
-             dv_dr0(i) = sv(24+3*numOfParam+i);
-             dv_dv0(i) = sv(33+3*numOfParam+i);
+             dv_dr0(i) = state(24+3*numOfParam+i);
+             dv_dv0(i) = state(33+3*numOfParam+i);
          }
 
          for(int i=0; i<3*numOfParam; ++i)
          {
-             dv_dp0(i) = sv(42+3*numOfParam+i);
+             dv_dp0(i) = state(42+3*numOfParam+i);
          }
 
       }
       else
       {
-         cerr << "Spacecraft::setStateVector() error, the size does not match." << endl;
+         cerr << "Set Spacecraft Current State error." << endl;
       }
 
       return (*this);
 
-   }  // End of method 'Spacecraft::setStateVector()'
+   }  // End of method 'Spacecraft::setCurrentState()'
 
 
-      /// Get state vector of Spacecraft
-   Vector<double> Spacecraft::getStateVector() const
+      /// Get current state of Spacecraft
+   Vector<double> Spacecraft::getCurrentState() const
    {
 
-      Vector<double> sv(42+6*numOfParam, 0.0);
+      Vector<double> state(42+6*numOfParam, 0.0);
 
 
       //// Parameters related to equation of motion ////
 
       // position
-      sv(0) = r(0); sv(1) = r(1); sv(2) = r(2);
+      state(0) = r(0); state(1) = r(1); state(2) = r(2);
 
       // velocity
-      sv(3) = v(0); sv(4) = v(1); sv(5) = v(2);
+      state(3) = v(0); state(4) = v(1); state(5) = v(2);
 
 
       //// parameters related to equation of variation ////
@@ -137,14 +137,14 @@ namespace gpstk
       // dr_dr0, dr_dv0
       for(int i=0; i<3*3; ++i)
       {
-          sv( 6+i) = dr_dr0(i);
-          sv(15+i) = dr_dv0(i);
+          state( 6+i) = dr_dr0(i);
+          state(15+i) = dr_dv0(i);
       }
 
       // dr_dp0
       for(int i=0; i<3*numOfParam; ++i)
       {
-          sv(24+i) = dr_dp0(i);
+          state(24+i) = dr_dp0(i);
       }
 
       // velocity related partial derivatives
@@ -152,19 +152,19 @@ namespace gpstk
       // dv_dr0, dv_dv0
       for(int i=0; i<3*3; ++i)
       {
-          sv(24+3*numOfParam+i) = dv_dr0(i);
-          sv(33+3*numOfParam+i) = dv_dv0(i);
+          state(24+3*numOfParam+i) = dv_dr0(i);
+          state(33+3*numOfParam+i) = dv_dv0(i);
       }
 
       // dv_dp0
       for(int i=0; i<3*numOfParam; ++i)
       {
-          sv(42+3*numOfParam+i) = dv_dp0(i);
+          state(42+3*numOfParam+i) = dv_dp0(i);
       }
 
-      return sv;
+      return state;
 
-   }  // End of method 'Spacecraft::getStateVector()'
+   }  // End of method 'Spacecraft::getCurrentState()'
 
 
 
@@ -360,8 +360,10 @@ namespace gpstk
    ostream& operator<<( ostream& s,
                         const gpstk::Spacecraft& sc )
    {
-       s << sc.getSatID() << ' ' << CivilTime(sc.getCurrentTime()) << ' '
-         << sc.getBlockType() << ' ' << sc.getMass();
+       s << sc.getSatID() << ' '
+         << CivilTime(sc.getCurrentTime()) << ' '
+         << sc.getCurrentBlock() << ' '
+         << sc.getCurrentMass();
 
        return s;
 

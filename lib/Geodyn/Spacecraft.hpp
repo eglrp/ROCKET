@@ -26,8 +26,8 @@
 * Class to encapsulate Spacecraft related paramenters.
 */
 
-#ifndef GPSTK_SPACECRAFT_HPP
-#define GPSTK_SPACECRAFT_HPP
+#ifndef SPACECRAFT_HPP
+#define SPACECRAFT_HPP
 
 #include <iostream>
 #include <string>
@@ -37,6 +37,7 @@
 
 #include "CommonTime.hpp"
 #include "SatID.hpp"
+#include "SatDataReader.hpp"
 
 
 namespace gpstk
@@ -62,97 +63,104 @@ namespace gpstk
 
 
          /// Set current time of Spacecraft
-      inline Spacecraft& setCurrentTime(const CommonTime& utc)
+      inline Spacecraft& setCurrentTime(const CommonTime& t)
       {
-         curTime = utc;
-
+         utc = t;
          return (*this);
       }
 
          /// Get current time of Spacecraft
       inline CommonTime getCurrentTime() const
       {
-         return curTime;
+         return utc;
       }
 
 
          /// Set SatID of Spacecraft
       inline Spacecraft& setSatID(const SatID& si)
       {
-         satID = si;
-
+         sat = si;
          return (*this);
       }
 
          /// Get SatID of Spacecraft
       inline SatID getSatID() const
       {
-         return satID;
+         return sat;
       }
 
 
-         /// Set block type of Spacecraft
-      inline Spacecraft& setBlockType(const std::string& bt)
+         /// Set SatData
+      inline Spacecraft& setSatData(SatDataReader& sd)
       {
-         blockType = bt;
-
-         return (*this);
+          pSatData = &sd;
+          return (*this);
       }
 
-         /// Get block type of Spacecraft
-      inline std::string getBlockType() const
+         /// Get SatData
+      inline SatDataReader* getSatData() const
       {
-         return blockType;
+          return pSatData;
       }
 
+         /// Set current block of Spacecraft
+//      inline Spacecraft& setCurrentBlock(const std::string& b)
+//      {
+//         block = b;
+//         return (*this);
+//      }
 
-         /// Set mass of Spacecraft
-      inline Spacecraft& setMass(const double& m)
+         /// Get current block of Spacecraft
+      inline std::string getCurrentBlock() const
       {
-         mass = m;
-
-         return (*this);
+         return pSatData->getBlock(sat,utc);
       }
 
-         /// Get mass of Spacecraft
-      inline double getMass() const
+
+         /// Set current mass of Spacecraft
+//      inline Spacecraft& setCurrentMass(const double& m)
+//      {
+//         mass = m;
+//         return (*this);
+//      }
+
+         /// Get current mass of Spacecraft
+      inline double getCurrentMass() const
       {
-         return mass;
+         return pSatData->getMass(sat,utc);
       }
 
 
-         /// Set position of Spacecraft
-      inline Spacecraft& setPosition(const Vector<double>& pos)
+         /// Set current position of Spacecraft
+      inline Spacecraft& setCurrentPos(const Vector<double>& pos)
       {
          r = pos;
-
          return (*this);
       }
 
-         /// Get position of Spacecraft
-      inline Vector<double> getPosition() const
+         /// Get current position of Spacecraft
+      inline Vector<double> getCurrentPos() const
       {
          return r;
       }
 
 
-         /// Set velocity of Spacecraft
-      inline Spacecraft& setVelocity(const Vector<double>& vel)
+         /// Set current velocity of Spacecraft
+      inline Spacecraft& setCurrentVel(const Vector<double>& vel)
       {
          v = vel;
-
          return (*this);
       }
 
-         /// Get velocity of Spacecraft
-      inline Vector<double> getVelocity() const
+         /// Get current velocity of Spacecraft
+      inline Vector<double> getCurrentVel() const
       {
          return v;
       }
 
 
-         /// Set position and velocity of Spacecraft
-      inline Spacecraft& setPosVel(const Vector<double>& rv)
+         /// Set current position and velocity of Spacecraft
+      inline Spacecraft& setCurrentPosVel(const Vector<double>& rv)
       {
           r(0) = rv(0); r(1) = rv(1); r(2) = rv(2);
           v(0) = rv(3); v(1) = rv(4); v(2) = rv(5);
@@ -160,8 +168,8 @@ namespace gpstk
           return (*this);
       }
 
-         /// Get position and velocity of Spacecraft
-      inline Vector<double> getPosVel() const
+         /// Get current position and velocity of Spacecraft
+      inline Vector<double> getCurrentPosVel() const
       {
           Vector<double> rv(6,0.0);
           rv(0) = r(0); rv(1) = r(1); rv(2) = r(2);
@@ -193,7 +201,6 @@ namespace gpstk
       inline Spacecraft& setIsEclipsed(const bool& b)
       {
           isEclipsed = b;
-
           return (*this);
       }
 
@@ -248,12 +255,12 @@ namespace gpstk
       }
 
 
-         /// Set state vector of Spacecraft
-      Spacecraft& setStateVector(const Vector<double>& sv);
+         /// Set current state of Spacecraft
+      Spacecraft& setCurrentState(const Vector<double>& state);
 
 
-         /// Get state vector of Spacecraft
-      Vector<double> getStateVector() const;
+         /// Get current state of Spacecraft
+      Vector<double> getCurrentState() const;
 
 
          /// Get transition matrix of Spacecraft
@@ -268,34 +275,33 @@ namespace gpstk
       Matrix<double> getSensitivityMatrix() const;
 
 
-         /// Convert position and velocity from kepler orbit elements
+         /// Convert kepler orbit elements to position and velocity
       Spacecraft& convertFromKepler(const Vector<double>& kepler);
 
-         /// Convert position and velocity of Spacecraft to kepler orbit elements
+         /// Convert position and velocity to kepler orbit elements
       Vector<double> convertToKepler() const;
 
-
-   private:
 
          /// Reset state of Spacecraft
       void resetState();
 
 
-         /// Current time of Spacecraft
-      CommonTime curTime;
+   private:
 
-         /// SatID of Spacecraft
-      SatID satID;
+         /// Current time
+      CommonTime utc;
 
-         /// Block type of spacecraft
-      std::string blockType;
+         /// SatID
+      SatID sat;
 
-         /// Mass of spacecraft
-      double mass;
+         /// SatData
+      SatDataReader* pSatData;
 
 
-         /// State vector     6*n + 42
+         /// Current position
       Vector<double> r;       // 3*1
+
+         /// Current velocity
       Vector<double> v;       // 3*1
 
          /// Number of parameters
@@ -304,7 +310,7 @@ namespace gpstk
          /// Is eclipsed
       bool isEclipsed;
 
-         /// Partial derivatives
+         /// Current partial derivatives
       Vector<double> dr_dr0;  // 3*3
       Vector<double> dr_dv0;  // 3*3
       Vector<double> dr_dp0;  // 3*n
@@ -327,4 +333,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_SPACECRAFT_HPP
+#endif   // SPACECRAFT_HPP

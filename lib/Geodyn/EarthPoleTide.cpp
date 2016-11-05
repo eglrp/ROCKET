@@ -43,11 +43,11 @@ namespace gpstk
        * @param utc     time in UTC
        * @param dCS     normalized earth potential coefficients
        */
-   void EarthPoleTide::getPoleTide(CommonTime utc, Matrix<double>& dCS)
+   Matrix<double> EarthPoleTide::getPoleTide(CommonTime utc)
    {
       // resize dCS
       int size = indexTranslator(2,1) - 1;
-      dCS.resize(size,2, 0.0);
+      Matrix<double> dCS(size,2, 0.0);
 
       // compute time in years since J2000
       double MJD_UTC = MJD(utc).mjd;
@@ -104,6 +104,8 @@ namespace gpstk
       // only (n,m) = (2,1) considered
       dCS(id21, 0) += -2.1778e-10 * (m1 - 0.01724*m2);
       dCS(id21, 1) += -1.7232e-10 * (m2 - 0.03365*m1);
+
+      return dCS;
 
    }  // End of method 'EarthPoleTide::getPoleTide()'
 

@@ -42,7 +42,7 @@
 #include "EGM08GravityModel.hpp"
 #include "GNSSconstants.hpp"
 #include "StringUtils.hpp"
-#include "MJD.hpp"
+#include "Epoch.hpp"
 #include "Legendre.hpp"
 
 using namespace std;
@@ -149,8 +149,20 @@ namespace gpstk
        */
    void EGM08GravityModel::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
    {
+//       cout << "EGM: " << CivilTime(utc) << endl;
+
       // make a copy of gmData.normalizedCS
       Matrix<double> CS( gmData.normalizedCS );
+
+//      cout.unsetf(ios_base::fixed);
+//      for(int i=0; i<CS.rows(); ++i)
+//      {
+//          for(int j=0; j<2; ++j)
+//          {
+//              cout << setw(25) << CS(i,j);
+//          }
+//          cout << endl;
+//      }
 
       // compute time in years since J2000
       double MJD_UTC = MJD(utc).mjd;
@@ -165,7 +177,7 @@ namespace gpstk
       const double value[3] =
       {
          // the value of C20, C30 and C40 at 2000.0
-//         -0.48416514e-3, 0.9571612e-6, 0.5399659e-6
+//         -0.484165143790815e-3, 0.957161207093473e-6, 0.539965866638991e-6
          -0.48416531e-3, 0.9571612e-6, 0.5399659e-6
 //         -0.48416948e-3
       };
@@ -218,7 +230,7 @@ namespace gpstk
 
       // get the mean pole at epoch 2000.0 from IERS Conventions 2010
       // see IERS Conventions 2010, Equation 7.25
-      double xpm, ypm;
+      double xpm(0.0), ypm(0.0);
 
       if(MJD_UTC < 55197.0)    // until 2010.0
       {
@@ -235,7 +247,6 @@ namespace gpstk
       xpm = xpm * AS_TO_RAD;
       ypm = ypm * AS_TO_RAD;
 
-
       // Rotate from the Earth-fixed frame, where the coefficients are
       // pertinent, to an inertial frame, where the satellite motion is
       // computed
@@ -244,19 +255,24 @@ namespace gpstk
       // C21 = +sqrt(3)*xpm*C20 - xpm*C22 + ypm*S22
       // S21 = -sqrt(3)*ypm*C20 - ypm*C22 - xpm*S22
       //
-      CS(id21,0) = +std::sqrt(3.0)*xpm*CS(id20,0) - xpm*CS(id22,0) + ypm*CS(id22,1);
-      CS(id21,1) = -std::sqrt(3.0)*ypm*CS(id20,0) - ypm*CS(id22,0) - xpm*CS(id22,1);
+      double C20 = CS(id20,0);
+      double C22 = CS(id22,0); double S22 = CS(id22,1);
 
+      double C21 = +std::sqrt(3.0)*xpm*C20 - xpm*C22 + ypm*S22;
+      double S21 = -std::sqrt(3.0)*ypm*C20 - ypm*C22 - xpm*S22;
+
+      CS(id21,0) = C21; CS(id21,1) = S21;
+
+
+      // corrections of CS
+      Matrix<double> dCS;
 
       // solid tide
       if(pSolidTide != NULL)
       {
-         Matrix<double> dCS;
-         pSolidTide->getSolidTide(utc, dCS);
+         dCS = pSolidTide->getSolidTide(utc);
 
-         int row = dCS.rows();
-
-         for(int i=0; i<row; ++i)
+         for(int i=0; i<dCS.rows(); ++i)
          {
              CS(i,0) += dCS(i,0);
              CS(i,1) += dCS(i,1);
@@ -266,12 +282,9 @@ namespace gpstk
       // ocean tide
       if(pOceanTide != NULL)
       {
-         Matrix<double> dCS;
-         pOceanTide->getOceanTide(utc, dCS);
+         dCS = pOceanTide->getOceanTide(utc);
 
-         int row = dCS.rows();
-
-         for(int i=0; i<row; ++i)
+         for(int i=0; i<dCS.rows(); ++i)
          {
              CS(i,0) += dCS(i,0);
              CS(i,1) += dCS(i,1);
@@ -281,12 +294,9 @@ namespace gpstk
       // pole tide
       if(pPoleTide != NULL)
       {
-         Matrix<double> dCS;
-         pPoleTide->getPoleTide(utc, dCS);
+         dCS = pPoleTide->getPoleTide(utc);
 
-         int row = dCS.rows();
-
-         for(int i=0; i<row; ++i)
+         for(int i=0; i<dCS.rows(); ++i)
          {
              CS(i,0) += dCS(i,0);
              CS(i,1) += dCS(i,1);
@@ -295,9 +305,9 @@ namespace gpstk
 
 
       // satellite position in ICRS
-      Vector<double> r_sat_icrs = sc.getPosition();
+      Vector<double> r_sat_icrs = sc.getCurrentPos();
 
-      // transformation matrixs between ICRS and ITRS
+      // transformation matrixes between ICRS and ITRS
       Matrix<double> C2T = pRefSys->C2TMatrix(utc);
       Matrix<double> T2C = transpose(C2T);
 
@@ -313,11 +323,27 @@ namespace gpstk
       double lat = std::atan( rz / std::sqrt(rx*rx + ry*ry) );
       double lon = std::atan2( ry, rx );
 
-      // sine and cosine of geocentric latitude and longitude of satellite
+      // sine and cosine of geocentric latitude
       double slat = std::sin(lat);
-      double slon = std::sin(lon);
       double clat = std::cos(lat);
-      double clon = std::cos(lon);
+
+      // sine and cosine of geocentric longitude
+      //    slon(0) = sin(0*lon);
+      //    slon(1) = sin(1*lon);
+      //        ......
+      //    slon(i) = slon(i-1)*cos(lon) + clon(i-1)*sin(lon)
+      //    clon(i) = clon(i-1)*cos(lon) - slon(i-1)*sin(lon)
+      Vector<double> slon(desiredDegree+1,0.0);
+      Vector<double> clon(desiredDegree+1,0.0);
+
+      slon(0) = 0.0;            clon(0) = 1.0;
+      slon(1) = std::sin(lon);  clon(1) = std::cos(lon);
+
+      for(int i=2; i<=desiredDegree; ++i)
+      {
+          slon(i) = slon(i-1)*clon(1) + clon(i-1)*slon(1);
+          clon(i) = clon(i-1)*clon(1) - slon(i-1)*slon(1);
+      }
 
       // fully normalized associated legendre functions and its gradients
       Vector<double> leg0, leg1, leg2;
@@ -325,42 +351,42 @@ namespace gpstk
 
       // partials of (rho, lat, lon) in ITRS to (x, y, z) in ITRS
       Matrix<double> b(3,3,0.0);
-      b(0,0) =  clat * clon;
-      b(0,1) =  clat * slon;
+      b(0,0) =  clat * clon(1);
+      b(0,1) =  clat * slon(1);
       b(0,2) =  slat;
-      b(1,0) = -slat * clon / rho;
-      b(1,1) = -slat * slon / rho;
+      b(1,0) = -slat * clon(1) / rho;
+      b(1,1) = -slat * slon(1) / rho;
       b(1,2) =  clat / rho;
-      b(2,0) = -slon / (rho * clat);
-      b(2,1) =  clon / (rho * clat);
+      b(2,0) = -slon(1) / (rho * clat);
+      b(2,1) =  clon(1) / (rho * clat);
 
 
       // partials of b to (rho, lat, lon) in ITRS
 
       Matrix<double> db_drho(3,3,0.0);     // db / drho
-      db_drho(1,0) =  slat * clon / (rho*rho);
-      db_drho(1,1) =  slat * slon / (rho*rho);
+      db_drho(1,0) =  slat * clon(1) / (rho*rho);
+      db_drho(1,1) =  slat * slon(1) / (rho*rho);
       db_drho(1,2) = -clat / (rho*rho);
-      db_drho(2,0) =  slon / (rho*rho * clat);
-      db_drho(2,1) = -clon / (rho*rho * clat);
+      db_drho(2,0) =  slon(1) / (rho*rho * clat);
+      db_drho(2,1) = -clon(1) / (rho*rho * clat);
 
       Matrix<double> db_dlat(3,3,0.0);     // db / dlat
-      db_dlat(0,0) = -slat * clon;
-      db_dlat(0,1) = -slat * slon;
+      db_dlat(0,0) = -slat * clon(1);
+      db_dlat(0,1) = -slat * slon(1);
       db_dlat(0,2) =  clat;
-      db_dlat(1,0) = -clat * clon / rho;
-      db_dlat(1,1) = -clat * slon / rho;
+      db_dlat(1,0) = -clat * clon(1) / rho;
+      db_dlat(1,1) = -clat * slon(1) / rho;
       db_dlat(1,2) = -slat / rho;
-      db_dlat(2,0) = -slat * slon / (rho * clat*clat);
-      db_dlat(2,1) =  slat * clon / (rho * clat*clat);
+      db_dlat(2,0) = -slat * slon(1) / (rho * clat*clat);
+      db_dlat(2,1) =  slat * clon(1) / (rho * clat*clat);
 
       Matrix<double> db_dlon(3,3,0.0);     // db / dlon
-      db_dlon(0,0) = -clat * slon;
-      db_dlon(0,1) =  clat * clon;
-      db_dlon(1,0) =  slat * slon / rho;
-      db_dlon(1,1) = -slat * clon / rho;
-      db_dlon(2,0) = -clon / (rho * clat);
-      db_dlon(2,1) = -slon / (rho * clat);
+      db_dlon(0,0) = -clat * slon(1);
+      db_dlon(0,1) =  clat * clon(1);
+      db_dlon(1,0) =  slat * slon(1) / rho;
+      db_dlon(1,1) = -slat * clon(1) / rho;
+      db_dlon(2,0) = -clon(1) / (rho * clat);
+      db_dlon(2,1) = -slon(1) / (rho * clat);
 
 
       ////////////// partials of v to (rho, lat, lon) in ITRS /////////////////
@@ -407,7 +433,7 @@ namespace gpstk
       for(int n=0; n<=desiredDegree; ++n)
       {
          // (ae/rho)^n
-         double ae_rho_n = std::pow(gmData.ae/rho, n);
+         double fct = std::pow(gmData.ae/rho, n);
 
          // loop for order
          for(int m=0; m<=n && m<=desiredOrder; ++m)
@@ -415,55 +441,43 @@ namespace gpstk
             // index for (n,m)
             int idnm = indexTranslator(n,m) - 1;
 
-            // Pnm
+            // Pnm and its derivatives wrt latitude
             double P0 = leg0(idnm);
-            // dPnm / dlat
             double P1 = leg1(idnm);
-            // d(dPnm/dlat) / dlat
             double P2 = leg2(idnm);
-
-//            cout << setw(3) << n << " "
-//                 << setw(3) << m << " "
-//                 << setw(20) << P0 << " "
-//                 << setw(20) << P1 << " "
-//                 << setw(20) << P2 << endl;
 
             // Cnm, Snm
             double Cnm = CS(idnm, 0);
             double Snm = CS(idnm, 1);
-//            cout << setw(20) << Cnm << " "
-//                 << setw(20) << Snm << endl;
 
             // sin(m*lon) and cos(m*lon)
-            double smlon = std::sin(m*lon);
-            double cmlon = std::cos(m*lon);
-//            cout << setw(20) << smlon << " "
-//                 << setw(20) << cmlon << endl;
+            double smlon = slon(m);
+            double cmlon = clon(m);
 
             // f_rll
-            f_rll(0) += -gm_r2 * (n+1) * ae_rho_n * P0 * (Cnm*cmlon+Snm*smlon);
-            f_rll(1) +=  gm_r1 * ae_rho_n * P1 * (Cnm*cmlon+Snm*smlon);
-            f_rll(2) +=  gm_r1 * m * ae_rho_n * P0 * (-Cnm*smlon+Snm*cmlon);
+            f_rll(0) += -gm_r2 * (n+1) * fct * P0 * (Cnm*cmlon+Snm*smlon);
+            f_rll(1) +=  gm_r1 * fct * P1 * (Cnm*cmlon+Snm*smlon);
+            f_rll(2) +=  gm_r1 * m * fct * P0 * (-Cnm*smlon+Snm*cmlon);
 
             // g_rll
-            g_rll(0,0) +=  gm_r3 * (n+1)*(n+2) * ae_rho_n * P0 * (Cnm*cmlon+Snm*smlon);
-            g_rll(0,1) += -gm_r2 * (n+1) * ae_rho_n * P1 * (Cnm*cmlon+Snm*smlon);
-            g_rll(0,2) += -gm_r2 * (n+1)*m * ae_rho_n * P0 * (-Cnm*smlon+Snm*cmlon);
-            g_rll(1,1) +=  gm_r1 * ae_rho_n * P2 * (Cnm*cmlon+Snm*smlon);
-            g_rll(1,2) +=  gm_r1 * m * ae_rho_n * P1 * (-Cnm*smlon+Snm*cmlon);
-            g_rll(2,2) += -gm_r1 * m*m * ae_rho_n * P0 * (Cnm*cmlon+Snm*smlon);
+            g_rll(0,0) +=  gm_r3 * (n+1)*(n+2) * fct * P0 * (Cnm*cmlon+Snm*smlon);
+            g_rll(0,1) += -gm_r2 * (n+1) * fct * P1 * (Cnm*cmlon+Snm*smlon);
+            g_rll(0,2) += -gm_r2 * (n+1)*m * fct * P0 * (-Cnm*smlon+Snm*cmlon);
+            g_rll(1,1) +=  gm_r1 * fct * P2 * (Cnm*cmlon+Snm*smlon);
+            g_rll(1,2) +=  gm_r1 * m * fct * P1 * (-Cnm*smlon+Snm*cmlon);
+            g_rll(2,2) += -gm_r1 * m*m * fct * P0 * (Cnm*cmlon+Snm*smlon);
 
             if(satGravimetry)
             {
                // c_rll
-               c_rll(0) = -gm_r2 * (n+1) * ae_rho_n * P0 * cmlon;
-               c_rll(1) =  gm_r1 * ae_rho_n * P1 * cmlon;
-               c_rll(2) = -gm_r1 * m * ae_rho_n * P0 * smlon;
+               c_rll(0) = -gm_r2 * (n+1) * fct * P0 * cmlon;
+               c_rll(1) =  gm_r1 * fct * P1 * cmlon;
+               c_rll(2) = -gm_r1 * m * fct * P0 * smlon;
 
                // s_rll
-               s_rll(0) = -gm_r2 * (n+1) * ae_rho_n * P0 * smlon;
-               s_rll(1) =  gm_r1 * ae_rho_n * P1 * smlon;
-               s_rll(2) =  gm_r1 * m * ae_rho_n * P0 * cmlon;
+               s_rll(0) = -gm_r2 * (n+1) * fct * P0 * smlon;
+               s_rll(1) =  gm_r1 * fct * P1 * smlon;
+               s_rll(2) =  gm_r1 * m * fct * P0 * cmlon;
 
                // df_itrs_dcs
                df_itrs_dcs(0,idnm+0) = c_rll(0)*b(0,0) + c_rll(1)*b(1,0) + c_rll(2)*b(2,0);
@@ -484,46 +498,24 @@ namespace gpstk
       g_rll(2,0) = g_rll(0,2);
       g_rll(2,1) = g_rll(1,2);
 
-
       // gravitation acceleration in ICRS
-//      a(0) = b(0,0)*f_rll(0) + b(1,0)*f_rll(1) + b(2,0)*f_rll(2);
-//      a(1) = b(0,1)*f_rll(0) + b(1,1)*f_rll(1) + b(2,1)*f_rll(2);
-//      a(2) = b(0,2)*f_rll(0) + b(1,2)*f_rll(1) + b(2,2)*f_rll(2);
-//      a = T2C * a;
       a = T2C * transpose(b) * f_rll;
 
 
       // partials of gravitation acceleration in ICRS to (x, y, z) in ICRS
       Matrix<double> df_itrs_drll(3,3,0.0);
-      df_itrs_drll(0,0) = g_rll(0,0)*b(0,0) + f_rll(0)*db_drho(0,0)
-                        + g_rll(1,0)*b(1,0) + f_rll(1)*db_drho(1,0)
-                        + g_rll(2,0)*b(2,0) + f_rll(2)*db_drho(2,0);
-      df_itrs_drll(0,1) = g_rll(0,1)*b(0,0) + f_rll(0)*db_dlat(0,0)
-                        + g_rll(1,1)*b(1,0) + f_rll(1)*db_dlat(1,0)
-                        + g_rll(2,1)*b(2,0) + f_rll(2)*db_dlat(2,0);
-      df_itrs_drll(0,2) = g_rll(0,2)*b(0,0) + f_rll(0)*db_dlon(0,0)
-                        + g_rll(1,2)*b(1,0) + f_rll(1)*db_dlon(1,0)
-                        + g_rll(2,2)*b(2,0) + f_rll(2)*db_dlon(2,0);
-
-      df_itrs_drll(1,0) = g_rll(0,0)*b(0,1) + f_rll(0)*db_drho(0,1)
-                        + g_rll(1,0)*b(1,1) + f_rll(1)*db_drho(1,1)
-                        + g_rll(2,0)*b(2,1) + f_rll(2)*db_drho(2,1);
-      df_itrs_drll(1,1) = g_rll(0,1)*b(0,1) + f_rll(0)*db_dlat(0,1)
-                        + g_rll(1,1)*b(1,1) + f_rll(1)*db_dlat(1,1)
-                        + g_rll(2,1)*b(2,1) + f_rll(2)*db_dlat(2,1);
-      df_itrs_drll(1,2) = g_rll(0,2)*b(0,1) + f_rll(0)*db_dlon(0,1)
-                        + g_rll(1,2)*b(1,1) + f_rll(1)*db_dlon(1,1)
-                        + g_rll(2,2)*b(2,1) + f_rll(2)*db_dlon(2,1);
-
-      df_itrs_drll(2,0) = g_rll(0,0)*b(0,2) + f_rll(0)*db_drho(0,2)
-                        + g_rll(1,0)*b(1,2) + f_rll(1)*db_drho(1,2)
-                        + g_rll(2,0)*b(2,2) + f_rll(2)*db_drho(2,2);
-      df_itrs_drll(2,1) = g_rll(0,1)*b(0,2) + f_rll(0)*db_dlat(0,2)
-                        + g_rll(1,1)*b(1,2) + f_rll(1)*db_dlat(1,2)
-                        + g_rll(2,1)*b(2,2) + f_rll(2)*db_dlat(2,2);
-      df_itrs_drll(2,2) = g_rll(0,2)*b(0,2) + f_rll(0)*db_dlon(0,2)
-                        + g_rll(1,2)*b(1,2) + f_rll(1)*db_dlon(1,2)
-                        + g_rll(2,2)*b(2,2) + f_rll(2)*db_dlon(2,2);
+      for(int i=0; i<3; ++i)
+      {
+          df_itrs_drll(i,0) = g_rll(0,0)*b(0,i) + f_rll(0)*db_drho(0,i)
+                            + g_rll(1,0)*b(1,i) + f_rll(1)*db_drho(1,i)
+                            + g_rll(2,0)*b(2,i) + f_rll(2)*db_drho(2,i);
+          df_itrs_drll(i,1) = g_rll(0,1)*b(0,i) + f_rll(0)*db_dlat(0,i)
+                            + g_rll(1,1)*b(1,i) + f_rll(1)*db_dlat(1,i)
+                            + g_rll(2,1)*b(2,i) + f_rll(2)*db_dlat(2,i);
+          df_itrs_drll(i,2) = g_rll(0,2)*b(0,i) + f_rll(0)*db_dlon(0,i)
+                            + g_rll(1,2)*b(1,i) + f_rll(1)*db_dlon(1,i)
+                            + g_rll(2,2)*b(2,i) + f_rll(2)*db_dlon(2,i);
+      }
 
       da_dr = T2C * df_itrs_drll * b * C2T;
 

@@ -26,8 +26,8 @@
  * Class to do Relativity Effect calculation.
  */
 
-#ifndef GPSTK_RELATIVITY_EFFECT_HPP
-#define GPSTK_RELATIVITY_EFFECT_HPP
+#ifndef RELATIVITY_EFFECT_HPP
+#define RELATIVITY_EFFECT_HPP
 
 #include "ForceModel.hpp"
 
@@ -74,4 +74,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_RELATIVITY_EFFECT_HPP
+#endif   // RELATIVITY_EFFECT_HPP

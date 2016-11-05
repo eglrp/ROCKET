@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2015
 //
@@ -24,13 +24,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -39,8 +39,8 @@
  * @file EGM08GravityModel.hpp
  */
 
-#ifndef GPSTK_EGM08_GRAVITY_MODEL_HPP
-#define GPSTK_EGM08_GRAVITY_MODEL_HPP
+#ifndef EGM08_GRAVITY_MODEL_HPP
+#define EGM08_GRAVITY_MODEL_HPP
 
 #include "EarthGravitation.hpp"
 
@@ -54,11 +54,11 @@ namespace gpstk
     */
    class EGM08GravityModel : public EarthGravitation
    {
-   public:  
+   public:
          /** Constructor
           * @param n    Desired degree
           * @param m    Desired order
-          */ 
+          */
       EGM08GravityModel (int n = 0, int m = 0)
          : EarthGravitation(n, m)
       {
@@ -78,11 +78,11 @@ namespace gpstk
          gmData.refMJD =  51544.0;
 
        }    // End of constructor
- 
+
 
          /// Default destructor
       virtual ~EGM08GravityModel() {}
- 
+
 
          /// Load file
       void loadFile(std::string file)
@@ -109,4 +109,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_EGM08_GRAVITY_MODEL_HPP
+#endif   // EGM08_GRAVITY_MODEL_HPP

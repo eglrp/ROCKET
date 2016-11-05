@@ -41,8 +41,8 @@
 *
 */
 
-#ifndef GPSTK_EARTH_GRAVITATION_HPP
-#define GPSTK_EARTH_GRAVITATION_HPP
+#ifndef EARTH_GRAVITATION_HPP
+#define EARTH_GRAVITATION_HPP
 
 #include "ForceModel.hpp"
 #include "ReferenceSystem.hpp"
@@ -264,4 +264,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_EARTH_GRAVITATION_HPP
+#endif   // EARTH_GRAVITATION_HPP

@@ -1,9 +1,13 @@
+/*
+ * Test for the EOP time series.
+ *
+ */
+
 #include <iostream>
 
 #include "ConfDataReader.hpp"
 
-#include "EOPDataStore.hpp"
-#include "EOPDataStore2.hpp"
+#include "ReferenceSystem.hpp"
 
 #include "Epoch.hpp"
 
@@ -14,52 +18,99 @@ using namespace gpstk;
 
 int main(void)
 {
+    // Configuration file
+    ConfDataReader confReader;
+    try
+    {
+        confReader.open("../../ROCKET/oldtests/test.conf");
+    }
+    catch(...)
+    {
+        cerr << "Configuration file open error." << endl;
 
-   ConfDataReader confReader;
-   try
-   {
-      confReader.open("../../ROCKET/oldtests/test.conf");
-   }
-   catch(...)
-   {
-      cerr << "Conf File Open Error." << endl;
-      return 1;
-   }
+        return 1;
+    }
 
-   EOPDataStore eopDataStore;
-   EOPDataStore2 eopDataStore2;
+    // EOP Data Store
+    EOPDataStore2 eopDataStore;
+    eopDataStore.setUseBulletinB(true);
 
-   string eopFile = confReader.getValue("IERSEOPFILE", "DEFAULT");
-   try
-   {
-      eopDataStore.loadIERSFile(eopFile);
-      eopDataStore2.loadIERSFile(eopFile);
-   }
-   catch(...)
-   {
-      cerr << "IERS EOP File Load Error." << endl;
-      return 1;
-   }
+    // IERS EOP file
+    string eopFile = confReader.getValue("IERSEOPFILE", "DEFAULT");
+    try
+    {
+        eopDataStore.loadIERSFile(eopFile);
+    }
+    catch(...)
+    {
+        cerr << "EOP File Load Error." << endl;
 
-   CivilTime CT(2015,6,30,12,0,0.0, TimeSystem::UTC);
-   CommonTime UTC( CT.convertToCommonTime() );
+        return 1;
+    }
 
-   EOPDataStore::EOPData eopData = eopDataStore.getEOPData(UTC);
-   cout << "EOPDataStore: " << endl;
-   cout << eopData << endl;
+    // Leap Sec Store
+    LeapSecStore leapSecStore;
 
-   EOPDataStore2::EOPData eopData2 = eopDataStore2.getEOPData(UTC);
+    // IERS LeapSecond file
+    string lsFile  = confReader.getValue("IERSLSFILE", "DEFAULT");
+    try
+    {
+        leapSecStore.loadFile(lsFile);
+    }
+    catch(...)
+    {
+        cerr << "IERS Leap Second File Load Error." << endl;
 
-   double cor[4] = {0.0};
-   eopDataStore2.PMUT1_OCEANS(UTC,cor);
+        return 1;
+    }
 
-   eopData2.xp += cor[0];
-   eopData2.yp += cor[1];
-   eopData2.UT1mUTC += cor[2];
-   eopData2.LOD += cor[3];
+    // Reference System
+    ReferenceSystem refSys;
+    refSys.setEOPDataStore(eopDataStore);
+    refSys.setLeapSecStore(leapSecStore);
 
-   cout << "EOPDataStore2: " << endl;
-   cout << eopData2 << endl;
 
-   return 0;
+    // Time
+    CivilTime ct0(2000,1,1,12,0,0.0, TimeSystem::UTC);
+    CommonTime utc0( ct0.convertToCommonTime() );
+
+    CommonTime utcx( utc0 );
+
+    // Variables
+    int np = 365*10;
+
+    EOPDataStore2::EOPData eopx;
+
+    Vector<double> xp(np,0.0),yp(np,0.0);
+    Vector<double> UT1mUTC(np,0.0);
+    Vector<double> dX(np,0.0),dY(np,0.0);
+
+
+    eopDataStore.setInterpolationPoints(8);
+    eopDataStore.setRegularization(true);
+    eopDataStore.setOceanTides(true);
+    eopDataStore.setLibration(true);
+
+    cout << fixed << setprecision(8);
+
+    for(int i=0; i<np; ++i)
+    {
+        /* Comparison of EOP time series */
+
+        eopx = eopDataStore.getEOPData(utcx);
+
+//        cout << setw(5) << YDSTime(utcx).doy;
+        cout << setw(5) << i;
+        cout << setw(20) << eopx.xp
+             << setw(20) << eopx.yp
+             << setw(20) << eopx.UT1mUTC
+             << setw(20) << eopx.dX
+             << setw(20) << eopx.dY
+             << endl;
+
+        utcx.addDays(1);
+
+    }
+
+    return 0;
 }

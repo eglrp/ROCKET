@@ -27,8 +27,8 @@
  * Class to do GNSS Orbit configuration.
  */
 
-#ifndef GNSSORBIT_HPP
-#define GNSSORBIT_HPP
+#ifndef GNSS_ORBIT_HPP
+#define GNSS_ORBIT_HPP
 
 #include "EquationOfMotion.hpp"
 #include "EarthBody.hpp"
@@ -109,40 +109,10 @@ namespace gpstk
       }
 
 
-         /// Set sun gravitation
-      inline GNSSOrbit& setSunGravitation(SunGravitation& sun)
-      {
-         pSun = &sun;
-
-         return (*this);
-      }
-
-         /// Get sun gravitation
-      inline SunGravitation* getSunGravitation() const
-      {
-         return pSun;
-      }
-
-
-         /// Set moon gravitation
-      inline GNSSOrbit& setMoonGravitation(MoonGravitation& moon)
-      {
-         pMoon = &moon;
-
-         return (*this);
-      }
-
-         /// Get moon gravitation
-      inline MoonGravitation* getMoonGravitation() const
-      {
-         return pMoon;
-      }
-
-
          /// Set ThirdBody
-      inline GNSSOrbit& setThirdBody(ThirdBody& third)
+      inline GNSSOrbit& setThirdBody(ThirdBody& thd)
       {
-          pThird = &third;
+          pThd = &thd;
 
           return (*this);
       }
@@ -150,7 +120,7 @@ namespace gpstk
          /// Get ThirdBody
       inline ThirdBody* getThirdBody() const
       {
-          return pThird;
+          return pThd;
       }
 
 
@@ -201,22 +171,12 @@ namespace gpstk
 
          /// Force models
       EarthGravitation* pEGM;
-      SunGravitation*   pSun;
-      MoonGravitation*  pMoon;
-      ThirdBody*        pThird;
+      ThirdBody*        pThd;
       SolarPressure*    pSRP;
       RelativityEffect* pRel;
-
-      // Force models configuration
-      bool bEGM;
-      bool bSun;
-      bool bMoon;
-      bool bThird;
-      bool bSRP;
-      bool bRel;
 
    }; // End of class 'GNSSOrbit'
 
 }  // End of namespace 'gpstk'
 
-#endif   // GNSSORBIT_HPP
+#endif   // GNSS_ORBIT_HPP

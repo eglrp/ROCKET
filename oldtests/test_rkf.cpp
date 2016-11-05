@@ -1,13 +1,6 @@
-/*************************************************************************
-	> File Name: test_rkf.cpp
-	> Author:
-	> Mail:
-	> Created Time: 2016年07月24日 星期日 15时04分51秒
- ************************************************************************/
-
 #include<iostream>
 
-#include "RungeKuttaFehlberg.hpp"
+#include "RKF78Integrator.hpp"
 
 #include "EquationOfMotion.hpp"
 
@@ -46,7 +39,7 @@ int main(void)
 
    Vector<double> y0(1,0.0);
 
-   RungeKuttaFehlberg rkf;
+   RKF78Integrator rkf;
    rkf.setStepSize(0.25);
 
    for(int i=0; i<100000; ++i)

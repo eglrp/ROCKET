@@ -9,7 +9,7 @@
 
 #include "ReferenceSystem.hpp"
 
-#include "SP3EphemerisStore.hpp"
+#include "Epoch.hpp"
 
 
 using namespace std;
@@ -33,6 +33,7 @@ int main(void)
 
     // EOP Data Store
     EOPDataStore2 eopDataStore;
+    eopDataStore.setUseBulletinB(true);
 
     // IERS EOP file
     string eopFile = confReader.getValue("STKEOPFILE", "DEFAULT");
@@ -42,11 +43,15 @@ int main(void)
     }
     catch(...)
     {
-        cerr << "STK Earth Orientation Parameters File Load Error." << endl;
+        cerr << "EOP File Load Error." << endl;
 
         return 1;
     }
 
+    eopDataStore.setInterpolationPoints(8);
+    eopDataStore.setRegularization(true);
+    eopDataStore.setOceanTides(true);
+    eopDataStore.setLibration(true);
 
     // Leap Sec Store
     LeapSecStore leapSecStore;
@@ -70,65 +75,48 @@ int main(void)
     rs.setEOPDataStore(eopDataStore);
     rs.setLeapSecStore(leapSecStore);
 
-//    cout << "sizeof(eopDataStore): " << sizeof(eopDataStore) << endl;
-//    cout << "sizeof(leapSecStore): " << sizeof(leapSecStore) << endl;
-//    cout << "sizeof(rs): " << sizeof(rs) << endl;
+    // GPS
+    int year, mon, day, hour, min;
+    double sec;
 
-    // IGS SP3 file
-    SP3EphemerisStore sp3Eph;
-    sp3Eph.rejectBadPositions(true);
-    sp3Eph.setPosGapInterval(900+1);
-    sp3Eph.setPosMaxInterval(9*900+1);
-
-    string sp3File;
-    while( (sp3File = confReader.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
+    try
     {
-        try
-        {
-            sp3Eph.loadFile(sp3File);
-        }
-        catch(...)
-        {
-            cerr << "SP3 File Load Error." << endl;
+        year = confReader.getValueAsInt("YEAR", "DEFAULT");
+        mon  = confReader.getValueAsInt("MON", "DEFAULT");
+        day  = confReader.getValueAsInt("DAY", "DEFAULT");
+        hour = confReader.getValueAsInt("HOUR", "DEFAULT");
+        min  = confReader.getValueAsInt("MIN", "DEFAULT");
+        sec  = confReader.getValueAsDouble("SEC", "DEFAULT");
+    }
+    catch(...)
+    {
+        cerr << "Get Initial Time Error." << endl;
 
-            return 1;
-        }
+        return 1;
     }
 
-    // GPS
-//    CivilTime CT(2015,1,1,12,0,0.0, TimeSystem::GPS);
-//    CommonTime GPS( CT.convertToCommonTime() );
+    CivilTime CT(2014,12,31,20,30,0.0, TimeSystem::GPS);
+    CommonTime GPS0( CT.convertToCommonTime() );
+    CommonTime UTC0( rs.GPS2UTC(GPS0) );
 
-//    cout << "GPS: " << CT << endl;
+//    cout << CivilTime(UTC0) << endl;
 
-    // UTC
-//    CommonTime UTC( rs.GPS2UTC(GPS) );
-//    cout << "UTC: " << CivilTime(UTC) << endl;
-
-    // TT
-//    CommonTime TT( rs.UTC2TT(UTC) );
-
-    CivilTime CT(2014,1,1,0,0,0.0, TimeSystem::UTC);
-    CommonTime UTC( CT.convertToCommonTime() );
-
-    CommonTime GPS( rs.UTC2GPS(UTC) );
-    CommonTime TT ( rs.UTC2TT (UTC) );
-
-
-    for(int i=0; i<=24*360; ++i)
+    // Loop
+    for(int i=0; i<31*4; ++i)
     {
-        CommonTime time = UTC + i*3600.0;
+        CommonTime GPS = GPS0 + i*900.0;
+        CommonTime UTC = rs.GPS2UTC(GPS);
 
-        Matrix<double> T2C( rs.T2CMatrix(time) );
+        Matrix<double> T2C( rs.T2CMatrix(UTC) );
 
-        CivilTime temp(time);
+        JulianDate JD(GPS);
+        long int IJD(JD.jd+0.5);
+        double FJD( (JD.jd+0.5-IJD)*DAY_TO_SEC);
+//        cout << CivilTime(GPS);
 
-        cout << setw(4) << temp.year << " "
-             << setw(2) << temp.month << " "
-             << setw(2) << temp.day << " "
-             << setw(2) << temp.hour << " "
-             << setw(2) << temp.minute << " "
-             << setw(10) << temp.second << " ";
+        cout << fixed << setprecision(3);
+        cout << setw(10) << IJD;
+        cout << setw(10) << FJD;
 
         cout << fixed << setprecision(10);
 
@@ -141,79 +129,8 @@ int main(void)
              << setw(15) << T2C(2,0) << " "
              << setw(15) << T2C(2,1) << " "
              << setw(15) << T2C(2,2) << endl;
+
     }
 
-/*
-    // T2C matrix and its time dot
-    Matrix<double> T2C( rs.T2CMatrix(UTC) );
-    Matrix<double> dT2C( rs.dT2CMatrix(UTC) );
-
-    cout << fixed << setprecision(10);
-    cout << "C2T: " << endl
-         << setw(18) << T2C(0,0) << " "
-         << setw(18) << T2C(0,1) << " "
-         << setw(18) << T2C(0,2) << endl
-         << setw(18) << T2C(1,0) << " "
-         << setw(18) << T2C(1,1) << " "
-         << setw(18) << T2C(1,2) << endl
-         << setw(18) << T2C(2,0) << " "
-         << setw(18) << T2C(2,1) << " "
-         << setw(18) << T2C(2,2) << endl;
-
-    cout << "dC2T: " << endl
-         << setw(18) << dT2C(0,0) << " "
-         << setw(18) << dT2C(0,1) << " "
-         << setw(18) << dT2C(0,2) << endl
-         << setw(18) << dT2C(1,0) << " "
-         << setw(18) << dT2C(1,1) << " "
-         << setw(18) << dT2C(1,2) << endl
-         << setw(18) << dT2C(2,0) << " "
-         << setw(18) << dT2C(2,1) << " "
-         << setw(18) << dT2C(2,2) << endl;
-
-
-    // Satellite ID
-    SatID sat(1, SatID::systemGPS);
-
-    // Position and velocity in ITRS
-    Vector<double> r_itrs(3,0.0), v_itrs(3,0.0);
-    try
-    {
-        r_itrs = sp3Eph.getXvt(sat,GPS).x.toVector();
-        v_itrs = sp3Eph.getXvt(sat,GPS).v.toVector();
-    }
-    catch(...)
-    {
-        cerr << "Get Position and Velocity from SP3 File Error." << endl;
-
-        return 1;
-    }
-
-    // Position and velocity in ICRS
-    Vector<double> r_icrs( T2C * r_itrs );
-    Vector<double> v_icrs( T2C * v_itrs + dT2C * r_itrs);
-
-    cout << fixed << setprecision(6);
-
-    cout << "r_itrs: " << endl
-         << setw(18) << r_itrs[0] << " "
-         << setw(18) << r_itrs[1] << " "
-         << setw(18) << r_itrs[2] << endl;
-
-    cout << "v_itrs: " << endl
-         << setw(18) << v_itrs[0] << " "
-         << setw(18) << v_itrs[1] << " "
-         << setw(18) << v_itrs[2] << endl;
-
-    cout << "r_icrs: " << endl
-         << setw(18) << r_icrs[0] << " "
-         << setw(18) << r_icrs[1] << " "
-         << setw(18) << r_icrs[2] << endl;
-
-    cout << "v_icrs: " << endl
-         << setw(18) << v_icrs[0] << " "
-         << setw(18) << v_icrs[1] << " "
-         << setw(18) << v_icrs[2] << endl;
-*/
     return 0;
 }

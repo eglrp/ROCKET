@@ -26,8 +26,8 @@
  * Class to do Solar Pressure calculation.
  */
 
-#ifndef GPSTK_SOLAR_PRESSURE_HPP
-#define GPSTK_SOLAR_PRESSURE_HPP
+#ifndef SOLAR_PRESSURE_HPP
+#define SOLAR_PRESSURE_HPP
 
 #include "ForceModel.hpp"
 #include "GNSSconstants.hpp"
@@ -157,4 +157,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_SOLAR_PRESSURE_HPP
+#endif   // SOLAR_PRESSURE_HPP

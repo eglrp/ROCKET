@@ -41,8 +41,8 @@
 *
 */
 
-#ifndef GPSTK_EARTH_OCEAN_TIDE_HPP
-#define GPSTK_EARTH_OCEAN_TIDE_HPP
+#ifndef EARTH_OCEAN_TIDE_HPP
+#define EARTH_OCEAN_TIDE_HPP
 
 #include "ReferenceSystem.hpp"
 
@@ -143,6 +143,23 @@ namespace gpstk
       void getOceanTide(CommonTime utc, Matrix<double>& dCS);
 
 
+         /** Ocean tide to normalized earth potential coefficients.
+          *
+          * @param utc  time in UTC
+          * @return     correction to normalized earth potential coefficients
+          */
+      Matrix<double> getOceanTide(CommonTime utc);
+
+         /** Ocean tide to site displacements.
+          *
+          * @param utc  time in UTC
+          * @param pos  nominal position of the site of interest
+          * @return     correction to site displacements
+          */
+      Vector<double> getOceanTide(CommonTime utc,
+                                  const Vector<double>& pos);
+
+
    protected:
 
          /// Degree and Order of ocean tide model desired
@@ -162,4 +179,4 @@ namespace gpstk
 }  // End of namespace 'gpstk'
 
 
-#endif   // GPSTK_OCEAN_TIDE_HPP
+#endif   // OCEAN_TIDE_HPP

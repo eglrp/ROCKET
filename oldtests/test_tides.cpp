@@ -158,7 +158,7 @@ int main(void)
 
 
    // Cnm and Snm
-   Matrix<double> CS(20,20,0.0);
+   Matrix<double> CS;
 
    cout << fixed << setprecision(15);
 
@@ -170,7 +170,7 @@ int main(void)
        CommonTime gps( gps0 + i*900.0 );
        CommonTime utc( refSys.GPS2UTC(gps) );
 
-       solidTide.getSolidTide(utc,CS);
+       CS = solidTide.getSolidTide(utc);
 
        i++;
 

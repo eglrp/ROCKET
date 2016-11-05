@@ -27,8 +27,8 @@
  * Class to do ThirdBody Gravitation calculation.
  */
 
-#ifndef GPSTK_THIRDBODY_HPP
-#define GPSTK_THIRDBODY_HPP
+#ifndef THIRD_BODY_HPP
+#define THIRD_BODY_HPP
 
 #include "ForceModel.hpp"
 #include "SolarSystem.hpp"
@@ -356,4 +356,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_THIRDBODY_HPP
+#endif   // THIRD_BODY_HPP

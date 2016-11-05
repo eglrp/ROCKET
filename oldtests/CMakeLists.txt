@@ -3,6 +3,9 @@
 add_executable(test_egm test_egm.cpp)
 target_link_libraries(test_egm rocket)
 
+add_executable(test_egm2 test_egm2.cpp)
+target_link_libraries(test_egm2 rocket)
+
 add_executable(test_srp test_srp.cpp)
 target_link_libraries(test_srp rocket)
 
@@ -21,8 +24,14 @@ target_link_libraries(test_rkf rocket)
 add_executable(test_force test_force.cpp)
 target_link_libraries(test_force rocket)
 
+add_executable(test_force2 test_force2.cpp)
+target_link_libraries(test_force2 rocket)
+
 add_executable(test_oi test_oi.cpp)
 target_link_libraries(test_oi rocket)
+
+add_executable(test_op test_op.cpp)
+target_link_libraries(test_op rocket)
 
 add_executable(test_jpl test_jpl.cpp)
 target_link_libraries(test_jpl rocket)

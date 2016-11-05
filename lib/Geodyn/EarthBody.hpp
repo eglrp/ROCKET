@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
@@ -24,13 +24,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -41,8 +41,8 @@
 * body of the spacecraft.
 */
 
-#ifndef GPSTK_EARTH_BODY_HPP
-#define GPSTK_EARTH_BODY_HPP
+#ifndef EARTH_BODY_HPP
+#define EARTH_BODY_HPP
 
 #include "CommonTime.hpp"
 #include "ReferenceSystem.hpp"
@@ -76,9 +76,9 @@ namespace gpstk
       {
          return pRefSys;
       }
-      
+
          /**
-          * Returnts the dynamic Earth rotation rate. 
+          * Returnts the dynamic Earth rotation rate.
           * @param utc  Time in UTC
           */
       virtual double getSpinRate(CommonTime utc);
@@ -93,4 +93,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_EARTH_BODY_HPP
+#endif   // EARTH_BODY_HPP

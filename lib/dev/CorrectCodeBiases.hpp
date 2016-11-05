@@ -2,7 +2,7 @@
 
 /**
 * @file CorrectCodeBiases.hpp
-* 
+*
 */
 
 #ifndef GPSTK_CORRECT_CODE_BIASES_HPP
@@ -89,19 +89,19 @@ namespace gpstk
       virtual CorrectCodeBiases& setDCBFile( const string& fileP1P2,
                                              const string& fileP1C1);
 
-         /** Set if C1 has been used as P1 to calculate some combinations 
+         /** Set if C1 has been used as P1 to calculate some combinations
           * @param useC1      If C1 has been used as P1, then set it to true
           */
       virtual CorrectCodeBiases& setUsingC1(const bool& useC1)
       { usingC1 = useC1; return (*this);}
 
 
-         /** Set receiver name 
+         /** Set receiver name
           * @param receiver      Name of receiver with 4 char
           */
       virtual CorrectCodeBiases& setReceiver(const string& receiver)
       { receiverName = receiver; return (*this);}
-      
+
 
          /** Returns a satTypeValueMap object, adding the new data generated
           *  when calling this object.
@@ -133,7 +133,7 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
 
-   
+
          /// Returns a string identifying this object.
       virtual std::string getClassName() const;
 
@@ -141,17 +141,17 @@ namespace gpstk
    protected:
 
          /// get DCB(Differental Code Biases) corrections
-      virtual double getDCBCorrection(const string& receiver, 
+      virtual double getDCBCorrection(const string& receiver,
                                       const SatID&  sat,
                                       const TypeID& type,
                                       const bool&   useC1 = false);
 
       DCBDataReader dcbP1P2;
       DCBDataReader dcbP1C1;
-         
+
          /// if C1 is used as P1 to calculate some combination
       bool usingC1;
-         
+
          /// receiver name
       std::string receiverName;
 
@@ -159,7 +159,7 @@ namespace gpstk
          // it's false by default
       bool crossCorrelationReceiver;
 
-      
+
    private:
 
 

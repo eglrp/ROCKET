@@ -95,6 +95,24 @@ namespace gpstk
       void getSolidTide(CommonTime utc, Matrix<double>& dCS);
 
 
+         /** Solid tide to normalized earth potential coefficients.
+          *
+          * @param utc  time in UTC
+          * @return     correction to normalized earth potential coefficients
+          */
+      Matrix<double> getSolidTide(CommonTime utc);
+
+
+         /** Solid tide to site displacements.
+          *
+          * @param utc  time in UTC
+          * @param pos  nominal position of the site of interest
+          * @return     correction to site displacements
+          */
+      Vector<double> getSolidTide(CommonTime utc,
+                                  const Vector<double>& pos);
+
+
    protected:
 
          /// Parameters
@@ -114,4 +132,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   //GPSTK_EARTH_SOLID_TIDE_HPP
+#endif   // EARTH_SOLID_TIDE_HPP

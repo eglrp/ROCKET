@@ -42,8 +42,8 @@ namespace gpstk
       const double GM = GM_EARTH;
       const double C = C_MPS;
 
-      Vector<double> r = sc.getPosition();
-      Vector<double> v = sc.getVelocity();
+      Vector<double> r = sc.getCurrentPos();
+      Vector<double> v = sc.getCurrentVel();
 
       double beta = 1.0;
       double gama = 1.0;
@@ -80,9 +80,9 @@ namespace gpstk
             double det = (i == j) ? 1.0 : 0.0;
 
             da_dr(i,j) = prr*r(i)*r(j)
-               + pvv*v(i)*v(j)
-               + par*a(i)*r(j)
-               + ppr*det;
+                       + pvv*v(i)*v(j)
+                       + par*a(i)*r(j)
+                       + ppr*det;
          }
       }
 

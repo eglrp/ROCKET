@@ -28,8 +28,8 @@
 *
 */
 
-#ifndef GPSTK_EARTH_POLE_TIDE_HPP
-#define GPSTK_EARTH_POLE_TIDE_HPP
+#ifndef EARTH_POLE_TIDE_HPP
+#define EARTH_POLE_TIDE_HPP
 
 #include "ReferenceSystem.hpp"
 
@@ -78,6 +78,22 @@ namespace gpstk
           */
       void getPoleTide(CommonTime utc, Matrix<double>& dCS);
 
+         /** Pole tide to normalized earth potential coefficients.
+          *
+          * @param utc  time in UTC
+          * @return     correction to normalized potential coefficients
+          */
+      Matrix<double> getPoleTide(CommonTime utc);
+
+         /** Pole tide to site displacements.
+          *
+          * @param utc  time in UTC
+          * @param pos  nominal position of interest
+          * @return     correction to site displacements
+          */
+      Vector<double> getPoleTide(CommonTime utc,
+                                 const Vector<double>& pos);
+
    protected:
 
          /// Reference System
@@ -90,4 +106,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_EARTH_POLE_TIDE_HPP
+#endif   // EARTH_POLE_TIDE_HPP

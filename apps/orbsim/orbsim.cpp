@@ -40,8 +40,8 @@
 // Class to deal with EGM08 gravity model
 #include "EGM08GravityModel.hpp"
 
-// Class to do Runge-Kutta-Fehlberg integrator
-#include "RungeKuttaFehlberg.hpp"
+// Class to do RKF78 integrator
+#include "RKF78Integrator.hpp"
 
 
 using namespace std;
@@ -129,14 +129,14 @@ Vector<double> OrbitEOM::getDerivatives(const double& t, const Vector<double>& y
    CommonTime utc(utc0+t);
 
    // Current state
-   Vector<double> state( sc.getStateVector() );
+   Vector<double> state( sc.getCurrentState() );
 
    // Update position and velocity
    state(0) = y(0); state(1) = y(1); state(2) = y(2);    // r
    state(3) = y(3); state(4) = y(4); state(5) = y(5);    // v
 
    // Set spacecraft with current position and velocity
-   sc.setStateVector(state);
+   sc.setCurrentState(state);
 
    // Current velocity
    Vector<double> v(3,0.0);
@@ -385,7 +385,7 @@ void orbsim::process()
    orbit.setReferenceSystem(rs);
 
       // Orbit integrator
-   RungeKuttaFehlberg rkf;
+   RKF78Integrator rkf;
 
       // StepSize, unit: second
    double stepSize = confReader.getValueAsDouble("StepSize", "DEFAULT");
@@ -440,7 +440,7 @@ void orbsim::process()
 
          // Current state in ICRS
       Vector<double> rv_icrs(rv0_icrs);
-      Vector<double> state( sc.getStateVector() );
+      Vector<double> state( sc.getCurrentState() );
       state( 0) = rv_icrs(0); state( 1) = rv_icrs(1); state( 2) = rv_icrs(2);
       state(21) = rv_icrs(3); state(22) = rv_icrs(4); state(23) = rv_icrs(5);
 
@@ -475,7 +475,7 @@ void orbsim::process()
 
          // Spacecraft settings
       sc.setCurrentTime(utc);
-      sc.setStateVector(state);
+      sc.setCurrentState(state);
 
          // Orbit settings
       orbit.setSpacecraft(sc);

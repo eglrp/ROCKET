@@ -93,7 +93,7 @@ int main(void)
 
    try
    {
-       prn = confReader.getValueAsInt("PRN", "DEFAULT");
+       prn = confReader.getValueAsInt("SATPRN", "DEFAULT");
    }
    catch(...)
    {
@@ -124,9 +124,9 @@ int main(void)
        return 1;
    }
 
-   CivilTime ct0(year,mon,day,hour,min,sec, TimeSystem::GPS);
-   CommonTime gps0( ct0.convertToCommonTime() );
-   CommonTime utc0( refSys.GPS2UTC(gps0) );
+   CivilTime CT(year,mon,day,hour,min,sec, TimeSystem::GPS);
+   CommonTime GPS0( CT.convertToCommonTime() );
+   CommonTime UTC0( refSys.GPS2UTC(GPS0) );
 
    // SP3 File
    SP3EphemerisStore sp3Eph;
@@ -157,12 +157,12 @@ int main(void)
    EarthBody eb;
 
    // SatData File
-   SatDataReader satReader;
+   SatDataReader satData;
 
    try
    {
       string satDataFile = confReader.getValue("SATDATAFILE", "DEFAULT");
-      satReader.open(satDataFile);
+      satData.open(satDataFile);
    }
    catch(...)
    {
@@ -175,10 +175,11 @@ int main(void)
    Spacecraft sc;
    sc.setNumOfParam(9);
    sc.setSatID(sat);
+   sc.setSatData(satData);
 
    // CODE SRP
-   Vector<double> p0(9,0.0);
-   p0(0) = 1.0;
+   Vector<double> p0(5,0.0);
+   p0(0) = -100.0;
 
    CODEPressure code;
    code.setReferenceSystem(refSys);
@@ -190,7 +191,7 @@ int main(void)
 
    try
    {
-       length = confReader.getValueAsDouble("LENGTH", "DEFAULT");
+       length = confReader.getValueAsDouble("ARCLENGTH", "INTEGRATOR");
    }
    catch(...)
    {
@@ -206,16 +207,16 @@ int main(void)
    while(true)
    {
        // Current Time
-       CommonTime gps( gps0 + i*900.0 );
-       CommonTime utc( refSys.GPS2UTC(gps) );
+       CommonTime GPS( GPS0 + i*900.0 );
+       CommonTime UTC( refSys.GPS2UTC(GPS) );
 
        // Current Position and Velocity in ITRS
        Vector<double> r_itrs, v_itrs;
 
        try
        {
-           r_itrs = sp3Eph.getXvt(sat, gps).x.toVector();
-           v_itrs = sp3Eph.getXvt(sat, gps).v.toVector();
+           r_itrs = sp3Eph.getXvt(sat, GPS).x.toVector();
+           v_itrs = sp3Eph.getXvt(sat, GPS).v.toVector();
        }
        catch(...)
        {
@@ -225,11 +226,11 @@ int main(void)
        }
 
        // Current Transform Matrix
-       Matrix<double> c2t ( refSys.C2TMatrix(utc) );
+       Matrix<double> c2t ( refSys.C2TMatrix(UTC) );
        Matrix<double> t2c ( transpose(c2t) );
 
        // Current Transform Matrix Time Dot
-       Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
+       Matrix<double> dc2t( refSys.dC2TMatrix(UTC) );
        Matrix<double> dt2c( transpose(dc2t) );
 
        // Current Position and Velocity in ICRS
@@ -237,27 +238,24 @@ int main(void)
        Vector<double> v_icrs = t2c * v_itrs + dt2c * r_itrs;
 
        // Current Spacecraft
-       sc.setPosition(r_icrs);
-       sc.setVelocity(v_icrs);
-       sc.setCurrentTime(utc);
-       sc.setBlockType(satReader.getBlock(sat,utc));
-       sc.setMass(satReader.getMass(sat,utc));
+       sc.setCurrentPos(r_icrs);
+       sc.setCurrentVel(v_icrs);
+       sc.setCurrentTime(UTC);
 
        // Current Acceleration
-       code.doCompute(utc, eb, sc);
+       code.doCompute(UTC, eb, sc);
 
        Vector<double> a_icrs( code.getAcceleration() );
 
-       cout << setw(20) << i*900.0/3600.0;
+       cout << CivilTime(GPS);
        cout << setw(20) << a_icrs(0)
             << setw(20) << a_icrs(1)
             << setw(20) << a_icrs(2)
-            << setw(20) << sc.getIsEclipsed()
             << endl;
 
        i++;
 
-       if(i >= length*3600/900) break;
+       if(i > length*3600/900) break;
    }
 
    return 0;

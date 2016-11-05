@@ -7,8 +7,6 @@
 
 #include "ConfDataReader.hpp"
 
-#include "SunGravitation.hpp"
-#include "MoonGravitation.hpp"
 #include "ThirdBody.hpp"
 
 #include "SP3EphemerisStore.hpp"
@@ -126,11 +124,11 @@ int main(void)
 
     try
     {
-        prn = confReader.getValueAsInt("PRN", "DEFAULT");
+        prn = confReader.getValueAsInt("SATPRN", "DEFAULT");
     }
     catch(...)
     {
-        cerr << "Get Sat PRN Error." << endl;
+        cerr << "Get Satellite PRN Error." << endl;
 
         return 1;
     }
@@ -145,9 +143,9 @@ int main(void)
     int min  = confReader.getValueAsInt("MIN", "DEFAULT");
     double sec = confReader.getValueAsDouble("SEC", "DEFAULT");
 
-    CivilTime cv0(year,mon,day,hour,min,sec, TimeSystem::GPS);
-    CommonTime gps0( cv0.convertToCommonTime() );
-    CommonTime utc0( refSys.GPS2UTC(gps0) );
+    CivilTime CT(year,mon,day,hour,min,sec, TimeSystem::GPS);
+    CommonTime GPS0( CT.convertToCommonTime() );
+    CommonTime UTC0( refSys.GPS2UTC(GPS0) );
 
     // SP3 File
     SP3EphemerisStore sp3Eph;
@@ -187,12 +185,12 @@ int main(void)
     EarthBody eb;
 
     // SatData File
-    SatDataReader satReader;
+    SatDataReader satData;
     string satDataFile = confReader.getValue("SATDATAFILE", "DEFAULT");
 
     try
     {
-        satReader.open(satDataFile);
+        satData.open(satDataFile);
     }
     catch(...)
     {
@@ -205,17 +203,7 @@ int main(void)
     Spacecraft sc;
     sc.setNumOfParam(0);
     sc.setSatID(sat);
-
-    // Sun Gravitation
-    SunGravitation sun;
-    sun.setSolarSystem(solSys);
-    sun.setReferenceSystem(refSys);
-
-    // Moon Gravitation
-    MoonGravitation moon;
-    moon.setSolarSystem(solSys);
-    moon.setReferenceSystem(refSys);
-
+    sc.setSatData(satData);
 
     // ThirdBody
     ThirdBody third;
@@ -224,12 +212,12 @@ int main(void)
     third.enableSun();
     third.enableMoon();
 
-
+    // Length
     double length;
 
     try
     {
-        length = confReader.getValueAsDouble("LENGTH", "DEFAULT");
+        length = confReader.getValueAsDouble("ARCLENGTH", "INTEGRATOR");
     }
     catch(...)
     {
@@ -245,16 +233,16 @@ int main(void)
     while(true)
     {
         // Current Time
-        CommonTime gps( gps0 + i*900.0 );
-        CommonTime utc( refSys.GPS2UTC(gps) );
+        CommonTime GPS( GPS0 + i*900.0 );
+        CommonTime UTC( refSys.GPS2UTC(GPS) );
 
         // Current Position and Velocity in ITRS
         Vector<double> r_itrs, v_itrs;
 
         try
         {
-            r_itrs = sp3Eph.getXvt(sat, gps).x.toVector();
-            v_itrs = sp3Eph.getXvt(sat, gps).v.toVector();
+            r_itrs = sp3Eph.getXvt(sat, GPS).x.toVector();
+            v_itrs = sp3Eph.getXvt(sat, GPS).v.toVector();
         }
         catch(...)
         {
@@ -264,11 +252,11 @@ int main(void)
         }
 
         // Current Transform Matrix
-        Matrix<double> c2t ( refSys.C2TMatrix(utc) );
+        Matrix<double> c2t ( refSys.C2TMatrix(UTC) );
         Matrix<double> t2c ( transpose(c2t) );
 
         // Current Transform Matrix Time Dot
-        Matrix<double> dc2t( refSys.dC2TMatrix(utc) );
+        Matrix<double> dc2t( refSys.dC2TMatrix(UTC) );
         Matrix<double> dt2c( transpose(dc2t) );
 
         // Currrent Position and Velocity in ICRS
@@ -276,31 +264,24 @@ int main(void)
         Vector<double> v_icrs = t2c * v_itrs + dt2c * r_itrs;
 
         // Current Spacecraft
-        sc.setPosition(r_icrs);
-        sc.setVelocity(v_icrs);
-        sc.setCurrentTime(utc);
-        sc.setBlockType(satReader.getBlock(sat,utc));
-        sc.setMass(satReader.getMass(sat,utc));
+        sc.setCurrentPos(r_icrs);
+        sc.setCurrentVel(v_icrs);
+        sc.setCurrentTime(UTC);
 
         // Current Acceleration
-        sun.doCompute(utc, eb, sc);
-        moon.doCompute(utc, eb, sc);
-        third.doCompute(utc, eb, sc);
+        third.doCompute(UTC, eb, sc);
 
-        Vector<double> a_sun  = sun.getAcceleration();
-        Vector<double> a_moon = moon.getAcceleration();
         Vector<double> a_third = third.getAcceleration();
-        Vector<double> a_diff = a_third - a_sun - a_moon;
 
-        cout << setw(20) << i*900.0/3600.0;
-        cout << setw(20) << a_diff(0)
-             << setw(20) << a_diff(1)
-             << setw(20) << a_diff(2)
+        cout << CivilTime(GPS);
+        cout << setw(20) << a_third(0)
+             << setw(20) << a_third(1)
+             << setw(20) << a_third(2)
              << endl;
 
         i++;
 
-        if(i >= length*3600/900) break;
+        if(i > length*3600/900) break;
     }
 
     return 0;

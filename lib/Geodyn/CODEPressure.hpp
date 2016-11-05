@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //  Kaifa Kuang - Wuhan University . 2015
@@ -27,8 +27,8 @@
  * Class to do CODE Pressure calculation.
  */
 
-#ifndef GPSTK_CODE_PRESSURE_HPP
-#define GPSTK_CODE_PRESSURE_HPP
+#ifndef CODE_PRESSURE_HPP
+#define CODE_PRESSURE_HPP
 
 #include "SolarPressure.hpp"
 
@@ -71,4 +71,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_CODE_PRESSURE_HPP
+#endif   // CODE_PRESSURE_HPP

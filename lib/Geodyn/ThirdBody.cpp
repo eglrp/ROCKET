@@ -28,6 +28,7 @@
 
 #include "ThirdBody.hpp"
 #include "GNSSconstants.hpp"
+#include "Epoch.hpp"
 
 using namespace std;
 
@@ -47,9 +48,11 @@ namespace gpstk
          * da/dr = -GM*( I/norm(r-s)^3 - 3(r-s)transpose(r-s)/norm(r-s)^5)
          */
 
+//        cout << "Thd: " << CivilTime(utc) << endl;
+
         double tt = JulianDate( pRefSys->UTC2TT(utc) ).jd;
 
-        Vector<double> r_sat = sc.getPosition();
+        Vector<double> r_sat = sc.getCurrentPos();
 
         Vector<bool> bPlanets(10,false);
         bPlanets(0) = bSun;
@@ -81,8 +84,8 @@ namespace gpstk
 
         Matrix<double> I = ident<double>(3);
 
-        a.resize(3,0.0);
-        da_dr.resize(3,3,0.0);
+        Vector<double> ap(3,0.0);
+        Matrix<double> dap_dr(3,3,0.0);
 
         // Loop
         for(int i=0; i<10; ++i)
@@ -156,16 +159,19 @@ namespace gpstk
             d5 = d3*d*d;
 
             // a
-            a += GMP * (dist/d3 - r_planet/p3);
+            ap += GMP * (dist/d3 - r_planet/p3);
 
             // da_dr
-            da_dr += -GMP * (I/d3 - 3.0*outer(dist,dist)/d5);
+            dap_dr += -GMP * (I/d3 - 3.0*outer(dist,dist)/d5);
 
             // da_dv ...
 
             // da_dp ...
 
         }
+
+        a = ap;
+        da_dr = dap_dr;
 
    }  // End of method 'ThirdBody::doCompute()'
 

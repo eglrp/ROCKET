@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //  Kaifa Kuang - Wuhan University . 2016
 //
@@ -27,8 +27,8 @@
  * Class to do Moon Gravitation calculation.
  */
 
-#ifndef GPSTK_MOON_GRAVITATION_HPP
-#define GPSTK_MOON_GRAVITATION_HPP
+#ifndef MOON_GRAVITATION_HPP
+#define MOON_GRAVITATION_HPP
 
 #include "ForceModel.hpp"
 #include "SolarSystem.hpp"
@@ -102,7 +102,7 @@ namespace gpstk
           * @param sc      spacecraft
           */
       virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
-      
+
 
          /// Return the force model name
       inline virtual std::string modelName() const
@@ -126,4 +126,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_MOON_GRAVITATION_HPP
+#endif   // MOON_GRAVITATION_HPP

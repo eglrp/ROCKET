@@ -359,7 +359,7 @@ namespace gpstk
           m_timeSystem != right.m_timeSystem)
       {
            InvalidRequest ir("CommonTime objects not in same time system, cannot be compared: " + m_timeSystem.asString() + " != " + right.m_timeSystem.asString());
-  
+
            GPSTK_THROW( ir );
       }
 

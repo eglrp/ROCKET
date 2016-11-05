@@ -131,11 +131,11 @@ namespace gpstk
        * @param utc     time in UTC
        * @param dCS     correction to normalized earth potential coefficients
        */
-   void EarthOceanTide::getOceanTide(CommonTime utc, Matrix<double>& dCS)
+   Matrix<double> EarthOceanTide::getOceanTide(CommonTime utc)
    {
       // resize dCS
       int size = indexTranslator(desiredDegree,desiredOrder) - 1;
-      dCS.resize(size,2, 0.0);
+      Matrix<double> dCS(size,2, 0.0);
 
       // TT
       CommonTime tt( pRefSys->UTC2TT(utc) );
@@ -177,7 +177,9 @@ namespace gpstk
 
       }  // End of 'for()'
 
-   }	// End of method 'EarthOceanTide::getOceanTide()'
+      return dCS;
+
+   }    // End of method 'EarthOceanTide::getOceanTide()'
 
 
 }  // End of namespace 'gpstk'

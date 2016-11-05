@@ -41,8 +41,8 @@
 * models.
 */
 
-#ifndef GPSTK_FORCE_MODEL_HPP
-#define GPSTK_FORCE_MODEL_HPP
+#ifndef FORCE_MODEL_HPP
+#define FORCE_MODEL_HPP
 
 
 #include "Vector.hpp"
@@ -311,4 +311,4 @@ namespace gpstk
 }  // End of namespace 'gpstk'
 
 
-#endif  // GPSTK_FORCE_MODEL_HPP
+#endif  // FORCE_MODEL_HPP

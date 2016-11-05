@@ -3,8 +3,8 @@
  * This class ease handling reference system transformation.
  */
 
-#ifndef GPSTK_REFERENCE_SYSTEM_HPP
-#define GPSTK_REFERENCE_SYSTEM_HPP
+#ifndef REFERENCE_SYSTEM_HPP
+#define REFERENCE_SYSTEM_HPP
 
 //============================================================================
 //
@@ -235,172 +235,6 @@ namespace gpstk
       double MeanObliquity06(const CommonTime& TT);
 
 
-         /**Nutation, IAU 2000A model (MHB2000 luni-solar and planetary nutation
-          * with free core nutation omitted).
-          *
-          * @param   TT
-          * @return  nutation, luni-solar + planetary
-          */
-      void NutAngles00A(const CommonTime& TT, double& dpsi, double& deps);
-
-
-         /**IAU 2000A nutation with adjustments to match the IAU 2006 precession.
-          *
-          * @param   TT
-          * @return  nutation, luni-solar + planetary
-          */
-      void NutAngles06A(const CommonTime& TT, double& dpsi, double& deps);
-
-
-         /**Form the matrix of nutation.
-          *
-          * @param   epsa        mean obliquity of date
-          * @param   dpsi, deps  nutation
-          * @return  nutation matrix
-          */
-      Matrix<double> NutMatrix(const double& epsa,
-                               const double& dpsi,
-                               const double& deps);
-
-
-         /**Form the matrix of nutation for a given date, IAU 2006/2000 model.
-          *
-          * @param   TT
-          * @return  nutation matrix
-          */
-      Matrix<double> NutMatrix06(const CommonTime& TT);
-
-
-         /** Precession angles, IAU 2006 (Fukushima-Williams 4-angle formulation).
-          *
-          * @param   TT
-          * @return  gamb  F-W angle gamma_bar (radians)
-          *          phib  F-W angle phi_bar (radians)
-          *          psib  F-W angle psi_bar (radians)
-          *          epsa  F-W angle epsilon_A (radians)
-          */
-      void PreAngles06(const CommonTime& TT,
-                       double& gamb,
-                       double& phib,
-                       double& psib,
-                       double& epsa);
-
-
-         /**Form nutation matrix given the Fukushima-Williams angles.
-          *
-          * @param   gamb  F-W angle gamma_bar (radians)
-          *          phib  F-W angle phi_bar (radians)
-          *          psi   F-W angle psi (radians)
-          *          eps   F-W angle epsilon (radians)
-          */
-      Matrix<double> FWMatrix(const double& gamb,
-                              const double& phib,
-                              const double& psi,
-                              const double& eps);
-
-
-         /**Precession-nutation, IAU 2006 model: a multi-purpose function,
-          * supporting classical (equinox-based)  use directly and CIO-based
-          * use indirectly.
-          *
-          * @param   TT
-          *          dpsi, deps  nutation
-          * @return  epsa        mean obliquity
-          *          rb          frame bias matrix
-          *          rp          precession matrix
-          *          rbp         bias-precession matrix
-          *          rn          nutation matrix
-          *          rbpn        GCRS-to-true matrix
-          */
-      void PreNut06(const CommonTime& TT,
-                    const double& dpsi,
-                    const double& deps,
-                    double& epsa,
-                    Matrix<double>& rb,
-                    Matrix<double>& rp,
-                    Matrix<double>& rbp,
-                    Matrix<double>& rn,
-                    Matrix<double>& rbpn);
-
-
-         /**Precession-nutation, IAU 2006/2000A model: a multi-purpose function,
-          * supporting classical (equinox-based)  use directly and CIO-based use
-          * indirectly.
-          *
-          * @param   TT
-          * @return  dpsi, deps  nutation
-          *          epsa        mean obliquity
-          *          rb          frame bias matrix
-          *          rp          precession matrix
-          *          rbp         bias-precession matrix
-          *          rn          nutation matrix
-          *          rbpn        GCRS-to-true matrix
-          */
-      void PreNut06A(const CommonTime& TT,
-                     double& dpsi,
-                     double& deps,
-                     double& epsa,
-                     Matrix<double>& rb,
-                     Matrix<double>& rp,
-                     Matrix<double>& rbp,
-                     Matrix<double>& rn,
-                     Matrix<double>& rbpn);
-
-
-
-         /**Extract from the bias-precession-nutation matrix the X, Y coordinates
-          * of the Celestial Intermediate Pole.
-          *
-          * @param   rbpn  celestial-to-true matrix
-          * @return  x, y  Celestial Intermediate Pole
-          */
-      void BPN2XY(const Matrix<double>& rbpn, double& x, double& y);
-
-
-         /**Equation of the origins, given the classical NPB matrix and the
-          * quantity s.
-          *
-          * @param   rnpb  classical nutation x precession x bias matrix
-          *          s     the quantity s (the CIO locator)
-          * @return  the equation of the origins in radians.
-          */
-      double EqnOrigin(const Matrix<double>& rnpb, const double& s);
-
-
-         /**Form the matrix of precession-nutation for a given date (incluing
-          * frame bias), IAU 2006 precession and IAU 2000A nutation models.
-          *
-          * @param   TT
-          * @return  bias-precession-nutation matrix
-          */
-      Matrix<double> PreNutMatrix06A(const CommonTime& TT);
-
-
-         /**Greenwich apparent sidereal time, IAU 2006, given the NPB matrix.
-          *
-          * @param   UT1
-          *          TT
-          *          rnpb  nutation x precession x bias matrix
-          * @return  Greenwich apparent sidereal time (radians)
-          */
-      double GST06(const CommonTime& UT1,
-                   const CommonTime& TT,
-                   const Matrix<double>& rnpb);
-
-
-         /**Greenwich apparent sidereal time (consistent with IAU 2000 and 2006
-          * resolutions).
-          *
-          * @param   UT1
-          *          TT
-          * @return  Greenwich apparent sidereal time (radians)
-          */
-      double GST06A(const CommonTime& UT1,
-                    const CommonTime& TT);
-
-
-
-
          /**X,Y coordinates of celestial intermediate pole from series based
           * on IAU 2006 precession and IAU 2000A nutation.
           *
@@ -497,6 +331,280 @@ namespace gpstk
                             double FNUT[5]         );
 
 
+
+         /**Convert coordinate difference in XYZ to RTN.
+          *
+          * @param dxyz     Coordinate difference in XYZ
+          * @param r        Position used to define RTN
+          * @param v        Velocity used to define RTN
+          * @return         Coordinate difference in RTN
+          */
+      Vector<double> XYZ2RTN(const Vector<double>& dxyz,
+                             const Vector<double>& r,
+                             const Vector<double>& v);
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean anomaly of the Moon.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      l, mean anomaly of the Moon (radians)
+         */
+      inline double Fal03(const double& t)
+      {
+          double a;
+
+          /* Mean anomaly of the Moon (IERS Conventions 2003). */
+          a = std::fmod(           485868.249036  +
+                        t * ( 1717915923.2178 +
+                        t * (         31.8792 +
+                        t * (          0.051635 +
+                        t * (        - 0.00024470 ) ) ) ), TURNAS ) * AS_TO_RAD;
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean anomaly of the Sun.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      l', radians
+         */
+      inline double Falp03(const double& t)
+      {
+          double a;
+
+          /* Mean anomaly of the Sun (IERS Conventions 2003). */
+          a = std::fmod(         1287104.793048 +
+                        t * ( 129596581.0481 +
+                        t * (       - 0.5532 +
+                        t * (         0.000136 +
+                        t * (       - 0.00001149 ) ) ) ), TURNAS ) * AS_TO_RAD;
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of the Moon minus mean longitude of the ascending
+         * node.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      F, radians
+         */
+      inline double Faf03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of the Moon minus that of the ascending node */
+          /* (IERS Conventions 2003).                                    */
+          a = std::fmod(           335779.526232 +
+                        t * ( 1739527262.8478 +
+                        t * (       - 12.7512 +
+                        t * (        - 0.001037 +
+                        t * (          0.00000417 ) ) ) ), TURNAS ) * AS_TO_RAD;
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean elongation of the Moon from the Sun.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      D, radians
+         */
+      inline double Fad03(const double& t)
+      {
+          double a;
+
+          /* Mean elongation of the Moon from the Sun (IERS Conventions 2003). */
+          a = std::fmod(          1072260.703692 +
+                        t * ( 1602961601.2090 +
+                        t * (        - 6.3706 +
+                        t * (          0.006593 +
+                        t * (        - 0.00003169 ) ) ) ), TURNAS ) * AS_TO_RAD;
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of the Moon's ascending node.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      Omega, radians
+         */
+      inline double Faom03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of the Moon's ascending node */
+          /* (IERS Conventions 2003).                    */
+          a = std::fmod(          450160.398036 +
+                        t * ( - 6962890.5431 +
+                        t * (         7.4722 +
+                        t * (         0.007702 +
+                        t * (       - 0.00005939 ) ) ) ), TURNAS ) * AS_TO_RAD;
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of Mercury.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      mean longitude of Mercury, radians
+         */
+      inline double Fame03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of Mercury (IERS Conventions 2003). */
+          a = std::fmod(4.402608842 + 2608.7903141574 * t, TWO_PI);
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of Venus.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      mean longitude of Venus, radians
+         */
+      inline double Fave03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of Venus (IERS Conventions 2003). */
+          a = std::fmod(3.176146697 + 1021.3285546211 * t, TWO_PI);
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of Earth.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      mean longitude of Earth, radians
+         */
+      inline double Fae03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of Earth (IERS Conventions 2003). */
+          a = std::fmod(1.753470314 + 628.3075849991 * t, TWO_PI);
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of Mars.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      mean longitude of Mars, radians
+         */
+      inline double Fama03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of Mars (IERS Conventions 2003). */
+          a = std::fmod(6.203480913 + 334.0612426700 * t, TWO_PI);
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of Jupiter.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      mean longitude of Jupiter, radians
+         */
+      inline double Faju03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of Jupiter (IERS Conventions 2003). */
+          a = std::fmod(0.599546497 + 52.9690962641 * t, TWO_PI);
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of the Saturn.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      mean longitude of Saturn, radians
+         */
+      inline double Fasa03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of Saturn (IERS Conventions 2003). */
+          a = std::fmod(0.874016757 + 21.3299104960 * t, TWO_PI);
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of Uranus.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      mean longitude of Uranus, radians
+         */
+      inline double Faur03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of Uranus (IERS Conventions 2003). */
+          a = std::fmod(5.481293872 + 7.4781598567 * t, TWO_PI);
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * mean longitude of Neptune.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      mean longitude of Neptune, radians
+         */
+      inline double Fane03(const double& t)
+      {
+          double a;
+
+          /* Mean longitude of Neptune (IERS Conventions 2003). */
+          a = std::fmod(5.311886287 + 3.8133035638 * t, TWO_PI);
+
+          return a;
+      }
+
+
+        /**Fundamental argument, IERS Conventions (2003):
+         * general accumulated precession in longitude.
+         *
+         * @param t     TDB, Julian centuries since J2000.0
+         * @return      general precession in longitude, radians
+         */
+      inline double Fapa03(const double& t)
+      {
+          double a;
+
+          /* General accumulated precession in longitude. */
+          a = (0.024381750 + 0.00000538691 * t) * t;
+
+          return a;
+      }
+
+
         /**Normalize angle into the range -PI <= a <= +PI.
          *
          * @param  a    Angle (radians)
@@ -556,4 +664,4 @@ namespace gpstk
 
 }  // End of namespace 'gpstk'
 
-#endif   // GPSTK_REFERENCE_SYSTEM_HPP
+#endif   // REFERENCE_SYSTEM_HPP
