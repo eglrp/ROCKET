@@ -102,8 +102,52 @@ namespace gpstk
 
 	Variable Variable::updSatLC( TypeID::updSatLC, &updSatLCModel, false, true );
 
+	WhiteNoiseModel Variable::recvClockModel;
+
+	WhiteNoiseModel Variable::satClockModel;
+
+	RandomWalkModel Variable::dcbModel(3.0e-4);
+
+	TropoRandomWalkModel Variable::tropoModel;
+
+	IonoRandomWalkModel Variable::ionoModel;
 
 
+//	RandomWalkModel Variable::updModelL1(3.0e-4);
+//	RandomWalkModel Variable::updModelL2(3.0e-4);
+
+	RecBiasRandomWalkModel Variable::updModelL1;
+	RecBiasRandomWalkModel Variable::updModelL2;
+	SatBiasRandomWalkModel Variable::updSatModelL1;
+	SatBiasRandomWalkModel Variable::updSatModelL2;
+
+	PhaseAmbiguityModel Variable::ambiModelL1;
+	PhaseAmbiguityModel Variable::ambiModelL2;
+
+	Variable Variable::cdt( TypeID::cdt, &recvClockModel, true, false);
+
+	Variable Variable::satClock( TypeID::dtSat, &satClockModel, false, true );
+
+	Variable Variable::tropo( TypeID::wetMap, &tropoModel, true, false, 10.0  );
+
+	Variable Variable::ionoL1( TypeID::ionoMap, &ionoModel, true, true );
+
+	Variable Variable::recDCB( TypeID::recInstP2, &dcbModel, true, false );
+
+
+	Variable Variable::updL1(TypeID::updL1, &updModelL1, true, false);
+	Variable Variable::updL2(TypeID::updL2, &updModelL2, true, false);
+
+	Variable Variable::updSatL1(TypeID::updSatL1, &updSatModelL1, false, true);
+	Variable Variable::updSatL2(TypeID::updSatL2, &updSatModelL2, false, true);
+
+	Variable Variable::BL1( TypeID::BL1, &ambiModelL1, true, true );
+	Variable Variable::BL2( TypeID::BL2, &ambiModelL2, true, true );
+
+	Variable Variable::P1(TypeID::P1);
+	Variable Variable::P2(TypeID::P2);
+	Variable Variable::L1(TypeID::L1);
+	Variable Variable::L2(TypeID::L2);
 
       // Default constructor for Variable
    Variable::Variable()

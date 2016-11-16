@@ -66,6 +66,36 @@ namespace gpstk
 			/// Definition to describe BLC observable at reference station
 		Equation equBLCRef;
 
+			/// Definition to describe P1 observable at master station
+		Equation equP1Master;
+
+			/// Definition to describe P1 observable at reference station
+		Equation equP1Ref;
+
+			/// Definition to describe P2 observable at master station
+		Equation equP2Master;
+
+			/// Definition to describe P2 observable at reference station
+		Equation equP2Ref;
+
+			/// Definition to describe L1 observable at master station
+		Equation equL1Master;
+
+			/// Definition to describe L1 observable at receiver station
+		Equation equL1Ref;
+
+			/// Definition to describe L2 observable at master station
+		Equation equL2Master;
+
+			/// Definition to describe L2 observable at reference station
+		Equation equL2Ref;
+
+			/// Definition to describe Iono observable
+		Equation equIono;
+
+			/// Definition ro describe receiver P1P2 DCB observable 
+		Equation equRecDCB;
+
 	};  // End of ' class CommonlyUsedEquations '
 
 }  // End of ' namespace gpstk '

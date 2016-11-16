@@ -320,7 +320,61 @@ namespace gpstk
 		static SatBiasRandomWalkModel updSatLCModel;
 		static Variable updSatLC;
 
+			// Receiver clock random model 
+		static WhiteNoiseModel recvClockModel;
 
+			// Sat clock random model
+		static WhiteNoiseModel satClockModel;
+
+			// P1P2 DCB random model
+		static RandomWalkModel dcbModel;
+
+			// Tropo random model
+		static TropoRandomWalkModel tropoModel;		
+
+			// Iono random model
+		static IonoRandomWalkModel ionoModel;
+
+			//  Receiver and sat upd random model on L1/L2
+		static RecBiasRandomWalkModel updModelL1;
+		static RecBiasRandomWalkModel updModelL2;
+		static SatBiasRandomWalkModel updSatModelL1;
+		static SatBiasRandomWalkModel updSatModelL2;
+
+			// Phase ambiguity random model 
+		static PhaseAmbiguityModel ambiModelL1;
+		static PhaseAmbiguityModel ambiModelL2;
+
+			// Variable: receiver colok error
+		static Variable cdt;
+
+			// Variable: sat clock error
+		static Variable satClock;
+
+			// Variable: tropo
+		static Variable tropo; 
+
+			// Variable: ionoL1
+		static Variable ionoL1;
+
+			// Variable: recv P1P2 DCB 
+		static Variable recDCB;
+
+			// Variable: receiver and satellite upd on L1 and L2
+		static Variable updL1;
+		static Variable updL2;
+		static Variable updSatL1;
+		static Variable updSatL2;
+
+			// Variable: ambiguity
+		static Variable BL1;
+		static Variable BL2;
+
+			// Variable: P1/P2/L1/L2
+		static Variable P1;
+		static Variable P2;
+		static Variable L1;
+		static Variable L2;
 
          /// Destructor
       virtual ~Variable() {};
