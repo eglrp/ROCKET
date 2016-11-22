@@ -560,41 +560,593 @@ namespace gpstk
             // Fill the initialState vector  
          if( firstTime )
          {
-            int i(0);      // Set an index
-            for( VariableSet::const_iterator itVar = currentUnknowns.begin();
-                 itVar != currentUnknowns.end();
-                 ++itVar )
-            {
-                  // If the type of (*itVar) is 'TypeID::BL1'
-               if( (*itVar).getType() == TypeID::BL1)
-               {
-                     // Get the MWubbena value
-                  double BLC = gdsMap.getValue( (*itVar).getSource(), 
-                                                     (*itVar).getSatellite(), 
-                                                     TypeID::BLC );
-  
-                     // Compute the initial narrowlane ambiguity
-                  xhatminus(i) = std::floor( BLC/(-0.106953378) + 0.5 ) ;
-  
-               } // End of 'if( (*itVar).getType() == ... )'
-  
-                  // Index
-               ++i;
-            }
-               // No longer first time
+//            int i(0);      // Set an index
+//            for( VariableSet::const_iterator itVar = currentUnknowns.begin();
+//                 itVar != currentUnknowns.end();
+//                 ++itVar )
+//            {
+//                  // If the type of (*itVar) is 'TypeID::BL1'
+//               if( (*itVar).getType() == TypeID::BL1)
+//               {
+//                     // Get the MWubbena value
+//                  double BL1 = gdsMap.getValue( (*itVar).getSource(), 
+//                                                     (*itVar).getSatellite(), 
+//                                                     TypeID::BL1 );
+//  
+//                     // Compute the initial narrowlane ambiguity
+//                  xhatminus(i) = std::floor( BL1/(-1*L1_WAVELENGTH_GPS ) + 0.5 ) ;
+//  
+//               } // End of 'if( (*itVar).getType() == ... )'
+//
+//
+//					   // If the type of (*itVar) is 'TypeID::BL1'
+//               if( (*itVar).getType() == TypeID::BL2)
+//               {
+//                     // Get the MWubbena value
+//                  double BL2 = gdsMap.getValue( (*itVar).getSource(), 
+//                                                     (*itVar).getSatellite(), 
+//                                                     TypeID::BL2 );
+//  
+//                     // Compute the initial narrowlane ambiguity
+//                  xhatminus(i) = std::floor( BL2/(-1*L2_WAVELENGTH_GPS) + 0.5 ) ;
+//  
+//               } // End of 'if( (*itVar).getType() == ... )'
+//  
+//
+//  
+//                  // Index
+//               ++i;
+//            }
+//               // No longer first time
             firstTime = false;
          }
          
-         VariableDataMap ambMap;
-         std::map<Variable, VariableDataMap > ambVarMap;
 
-            // Store values of current state
-         int i(0);      // Set an index
+				//
+            // Now, Let's preform the measurment udpate
+            //
+         xhat = xhatminus;
+         P = Pminus;
+
+				// Choose ambiguity datum and implement 'measurement' update. 
+			AmbObsMeasUpdate( gdsMap );
+
+
+//         VariableDataMap ambMap;
+//         std::map<Variable, VariableDataMap > ambVarMap;
+//
+//            // Store values of current state
+//         int i(0);      // Set an index
+//         for( VariableSet::const_iterator itVar = currentUnknowns.begin();
+//              itVar != currentUnknowns.end();
+//              ++itVar )
+//         {
+//            if( (*itVar).getType() == TypeID::BL1 )
+//            {
+//               ambMap[(*itVar)] = xhatminus(i);
+//               ambVarMap[ (*itVar) ][ (*itVar) ] = Pminus(i, i);
+//					
+//            }
+//            ++i;
+//         }
+//
+//            /**
+//             * Now, Let's get the ambiguity datum 
+//             */
+//         ambFixedMap.clear();
+//
+//            // Set apriori state solution to the ambiguityDatum 
+//         indepAmbDatum.Reset(ambMap, ambVarMap);
+//         indepAmbDatum.Prepare(gdsMap);
+//
+//            // Now, get the fixed ambiguity sats and their values
+//         ambFixedMap = indepAmbDatum.getIndepAmbMap();
+//
+//            /**
+//             * Define prefit/geometry/weight matrix for ambiguity candidate 
+//             */
+//
+//            // Number of ambiguities that can be fixed
+//         int numFix( ambFixedMap.size() );
+//
+//            // Throw exception
+//         if( numFix == 0 )
+//         {
+//               // Throw an exception if something unexpected happens
+//            ProcessingException e("The ambiguity constraint equation number is 0.");
+//
+//               // Throw the exception
+//            GPSTK_THROW(e);
+//
+//         }  // End of 'If(...)'
+//
+//            //
+//            // Now, Let's preform the measurment udpate
+//            //
+//         xhat = xhatminus;
+//         P = Pminus;
+//
+//            //
+//            // Measurement update using single observables each time.
+//            //
+//         int numVar(currentUnknowns.size());
+//
+//            //
+//            // Let's apply the independent ambiguity constraints
+//            //
+//            // To be modified
+//            // apply the ambiguity constraint equations
+//            //
+//         for( VariableDataMap::const_iterator itamb=ambFixedMap.begin();
+//              itamb !=ambFixedMap.end();
+//              ++itamb )
+//         {
+//               // Now, prefit = fixed ambiguity
+//            double tempPrefit( (*itamb).second );
+//
+//               // Weight
+//            double weight( 1.0e+9 );
+//            double tempCoef(1.0);
+//
+//               // Second, fill geometry matrix: Look for equation coefficients
+//            VariableDataMap tempCoeffMap;
+//               
+//               // Now, Let's get the position of this variable in 
+//               // 'currentUnknowns'
+//            Variable var( (*itamb).first );
+//            VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
+//
+//               // Get the coefficent map
+//            if( itVar1 != currentUnknowns.end() )
+//            {
+//               tempCoeffMap[(*itVar1)] = tempCoef ;
+//            }
+//
+//               // Now, Let's create the index for current float unks
+//
+//               // Float unks number for current equation
+//            int numUnks(tempCoeffMap.size());
+//            Vector<int> index(numUnks);
+//            Vector<double> G(numUnks);
+//
+//               // Loop the tempCoeffMap
+//            int i(0);
+//            for( VariableDataMap::const_iterator itvdm=tempCoeffMap.begin();
+//                 itvdm != tempCoeffMap.end();
+//                 ++itvdm )
+//            {
+//               int col(0);
+//               VariableSet::const_iterator itVar2=currentUnknowns.begin();
+//               while( (*itVar2) != (*itvdm).first )
+//               {
+//                  col++;
+//                  itVar2++;
+//               }
+//               index(i) = col; 
+//               G(i) = (*itvdm).second;
+//
+//                  // Incrment of the float variable 
+//               i++;
+//            }
+//
+//               // Temp measurement
+//            double z(tempPrefit);
+//
+//               // Inverse weight
+//            double inv_W(1.0/weight);  
+//
+//               // M to store the value of  P*G
+//            Vector<double> M(numVar,0.0);
+//
+//               // Now, let's compute M=P*G.
+//            for(int i=0; i<numVar; i++)
+//            {
+//               for(int j=0; j<numUnks; j++)
+//               {
+//                  M(i) = M(i) + P(i,index(j)) * G(j);
+//               }
+//            }
+//
+//            double dotGM(0.0);
+//            for(int i=0; i<numUnks; i++)
+//            {
+//               dotGM = dotGM + G(i)*M(index(i)); 
+//            }
+//
+//               // Compute the Kalman gain
+//            Vector<double> K(numVar,0.0); 
+//
+//            double beta(inv_W + dotGM);
+//            K = M/beta;
+//
+//            double dotGX(0.0);
+//            for(int i=0; i<numUnks; i++)
+//            {
+//               dotGX = dotGX + G(i)*xhat(index(i)); 
+//            }
+//               // State update
+//            xhat = xhat + K*( z - dotGX );
+//
+//               // Covariance update
+//               // old version:
+//               // P = P - outer(K,M);
+//               // Considering that the P and KM matrix are symetric, 
+//               // thus the computation can be accelerated by operating 
+//               // the upper triangular matrix. 
+//
+//#ifdef USE_OPENMP
+//	#pragma omp parallel for
+//#endif
+//            for(int i=0;i<numVar;i++)
+//            {
+//                  // The diagonal element
+//               P(i,i) = P(i,i) -  K(i)*M(i);
+//
+//                  // The upper/lower triangular element
+//               for(int j=(i+1);j<numVar;j++)
+//               {
+//                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
+//               }
+//
+//            }  // End of 'for(int i = 0; ...)'
+//
+//         }
+
+				// 
+			   // Receiver DCB measurement update
+			   // 
+            
+			DCBObsMeasUpdate( gdsMap );
+
+
+            //
+            // Let's perform the measurement update one observable by one
+            //
+            
+         std::list<Equation> equList;
+         equList = equSystem.getCurrentEquationsList();
+         int numEqu(equList.size());
+
+         prefitResiduals.resize(numEqu,0.0);
+
+         int numVar(currentUnknowns.size());
+         hMatrix.resize( numEqu, numVar, 0.0 );
+
+         int row(0);
+         for( std::list<Equation>::const_iterator itEq = equList.begin();
+              itEq != equList.end();
+              ++itEq )
+         {
+               // Get the type value data from the header of the equation
+            typeValueMap tData( (*itEq).header.typeValueData );
+
+               // Get the independent type of this equation
+            TypeID indepType( (*itEq).header.indTerm.getType() );
+
+               // Now, Let's get current prefit
+            double tempPrefit(tData(indepType));
+
+               // Weight
+            double weight;
+
+               // First, fill weights matrix
+               // Check if current 'tData' has weight info. If you don't want those
+               // weights to get into equations, please don't put them in GDS
+            if( tData.find(TypeID::weight) != tData.end() )
+            {
+                  // Weights matrix = Equation weight * observation weight
+               weight = (*itEq).header.constWeight * tData(TypeID::weight);
+            }
+            else
+            {
+               weight = (*itEq).header.constWeight; // Weights matrix = Equation weight
+            }
+
+               // Second, fill geometry matrix: Look for equation coefficients
+            VariableDataMap tempCoeffMap;
+               
+               // Now, let's visit all Variables and the corresponding 
+               // coefficient in this equation description
+            for( VarCoeffMap::const_iterator vcmIter = (*itEq).body.begin();
+                 vcmIter != (*itEq).body.end();
+                 ++vcmIter )
+            {
+                  // We will work with a copy of current Variable
+               Variable var( (*vcmIter).first );
+
+                  // Coefficient Struct
+               Coefficient coef( (*vcmIter).second);
+
+                  // Coefficient values
+               double tempCoef( coef.defaultCoefficient  );
+
+						// An improved version vvv
+					if( !coef.forceDefault )
+					{
+							// Beside using default coefficent, we need to
+							// find in typeValueMap
+					       
+							// Look the coefficient in 'tdata'
+
+							// Get type of current varUnknown
+                  TypeID type( var.getType() );
+
+							// Check if this type has an entry in current GDS type set
+                  if( tData.find(type) != tData.end() )
+                  {
+                        // If type was found, insert value into hMatrix
+                     tempCoef *= tData(type);
+                  }
+						else
+						{
+							GPSTK_THROW( TypeIDNotFound("TypeID not found in tData"));
+						}  // End of 'if( tData.find(type) != tData.end() ) ...'
+					}
+
+						// An improved version ^^^ 
+
+
+//                  // Check if '(*itCol)' unknown variable enforces a specific
+//                  // coefficient, according the coefficient information from
+//                  // the equation
+//               if( coef.forceDefault )
+//               {
+//                     // Use default coefficient
+//                  tempCoef = coef.defaultCoefficient;
+//               }
+//               else
+//               {
+//                     // Look the coefficient in 'tdata'
+//
+//                     // Get type of current varUnknown
+//                  TypeID type( var.getType() );
+//
+//                     // Check if this type has an entry in current GDS type set
+//                  if( tData.find(type) != tData.end() )
+//                  {
+//                        // If type was found, insert value into hMatrix
+//                     tempCoef = tData(type);
+//                  }
+//                  else
+//                  {
+//                        // If value for current type is not in gdsMap, then
+//                        // insert default coefficient for this variable
+//                     tempCoef = coef.defaultCoefficient;
+//                  }
+
+//               }  // End of 'if( (*itCol).isDefaultForced() ) ...'
+
+                  // Now, Let's get the position of this variable in 
+                  // 'currentUnknowns'
+               VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
+
+                  // Get the coefficent map
+               if( itVar1 != currentUnknowns.end() )
+               {
+                  tempCoeffMap[(*itVar1)] = tempCoef ;
+               }
+
+            }  // End of 'for( VarCoeffMap::const_iterator vcmIter = ...'
+
+               // Now, Let's create the index for current float unks
+
+               // Float unks number for current equation
+            int numUnks(tempCoeffMap.size());
+            Vector<int> index(numUnks);
+            Vector<double> G(numUnks);
+
+               // Loop the tempCoeffMap
+            int i(0);
+            for( VariableDataMap::const_iterator itvdm=tempCoeffMap.begin();
+                 itvdm != tempCoeffMap.end();
+                 ++itvdm )
+            {
+               int col(0);
+               VariableSet::const_iterator itVar2=currentUnknowns.begin();
+               while( (*itVar2) != (*itvdm).first )
+               {
+                  col++;
+                  itVar2++;
+               }
+               index(i) = col; 
+               G(i) = (*itvdm).second;
+
+                  // Set the geometry matrix
+               hMatrix(row, col) = (*itvdm).second;
+
+                  // Incrment of the float variable 
+               i++;
+            }
+
+//               // Temp measurement
+//            double z(tempPrefit);
+//
+//               // Inverse weight
+//            double inv_W(1.0/weight);  
+//
+//               // M to store the value of  P*G
+//            Vector<double> M(numVar,0.0);
+//
+//               // Now, let's compute M=P*G.
+//            for(int i=0; i<numVar; i++)
+//            {
+//               for(int j=0; j<numUnks; j++)
+//               {
+//                  M(i) = M(i) + P(i,index(j)) * G(j);
+//               }
+//            }
+//
+//            double dotGM(0.0);
+//            for(int i=0; i<numUnks; i++)
+//            {
+//               dotGM = dotGM + G(i)*M(index(i)); 
+//            }
+//
+//               // Compute the Kalman gain
+//            Vector<double> K(numVar,0.0); 
+//
+//            double beta(inv_W + dotGM);
+//            K = M/beta;
+//
+//            double dotGX(0.0);
+//            for(int i=0; i<numUnks; i++)
+//            {
+//               dotGX = dotGX + G(i)*xhat(index(i)); 
+//            }
+//               // State update
+//            xhat = xhat + K*( z - dotGX );
+//
+//               // Covariance update
+//               // old version:
+//               // P = P - outer(K,M);
+//               // Considering that the P and KM matrix are symetric, 
+//               // thus the computation can be accelerated by operating 
+//               // the upper triangular matrix. 
+//
+//#ifdef USE_OPENMP
+//	#pragma omp parallel for
+//#endif
+//            for(int i=0;i<numVar;i++)
+//            {
+//                  // The diagonal element
+//               P(i,i) = P(i,i) -  K(i)*M(i);
+//
+//                  // The upper/lower triangular element
+//               for(int j=(i+1);j<numVar;j++)
+//               {
+//                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
+//               }
+//
+//            }  // End of 'for(int i = 0; ...)'
+
+
+					// True measurement update
+				singleMeasCorrect( tempPrefit, 
+										 weight,
+									    G,
+									    index );
+
+               // insert current 'prefit' into 'prefitResiduals'
+            prefitResiduals(row) = tempPrefit;
+
+               // Increment row number
+            ++row;
+
+         }  // End of 'for( std::list<Equation>::const_iterator itEq = ...'
+
+
+            // Reset
+         xhatminus = xhat;
+         Pminus = P;
+
+            // Reset
+         solution = xhat;
+         covMatrix = P;
+
+            // Compute the postfit residuals Vector
+         postfitResiduals = prefitResiduals - (hMatrix* solution);
+
+      }
+      catch(Exception& u)
+      {
+            // Throw an exception if something unexpected happens
+         ProcessingException e( getClassName() + ":"
+                                + StringUtils::asString( getIndex() ) + ":"
+                                + u.what() );
+         GPSTK_THROW(e);
+      }
+
+      return gdsMap;
+   }
+
+		// Receivers' DCB measurement update
+	void SolverGenL1L2::DCBObsMeasUpdate( gnssDataMap& gdsMap )
+	{
+			// Loop all the stations
+		SourceIDSet sidSet( gdsMap.getSourceIDSet() );
+		for( SourceIDSet::iterator itSID = sidSet.begin();
+			  itSID != sidSet.end(); 
+			  ++itSID )
+		{
+				// Now, prefit = DCB
+			double tempPrefit( (*itSID).getValue( TypeID::recInstP2 ) );
+
+				// Weight
+			double weight(1.0e+2);
+			double tempCoef(1.0);
+
+				// Second, fill geometry matrix: Look for equation coefficients
+			VariableDataMap tempCoeffMap;
+
+				// Now, Let's get the position of this variable in 
+				// 'currentUnknowns'
+			Variable var( TypeID::recInstP2 );
+			VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
+
+				// Get the coefficent map
+			if( itVar1 != currentUnknowns.end() )
+			{
+				tempCoeffMap[(*itVar1)] = tempCoef ;
+			}
+			
+				// Now, Let's create the index for current float unks
+
+				// Float unks number for current equation
+			int numUnks(tempCoeffMap.size());
+			Vector<int> index(numUnks);
+			Vector<double> G(numUnks);
+
+				// Loop the tempCoeffMap
+			int i(0);
+			for( VariableDataMap::const_iterator itvdm=tempCoeffMap.begin();
+				  itvdm != tempCoeffMap.end();
+				  ++itvdm )
+			{
+				int col(0);
+				VariableSet::const_iterator itVar2=currentUnknowns.begin();
+				while( (*itVar2) != (*itvdm).first )
+				{
+					col++;
+					itVar2++;
+				}
+				index(i) = col;
+				G(i) = (*itvdm).second;
+
+					// Incrment of the float variable 
+				i++;
+			}  // End of ' for( VariableDataMap::const_iterator ... '
+
+					// True measurement update
+			singleMeasCorrect( tempPrefit, 
+									 weight,
+									 G,
+									 index );
+
+
+		}  // End of 'for( SourceIDSet::iterator itSID = sidSet.begin(); ... '
+
+
+	}  // End of 'void SolverGenL1L2::DCBObsMeasUpdate( ... '
+
+		// Choose datum ambiguities and implement measment update 
+	void SolverGenL1L2::AmbObsMeasUpdate( gnssDataMap& gdsMap )
+	{
+			// Loop all the ambiguity type
+		for( TypeIDSet::iterator itAmbType = ambTypeSet.begin();
+			  itAmbType != ambTypeSet.end(); 
+			  ++itAmbType )
+		{
+				// Amb value and covariance
+			VariableDataMap ambMap;
+			std::map<Variable, VariableDataMap > ambVarMap;
+
+				// Assignment
+			int i(0);      // Set an index
          for( VariableSet::const_iterator itVar = currentUnknowns.begin();
               itVar != currentUnknowns.end();
               ++itVar )
          {
-            if( (*itVar).getType() == TypeID::BL1 )
+            if( (*itVar).getType() == *itAmbType )
             {
                ambMap[(*itVar)] = xhatminus(i);
                ambVarMap[ (*itVar) ][ (*itVar) ] = Pminus(i, i);
@@ -602,19 +1154,22 @@ namespace gpstk
             ++i;
          }
 
-            /**
+			   /**
              * Now, Let's get the ambiguity datum 
              */
          ambFixedMap.clear();
 
-            // Set apriori state solution to the ambiguityDatum 
-         indepAmbDatum.Reset(ambMap, ambVarMap);
-         indepAmbDatum.Prepare(gdsMap);
+				// Set apriori state solution to the ambiguityDatum 
+			Variable ambVar(*itAmbType);
+			
+			IndepAmbiguityDatum ambConstr;
+			ambConstr.setAmbType(ambVar);
+			ambConstr.Reset(ambMap, ambVarMap);
+			ambConstr.Prepare(gdsMap);
 
-            // Now, get the fixed ambiguity sats and their values
-         ambFixedMap = indepAmbDatum.getIndepAmbMap();
+			ambFixedMap = ambConstr.getIndepAmbMap();
 
-            /**
+				/**
              * Define prefit/geometry/weight matrix for ambiguity candidate 
              */
 
@@ -632,18 +1187,13 @@ namespace gpstk
 
          }  // End of 'If(...)'
 
-            //
-            // Now, Let's preform the measurment udpate
-            //
-         xhat = xhatminus;
-         P = Pminus;
 
             //
             // Measurement update using single observables each time.
             //
          int numVar(currentUnknowns.size());
 
-            //
+				//
             // Let's apply the independent ambiguity constraints
             //
             // To be modified
@@ -701,293 +1251,102 @@ namespace gpstk
                i++;
             }
 
-               // Temp measurement
-            double z(tempPrefit);
+					// True measurement update
+				singleMeasCorrect( tempPrefit, 
+										 weight,
+									    G,
+									    index );
 
-               // Inverse weight
-            double inv_W(1.0/weight);  
+			}  // End of 'for( VariableDataMap::const_iterator itamb=ambFixed ...  '
 
-               // M to store the value of  P*G
-            Vector<double> M(numVar,0.0);
 
-               // Now, let's compute M=P*G.
-            for(int i=0; i<numVar; i++)
-            {
-               for(int j=0; j<numUnks; j++)
-               {
-                  M(i) = M(i) + P(i,index(j)) * G(j);
-               }
-            }
+				// Update xhatminus
+			xhatminus = xhat;
+			Pminus = P;
 
-            double dotGM(0.0);
-            for(int i=0; i<numUnks; i++)
-            {
-               dotGM = dotGM + G(i)*M(index(i)); 
-            }
+		}  // End of 'for( TypeIDSet::iterator itAmbType = ambTypeSet.begin() ... '
+		
+	}  // End of 'void SolverGenL1L2::AmbObsMeasUpdate()'
 
-               // Compute the Kalman gain
-            Vector<double> K(numVar,0.0); 
 
-            double beta(inv_W + dotGM);
-            K = M/beta;
+		/**  Single measurement correction  
+		 * 
+		 * @param z					Measurement
+		 * @param weight			Weight of measurement
+		 * @param G					Vector holding the coefficients of variables
+		 * @param index			Vector holding index of above variables in 
+		 *								the unknown vector
+		 */ 
+   int SolverGenL1L2::singleMeasCorrect( const double& z,
+					  					 const double& weight,
+					  					 const Vector<double>& G,
+					  					 const Vector<int>& index )
+   throw(InvalidSolver)
+   {
+			// Inverse weight
+		double inv_W(1.0/weight);
 
-            double dotGX(0.0);
-            for(int i=0; i<numUnks; i++)
-            {
-               dotGX = dotGX + G(i)*xhat(index(i)); 
-            }
-               // State update
-            xhat = xhat + K*( z - dotGX );
+			// Num of var in xhat
+		int numVar( xhat.size() );
 
-               // Covariance update
-               // old version:
-               // P = P - outer(K,M);
-               // Considering that the P and KM matrix are symetric, 
-               // thus the computation can be accelerated by operating 
-               // the upper triangular matrix. 
+			// Size of G and index vector
+		int numUnks( index.size() );
 
+			// M to store the value of  P*G
+		Vector<double> M(numVar,0.0);
+
+			// Now, let's compute M=P*G.
+		for(int i=0; i<numVar; i++)
+		{
+			for(int j=0; j<numUnks; j++)
+			{
+				M(i) = M(i) + P(i,index(j)) * G(j);
+			}  // End of ' for(int j=0; j<numUnks; j++) ' 
+		}  // End of ' for(int i=0; i<numVar; i++) '
+
+		double dotGM(0.0);
+		for(int i=0; i<numUnks; i++)
+		{
+			dotGM = dotGM + G(i)*M(index(i));
+		}  // End of ' for(int i=0; i<numUnks; i++) '
+
+			// Compute the Kalman gain
+		Vector<double> K(numVar,0.0);
+
+		double beta(inv_W + dotGM);
+		K = M/beta; 
+
+		double dotGX(0.0);
+		for(int i=0; i<numUnks; i++)
+		{
+			dotGX = dotGX + G(i)*xhat(index(i));
+		}  // End of ' for(int i=0; i<numUnks; i++) '
+
+			// State update
+		xhat = xhat + K*( z - dotGX );
+
+				// Covariance update
 #ifdef USE_OPENMP
 	#pragma omp parallel for
 #endif
-            for(int i=0;i<numVar;i++)
-            {
-                  // The diagonal element
-               P(i,i) = P(i,i) -  K(i)*M(i);
+		for(int i=0;i<numVar;i++)
+		{
+				// The diagonal element
+			P(i,i) = P(i,i) -  K(i)*M(i);
 
-                  // The upper/lower triangular element
-               for(int j=(i+1);j<numVar;j++)
-               {
-                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
-               }
+				// The upper/lower triangular element
+			for(int j=(i+1);j<numVar;j++)
+			{
+				P(j,i) = P(i,j) = P(i,j) - K(i)*M(j);
+			}  // End of ' for(int j=(i+1);j<numVar;j++) '
+		}  // End of ' for(int i=0;i<numVar;i++) '
 
-            }  // End of 'for(int i = 0; ...)'
+		return 0;
 
-         }
-            
-            //
-            // Let's perform the measurement update one observable by one
-            //
-            
-         std::list<Equation> equList;
-         equList = equSystem.getCurrentEquationsList();
-         int numEqu(equList.size());
-
-         prefitResiduals.resize(numEqu,0.0);
-         hMatrix.resize( numEqu, numVar, 0.0 );
-
-         int row(0);
-         for( std::list<Equation>::const_iterator itEq = equList.begin();
-              itEq != equList.end();
-              ++itEq )
-         {
-               // Get the type value data from the header of the equation
-            typeValueMap tData( (*itEq).header.typeValueData );
-
-               // Get the independent type of this equation
-            TypeID indepType( (*itEq).header.indTerm.getType() );
-
-               // Now, Let's get current prefit
-            double tempPrefit(tData(indepType));
-
-               // Weight
-            double weight;
-
-               // First, fill weights matrix
-               // Check if current 'tData' has weight info. If you don't want those
-               // weights to get into equations, please don't put them in GDS
-            if( tData.find(TypeID::weight) != tData.end() )
-            {
-                  // Weights matrix = Equation weight * observation weight
-               weight = (*itEq).header.constWeight * tData(TypeID::weight);
-            }
-            else
-            {
-               weight = (*itEq).header.constWeight; // Weights matrix = Equation weight
-            }
-
-               // Second, fill geometry matrix: Look for equation coefficients
-            VariableDataMap tempCoeffMap;
-               
-               // Now, let's visit all Variables and the corresponding 
-               // coefficient in this equation description
-            for( VarCoeffMap::const_iterator vcmIter = (*itEq).body.begin();
-                 vcmIter != (*itEq).body.end();
-                 ++vcmIter )
-            {
-                  // We will work with a copy of current Variable
-               Variable var( (*vcmIter).first );
-
-                  // Coefficient Struct
-               Coefficient coef( (*vcmIter).second);
-
-                  // Coefficient values
-               double tempCoef(0.0);
-
-                  // Check if '(*itCol)' unknown variable enforces a specific
-                  // coefficient, according the coefficient information from
-                  // the equation
-               if( coef.forceDefault )
-               {
-                     // Use default coefficient
-                  tempCoef = coef.defaultCoefficient;
-               }
-               else
-               {
-                     // Look the coefficient in 'tdata'
-
-                     // Get type of current varUnknown
-                  TypeID type( var.getType() );
-
-                     // Check if this type has an entry in current GDS type set
-                  if( tData.find(type) != tData.end() )
-                  {
-                        // If type was found, insert value into hMatrix
-                     tempCoef = tData(type);
-                  }
-                  else
-                  {
-                        // If value for current type is not in gdsMap, then
-                        // insert default coefficient for this variable
-                     tempCoef = coef.defaultCoefficient;
-                  }
-
-               }  // End of 'if( (*itCol).isDefaultForced() ) ...'
-
-                  // Now, Let's get the position of this variable in 
-                  // 'currentUnknowns'
-               VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
-
-                  // Get the coefficent map
-               if( itVar1 != currentUnknowns.end() )
-               {
-                  tempCoeffMap[(*itVar1)] = tempCoef ;
-               }
-
-            }  // End of 'for( VarCoeffMap::const_iterator vcmIter = ...'
-
-               // Now, Let's create the index for current float unks
-
-               // Float unks number for current equation
-            int numUnks(tempCoeffMap.size());
-            Vector<int> index(numUnks);
-            Vector<double> G(numUnks);
-
-               // Loop the tempCoeffMap
-            int i(0);
-            for( VariableDataMap::const_iterator itvdm=tempCoeffMap.begin();
-                 itvdm != tempCoeffMap.end();
-                 ++itvdm )
-            {
-               int col(0);
-               VariableSet::const_iterator itVar2=currentUnknowns.begin();
-               while( (*itVar2) != (*itvdm).first )
-               {
-                  col++;
-                  itVar2++;
-               }
-               index(i) = col; 
-               G(i) = (*itvdm).second;
-
-                  // Set the geometry matrix
-               hMatrix(row, col) = (*itvdm).second;
-
-                  // Incrment of the float variable 
-               i++;
-            }
-
-               // Temp measurement
-            double z(tempPrefit);
-
-               // Inverse weight
-            double inv_W(1.0/weight);  
-
-               // M to store the value of  P*G
-            Vector<double> M(numVar,0.0);
-
-               // Now, let's compute M=P*G.
-            for(int i=0; i<numVar; i++)
-            {
-               for(int j=0; j<numUnks; j++)
-               {
-                  M(i) = M(i) + P(i,index(j)) * G(j);
-               }
-            }
-
-            double dotGM(0.0);
-            for(int i=0; i<numUnks; i++)
-            {
-               dotGM = dotGM + G(i)*M(index(i)); 
-            }
-
-               // Compute the Kalman gain
-            Vector<double> K(numVar,0.0); 
-
-            double beta(inv_W + dotGM);
-            K = M/beta;
-
-            double dotGX(0.0);
-            for(int i=0; i<numUnks; i++)
-            {
-               dotGX = dotGX + G(i)*xhat(index(i)); 
-            }
-               // State update
-            xhat = xhat + K*( z - dotGX );
-
-               // Covariance update
-               // old version:
-               // P = P - outer(K,M);
-               // Considering that the P and KM matrix are symetric, 
-               // thus the computation can be accelerated by operating 
-               // the upper triangular matrix. 
-
-#ifdef USE_OPENMP
-	#pragma omp parallel for
-#endif
-            for(int i=0;i<numVar;i++)
-            {
-                  // The diagonal element
-               P(i,i) = P(i,i) -  K(i)*M(i);
-
-                  // The upper/lower triangular element
-               for(int j=(i+1);j<numVar;j++)
-               {
-                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
-               }
-
-            }  // End of 'for(int i = 0; ...)'
-
-               // insert current 'prefit' into 'prefitResiduals'
-            prefitResiduals(row) = tempPrefit;
-
-               // Increment row number
-            ++row;
-
-         }  // End of 'for( std::list<Equation>::const_iterator itEq = ...'
-
-
-            // Reset
-         xhatminus = xhat;
-         Pminus = P;
-
-            // Reset
-         solution = xhat;
-         covMatrix = P;
-
-            // Compute the postfit residuals Vector
-         postfitResiduals = prefitResiduals - (hMatrix* solution);
-
-      }
-      catch(Exception& u)
-      {
-            // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + StringUtils::asString( getIndex() ) + ":"
-                                + u.what() );
-         GPSTK_THROW(e);
-      }
-
-      return gdsMap;
    }
+
+
+
 
       // Now, fix all the ambiguities to integers 
    gnssDataMap& SolverGenL1L2::AmbiguityFixing( gnssDataMap& gData )

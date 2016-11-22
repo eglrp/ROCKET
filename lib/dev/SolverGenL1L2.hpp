@@ -76,6 +76,7 @@
 #include "TypeID.hpp"
 
 
+
 namespace gpstk
 {
 
@@ -104,6 +105,13 @@ namespace gpstk
        * @sa SolverGenL1L2.hpp.
        *
        */
+
+
+      /// Thrown when attempting to access a value and the corresponding TypeID
+      /// does not exist in the map.
+      /// @ingroup exceptiongroup
+//   NEW_EXCEPTION_CLASS(TypeIDNotFound, gpstk::Exception);
+
    class SolverGenL1L2 : public SolverBase, public ProcessingClass
    {
    public:
@@ -240,9 +248,33 @@ namespace gpstk
           *
           * @param constrSystem  Object holding the constraint system
           */
-      virtual SolverGenL1L2& add2AmbDatumSet( 
-                                    const IndepAmbiguityDatum& ambDatum)
-      { ambDatumSet.insert( ambDatum ); return (*this); };
+      virtual SolverGenL1L2& add2AmbTypeSet( 
+                                     TypeID& ambType) 
+      { ambTypeSet.insert( ambType ); return (*this); };
+
+		/* Choose datum ambiguities and implement measment update 
+		 * 
+		 */
+		void AmbObsMeasUpdate( gnssDataMap& gdsMap );
+
+		/* Receivers' DCB measurement update
+		 *
+		 */
+		void DCBObsMeasUpdate( gnssDataMap& gdsMap );
+
+		/**  Single measurement correction  
+		 * 
+		 * @param z					Measurement
+		 * @param weight			Weight of measurement
+		 * @param G					Vector holding the coefficients of variables
+		 * @param index			Vector holding index of above variables in 
+		 *								the unknown vector
+		 */ 
+   virtual int singleMeasCorrect( const double& z,
+											 const double& weight,
+											 const Vector<double>& G,
+											 const Vector<int>& index )
+   throw(InvalidSolver);
 
 
          /** Set constraint system for the equationSystem.
@@ -257,8 +289,8 @@ namespace gpstk
           *
           * @param constrSystem  Object holding the constraint system
           */
-      virtual SolverGenL1L2& add2AmbTypeSet( const Variable& var)
-      { ambTypeSet.insert( var ); return (*this); };
+//      virtual SolverGenL1L2& add2AmbTypeSet( const Variable& var)
+//      { ambTypeSet.insert( var ); return (*this); };
 
 
       virtual SolverGenL1L2& setFixAndHold( const bool& hold)
@@ -369,6 +401,9 @@ namespace gpstk
          /// Ambiguity Datum system
       IndepAmbiguityDatum indepAmbDatum;
 
+			/// Ambiguity type set
+		TypeIDSet ambTypeSet;
+
          /// Current set of unknowns
       VariableSet currentUnknowns;
       
@@ -408,12 +443,8 @@ namespace gpstk
          /// Variable to store the ambiguity type
       Variable ambType;
 
-			/// Set of ambiguity types
-		VariableSet ambTypeSet;
 
 			/// Set of IndepAmbiguityDatum 
-		typedef set<IndepAmbiguityDatum> IndepAmbDatumSet;
-		IndepAmbDatumSet ambDatumSet; 
 
          // Predicted state
       Vector<double> xhatminus;
