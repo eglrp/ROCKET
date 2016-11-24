@@ -223,6 +223,22 @@ namespace gpstk
       virtual gnssDataMap& AmbiguityFixing( gnssDataMap& gdsMap )
          throw(ProcessingException);
 
+         /** Fix the ambiguities.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& AmbiguityFixing2( gnssDataMap& gdsMap )
+         throw(ProcessingException);
+
+			/** Ambiguity Fixing strategy
+			 *
+			 */
+		virtual void TrueAmbiguityFixing( Vector<double>& stateVec,
+													 Matrix<double>& covMat,
+													 TypeID ambiguityType )
+         throw(ProcessingException);
+
+
 
          /** Update the free unknonws' solution and covariance after
           *  fixing the ambiguities

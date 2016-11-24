@@ -197,7 +197,7 @@ namespace gpstk
 
 
             // Call the Compute() method with the defined equation model.
-//         Correct( gdsMap );
+         Correct( gdsMap );
 
             // return
          return gdsMap;
@@ -517,10 +517,10 @@ namespace gpstk
          MeasUpdate( gdsMap );
 
             // Ambiguity Constraints
-         AmbiguityFixing( gdsMap );
+         AmbiguityFixing2( gdsMap );
 
              // Post compute
-         postCompute(gdsMap);
+//         postCompute(gdsMap);
       }
       catch(Exception& u)
       {
@@ -560,44 +560,6 @@ namespace gpstk
             // Fill the initialState vector  
          if( firstTime )
          {
-//            int i(0);      // Set an index
-//            for( VariableSet::const_iterator itVar = currentUnknowns.begin();
-//                 itVar != currentUnknowns.end();
-//                 ++itVar )
-//            {
-//                  // If the type of (*itVar) is 'TypeID::BL1'
-//               if( (*itVar).getType() == TypeID::BL1)
-//               {
-//                     // Get the MWubbena value
-//                  double BL1 = gdsMap.getValue( (*itVar).getSource(), 
-//                                                     (*itVar).getSatellite(), 
-//                                                     TypeID::BL1 );
-//  
-//                     // Compute the initial narrowlane ambiguity
-//                  xhatminus(i) = std::floor( BL1/(-1*L1_WAVELENGTH_GPS ) + 0.5 ) ;
-//  
-//               } // End of 'if( (*itVar).getType() == ... )'
-//
-//
-//					   // If the type of (*itVar) is 'TypeID::BL1'
-//               if( (*itVar).getType() == TypeID::BL2)
-//               {
-//                     // Get the MWubbena value
-//                  double BL2 = gdsMap.getValue( (*itVar).getSource(), 
-//                                                     (*itVar).getSatellite(), 
-//                                                     TypeID::BL2 );
-//  
-//                     // Compute the initial narrowlane ambiguity
-//                  xhatminus(i) = std::floor( BL2/(-1*L2_WAVELENGTH_GPS) + 0.5 ) ;
-//  
-//               } // End of 'if( (*itVar).getType() == ... )'
-//  
-//
-//  
-//                  // Index
-//               ++i;
-//            }
-//               // No longer first time
             firstTime = false;
          }
          
@@ -611,186 +573,6 @@ namespace gpstk
 				// Choose ambiguity datum and implement 'measurement' update. 
 			AmbObsMeasUpdate( gdsMap );
 
-
-//         VariableDataMap ambMap;
-//         std::map<Variable, VariableDataMap > ambVarMap;
-//
-//            // Store values of current state
-//         int i(0);      // Set an index
-//         for( VariableSet::const_iterator itVar = currentUnknowns.begin();
-//              itVar != currentUnknowns.end();
-//              ++itVar )
-//         {
-//            if( (*itVar).getType() == TypeID::BL1 )
-//            {
-//               ambMap[(*itVar)] = xhatminus(i);
-//               ambVarMap[ (*itVar) ][ (*itVar) ] = Pminus(i, i);
-//					
-//            }
-//            ++i;
-//         }
-//
-//            /**
-//             * Now, Let's get the ambiguity datum 
-//             */
-//         ambFixedMap.clear();
-//
-//            // Set apriori state solution to the ambiguityDatum 
-//         indepAmbDatum.Reset(ambMap, ambVarMap);
-//         indepAmbDatum.Prepare(gdsMap);
-//
-//            // Now, get the fixed ambiguity sats and their values
-//         ambFixedMap = indepAmbDatum.getIndepAmbMap();
-//
-//            /**
-//             * Define prefit/geometry/weight matrix for ambiguity candidate 
-//             */
-//
-//            // Number of ambiguities that can be fixed
-//         int numFix( ambFixedMap.size() );
-//
-//            // Throw exception
-//         if( numFix == 0 )
-//         {
-//               // Throw an exception if something unexpected happens
-//            ProcessingException e("The ambiguity constraint equation number is 0.");
-//
-//               // Throw the exception
-//            GPSTK_THROW(e);
-//
-//         }  // End of 'If(...)'
-//
-//            //
-//            // Now, Let's preform the measurment udpate
-//            //
-//         xhat = xhatminus;
-//         P = Pminus;
-//
-//            //
-//            // Measurement update using single observables each time.
-//            //
-//         int numVar(currentUnknowns.size());
-//
-//            //
-//            // Let's apply the independent ambiguity constraints
-//            //
-//            // To be modified
-//            // apply the ambiguity constraint equations
-//            //
-//         for( VariableDataMap::const_iterator itamb=ambFixedMap.begin();
-//              itamb !=ambFixedMap.end();
-//              ++itamb )
-//         {
-//               // Now, prefit = fixed ambiguity
-//            double tempPrefit( (*itamb).second );
-//
-//               // Weight
-//            double weight( 1.0e+9 );
-//            double tempCoef(1.0);
-//
-//               // Second, fill geometry matrix: Look for equation coefficients
-//            VariableDataMap tempCoeffMap;
-//               
-//               // Now, Let's get the position of this variable in 
-//               // 'currentUnknowns'
-//            Variable var( (*itamb).first );
-//            VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
-//
-//               // Get the coefficent map
-//            if( itVar1 != currentUnknowns.end() )
-//            {
-//               tempCoeffMap[(*itVar1)] = tempCoef ;
-//            }
-//
-//               // Now, Let's create the index for current float unks
-//
-//               // Float unks number for current equation
-//            int numUnks(tempCoeffMap.size());
-//            Vector<int> index(numUnks);
-//            Vector<double> G(numUnks);
-//
-//               // Loop the tempCoeffMap
-//            int i(0);
-//            for( VariableDataMap::const_iterator itvdm=tempCoeffMap.begin();
-//                 itvdm != tempCoeffMap.end();
-//                 ++itvdm )
-//            {
-//               int col(0);
-//               VariableSet::const_iterator itVar2=currentUnknowns.begin();
-//               while( (*itVar2) != (*itvdm).first )
-//               {
-//                  col++;
-//                  itVar2++;
-//               }
-//               index(i) = col; 
-//               G(i) = (*itvdm).second;
-//
-//                  // Incrment of the float variable 
-//               i++;
-//            }
-//
-//               // Temp measurement
-//            double z(tempPrefit);
-//
-//               // Inverse weight
-//            double inv_W(1.0/weight);  
-//
-//               // M to store the value of  P*G
-//            Vector<double> M(numVar,0.0);
-//
-//               // Now, let's compute M=P*G.
-//            for(int i=0; i<numVar; i++)
-//            {
-//               for(int j=0; j<numUnks; j++)
-//               {
-//                  M(i) = M(i) + P(i,index(j)) * G(j);
-//               }
-//            }
-//
-//            double dotGM(0.0);
-//            for(int i=0; i<numUnks; i++)
-//            {
-//               dotGM = dotGM + G(i)*M(index(i)); 
-//            }
-//
-//               // Compute the Kalman gain
-//            Vector<double> K(numVar,0.0); 
-//
-//            double beta(inv_W + dotGM);
-//            K = M/beta;
-//
-//            double dotGX(0.0);
-//            for(int i=0; i<numUnks; i++)
-//            {
-//               dotGX = dotGX + G(i)*xhat(index(i)); 
-//            }
-//               // State update
-//            xhat = xhat + K*( z - dotGX );
-//
-//               // Covariance update
-//               // old version:
-//               // P = P - outer(K,M);
-//               // Considering that the P and KM matrix are symetric, 
-//               // thus the computation can be accelerated by operating 
-//               // the upper triangular matrix. 
-//
-//#ifdef USE_OPENMP
-//	#pragma omp parallel for
-//#endif
-//            for(int i=0;i<numVar;i++)
-//            {
-//                  // The diagonal element
-//               P(i,i) = P(i,i) -  K(i)*M(i);
-//
-//                  // The upper/lower triangular element
-//               for(int j=(i+1);j<numVar;j++)
-//               {
-//                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
-//               }
-//
-//            }  // End of 'for(int i = 0; ...)'
-//
-//         }
 
 				// 
 			   // Receiver DCB measurement update
@@ -817,14 +599,20 @@ namespace gpstk
               itEq != equList.end();
               ++itEq )
          {
+
+
                // Get the type value data from the header of the equation
             typeValueMap tData( (*itEq).header.typeValueData );
 
                // Get the independent type of this equation
             TypeID indepType( (*itEq).header.indTerm.getType() );
 
+
+
                // Now, Let's get current prefit
             double tempPrefit(tData(indepType));
+
+
 
                // Weight
             double weight;
@@ -885,37 +673,6 @@ namespace gpstk
 
 						// An improved version ^^^ 
 
-
-//                  // Check if '(*itCol)' unknown variable enforces a specific
-//                  // coefficient, according the coefficient information from
-//                  // the equation
-//               if( coef.forceDefault )
-//               {
-//                     // Use default coefficient
-//                  tempCoef = coef.defaultCoefficient;
-//               }
-//               else
-//               {
-//                     // Look the coefficient in 'tdata'
-//
-//                     // Get type of current varUnknown
-//                  TypeID type( var.getType() );
-//
-//                     // Check if this type has an entry in current GDS type set
-//                  if( tData.find(type) != tData.end() )
-//                  {
-//                        // If type was found, insert value into hMatrix
-//                     tempCoef = tData(type);
-//                  }
-//                  else
-//                  {
-//                        // If value for current type is not in gdsMap, then
-//                        // insert default coefficient for this variable
-//                     tempCoef = coef.defaultCoefficient;
-//                  }
-
-//               }  // End of 'if( (*itCol).isDefaultForced() ) ...'
-
                   // Now, Let's get the position of this variable in 
                   // 'currentUnknowns'
                VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
@@ -929,6 +686,7 @@ namespace gpstk
             }  // End of 'for( VarCoeffMap::const_iterator vcmIter = ...'
 
                // Now, Let's create the index for current float unks
+
 
                // Float unks number for current equation
             int numUnks(tempCoeffMap.size());
@@ -957,68 +715,6 @@ namespace gpstk
                   // Incrment of the float variable 
                i++;
             }
-
-//               // Temp measurement
-//            double z(tempPrefit);
-//
-//               // Inverse weight
-//            double inv_W(1.0/weight);  
-//
-//               // M to store the value of  P*G
-//            Vector<double> M(numVar,0.0);
-//
-//               // Now, let's compute M=P*G.
-//            for(int i=0; i<numVar; i++)
-//            {
-//               for(int j=0; j<numUnks; j++)
-//               {
-//                  M(i) = M(i) + P(i,index(j)) * G(j);
-//               }
-//            }
-//
-//            double dotGM(0.0);
-//            for(int i=0; i<numUnks; i++)
-//            {
-//               dotGM = dotGM + G(i)*M(index(i)); 
-//            }
-//
-//               // Compute the Kalman gain
-//            Vector<double> K(numVar,0.0); 
-//
-//            double beta(inv_W + dotGM);
-//            K = M/beta;
-//
-//            double dotGX(0.0);
-//            for(int i=0; i<numUnks; i++)
-//            {
-//               dotGX = dotGX + G(i)*xhat(index(i)); 
-//            }
-//               // State update
-//            xhat = xhat + K*( z - dotGX );
-//
-//               // Covariance update
-//               // old version:
-//               // P = P - outer(K,M);
-//               // Considering that the P and KM matrix are symetric, 
-//               // thus the computation can be accelerated by operating 
-//               // the upper triangular matrix. 
-//
-//#ifdef USE_OPENMP
-//	#pragma omp parallel for
-//#endif
-//            for(int i=0;i<numVar;i++)
-//            {
-//                  // The diagonal element
-//               P(i,i) = P(i,i) -  K(i)*M(i);
-//
-//                  // The upper/lower triangular element
-//               for(int j=(i+1);j<numVar;j++)
-//               {
-//                  P(j,i) = P(i,j) = P(i,j) - K(i)*M(j); 
-//               }
-//
-//            }  // End of 'for(int i = 0; ...)'
-
 
 					// True measurement update
 				singleMeasCorrect( tempPrefit, 
@@ -1070,6 +766,9 @@ namespace gpstk
 		{
 				// Now, prefit = DCB
 			double tempPrefit( (*itSID).getValue( TypeID::recInstP2 ) );
+
+				// Change the unit from nano second to meter
+			tempPrefit = tempPrefit * C_MPS * 1e-9;
 
 				// Weight
 			double weight(1.0e+2);
@@ -1346,7 +1045,240 @@ namespace gpstk
    }
 
 
+      // Now, fix all the ambiguities to integers 
+   gnssDataMap& SolverGenL1L2::AmbiguityFixing2( gnssDataMap& gData )
+      throw(ProcessingException)
+	{
+		
+		try
+		{
 
+				// Num of unknowns 
+         int numVar(currentUnknowns.size());
+
+				// Mapping matrix
+				// [x, N1, N2] --> [x, N1, Nw] 
+			Matrix<double> mapMat( numVar, numVar, 0.0 );
+
+				// Fill the mapMat
+					// Firstly, we nee to store the N1 index of 
+					// each station in currentUnknowns 
+			int i(0);
+			std::map<SourceID, map<SatID, int> > stationSatBL1Index;
+			for( VariableSet::iterator itVar = currentUnknowns.begin();
+				  itVar != currentUnknowns.end();
+				  ++itVar )
+			{
+					 // Filter out N1 and N2
+				if( (*itVar).getType() == TypeID::BL1 )
+				{
+					SourceID tempSource( (*itVar).getSource() );
+					SatID tempSat( (*itVar).getSatellite() );
+					stationSatBL1Index[ tempSource ][ tempSat] 
+										= (*itVar).getNowIndex();  
+				}  
+
+			}  // End of 'for( VariableSet::iterator itVar = ... '
+
+					// Now, it's time to fill mapMat
+			for( VariableSet::iterator itVar = currentUnknowns.begin();
+				  itVar != currentUnknowns.end();
+				  ++itVar )
+			{
+					// Index of present observable
+				int index( (*itVar).getNowIndex() );
+				
+				if( (*itVar).getType() == TypeID::BL2 )
+				{
+					SourceID tempSource( (*itVar).getSource() );
+					SatID tempSat( (*itVar).getSatellite() );
+
+					int indexN1( stationSatBL1Index[tempSource][tempSat] );
+						// We need to find indexN1 in  
+
+//					// Debug code vvv
+//					cout << tempSource << " " 
+//						  << tempSat << " "	
+//						<< "indexN1: " 
+//						<< indexN1 << " indexN2 " << indexN2 << endl;
+//					// Debug code ^^^ 
+
+					mapMat(index, index) = -1.0;
+					mapMat(index, indexN1) = 1.0;
+
+				} 
+				else
+				{
+					mapMat(index, index) = 1.0;
+				}  // End of 'if( (*itVar).getType() == TypeID::BL2 ) ... '
+			}  // End of 'for( VariableSet::iterator itVar = ... '
+	
+			
+
+				// Now, Transform
+			Matrix<double>mapMatT( transpose(mapMat) );
+         Vector<double> newState( mapMat*solution );
+         Matrix<double> newCov( mapMat*covMatrix*mapMatT);
+			
+	
+			Vector<double> fixedState(numVar, 0.0);
+			Matrix<double> fixedCov(numVar, numVar, 0.0);
+
+
+				// Now, it's time to fix WL  ambiguities
+			TrueAmbiguityFixing( newState, newCov, TypeID::BL2);
+
+			// return
+			return gData;
+		}
+		catch(Exception& u)
+		{
+				// Throw an exception if something unexpected happens
+			ProcessingException e( getClassName() + ":"
+										  + StringUtils::asString( getIndex() ) + ":"
+										  + u.what() ); 
+
+			GPSTK_THROW(e);
+		}
+
+	}  // End of ' gnssDataMap& SolverGenL1L2::AmbiguityFixing ... '
+
+
+	void SolverGenL1L2::TrueAmbiguityFixing( Vector<double>& stateVec,
+														  Matrix<double>& covMat,
+														  TypeID ambigityType )
+		throw(ProcessingException)
+	{
+	
+		try
+		{
+			
+			Vector<double> newState;
+         Matrix<double> newCov;
+
+				// Fixed amb map
+			VariableDataMap ambFixedMap;
+
+            // Firsly, store the solution/covMatrix into 'newState/newCov'
+         newState = stateVec;
+         newCov = covMat; 
+
+            /**
+             * Firstly, fix the widelane ambiguities
+             */
+         int numUnknowns(currentUnknowns.size());
+
+            // Flags indicating whether this unknown variable has been fixed.
+         Vector<double> stateFlag(numUnknowns, 0.0);
+
+            // Cutting decision to fix the ambiguities
+         double cutDec(1000.0);
+
+            // Ambiguity Fixing method
+         ARRound ambRes(1000,0.15,0.15);
+
+            /*
+             * Loop to fix a ambiguity
+             */
+         int numFixed(0);
+
+            // Still have ambiguity to be fixed? 
+         bool done(false); 
+
+            // Now, fix the N1 ambiguities
+         while( !done )
+         {
+               // Indicator variable
+            int index(-1);
+            double maxDec(-100.0);
+            Variable tempVar;
+
+            int i(0);
+            for( VariableSet::const_iterator itVar1 = currentUnknowns.begin();
+                 itVar1 != currentUnknowns.end();
+                 ++itVar1 )
+            {
+               if( stateFlag(i) == 0.0 && (*itVar1).getType() == ambiguityType )
+               {
+                     // Ambiguity value
+                  double b1 = newState(i);
+
+                     // Sigma 
+                  double b1Sig = std::sqrt( newCov(i,i) );
+
+                     // Ambiguity fixing decision
+                  double decision = ambRes.getDecision(b1, b1Sig);
+
+                     // Look for the largest fixing decision
+                  if( decision > maxDec )
+                  {
+                     index = i;
+                     maxDec = decision;
+                     tempVar = (*itVar1);
+                  }
+               }
+                  // Increment
+               i++;
+            }
+
+               // If found 
+            if(index != -1)
+            {
+                  // If can be fixed
+               if( maxDec > cutDec )
+               {
+                     // Ambiguity value
+                  double b1 = newState(index);
+
+                     // Fixed value of b1
+                  double b1Fixed = std::floor( b1 + 0.5 );
+
+                     // Update the solution and covarinace  
+                  AmbiguityUpdate(newState, newCov, stateFlag, index, b1Fixed );
+
+                     // Not free at all
+                  stateFlag(index) = 1.0;
+
+                     // Store the fixed ambiguity value into 'state'
+                  newState(index) = b1Fixed;
+
+                     // Insert the ambiguity into 'ambFixedMap'
+                  ambFixedMap[(tempVar)] = b1Fixed;
+
+                     // Update the fixed number
+                  numFixed = numFixed + 1;
+
+               }
+               else
+               {
+                    // If ambiguity can't be fixed
+                  done = true;
+               } 
+
+            }
+            else
+            {
+                 // if no ambiguity is found
+               done = true;
+            }
+                
+         }  // End of 'while(done)'
+
+
+
+		}
+	   catch(Exception& u)
+      {
+            // Throw an exception if something unexpected happens
+         ProcessingException e( getClassName() + ":"
+                                + StringUtils::asString( getIndex() ) + ":"
+                                + u.what() );
+
+         GPSTK_THROW(e);
+
+      }
+
+	}  // End of 'void SolverGenL1L2::TrueAmbiguityFixing( ... '
 
       // Now, fix all the ambiguities to integers 
    gnssDataMap& SolverGenL1L2::AmbiguityFixing( gnssDataMap& gData )
