@@ -207,6 +207,65 @@ namespace gpstk
       return (*this);
 
    }  // End of method 'EquationSystem2::Prepare()'
+	
+	std::ostream& EquationSystem2::printEquationInfo( std::ostream& s,
+																	  int mode ) const
+		throw( InvalidEquationSystem2 )
+	{
+		if(!isPrepared)
+		{
+			s << "Equation system is not prepared !!! " << std::endl;
+			return s;
+		}
+
+		CivilTime ct(epoch);
+
+		s << "vvvvvvvvvvvvvvvvvvvv Equation info vvvvvvvvvvvvvvvvvvvv " << endl;
+			// Time
+		s << ct.year << " " << ct.month << " " << ct.day << " "
+			<< ct.hour << " " << ct.minute << " " << ct.second << endl;
+
+			// stations and satellites
+		for( std::map<SourceID, SatIDSet>::const_iterator it = sourceSatSet.begin(); 
+			  it != sourceSatSet.end(); 
+			  ++it )
+		{
+			s << "station: " << it -> first << " observed Sats: ";
+				
+				// SatIDSet
+			for( SatIDSet::iterator ite = (it -> second).begin();
+				  ite != (it -> second).end(); 
+				  ++ite )
+			{
+				s << *ite << " ";
+
+			}  // End of ' for( SatIDSet::iterator::iterator ite  ... '
+
+			s << endl;
+
+		}  // End of ' for( std::map<SourceID, SatIDSet>::iterator ... '
+
+			// Now equations
+//		for()
+//		{
+//		}
+
+
+		s << "^^^^^^^^^^^^^^^^^^^^ Equation info ^^^^^^^^^^^^^^^^^^^^^ " << endl;
+
+		return s; 
+
+	}  // End of ' std::ostream& EquationSystem2::printEquationInfo( std::ostream& s, ... '
+
+
+
+	TypeID EquationSystem2::getTypeOfFirstEqu()
+	{
+		TypeID type;
+		type = (*(equDescripList.begin())).header.indTerm.getType();
+
+		return type;
+	}
    
    void EquationSystem2::setUpEquationIndex( VariableSet& old_variable_set){
 
@@ -253,6 +312,9 @@ namespace gpstk
    void EquationSystem2::prepareCurrentSourceSat( gnssDataMap& gdsMap )
    {
 
+			// Recored the present epoch
+		epoch = ( gdsMap.begin() ) -> first;
+
          // Clear "currentSatSet" and "currentSourceSet"
       currentSatSet.clear();
       currentSourceSet.clear();
@@ -262,6 +324,18 @@ namespace gpstk
 
          // Insert the corresponding SourceID's in "currentSourceSet"
       currentSourceSet = gdsMap.getSourceIDSet();
+
+			// source -- satSet
+		for( SourceIDSet::iterator itSource = currentSourceSet.begin();
+			  itSource != currentSourceSet.end(); 
+			  ++itSource )
+		{
+			SourceID source(*itSource);
+			gnssDataMap tempgds( gdsMap.extractSourceID(source) );
+			sourceSatSet[ source ] = tempgds.getSatIDSet();
+
+		}  // End of ' for( SourceIDSet::iterator itSource = ... '
+
 
 
          // Let's return
@@ -295,6 +369,11 @@ namespace gpstk
               ++sdmIter )
          {
             
+				// Debug code vvv
+				//SourceID sid( (*sdmIter).first );
+				//cout << "station: " << sid <<  endl; 
+				// Debug code ^^^
+
                // Visit each "Equation" in "equDescripList"
             for( std::list<Equation>::const_iterator itEq = equDescripList.begin();
                  itEq != equDescripList.end();
@@ -328,6 +407,7 @@ namespace gpstk
                {
                      // In this case, we take directly the source as 'equSource' 
                   SourceID equSource = (*itEq).getEquationSource() ;
+
                   if( (equSource) == (*sdmIter).first )
                   {
                      found = true;
@@ -342,6 +422,14 @@ namespace gpstk
 
                      // Update equation independent term with SourceID information
                   tempEquation.header.equationSource = (*sdmIter).first;
+
+						// Debug code vvv
+//						std::cout << "Observable: " 
+//										<< tempEquation.header.indTerm.getType()
+//										<< endl
+//										<< "Variables: "
+//										<< endl;
+						// Debug code ^^^
 
                      // Iterate the satellite and create the equations
                   for( satTypeValueMap::const_iterator stvmIter =
@@ -404,7 +492,15 @@ namespace gpstk
 
                         }  // End of 'if( !var.getSatIndexed() )...'
 
+								// Debug code vvv
+							   //cout << var.getType() << " " << coef.defaultCoefficient << " " << endl;
+								// Debug code ^^^
+
                      }  // End of 'for( VarCoeffMap::const_iterator vcmIter = ...'
+
+							// Debug code vvv
+							//cout << endl;
+							// Debug code ^^^ 
 
                         // New equation is complete: Add it to 'currentEquationsList'
                      currentEquationsList.push_back( tempEquation );
@@ -420,6 +516,29 @@ namespace gpstk
       }  // End of 'for( gnssDataMap::const_iterator it = ...'
         
          // Return set of current unknowns
+		
+		// Debug code vvv
+//		CommonTime time((gdsMap.begin())->first);
+//
+//		std::cout << "Present unknowns: " << currentUnkSet.size()  << std::endl;
+//
+//		int count(1);
+//		
+//		for( VariableSet::iterator iter = currentUnkSet.begin(); 
+//			  iter != currentUnkSet.end();
+//			  ++iter )
+//		{
+//
+//			std::cout << "Variable index: " << count << std::endl;
+//			
+//			Variable varTest(*iter);
+//			std::cout << varTest.getType() << std::endl;
+//
+//			
+//
+//			count++;
+//		}  // End of 'for( VariableSet::iterator iter ... '
+		// Debug code ^^^
       return currentUnkSet;
 
    }  // End of method 'EquationSystem2::prepareUnknownsAndEquations()'

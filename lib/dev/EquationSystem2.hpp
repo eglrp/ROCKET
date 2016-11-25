@@ -305,11 +305,23 @@ namespace gpstk
          /// Setup Equation Index
       void setUpEquationIndex(VariableSet& old_variable_set);
 
+			/// Print out the info of equationSystem
+		virtual std::ostream& printEquationInfo(std::ostream &s, int mode=0) const
+			throw( InvalidEquationSystem2 );
+
+			/// Get the type of first equation in equDescripList
+		virtual TypeID getTypeOfFirstEqu();
          /// Destructor
       virtual ~EquationSystem2() {};
 
 
    private:
+
+			/// Present time
+		CommonTime epoch;
+
+			/// map: surce -- satset
+		std::map<SourceID, SatIDSet> sourceSatSet;
 
          /// List containing the DESCRIPTIONS of Equation objects.
       std::list<Equation> equDescripList;
