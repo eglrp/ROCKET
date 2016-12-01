@@ -32,6 +32,12 @@
 //  Octavian Andrei - FGI ( http://www.fgi.fi ). 2008, 2009, 2011
 //
 //============================================================================
+//
+// 2016.12.01
+// Add switch of correct receiver DCB of P2 observable
+// Lei Zhao
+//
+//============================================================================
 
 
 #include "IonexStore.hpp"
@@ -109,7 +115,7 @@ namespace gpstk
 
 
          /// Default constructor.
-      IonexModel() : pDefaultMaps(NULL), useDCB(false)
+      IonexModel() : pDefaultMaps(NULL), useDCB(false), CorrectRecInstP2(false)
       { };
 
 
@@ -166,7 +172,11 @@ namespace gpstk
           */
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(Exception)
-      { Process(gData.header.epoch, gData.body); return gData; };
+      {
+			targrtSource = gData.header.source;
+			Process(gData.header.epoch, gData.body); return gData; 
+		};
+
 
 
          /// Method to get the default observable for computations.
@@ -180,6 +190,13 @@ namespace gpstk
           */
       virtual IonexModel& setDefaultObservable(const TypeID& type)
       { defaultObservable = type; return (*this); };
+
+			/** Method to set the switch of CorrectRecInstP2
+			 *
+			 * @param flag 
+			 */
+		virtual IonexModel& setCorrectRecInstP2( bool flag )
+		{ CorrectRecInstP2 = flag; return (*this); };
 
 
          /// Method to get a pointer to the default maps to be used
@@ -265,6 +282,11 @@ namespace gpstk
 
    protected:
 
+			/// Switch of correcting receiver DCB of P2 observables
+		bool CorrectRecInstP2;
+
+			/// Target Source
+		SourceID targrtSource;
 
          /// Default observable to be used when fed with GNSS data structures.
       TypeID defaultObservable;
