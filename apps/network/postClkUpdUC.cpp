@@ -196,6 +196,9 @@
 	// GDSSerializer
 #include "GNSSDataSerializer.hpp"
 
+	// Class to time conversion between different time system
+#include "Epoch.hpp"
+
 using namespace std;
 using namespace gpstk;
 using namespace gpstk::StringUtils;
@@ -294,9 +297,27 @@ private:
       // Declare our own methods to handle output
    gnssDataMap gdsMap;
 
+		// Mulitmap used to store the clock data line
+	std::multimap<CommonTime, std::string> solutionMap;
+
 		// Master Station
 	SourceID master;
 
+		// Source sets for all the estimated receiver clocks
+	SourceIDSet sourceSet;
+
+		// Satellite sets for all the estimated satellite clocks
+	SatIDSet satSet;
+
+		// dcb program used in the header printing
+	string dcbProgram;
+
+		// antex file
+	string antexFile;
+
+		// dcb source used in the header printing
+	string dcbSource;
+		
 		// Reference stations set 
 	std::set<SourceID> refStationSet;
 
@@ -304,6 +325,10 @@ private:
    void printModel( ofstream& modelfile,
                     const gnssRinex& gData,
                     int   precision = 4 );
+
+		// Method to get estimated results
+	void getBiases( const CommonTime& workEpoch, 
+						 const SolverGenL1L2& solverUpdL1L2 );
 
 	      // Method to print clock header 
    void printBiasHeader( ofstream& solutionFile );
@@ -394,6 +419,116 @@ clkupdUC::clkupdUC(char* arg0)
    confFile.setMaxCount(1);
 
 }  // End of 'clkupdUC::clkupdUC'
+
+
+   // Method that will be executed AFTER initialization but BEFORE processing
+void clkupdUC::spinUp()
+{
+
+      // Check if the user provided a configuration file name
+   if ( confFile.getCount() > 0 )
+   {
+
+         // Enable exceptions
+      confReader.exceptions(ios::failbit);
+
+      try
+      {
+
+            // Try to open the provided configuration file
+         confReader.open( confFile.getValue()[0] );
+
+      }
+      catch(...)
+      {
+
+         cerr << "Problem opening file "
+              << confFile.getValue()[0]
+              << endl;
+         cerr << "Maybe it doesn't exist or you don't have proper "
+              << "read permissions." << endl;
+
+         exit (-1);
+
+      }  // End of 'try-catch' block
+
+   }
+   else
+   {
+
+      try
+      {
+            // Try to open default configuration file
+         confReader.open( "clkupdUC.conf" );
+      }
+      catch(...)
+      {
+
+         cerr << "Problem opening default configuration file 'clkupdUC.conf'"
+              << endl;
+         cerr << "Maybe it doesn't exist or you don't have proper read "
+              << "permissions. Try providing a configuration file with "
+              << "option '-c'."
+              << endl;
+
+         exit (-1);
+
+      }  // End of 'try-catch' block
+
+   }  // End of 'if ( confFile.getCount() > 0 )'
+
+
+      // If a given variable is not found in the provided section, then
+      // 'confReader' will look for it in the 'DEFAULT' section.
+   confReader.setFallback2Default(true);
+
+//      // Now, Let's parse the command line
+//   if(rnxFileListOpt.getCount())
+//   {
+//      rnxFileListName = rnxFileListOpt.getValue()[0];
+//   }
+//   if(sp3FileListOpt.getCount())
+//   {
+//      sp3FileListName = sp3FileListOpt.getValue()[0];
+//   }
+//   if(clkFileListOpt.getCount())
+//   {
+//      clkFileListName = clkFileListOpt.getValue()[0];
+//   }
+//   if(eopFileListOpt.getCount())
+//   {
+//      eopFileListName = eopFileListOpt.getValue()[0];
+//   }
+//   if(updFileListOpt.getCount())
+//   {
+//      updFileListName = updFileListOpt.getValue()[0];
+//   }
+//   if(ionFileListOpt.getCount())
+//   {
+//      ionFileListName = ionFileListOpt.getValue()[0];
+//   }
+//   if(dcbFileOpt.getCount())
+//   {
+//      dcbFileName = dcbFileOpt.getValue()[0];
+//   }
+   if(outputFileOpt.getCount())
+   {
+      outputFileName = outputFileOpt.getValue()[0];
+   }
+	if(inputFileListOpt.getCount())
+	{
+		inputFileListName = inputFileListOpt.getValue()[0];
+	}
+//   if(outputFileListOpt.getCount())
+//   {
+//      outputFileListName = outputFileListOpt.getValue()[0];
+//   }
+//   if(mscFileOpt.getCount())
+//   {
+//      mscFileName = mscFileOpt.getValue()[0];
+//   }
+
+}  // End of method 'clkupdUC::spinUp()'
 
 
 	// Method that will really process information
@@ -519,23 +654,20 @@ void clkupdUC::solve()
 	system1.addEquation(equ.equL1Ref);
 	system1.addEquation(equ.equL2Ref);
 	system1.addEquation(equ.equSlantIonoL1);
-	system1.addEquation(equ.equRecDCB);
+//	system1.addEquation(equ.equRecDCB);
 
 		// Setup a solver 
 	cout << "hi, I am solver" << endl;
 	SolverGenL1L2 solver(system1);
 
-			// Add amb datum to solver
-	IndepAmbiguityDatum ambConstrL1, ambConstrL2;
-	ambConstrL1.setAmbType(Variable::BL1);
-	ambConstrL2.setAmbType(Variable::BL2);
+	TypeID ambType1(TypeID::BL1), ambType2(TypeID::BL2);
 
-	solver.add2AmbDatumSet(ambConstrL1);
-	solver.add2AmbDatumSet(ambConstrL2);
+	solver.add2AmbTypeSet(ambType1);
+	solver.add2AmbTypeSet(ambType2);
 
 			// Add amb Type to solver 
-	solver.add2AmbTypeSet(Variable::BL1);
-	solver.add2AmbTypeSet(Variable::BL2);
+//	solver.add2AmbTypeSet(Variable::BL1);
+//	solver.add2AmbTypeSet(Variable::BL2);
 //	solver.Process( gdsMap );
 
    ////> Variables for the print out 
@@ -544,6 +676,9 @@ void clkupdUC::solve()
 //   int precision( confReader.getValueAsInt( "precision", "DEFAULT" ) );
    cout << fixed << setprecision( 2 );
 
+	// Debug code vvv
+	int count(0);
+	// Debug code ^^^ 
       // Repeat while there is preprocesed data available
    while( !gdsMap.empty() )
    {
@@ -585,130 +720,149 @@ master station is zero." << endl;
       
       solver.Process(gds);
 
-		break;
+		// Debug code vvv
+		if( (++count) > 3 )
+		{
+			break;
+		}
+		// Debug code ^^^ 
+//		break;
 
+			// Get solutions
+		getBiases( workEpoch, solver );
 
    }  // End of 'while( !gdsMap.empty() )'
 
    /// We are done ////
 
-
-
-	
 }  // End of 'void clkupdUC::solve()'
 
 
-
-
-
-   // Method that will be executed AFTER initialization but BEFORE processing
-void clkupdUC::spinUp()
+	// Method to extract the solutions from SolverGenL1L2 and 
+	// temprorarily store them in the string, which will be 
+	// print out to the solutionfile in the method 'printBiasData'
+void clkupdUC::getBiases( const CommonTime& workEpoch, 
+						 const SolverGenL1L2& solverUpdL1L2 )
 {
+		// Mulitmap used to store the clock data line 
+	std::string solutionRecord;
 
-      // Check if the user provided a configuration file name
-   if ( confFile.getCount() > 0 )
-   {
+		// Satellite sets for all the estimated satellite clocks
+	SatIDSet currentSatSet;
 
-         // Enable exceptions
-      confReader.exceptions(ios::failbit);
+		// Source sets for all the estimated receiver clocks
+	SourceIDSet currentSourceSet;
 
-      try
-      {
+		// Clock bias
+	double updL1;
+	double updL2;
 
-            // Try to open the provided configuration file
-         confReader.open( confFile.getValue()[0] );
+		//*Now, read and print the receiver clock data record
 
-      }
-      catch(...)
-      {
+		// Read receiver clocks from the stateMap
+	currentSourceSet = solverUpdL1L2.getCurrentSources();
 
-         cerr << "Problem opening file "
-              << confFile.getValue()[0]
-              << endl;
-         cerr << "Maybe it doesn't exist or you don't have proper "
-              << "read permissions." << endl;
+		// Insert the current sources into sourceSet
+	sourceSet.insert(currentSourceSet.begin(), currentSourceSet.end());
 
-         exit (-1);
-
-      }  // End of 'try-catch' block
-
-   }
-   else
-   {
-
-      try
-      {
-            // Try to open default configuration file
-         confReader.open( "clkupdUC.conf" );
-      }
-      catch(...)
-      {
-
-         cerr << "Problem opening default configuration file 'clkupdUC.conf'"
-              << endl;
-         cerr << "Maybe it doesn't exist or you don't have proper read "
-              << "permissions. Try providing a configuration file with "
-              << "option '-c'."
-              << endl;
-
-         exit (-1);
-
-      }  // End of 'try-catch' block
-
-   }  // End of 'if ( confFile.getCount() > 0 )'
-
-
-      // If a given variable is not found in the provided section, then
-      // 'confReader' will look for it in the 'DEFAULT' section.
-   confReader.setFallback2Default(true);
-
-//      // Now, Let's parse the command line
-//   if(rnxFileListOpt.getCount())
-//   {
-//      rnxFileListName = rnxFileListOpt.getValue()[0];
-//   }
-//   if(sp3FileListOpt.getCount())
-//   {
-//      sp3FileListName = sp3FileListOpt.getValue()[0];
-//   }
-//   if(clkFileListOpt.getCount())
-//   {
-//      clkFileListName = clkFileListOpt.getValue()[0];
-//   }
-//   if(eopFileListOpt.getCount())
-//   {
-//      eopFileListName = eopFileListOpt.getValue()[0];
-//   }
-//   if(updFileListOpt.getCount())
-//   {
-//      updFileListName = updFileListOpt.getValue()[0];
-//   }
-//   if(ionFileListOpt.getCount())
-//   {
-//      ionFileListName = ionFileListOpt.getValue()[0];
-//   }
-//   if(dcbFileOpt.getCount())
-//   {
-//      dcbFileName = dcbFileOpt.getValue()[0];
-//   }
-   if(outputFileOpt.getCount())
-   {
-      outputFileName = outputFileOpt.getValue()[0];
-   }
-	if(inputFileListOpt.getCount())
+		// Read the receiver clocks for the current sources
+	for( SourceIDSet::iterator itSource = currentSourceSet.begin();
+		  itSource != currentSourceSet.end();
+		  ++itSource )
 	{
-		inputFileListName = inputFileListOpt.getValue()[0];
-	}
-//   if(outputFileListOpt.getCount())
-//   {
-//      outputFileListName = outputFileListOpt.getValue()[0];
-//   }
-//   if(mscFileOpt.getCount())
-//   {
-//      mscFileName = mscFileOpt.getValue()[0];
-//   }
 
-}  // End of method 'clkupdUC::spinUp()'
+			// receiver clock bias and instrumental bias
+		try
+		{
+			updL1 = solverUpdL1L2.getFixedSolution( TypeID::updL1, *itSource);
+			updL2 = solverUpdL1L2.getFixedSolution( TypeID::updL2, *itSource);
+
+				// Change to cycle unit
+			updL1 = updL1/L1_WAVELENGTH_GPS;
+			updL2 = updL2/L2_WAVELENGTH_GPS;
+			
+		}
+		catch(InvalidRequest& e)
+		{
+			continue;
+		}
+
+			// Store the clock data record into solutionRecord
+		solutionRecord  = "AR";  // record flag
+		solutionRecord += string(1,' '); // parse space
+		solutionRecord += rightJustify((*itSource).sourceName,4); // Source name
+
+		solutionRecord += string(1,' '); // parse space
+      solutionRecord += printTime(workEpoch,"%4Y %02m %02d %02H %02M %9.6f"); // Time 
+      solutionRecord += rightJustify(asString(2),2); // clock data number
+      solutionRecord += string(3,' '); // parse space
+      solutionRecord += rightJustify(asString(updL1, 3), 8); // instrument bias LC
+      solutionRecord += string(1,' ');
+      solutionRecord += rightJustify(asString(updL2, 3), 8); // instrument bias MW
+      solutionRecord += string(1,' ');
+
+
+			// Store the data record line into 'solutionMap'
+		solutionMap.insert(make_pair(workEpoch, solutionRecord));
+
+			// Store the clock data record into solutionRecord
+	}  // End of ' for( SourceIDSet::iterator itSource ... '
+
+		//*Now, read and print the receiver clock data record
+   double updSatL1; 
+   double updSatL2; 
+      
+      // Read satellite clocks from the stateMap
+   currentSatSet = solverUpdL1L2.getCurrentSats();
+      
+      // Insert current satellites into satSet
+   satSet.insert(currentSatSet.begin(), currentSatSet.end());
+
+		// Read the receiver clocks for the current sources
+   for(SatIDSet::iterator itSat = currentSatSet.begin();
+       itSat != currentSatSet.end();
+       ++itSat)
+   {
+         // Satellite clock bias
+      try
+      {
+         updSatL1 = solverUpdL1L2.getFixedSolution(TypeID::updSatL1, *itSat);
+         updSatL2 = solverUpdL1L2.getFixedSolution(TypeID::updSatL2, *itSat);
+
+				// Change to cycle unit
+         updSatL1 = updSatL1/L1_WAVELENGTH_GPS;
+         updSatL2 = updSatL2/L2_WAVELENGTH_GPS;
+      }
+      catch(InvalidRequest& e)
+      {
+         continue;
+      }
+
+         // Satellite ID for rinex
+      RinexSatID satID(*itSat);
+      satID.setfill('0'); // set the fill char for output
+
+         // Store the clock data record into solutionRecord
+      solutionRecord  = "AS";  // record flag
+      solutionRecord += string(1,' '); // parse space
+      solutionRecord += leftJustify(satID.toString(),4); // Source name
+      solutionRecord += string(1,' '); // parse space
+      solutionRecord += printTime(workEpoch,"%4Y %02m %02d %02H %02M %9.6f"); // Time 
+      solutionRecord += rightJustify(asString(2),2); // clock data number
+      solutionRecord += string(3,' '); // parse space
+      solutionRecord += rightJustify(asString(updSatL1, 3), 8); // instrument bias LC
+      solutionRecord += string(1,' ');
+      solutionRecord += rightJustify(asString(updSatL2, 3), 8); // instrument bias MW
+      solutionRecord += string(1,' ');
+
+        // Store the data record line into 'solutionMap'
+      solutionMap.insert(make_pair(workEpoch, solutionRecord));
+
+   }
+
+
+}  // End of 'void clkupdUC::getBiases( const CommonTime& workEpoch ... '
+
 
 
 
@@ -740,12 +894,227 @@ void clkupdUC::shutDown()
    // Method to print clock data 
 void clkupdUC::printBiasHeader( ofstream& solutionFile)
 {
+   using namespace StringUtils;
 
+      // Define the header formatting strings
+   const string versionString         = "RINEX VERSION / TYPE";
+   const string runByString           = "PGM / RUN BY / DATE";
+   const string commentString         = "COMMENT";
+   const string sysString             = "SYS / # / OBS TYPES";
+   const string timeSystemString      = "TIME SYSTEM ID";
+   const string leapSecondsString     = "LEAP SECONDS";
+   const string sysDCBString          = "SYS / DCBS APPLIED";
+   const string sysPCVString          = "SYS / PCVS APPLIED";
+   const string numDataString         = "# / TYPES OF DATA";
+   const string stationNameString     = "STATION NAME / NUM";
+   const string stationClockRefString = "STATION CLK REF";
+   const string analysisCenterString  = "ANALYSIS CENTER";
+   const string numClockRefString     = "# OF CLK REF";
+   const string analysisClkRefrString = "ANALYSIS CLK REF";
+   const string numReceiversString    = "# OF SOLN STA / TRF";
+   const string solnStateString       = "SOLN STA NAME / NUM";
+   const string numSolnSatsString     = "# OF SOLN SATS";
+   const string prnListString         = "PRN LIST";
+   const string unitString            = "UPD UNIT";
+   const string endOfHeaderString     = "END OF HEADER";
+
+      // header line record
+   string headerRecord;
+   
+      // "RINEX VERSION / TYPE"
+   double version(2.0);
+   headerRecord  = rightJustify(asString(version,2), 9);
+	headerRecord += string(11,' ');
+   headerRecord += string("CLOCK") + string(15,' ');
+   headerRecord += string("GPS") + string(17,' ');      // TD fix
+   headerRecord += versionString;  
+   solutionFile << headerRecord << endl;
+
+		// "PGM / RUN BY / DATE"
+      //  Varialbes
+   string program ("upd");
+   string runby ("SGG");
+   Epoch dt;
+   dt.setLocalTime();
+   string dat = printTime( CommonTime(dt),"%02m/%02d/%04Y %02H:%02M:%02S");
+      //  print out
+   headerRecord  = leftJustify(program,20);
+   headerRecord += leftJustify(runby,20);
+   headerRecord += leftJustify(dat, 20);
+   headerRecord += runByString;          
+   solutionFile << headerRecord << endl;
+
+
+      // "TIME SYSTEM ID"
+   string timeSystem("GPS");
+   headerRecord  = string(3,' ');  // TD
+   headerRecord += leftJustify(timeSystem,57);     
+   headerRecord += timeSystemString;     
+   solutionFile << headerRecord << endl;
+
+      // "COMMENT"
+   std::vector<std::string> commentList;   
+   for(int i=0; i<commentList.size(); ++i) 
+   {
+      headerRecord  = leftJustify(commentList[i],60);
+      headerRecord += commentString;         // "COMMENT"
+      solutionFile<< headerRecord << endl;
+   }
+
+      // "SYS / DCBS APPLIED"
+   headerRecord  = string("G") + string(1,' ');
+   headerRecord += leftJustify(dcbProgram,17) + string(1, ' ');
+   headerRecord += leftJustify(dcbSource,40);
+   headerRecord += sysDCBString;          // "SYS / DCBS APPLIED"
+   solutionFile<< headerRecord << endl;
+
+      // "SYS / PCVS APPLIED"
+   headerRecord  = string("G") + string(1,' ');
+   headerRecord += leftJustify("upd",17) + string(1, ' ');
+   headerRecord += leftJustify(antexFile, 40);
+   headerRecord += sysPCVString;          // "SYS / PCVS APPLIED"
+   solutionFile<< headerRecord << endl;
+
+     // "# / TYPES OF DATA"
+   std::vector<std::string> dataTypes;
+   dataTypes.push_back("AR");
+   dataTypes.push_back("AS");
+
+   headerRecord  = rightJustify(asString(dataTypes.size()), 6);
+   for(int i=0; i<dataTypes.size(); ++i) headerRecord += string(4,' ') + dataTypes[i];
+   headerRecord += string(60-headerRecord.size(),' ');
+   headerRecord += numDataString;         // "# / TYPES OF DATA"
+   solutionFile<< headerRecord << endl;
+
+      // "ANALYSIS CENTER"
+   std::string analCenterDesignator("WHU");
+   std::string analysisCenter("Wuhan University");
+      // print out 
+   headerRecord  = analCenterDesignator;
+   headerRecord += string(2,' ');
+   headerRecord += leftJustify(analysisCenter,55);
+   headerRecord += analysisCenterString;  // "ANALYSIS CENTER"
+   solutionFile << headerRecord << endl;
+
+       // "# OF CLK REF"
+   int numClkRef(1);
+   headerRecord  = rightJustify(asString(numClkRef), 6) + string(54,' ');  // TD
+   headerRecord += numClockRefString;     // "# OF CLK REF"
+   solutionFile << headerRecord << endl;
+
+      // "ANALYSIS CLK REF"
+   headerRecord  = leftJustify((master.sourceName),4) + string(1,' ');  // TD
+   headerRecord += leftJustify((master.sourceNumber),20) + string(15,' ');
+   headerRecord += rightJustify(doub2sci(0.0,19,2), 19) + string(1,' ');
+   headerRecord += analysisClkRefrString; // "ANALYSIS CLK REF"
+   solutionFile << headerRecord << endl;
+
+        // "# OF SOLN STA / TRF"
+   string terrRefFrame("IGS05");
+   headerRecord  = rightJustify(asString(sourceSet.size()), 6);
+   headerRecord += string(4,' ');
+   headerRecord += leftJustify(terrRefFrame,50);
+   headerRecord += numReceiversString;    // "# OF SOLN STA / TRF"
+   solutionFile << headerRecord << endl;
+  
+        // "SOLN STA NAME / NUM"
+   for(SourceIDSet::iterator itSource = sourceSet.begin(); 
+       itSource != sourceSet.end(); 
+       ++itSource) 
+   {
+         // sourcename and sourceNumber number
+      headerRecord  = leftJustify((*itSource).sourceName,  4) + string( 1, ' ');
+      headerRecord += leftJustify((*itSource).sourceNumber,20) ;
+  
+         // coordinate
+      double coordX = floor(1000.0*(*itSource).nominalPos.X());
+      double coordY = floor(1000.0*(*itSource).nominalPos.Y());
+      double coordZ = floor(1000.0*(*itSource).nominalPos.Z());
+  
+         // print Coordiante 
+      headerRecord += rightJustify(asString(coordX, 0), 11);
+      headerRecord += string(1,' ');
+      headerRecord += rightJustify(asString(coordY, 0), 11);
+      headerRecord += string(1,' ');
+      headerRecord += rightJustify(asString(coordZ, 0), 11);
+  
+         // print the line
+      headerRecord += solnStateString;       // "SOLN STA NAME / NUM"
+      solutionFile << headerRecord << endl;
+   }
+  
+      // "# OF SOLN SATS"
+   headerRecord  = rightJustify(asString(satSet.size()), 6);
+   headerRecord += string(54,' ');
+   headerRecord += numSolnSatsString;     // "# OF SOLN SATS"
+   solutionFile << headerRecord << endl;
+  
+      // "PRN LIST"
+   headerRecord = string();
+   int i = 0;
+   for(SatIDSet::iterator itSat = satSet.begin();
+       itSat != satSet.end();
+       ++itSat)
+   {  
+         // Satellite ID for rinex
+      RinexSatID satID(*itSat);
+      satID.setfill('0'); // set the fill char for output
+  
+         // Add each PRN satellite ...
+      headerRecord += rightJustify(satID.toString(), 3) + string(1,' ');
+         // End of this line
+      if(((i+1) % 15) == 0 || (i==satSet.size()-1) ) 
+      {
+           // Add empty to the remaiding places
+         headerRecord += string(60-headerRecord.size(),' ');
+         headerRecord += prnListString;         // "PRN LIST"
+         solutionFile << headerRecord << endl;
+            // New line  
+         headerRecord  = string();
+      }
+        // increment for the satellite number
+      i = i+1;
+   }
+
+//    // "RINEX VERSION / TYPE"
+// headerRecord  = rightJustify(unit, 10);
+// headerRecord += string(50,' ');
+// headerRecord += unitString;         
+// solutionFile << headerRecord << endl;
+
+      // "END OF HEADER"
+   headerRecord = string(60,' ');
+   headerRecord+= endOfHeaderString;     // "END OF HEADER"
+   solutionFile << headerRecord << endl;
+ 
 }
 
    // Method to print clock data 
 void clkupdUC::printBiasData( ofstream& solutionFile)
 {
+	   // Time tolerance  
+   double tolerance(0.1);
+
+      // Check if the structure isn't empty  
+   while( !( solutionMap.empty() ) )
+   {
+         // Get the 'CommonTime' of the first element 
+      CommonTime firstEpoch( (*solutionMap.begin()).first );
+
+         // Find the position of the first element PAST
+      multimap<CommonTime,string>::iterator endPos( 
+                                solutionMap.upper_bound(firstEpoch+tolerance) );
+         // Remove values
+      for( multimap<CommonTime,string>::iterator pos = solutionMap.begin();
+           pos != endPos; )
+      {
+      
+         solutionFile << pos->second  << endl;
+            // It is advisable to avoid sawing off the branch we are
+            // sitting on
+         solutionMap.erase( pos++ );
+      }
+   }   // End of loop ' while( !( solutionMap.empty() ) ) '
 
 }
 
