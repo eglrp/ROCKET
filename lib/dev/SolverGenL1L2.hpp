@@ -273,6 +273,11 @@ namespace gpstk
 		 */
 		void AmbObsMeasUpdate( gnssDataMap& gdsMap );
 
+		/* Method to check residuals of fixed solution
+		 *
+		 */
+		void CheckFixedResiduals(); 
+
 		/* Receivers' DCB measurement update
 		 *
 		 */
