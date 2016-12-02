@@ -640,6 +640,22 @@ namespace gpstk
 
    }  // End of method 'SatBiasRandomWalkModel::Prepare()'
 
+	SatBiasRandomWalkModel::SatBiasRandomWalkModel( double qp )
+	{
+
+         // Look at each satellite being currently managed
+      for( std::map<SatID, satBiasModelData>::iterator it = sbData.begin();
+           it != sbData.end();
+           ++it )
+      {
+            // Assign new process spectral density value
+         (*it).second.qprime = qp;
+      }
+
+
+   }  // End of method 'SatBiasRandomWalkModel::setQprime()'
+
+
 
 
       /* This method provides the stochastic model with all the available

@@ -118,7 +118,12 @@ namespace gpstk
                             const SourceID& source,
                             const SatID& sat,
                             typeValueMap& tData)
-      { return; };
+      { 
+			// Debug code vvv
+			//std::cout << "Hi, I am Prepare of StochasticModel" << std::endl;
+			// Debug code ^^^
+			return; 
+		};
 
 
          /// Destructor
@@ -1075,6 +1080,8 @@ namespace gpstk
          /// Default constructor.
       SatBiasRandomWalkModel() {};
 
+			/// Explict constructor 
+		SatBiasRandomWalkModel( double qp );
 
          /** Set the value of previous epoch for a given source
           *
