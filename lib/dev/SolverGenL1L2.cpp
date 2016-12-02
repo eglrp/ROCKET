@@ -236,12 +236,6 @@ namespace gpstk
             // Prepare the equation system with current data
          equSystem.Prepare(gdsMap);
 
-			// Debug code vvv
-			
-				// Print equation system info
-//			equSystem.printEquationInfo( cout );
-			// Debug code ^^^ 
-
             // Get current unknowns
          currentUnknowns = equSystem.getCurrentUnknowns(); 
 
@@ -577,44 +571,11 @@ namespace gpstk
          P = Pminus;
 
 			// Debug code vvv
-
-			CommonTime time( gdsMap.begin() -> first );
-			CivilTime ct(time);
-
-			cout << ct.year << " " << ct.month << " " << ct.day << " "
-					<< ct.hour << " " << ct.minute << " " << ct.second << endl; 
-
-
-//			int numVars(currentUnknowns.size());
-//			int de(0);
-//			cout << "After_predict: " << endl;
-//			for( VariableSet::iterator ite = currentUnknowns.begin();
-//				  ite != currentUnknowns.end();
-//				  ++ite )
-//			{
+//			CommonTime time( gdsMap.begin() -> first );
+//			CivilTime ct(time);
 //
-////				cout << ct.year << " " << ct.month << " " << ct.day << " "
-////					<< ct.hour << " " << ct.minute << " " <<  ct.second << " "; 
-//				
-//				
-//				Variable var((*ite));
-//				cout << var.getType() << " ( ";
-//
-//				if( var.getSatIndexed() )
-//				{
-//					cout << var.getSatellite() << " "; 
-//				}
-//
-//				if(var.getSourceIndexed())
-//				{
-//					cout << var.getSource() << " ";
-//				}
-//
-//				cout << " ) var: " << Pminus(de, de) << endl;
-//
-//				de++;
-//			}  // End of 'for( VariableSet::iterator ite = currentUnknowns ...'
-
+//			cout << ct.year << " " << ct.month << " " << ct.day << " "
+//					<< ct.hour << " " << ct.minute << " " << ct.second << endl; 
 			// Debug code ^^^
 
 
@@ -622,47 +583,6 @@ namespace gpstk
 				// Choose ambiguity datum and implement 'measurement' update. 
 			AmbObsMeasUpdate( gdsMap );
 
-//			// Debug code vvv
-//			cout << " After AmbOBSMeasUpdate: " << endl; 
-//			de = 0;
-//			for( VariableSet::iterator ite = currentUnknowns.begin();
-//				  ite != currentUnknowns.end();
-//				  ++ite )
-//			{
-//
-////				cout << ct.year << " " << ct.month << " " << ct.day << " "
-////					<< ct.hour << " " << ct.minute << " " <<  ct.second << " "; 
-//			
-//				
-//				Variable var((*ite));
-//				cout << var.getType() << " ( ";
-//
-//				if( var.getSatIndexed() )
-//				{
-//					cout << var.getSatellite() << " "; 
-//				}
-//
-//				if(var.getSourceIndexed())
-//				{
-//					cout << var.getSource() << " ";
-//				}
-//
-//				cout << " ) var: " << P(de, de) << endl;
-//
-//				de++;
-//			}  // End of 'for( VariableSet::iterator ite = currentUnknowns ...'
-//
-//
-//			// Debug code ^^^ 
-
-
-
-
-				// 
-			   // Receiver DCB measurement update
-			   // 
-            
-//			DCBObsMeasUpdate( gdsMap );
 
 
             //
@@ -838,85 +758,6 @@ namespace gpstk
 
       return gdsMap;
    }
-
-		// Receivers' DCB measurement update
-	void SolverGenL1L2::DCBObsMeasUpdate( gnssDataMap& gdsMap )
-	{
-			// Loop all the stations
-		SourceIDSet sidSet( gdsMap.getSourceIDSet() );
-		for( SourceIDSet::iterator itSID = sidSet.begin();
-			  itSID != sidSet.end(); 
-			  ++itSID )
-		{
-				// Now, prefit = DCB
-			double tempPrefit( (*itSID).getValue( TypeID::recInstP2 ) );
-
-				// Change the unit from nano second to meter
-			tempPrefit = tempPrefit * C_MPS * 1e-9;
-
-				// Weight
-			double weight(1.0e+2);
-			double tempCoef(1.0);
-
-				// Second, fill geometry matrix: Look for equation coefficients
-			VariableDataMap tempCoeffMap;
-
-				// Now, Let's get the position of this variable in 
-				// 'currentUnknowns'
-			Variable var( TypeID::recInstP2 );
-			var.setSource( (*itSID) );
-			var.setModel( &( Variable::dcbModel ) );
-			VariableSet::const_iterator itVar1=currentUnknowns.find( (var) );
-
-				// Get the coefficent map
-			if( itVar1 != currentUnknowns.end() )
-			{
-				tempCoeffMap[(*itVar1)] = tempCoef ;
-			}
-			else 
-			{
-				Exception e("Can not find variable!!!");
-				GPSTK_THROW(e);
-			}
-			
-				// Now, Let's create the index for current float unks
-
-				// Float unks number for current equation
-			int numUnks(tempCoeffMap.size());
-			Vector<int> index(numUnks);
-			Vector<double> G(numUnks);
-
-				// Loop the tempCoeffMap
-			int i(0);
-			for( VariableDataMap::const_iterator itvdm=tempCoeffMap.begin();
-				  itvdm != tempCoeffMap.end();
-				  ++itvdm )
-			{
-				int col(0);
-				VariableSet::const_iterator itVar2=currentUnknowns.begin();
-				while( (*itVar2) != (*itvdm).first )
-				{
-					col++;
-					itVar2++;
-				}
-				index(i) = col;
-				G(i) = (*itvdm).second;
-
-					// Incrment of the float variable 
-				i++;
-			}  // End of ' for( VariableDataMap::const_iterator ... '
-
-					// True measurement update
-			singleMeasCorrect( tempPrefit, 
-									 weight,
-									 G,
-									 index );
-
-
-		}  // End of 'for( SourceIDSet::iterator itSID = sidSet.begin(); ... '
-
-
-	}  // End of 'void SolverGenL1L2::DCBObsMeasUpdate( ... '
 
 		// Choose datum ambiguities and implement measment update 
 	void SolverGenL1L2::AmbObsMeasUpdate( gnssDataMap& gdsMap )
@@ -1152,56 +993,8 @@ namespace gpstk
 			// State update
 		xhat = xhat + K*( z - dotGX );
 
-//			// Debug code vvv
-//			cout << " in singleMeas of AmbOBSMeasUpdate: " << endl; 
-//			int de = 0;
-//			for( VariableSet::iterator ite = currentUnknowns.begin();
-//				  ite != currentUnknowns.end();
-//				  ++ite )
-//			{
-//
-////				cout << ct.year << " " << ct.month << " " << ct.day << " "
-////					<< ct.hour << " " << ct.minute << " " <<  ct.second << " "; 
-//			
-//				
-//				Variable var((*ite));
-//				cout << var.getType() << " ( ";
-//
-//				if( var.getSatIndexed() )
-//				{
-//					cout << var.getSatellite() << " "; 
-//				}
-//
-//				if(var.getSourceIndexed())
-//				{
-//					cout << var.getSource() << " ";
-//				}
-//
-//				cout << " ) var: " << P(de, de)
-//							<< "K(i) " << K(de)
-//							<< " M(i) " << M(de) 
-//							<< " M(i)*K(i): " << K(de)*M(de)
-//							<< endl;
-//
-//				de++;
-//			}  // End of 'for( VariableSet::iterator ite = currentUnknowns ...'
-//
-//
-//			// Debug code ^^^ 
 
-
-
-//		// Debug code vvv
-//		for(int i=0;i<numVar;i++)
-//		{
-//			// Debug code vvv
-//			cout << "K(i): " << K(i) << " M(i): "
-//					<< M(i) << " P(i, i): " << P(i,i) << endl;
-//			// Debug code ^^^ 
-//		}  
-
-		// Debug code ^^^ 
-				// Covariance update
+			// Covariance update
 #ifdef USE_OPENMP
 	#pragma omp parallel for
 #endif
@@ -1231,11 +1024,12 @@ namespace gpstk
 		{
 
 				// Num of unknowns 
-         int numVar(currentUnknowns.size());
+         int numVars(currentUnknowns.size());
 
-				// Mapping matrix
+				//*** First, form mapping matrix
 				// [x, N1, N2] --> [x, N1, Nw] 
-			Matrix<double> mapMat( numVar, numVar, 0.0 );
+				//*** 
+			Matrix<double> mapMat( numVars, numVars, 0.0 );
 
 				// Fill the mapMat
 					// Firstly, we nee to store the N1 index of 
@@ -1273,13 +1067,6 @@ namespace gpstk
 					int indexN1( stationSatBL1Index[tempSource][tempSat] );
 						// We need to find indexN1 in  
 
-//					// Debug code vvv
-//					cout << tempSource << " " 
-//						  << tempSat << " "	
-//						<< "indexN1: " 
-//						<< indexN1 << " indexN2 " << indexN2 << endl;
-//					// Debug code ^^^ 
-
 					mapMat(index, index) = -1.0;
 					mapMat(index, indexN1) = 1.0;
 
@@ -1306,128 +1093,28 @@ namespace gpstk
          Vector<double> newState( mapMat*solution );
          Matrix<double> newCov( mapMat*covMatrix*mapMatT);
 			
-//			// Debug code vvv
-//			cout << " Variable and value:  " << endl; 
-//			int de(0);
-//			for( VariableSet::iterator ite = currentUnknowns.begin();
-//				  ite != currentUnknowns.end();
-//				  ++ite )
-//			{
-//
-////				cout << ct.year << " " << ct.month << " " << ct.day << " "
-////					<< ct.hour << " " << ct.minute << " " <<  ct.second << " "; 
-//			
-//				
-//				Variable var((*ite));
-//				cout << var.getType() << " ( ";
-//
-//				if( var.getSatIndexed() )
-//				{
-//					cout << var.getSatellite() << " "; 
-//				}
-//
-//				if(var.getSourceIndexed())
-//				{
-//					cout << var.getSource() << " ";
-//				}
-//
-//				cout << "solution: " <<  solution(de) << " " 
-//						<< "newState: " << newState(de) << endl;
-//
-//				de++;
-//			}  // End of 'for( VariableSet::iterator ite = currentUnknowns ...'
-//
-//
-
-//			cout << "WL amb: " << endl;
-//
-//			de = 0 ;
-//			for( VariableSet::iterator itVar = currentUnknowns.begin();
-//				  itVar != currentUnknowns.end();
-//				  ++itVar )
-//			{
-//				if( (*itVar).getType() == TypeID::BL2 )
-//				{
-//					cout << (*itVar).getType() << " ( "
-//							<< (*itVar).getSource() << " "
-//								<< (*itVar).getSatellite() << " ): "
-//									<< newState(de) << endl; 
-//				}
-//				de++;
-//
-//			}  
-//			
-//
-////			cout << "solution before AR: " << newState << endl;
-			// Debug code ^^^
+				// ***
+				// Ambiguity fixing, WL first, then N1  
+			   // ***
 
 				// Clear ambFixedMap, first
 			ambFixedMap.clear();
 
+				// Resize stateFlag vector
+			stateFlag.resize( numVars, 0.0);
+
+				// Dummy hMartrix for WL amb
+			Matrix<double> dummyhMat( hMatrix * mapMatInv );
+
 				// Now, it's time to fix WL  ambiguities
-			TrueAmbiguityFixing( newState, newCov, TypeID::BL2);
+			TrueAmbiguityFixing( newState, newCov, TypeID::BL2, dummyhMat );
 
 				// Now, fix the N1 ambiguities
-			TrueAmbiguityFixing( newState, newCov, TypeID::BL1);
-
-				// Now, test the residuals of fixed solution
-//			CheckFixedResiduals();
+			TrueAmbiguityFixing( newState, newCov, TypeID::BL1, hMatrix );
 
 
 				// Store the fixe solution
 			Vector<double> fixedState( mapMatInv*newState );
-
-			// Debug code vvv
-			cout << "postfitResiduals before AR:" << endl;
-		   postfitResiduals = prefitResiduals - (hMatrix* solution);	
-
-			std::list<Equation> equList1;
-			equList1 = equSystem.getCurrentEquationsList();
-			int numEqu1(equList1.size());
-
-				// Visit each Equation in "equList"
-			int row1(0);
-			for( std::list<Equation>::const_iterator itEq = equList1.begin();
-				  itEq != equList1.end();
-				  ++itEq )
-			{
-
-				Variable indTerm( (*itEq).header.indTerm );
-				cout << indTerm.getType() << " ( " << (*itEq).header.equationSource  
-						<< " " << (*itEq).header.equationSat 
-						<< " ) postfitResduals:  " << postfitResiduals(row1) << endl;
-				
-				row1++;
-				
-			}  // End of ' for( std::list<Equation>::const_iterator ... '
-			// Debug code ^^^ 
-
-
-
-			// Debug code vvv
-			cout << "postfitResiduals after AR: " << endl;
-		   postfitResiduals = prefitResiduals - (hMatrix* fixedState);	
-
-			std::list<Equation> equList;
-			equList = equSystem.getCurrentEquationsList();
-			int numEqu(equList.size());
-
-				// Visit each Equation in "equList"
-			int row(0);
-			for( std::list<Equation>::const_iterator itEq = equList.begin();
-				  itEq != equList.end();
-				  ++itEq )
-			{
-
-				Variable indTerm( (*itEq).header.indTerm );
-				cout << indTerm.getType() << " ( " << (*itEq).header.equationSource  
-						<< " " << (*itEq).header.equationSat 
-						<< " ) postfitResduals:  " << postfitResiduals(row) << endl;
-				
-				row++;
-				
-			}  // End of ' for( std::list<Equation>::const_iterator ... '
-			// Debug code ^^^ 
 
 			stateMapFixed.clear();
 			int i(0);      // Set an index
@@ -1438,29 +1125,7 @@ namespace gpstk
             stateMapFixed[ (*itVar) ] = fixedState(i);
             ++i;
 
-//				// Debug code vvv
-//				Variable var((*itVar));
-//				cout << var.getType() << " ( ";
-//
-//				if( var.getSatIndexed() )
-//				{
-//					cout << var.getSatellite() << " "; 
-//				}
-//
-//				if(var.getSourceIndexed())
-//				{
-//					cout << var.getSource() << " ";
-//				}
-//
-//				cout << " ) " << solution(i) << " " << fixedState(i)  << endl;
-//				// Debug code ^^^ 
-         }
-
-
-
-			// Debug code vvv
-//			cout << "solution after AR: " << newState << endl;
-			// Debug code ^^^
+			}
 
 			// return
 			return gData;
@@ -1478,14 +1143,11 @@ namespace gpstk
 	}  // End of ' gnssDataMap& SolverGenL1L2::AmbiguityFixing ... '
 
 
-	void SolverGenL1L2::CheckFixedResiduals()
-	{
-		
-	}  // End of ' void SolverGenL1L2::CheckFixedResiduals() '
 
 	void SolverGenL1L2::TrueAmbiguityFixing( Vector<double>& stateVec,
 														  Matrix<double>& covMat,
-														  TypeID ambiguityType )
+														  TypeID ambiguityType,
+														  Matrix<double>& hMat )
 		throw(ProcessingException)
 	{
 	
@@ -1504,13 +1166,16 @@ namespace gpstk
          newState = stateVec;
          newCov = covMat; 
 
+				// Copy of state flag
+			Vector<double> stateFlag2( stateFlag );
+
             /**
              * Firstly, fix the widelane ambiguities
              */
          int numUnknowns(currentUnknowns.size());
 
             // Flags indicating whether this unknown variable has been fixed.
-         Vector<double> stateFlag(numUnknowns, 0.0);
+//         Vector<double> stateFlag(numUnknowns, 0.0);
 
             // Cutting decision to fix the ambiguities
          double cutDec(1000.0);
@@ -1539,7 +1204,7 @@ namespace gpstk
                  itVar1 != currentUnknowns.end();
                  ++itVar1 )
             {
-               if( stateFlag(i) == 0.0 && (*itVar1).getType() == ambiguityType )
+               if( stateFlag2(i) == 0.0 && (*itVar1).getType() == ambiguityType )
                {
 
                      // Ambiguity value
@@ -1551,12 +1216,6 @@ namespace gpstk
                      // Ambiguity fixing decision
                   double decision = ambRes.getDecision(b1, b1Sig);
 
-
-						// Debug code vvv
-//						cout << "b1: " << b1 << endl;
-//						cout << "b1Sig: " << b1Sig << endl;
-//						cout << "decision: " << decision << endl;
-						// Debug code ^^^
                      // Look for the largest fixing decision
                   if( decision > maxDec )
                   {
@@ -1576,24 +1235,18 @@ namespace gpstk
                if( maxDec > cutDec )
                {
 
-						// Debug code vvv
-//						cout << "Hi, I'm updating states " << endl;
-						// Debug code ^^^
                      // Ambiguity value
                   double b1 = newState(index);
 
                      // Fixed value of b1
                   double b1Fixed = std::floor( b1 + 0.5 );
 
-						// Debug code vvv
-//						cout << "b1Fixed: " << b1Fixed << endl;
-						// Debug code ^^^
 
                      // Update the solution and covarinace  
-                  AmbiguityUpdate(newState, newCov, stateFlag, index, b1Fixed );
+                  AmbiguityUpdate(newState, newCov, stateFlag2, index, b1Fixed );
 
                      // Not free at all
-                  stateFlag(index) = 1.0;
+                  stateFlag2(index) = 1.0;
 
                      // Store the fixed ambiguity value into 'state'
                   newState(index) = b1Fixed;
@@ -1620,9 +1273,113 @@ namespace gpstk
                 
          }  // End of 'while(done)'
 
+			
+				// Now, residuals check
+			postfitResiduals = prefitResiduals - (hMat* newState);
+
+			std::list<Equation> equList;
+			equList = equSystem.getCurrentEquationsList();
+			int numEqu(equList.size());
+
+				// Visit each Equation in "equList"
+			int row(0);
+			for( std::list<Equation>::const_iterator itEq = equList.begin();
+				  itEq != equList.end();
+				  ++itEq )
+			{
+				Variable indTerm( (*itEq).header.indTerm );
+
+
+					// Get the type value data from the header of the equation
+				typeValueMap tData( (*itEq).header.typeValueData );
+
+					// Weight
+				double weight;
+
+					// First, fill weights matrix
+					// Check if current 'tData' has weight info. If you don't want those
+					// weights to get into equations, please don't put them in GDS
+				if( tData.find(TypeID::weight) != tData.end() )
+				{
+						// Weights matrix = Equation weight * observation weight
+					weight = (*itEq).header.constWeight * tData(TypeID::weight);
+				}
+				else
+				{
+					weight = (*itEq).header.constWeight; // Weights matrix = Equation      weight	
+				}
+				
+				Variable tempAmbL1;
+
+					// Let's get the ambiguity variable in this equation
+				for( VarCoeffMap::const_iterator vcmIter = (*itEq).body.begin();
+					  vcmIter != (*itEq).body.end();
+					  ++vcmIter )
+				{
+					if( (*vcmIter).first.getType() == ambiguityType )
+					{
+						tempAmbL1= (*vcmIter).first;
+					}  // end of 'if( (*vcmIter).first.getType() ...'
+
+				}  // End of ' for( VarCoeffMap::const_iterator vcmIter ... '
+
+				double threshold( 3*std::sqrt(1.0/weight) );
+
+				// If exceeds the threshold, then remove the ambiguity 
+				// from 'ambFixedMap'
+				if( postfitResiduals(row) > threshold )
+				{
+
+						// Warning:
+						// The map only remove the varialbes already
+						// existed in the map
+					VariableDataMap::iterator itvdm = ambFixedMap.find(tempAmbL1);
+
+						// If found in the 'ambFixedMap', then remove it 
+						// and reset the ambiguity variance and covariance
+					if( itvdm != ambFixedMap.end() )
+					{
+						ambFixedMap.erase( tempAmbL1);
+					}  // end of ' if( itvdm != ambFixedMap.end() ) '
+				}  // End of ' if( postfitResiduals(row) > threshold ) ... '
+
+				++row;
+
+			}  // End of 'for( std::list<Equation>::const_iterator itEq ... '
+
+				// Now we only use the correct ambiguities
+			Vector<double> newState2( stateVec );
+			Matrix<double> newCov2( covMat );
+
+			for( VariableDataMap::iterator itAmb = ambFixedMap.begin();
+				  itAmb != ambFixedMap.end();
+				  ++ itAmb)
+			{
+				VariableSet::iterator itVar1 = currentUnknowns.begin();
+				int k(0);
+				while( (*itVar1) != (*itAmb).first )
+				{
+					k++;
+					itVar1++;
+				}
+
+				int index(k);
+
+					// Fixed value of bw
+				double bwFixed = (*itAmb).second;
+
+					// Update the solution and covarinace 
+				AmbiguityUpdate(newState2, newCov2, stateFlag, index, bwFixed );
+			
+					// Not free at all
+				stateFlag(index) = 1.0;
+
+			}  // end off ' for( VariableDataMap::iterator itAmb ... '
+
+
 				// Store the fixed solutions
-			stateVec = newState; 
-			covMat = newCov;
+			stateVec = newState2; 
+			covMat = newCov2;
 
 		}
 	   catch(Exception& u)

@@ -235,7 +235,8 @@ namespace gpstk
 			 */
 		virtual void TrueAmbiguityFixing( Vector<double>& stateVec,
 													 Matrix<double>& covMat,
-													 TypeID ambiguityType )
+													 TypeID ambiguityType,
+													 Matrix<double>& hMat )
          throw(ProcessingException);
 
 
@@ -272,16 +273,6 @@ namespace gpstk
 		 * 
 		 */
 		void AmbObsMeasUpdate( gnssDataMap& gdsMap );
-
-		/* Method to check residuals of fixed solution
-		 *
-		 */
-		void CheckFixedResiduals(); 
-
-		/* Receivers' DCB measurement update
-		 *
-		 */
-		void DCBObsMeasUpdate( gnssDataMap& gdsMap );
 
 		/**  Single measurement correction  
 		 * 
@@ -484,6 +475,9 @@ namespace gpstk
 
          // A posteriori state
       Vector<double> stateFixed;
+
+			// State flag
+		Vector<double> stateFlag;	
 
          // A posteriori covariance.
       Matrix<double> covMatrixFixed;
