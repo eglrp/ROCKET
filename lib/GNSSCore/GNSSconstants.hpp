@@ -159,7 +159,11 @@ namespace gpstk
    const double A_REF_GPS = 26559710.0;
      /// Omega reference value from Table 30-I converted to radians
    const double OMEGADOT_REF_GPS = -2.6e-9 * PI;
-
+	
+	/// Added by Lei Zhao vvv
+	const double WL_WAVELENGTH_GPS = 0.861918400322;
+	const double NL_WAVELENGTH_GPS = 0.106953378;
+	/// Added by Lei Zhao ^^^
    inline
    short getLegacyFitInterval(const short iodc, const short fiti)
       throw(gpstk::InvalidRequest )
