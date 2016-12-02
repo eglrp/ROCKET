@@ -243,6 +243,9 @@ namespace gpstk
       tStrings[instL7]       = "instrumentalL7";
       tStrings[instL8]       = "instrumentalL8";
 
+
+      tStrings[recInstP2]    = "recInstP2";
+
       tStrings[updL1]        = "updL1";
       tStrings[updL2]        = "updL2";
       tStrings[updWL]    = "updWL";
@@ -320,6 +323,8 @@ namespace gpstk
       tStrings[dH]         = "dH";
       tStrings[cdt]        = "cdt";
       tStrings[cdtSat]     = "cdtSat";
+		tStrings[diffLat]    = "diffLat";
+		tStrings[diffLon]    = "diffLon";
       tStrings[dLatIPP]    = "dLatIPP";
       tStrings[dLonIPP]    = "dLonIPP";
       tStrings[dSatX]      = "dSatX";

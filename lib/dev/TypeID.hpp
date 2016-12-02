@@ -298,6 +298,9 @@ namespace gpstk
          instL7,    ///< Instrumental delay, L7
          instL8,    ///< Instrumental delay, L8
 
+
+         recInstP2, ///< Instrumental delay for receiver
+
             // Corrections for different observations for RTK positioning
             // shjzhang
          corrC1,    ///< Correction, C1
@@ -376,6 +379,10 @@ namespace gpstk
          dH,        ///< Position bias, Height component
          cdt,       ///< In the position domain: Receiver clock offset, meters; in the range domain: cdt coefficient
          cdtSat,    ///< In the position domain: Satellite clock offset, meters; in the range domain: cdt coefficient
+
+			diffLat,      ///< position difference between IPP and station location, Latitude component
+
+			diffLon,      ///< Position difference between IPP and station location, Longitude component
 
          dLatIPP,      ///< position difference between IPP and station location, Latitude component
          dLonIPP,      ///< Position difference between IPP and station location, Longitude component
