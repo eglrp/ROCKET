@@ -339,8 +339,6 @@ clkupd::clkupd(char* arg0)
 							"file storing the input files",
 							true )
 
-
-
 {
 
       // This option may appear just once at CLI
@@ -411,9 +409,9 @@ void clkupd::spinUp()
       // 'confReader' will look for it in the 'DEFAULT' section.
    confReader.setFallback2Default(true);
 
-	if(outputFileOpt.getCount())
+	if(outputFileListOpt.getCount())
 	{
-		outputFileName = outputFileOpt.getValue()[0];
+		outputFileListName = outputFileListOpt.getValue()[0];
 	}
 	if(inputFileListOpt.getCount())
 	{
@@ -445,7 +443,7 @@ void clkupd::preprocessing()
 	inputFileListStream.open(inputFileListName.c_str(), ios::in);	
 	if( !inputFileListStream )
 	{
-		cerr << "output file list name: '" << inputFileListName 
+		cerr << "input file list name: '" << inputFileListName 
 				<< "' doesn't exist" << endl;
 		exit(-1);
 	}
@@ -474,7 +472,7 @@ void clkupd::preprocessing()
 		// Now read output files from 'outputFileListName'
 	ifstream outputFileListStream;
 	outputFileListStream.open(outputFileListName.c_str(), ios::in);	
-	if( !inputFileListStream )
+	if( !outputFileListStream )
 	{
 		cerr << "output file list name: '" << outputFileListName 
 				<< "' doesn't exist" << endl;
@@ -501,6 +499,14 @@ void clkupd::preprocessing()
 
 	//std::cout << "inputGDSMapFileName: " << inputGDSMapFileName << std::endl;
 	// debug code 
+
+		// Debug code vvv
+	cout << "Your output files are: " << endl
+			<< outputClkFileName << endl 
+			<< outputUpdFileName << endl 
+			<< outputFixedClkFileName << endl
+			<< outputFixedUpdFileName << endl;
+		// Debug code ^^^ 
 
 	cout << "Reading json files ... " << endl;
 
@@ -731,7 +737,8 @@ void clkupd::solve()
    ////> Variables for the print out 
 
       // Prepare for printing
-   int precision( confReader.getValueAsInt( "precision", "DEFAULT" ) );
+//   int precision( confReader.getValueAsInt( "precision", "DEFAULT" ) );
+	int precision(3);
    cout << fixed << setprecision( precision );
 
       // Repeat while there is preprocesed data available
@@ -1050,19 +1057,21 @@ void clkupd::getBiases( const CommonTime& workEpoch,
 void clkupd::shutDown()
 {
       // Solution file
-   string updFileName;
-   string clkFileName;
+//   string updFileName;
+//   string clkFileName;
 
 
-   updFileName = confReader.getValue( "updFile", "DEFAULT" );
-   clkFileName = confReader.getValue( "clockFile", "DEFAULT" );
+//   updFileName = confReader.getValue( "updFile", "DEFAULT" );
+//   clkFileName = confReader.getValue( "clockFile", "DEFAULT" );
 
 
       // Solution output stream
    ofstream updFile;
    ofstream clkFile;
-   updFile.open( updFileName.c_str(), ios::out );
-   clkFile.open( clkFileName.c_str(), ios::out );
+//   updFile.open( updFileName.c_str(), ios::out );
+//   clkFile.open( clkFileName.c_str(), ios::out );
+   updFile.open( outputUpdFileName.c_str(), ios::out );
+   clkFile.open( outputClkFileName.c_str(), ios::out );
 
       // Print the UPD information
    printHeader( updFile );
@@ -1078,15 +1087,15 @@ void clkupd::shutDown()
    clkFile.close();
 
 
-   string updFileName2;
-   string clkFileName2;
-   updFileName2 = confReader.getValue( "updFixedFile", "DEFAULT" );
-   clkFileName2 = confReader.getValue( "clockFixedFile", "DEFAULT" );
+//   string updFileName2;
+//   string clkFileName2;
+//   updFileName2 = confReader.getValue( "updFixedFile", "DEFAULT" );
+//   clkFileName2 = confReader.getValue( "clockFixedFile", "DEFAULT" );
 
    ofstream updFile2;
    ofstream clkFile2;
-   updFile2.open( updFileName2.c_str(), ios::out );
-   clkFile2.open( clkFileName2.c_str(), ios::out );
+   updFile2.open( outputFixedUpdFileName.c_str(), ios::out );
+   clkFile2.open( outputFixedClkFileName.c_str(), ios::out );
 
       // Print the UPD information
    printHeader( updFile2 );

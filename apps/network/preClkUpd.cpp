@@ -1457,6 +1457,7 @@ void clkupd::preprocessing2()
          types.insert(TypeID::satArc);
          types.insert(TypeID::prefitC);
          types.insert(TypeID::prefitL);
+			types.insert(TypeID::BWL);
          types.insert(TypeID::MWubbena);
 
             // Delete the types not in 'types' to save the memory
