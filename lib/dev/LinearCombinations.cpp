@@ -104,9 +104,24 @@ namespace gpstk
       p1Prefit.body[TypeID::satPCenter]   = -1.0;
       p1Prefit.body[TypeID::tropoSlant]   = -1.0;
          // DCB for P1
-//    p1Prefit.body[TypeID::instP1]       = -1.0;
+		p1Prefit.body[TypeID::instP1]       = -1.0;
          // Interpolated from reference stations
       p1Prefit.body[TypeID::corrP1]       = -1.0;
+
+			// Definition to compute prefit residual of P1 for clock estimation
+      p1PrefitC.header                     = TypeID::prefitP1;
+      p1PrefitC.body[TypeID::P1]           = +1.0;
+      p1PrefitC.body[TypeID::rho]          = -1.0;
+//      p1Prefit.body[TypeID::dtSat]        = +1.0;
+      p1PrefitC.body[TypeID::rel]          = -1.0;
+      p1PrefitC.body[TypeID::gravDelay]    = -1.0;
+      p1PrefitC.body[TypeID::satPCenter]   = -1.0;
+      p1PrefitC.body[TypeID::tropoSlant]   = -1.0;
+         // DCB for P1
+		p1PrefitC.body[TypeID::instP1]       = -1.0;
+         // Interpolated from reference stations
+      p1PrefitC.body[TypeID::corrP1]       = -1.0;
+    
     
 
 
@@ -121,9 +136,25 @@ namespace gpstk
       p2Prefit.body[TypeID::tropoSlant]   = -1.0;
 
          // DCB for P2
-//    p2Prefit.body[TypeID::instP2]       = -1.0;
+      p2Prefit.body[TypeID::instP2]       = -1.0;
          // Interpolated from reference stations
       p2Prefit.body[TypeID::corrP2]       = -1.0;
+
+        // Definition to compute prefit residual of P2 for clock estimation
+      p2PrefitC.header                     = TypeID::prefitP2;
+      p2PrefitC.body[TypeID::P2]           = +1.0;
+      p2PrefitC.body[TypeID::rho]          = -1.0;
+//      p2PrefitC.body[TypeID::dtSat]        = +1.0;
+      p2PrefitC.body[TypeID::rel]          = -1.0;
+      p2PrefitC.body[TypeID::gravDelay]    = -1.0;
+      p2PrefitC.body[TypeID::satPCenter]   = -1.0;
+      p2PrefitC.body[TypeID::tropoSlant]   = -1.0;
+
+         // DCB for P2
+      p2PrefitC.body[TypeID::instP2]       = -1.0;
+         // Interpolated from reference stations
+      p2PrefitC.body[TypeID::corrP2]       = -1.0;
+
 
 
          // Definition to compute prefit residual of L1
@@ -141,6 +172,22 @@ namespace gpstk
          // Interpolated from reference stations
       l1Prefit.body[TypeID::corrL1]       = -1.0;
 
+        // Definition to compute prefit residual of L1 for clock estimation
+      l1PrefitC.header                     = TypeID::prefitL1;
+      l1PrefitC.body[TypeID::L1]           = +1.0;
+      l1PrefitC.body[TypeID::rho]          = -1.0;
+//      l1Prefit.body[TypeID::dtSat]        = +1.0;
+      l1PrefitC.body[TypeID::updSatL1]     = +1.0;
+      l1PrefitC.body[TypeID::rel]          = -1.0;
+      l1PrefitC.body[TypeID::gravDelay]    = -1.0;
+      l1PrefitC.body[TypeID::satPCenter]   = -1.0;
+      l1PrefitC.body[TypeID::tropoSlant]   = -1.0;
+         // Coefficient for L1 windUp is L1 wavelength/2*PI
+      l1PrefitC.body[TypeID::windUp]       = -L1_WAVELENGTH_GPS/TWO_PI;
+         // Interpolated from reference stations
+      l1PrefitC.body[TypeID::corrL1]       = -1.0;
+
+
 
          // Definition to compute prefit residual of L2
       l2Prefit.header                     = TypeID::prefitL2;
@@ -156,6 +203,22 @@ namespace gpstk
       l2Prefit.body[TypeID::windUp]       = -L2_WAVELENGTH_GPS/TWO_PI;
          // Interpolated from reference stations
       l2Prefit.body[TypeID::corrL2]       = -1.0;
+
+         // Definition to compute prefit residual of L2 for clock estimation
+      l2PrefitC.header                     = TypeID::prefitL2;
+      l2PrefitC.body[TypeID::L2]           = +1.0;
+      l2PrefitC.body[TypeID::rho]          = -1.0;
+//      l2Prefit.body[TypeID::dtSat]        = +1.0;
+      l2PrefitC.body[TypeID::updSatL2]     = +1.0;
+      l2PrefitC.body[TypeID::rel]          = -1.0;
+      l2PrefitC.body[TypeID::gravDelay]    = -1.0;
+      l2PrefitC.body[TypeID::satPCenter]   = -1.0;
+      l2PrefitC.body[TypeID::tropoSlant]   = -1.0;
+         // Coefficient for L2 windUp is L2 wavelength/2*PI
+      l2PrefitC.body[TypeID::windUp]       = -L2_WAVELENGTH_GPS/TWO_PI;
+         // Interpolated from reference stations
+      l2PrefitC.body[TypeID::corrL2]       = -1.0;
+
 
          // Definition to compute PC combination
       pcCombination.header                = TypeID::PC;

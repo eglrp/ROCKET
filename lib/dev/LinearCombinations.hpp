@@ -142,14 +142,26 @@ namespace gpstk
          /// Definition to compute prefit residual of P1
       gnssLinearCombination p1Prefit;
 
-         /// Definition to compute prefit residual of P2
+         /// Definition to compute prefit residual of P1 for clock estimation
+      gnssLinearCombination p1PrefitC;
+
+         /// Definition to compute prefit residual of P2 
       gnssLinearCombination p2Prefit;
 
-         /// Definition to compute prefit residual of L1
+         /// Definition to compute prefit residual of P2 for clock estimation
+      gnssLinearCombination p2PrefitC;
+
+         /// Definition to compute prefit residual of L1 
       gnssLinearCombination l1Prefit;
+
+         /// Definition to compute prefit residual of L1 for clock estimation
+      gnssLinearCombination l1PrefitC;
 
          /// Definition to compute prefit residual of L2
       gnssLinearCombination l2Prefit;
+
+         /// Definition to compute prefit residual of L2 for clock estimation
+      gnssLinearCombination l2PrefitC;
 
          /// Definition to compute PC combination
       gnssLinearCombination pcCombination;
