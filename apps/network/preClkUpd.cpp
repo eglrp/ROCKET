@@ -1036,22 +1036,6 @@ void clkupd::preprocessing2()
       pList.push_back(linear1);       // Add to processing list
 
 
-
-         // Objects to mark cycle slips
-      LICSDetector   markCSLI ;         // Checks LI cycle slips
-      pList.push_back(markCSLI );       // Add to processing list
-      MWCSDetector markCSMW;            // Checks Merbourne-Wubbena cycle slips
-      pList.push_back(markCSMW);        // Add to processing list
-
-
-         // Object to keep track of satellite arcs
-         // Notes: delete unstable satellite may cause discontinuity
-         //        in the network processing!
-      SatArcMarker2 markArc;
-      markArc.setDeleteUnstableSats(false);
-      markArc.setUnstablePeriod(151.0); // Delete the starting 5min data
-      pList.push_back(markArc);         // Add to processing list
-
          // Declare a basic modeler
       BasicModel basic(nominalPos, SP3EphList);
 
@@ -1067,6 +1051,23 @@ void clkupd::preprocessing2()
 
          // Add to processing list
       pList.push_back(basic);
+
+
+
+         // Objects to mark cycle slips
+      LICSDetector   markCSLI ;         // Checks LI cycle slips
+      pList.push_back(markCSLI );       // Add to processing list
+      MWCSDetector markCSMW;            // Checks Merbourne-Wubbena cycle slips
+      pList.push_back(markCSMW);        // Add to processing list
+
+
+         // Object to keep track of satellite arcs
+         // Notes: delete unstable satellite may cause discontinuity
+         //        in the network processing!
+      SatArcMarker2 markArc;
+      markArc.setDeleteUnstableSats(false);
+      markArc.setUnstablePeriod(151.0); // Delete the starting 5min data
+      pList.push_back(markArc);         // Add to processing list
 
 
 
@@ -1281,13 +1282,13 @@ void clkupd::preprocessing2()
       bool isNEU( confReader.getValueAsBoolean( "USENEU" ) );
 
          // Declare ppp solver
-      SolverPPP pppSolver(isNEU);
+//      SolverPPP pppSolver(isNEU);
 
 //		bool fixCoorsFlag( confReader.getValueAsBoolean( "fixCoordinate" ) );
 //		pppSolver.fixCoordinates( fixCoorsFlag );
 
          // Add to processing list
-      pList.push_back(pppSolver);
+//      pList.push_back(pppSolver);
 
          // Now, Smooth the MWubbena 
 

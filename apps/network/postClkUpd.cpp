@@ -554,7 +554,8 @@ void clkupd::solve()
       // MW Receiver bias variable
    SatBiasRandomWalkModel updSatMWModel;
 //   updSatMWModel.setQprime(updSatMWProcessNoise); // 1.67e-4(cr/s)*600 s = 0.1(cr) 
-	updSatMWModel.setQprime( 3.0e-7 );
+//	updSatMWModel.setQprime( 3.0e-7 );
+	updSatMWModel.setQprime( 0.1 );
    Variable updSatMW( TypeID::updSatMW, &updSatMWModel, false, true);
 
       //>Equation types to be used
