@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -49,134 +50,130 @@
 
 namespace gpstk
 {
-      /** @addtogroup GeoDynamics */
-      //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-      /** Class to do Earth Ocean Tide correction
-       * see IERS Conventions 2010 Section 6.3 for more details.
-       */
-   class EarthOceanTide
-   {
-   public:
+    /** Class to do Earth Ocean Tide correction
+     * see IERS Conventions 2010 Section 6.3 for more details.
+     */
+    class EarthOceanTide
+    {
+    public:
+        /// struct to hold Ocean Tide Data
+        struct OceanTideData
+        {
+            int         n[6];
+            std::string Darw;
+            int         l;
+            int         m;
 
-          /// struct to hold Ocean Tide Data
-      struct OceanTideData
-      {
-         int         n[6];
-         std::string Darw;
-         int         l;
-         int         m;
+            double      DelCp;
+            double      DelSp;
+            double      DelCm;
+            double      DelSm;
+        };
 
-         double      DelCp;
-         double      DelSp;
-         double      DelCm;
-         double      DelSm;
+    public:
+        /// Default constructor
+        EarthOceanTide(int n=4, int m=4)
+            : desiredDegree(n),
+              desiredOrder(m),
+              pRefSys(NULL)
+        {}
 
-      };
-
-   public:
-         /// Default constructor
-      EarthOceanTide(int n=4, int m=4)
-         : desiredDegree(n),
-           desiredOrder(m),
-           pRefSys(NULL)
-      {}
-
-         /// Default destructor
-      ~EarthOceanTide() {}
+        /// Default destructor
+        ~EarthOceanTide() {}
 
 
-         /// Load ocean tide file
-      void loadFile(const std::string& file)
-         throw(FileMissingException);
+        /// Load ocean tide file
+        void loadFile(const std::string& file)
+            throw(FileMissingException);
 
 
-         /// Set desired degree and order
-      inline EarthOceanTide& setDesiredDegreeOrder(const int& n, const int& m)
-      {
-         if(n >= m)
-         {
-            desiredDegree  =  n;
-            desiredOrder   =  m;
-         }
-         else
-         {
-            desiredDegree  =  n;
-            desiredOrder   =  n;
-         }
+        /// Set desired degree and order
+        inline EarthOceanTide& setDesiredDegreeOrder(const int& n, const int& m)
+        {
+            if(n >= m)
+            {
+                desiredDegree  =  n;
+                desiredOrder   =  m;
+            }
+            else
+            {
+                desiredDegree  =  n;
+                desiredOrder   =  n;
+            }
 
-         return (*this);
-
-      }
-
-
-         /// Get desired degree and order
-      inline void getDesiredDegreeOrder(int& n, int& m) const
-      {
-         n  =  desiredDegree;
-         m  =  desiredOrder;
-      }
+            return (*this);
+        }
 
 
-         /// Set reference system
-      inline EarthOceanTide& setReferenceSystem(ReferenceSystem& ref)
-      {
-         pRefSys = &ref;
-
-         return (*this);
-      }
-
-
-         /// Get reference system
-      inline ReferenceSystem* getReferenceSystem() const
-      {
-         return pRefSys;
-      }
+        /// Get desired degree and order
+        inline void getDesiredDegreeOrder(int& n, int& m) const
+        {
+            n  =  desiredDegree;
+            m  =  desiredOrder;
+        }
 
 
-         /**
-          * Ocean tide to normalized earth potential coefficients
-          *
-          * @param utc      time in UTC
-          * @param dCS      correction to normalized earth potential coefficients
-          */
-      void getOceanTide(CommonTime utc, Matrix<double>& dCS);
+        /// Set reference system
+        inline EarthOceanTide& setReferenceSystem(ReferenceSystem& ref)
+        {
+            pRefSys = &ref;
+
+            return (*this);
+        }
 
 
-         /** Ocean tide to normalized earth potential coefficients.
-          *
-          * @param utc  time in UTC
-          * @return     correction to normalized earth potential coefficients
-          */
-      Matrix<double> getOceanTide(CommonTime utc);
-
-         /** Ocean tide to site displacements.
-          *
-          * @param utc  time in UTC
-          * @param pos  nominal position of the site of interest
-          * @return     correction to site displacements
-          */
-      Vector<double> getOceanTide(CommonTime utc,
-                                  const Vector<double>& pos);
+        /// Get reference system
+        inline ReferenceSystem* getReferenceSystem() const
+        {
+            return pRefSys;
+        }
 
 
-   protected:
+        /**
+         * Ocean tide to normalized earth potential coefficients
+         *
+         * @param utc      time in UTC
+         * @param dCS      correction to normalized earth potential coefficients
+         */
+        void getOceanTide(CommonTime utc, Matrix<double>& dCS);
 
-         /// Degree and Order of ocean tide model desired
-      int desiredDegree;
-      int desiredOrder;
 
-         /// Reference System
-      ReferenceSystem* pRefSys;
+        /** Ocean tide to normalized earth potential coefficients.
+         *
+         * @param utc  time in UTC
+         * @return     correction to normalized earth potential coefficients
+         */
+        Matrix<double> getOceanTide(CommonTime utc);
 
-         /// Standard vector of Ocean Tide Data
-      std::vector<OceanTideData> otDataVec;
+        /** Ocean tide to site displacements.
+         *
+         * @param utc  time in UTC
+         * @param pos  nominal position of the site of interest
+         * @return     correction to site displacements
+         */
+        Vector<double> getOceanTide(CommonTime utc,
+                                    const Vector<double>& pos);
 
-   }; // End of class 'EarthOceanTide'
 
-      // @}
+    protected:
+
+        /// Degree and Order of ocean tide model desired
+        int desiredDegree;
+        int desiredOrder;
+
+        /// Reference System
+        ReferenceSystem* pRefSys;
+
+        /// Standard vector of Ocean Tide Data
+        std::vector<OceanTideData> otDataVec;
+
+    }; // End of class 'EarthOceanTide'
+
+    // @}
 
 }  // End of namespace 'gpstk'
 
-
-#endif   // OCEAN_TIDE_HPP
+#endif   // EARTH_OCEAN_TIDE_HPP

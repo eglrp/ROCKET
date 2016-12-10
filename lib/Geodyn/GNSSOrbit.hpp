@@ -35,8 +35,6 @@
 #include "Spacecraft.hpp"
 
 #include "EGM08GravityModel.hpp"
-#include "MoonGravitation.hpp"
-#include "SunGravitation.hpp"
 #include "ThirdBody.hpp"
 #include "CODEPressure.hpp"
 #include "RelativityEffect.hpp"
@@ -44,138 +42,136 @@
 namespace gpstk
 {
 
-      /** @addtogroup GeoDynamics */
-      //@{
+    /** @addtogroup GeoDynamics */
+    //@{
+
+    /** Class to do GNSS Orbit configuration.
+     *
+     */
+    class GNSSOrbit : public EquationOfMotion
+    {
+    public:
+
+        /// Default constructor
+        GNSSOrbit()
+        {}
+
+        /// Default destructor
+        virtual ~GNSSOrbit()
+        {}
+
+        /// Set reference epoch
+        inline GNSSOrbit& setRefEpoch(CommonTime utc)
+        {
+            utc0 = utc;
+
+            return (*this);
+        }
 
 
-      /** Class to do GNSS Orbit configuration.
-       *
-       */
-   class GNSSOrbit : public EquationOfMotion
-   {
-   public:
+        /// Get reference epoch
+        inline CommonTime getRefEpoch() const
+        {
+            return utc0;
+        }
 
-         /// Default constructor
-      GNSSOrbit()
-      {
-      }
+        /// Set spacecraft
+        inline GNSSOrbit& setSpacecraft(const Spacecraft& s)
+        {
+            sc = s;
 
-         /// Default destructor
-      virtual ~GNSSOrbit()
-      {
-      }
+            return *this;
+        }
 
-         /// Set reference epoch
-      inline GNSSOrbit& setRefEpoch(CommonTime utc)
-      {
-         utc0 = utc;
-
-         return (*this);
-      }
-
-         /// get reference epoch
-      inline CommonTime getRefEpoch() const
-      {
-         return utc0;
-      }
-
-         /// Set spacecraft
-      inline GNSSOrbit& setSpacecraft(const Spacecraft& s)
-      {
-         sc = s;
-
-         return *this;
-      }
-
-         /// Get spacecraft
-      inline Spacecraft getSpacecraft() const
-      {
-         return sc;
-      }
+        /// Get spacecraft
+        inline Spacecraft getSpacecraft() const
+        {
+            return sc;
+        }
 
 
-         /// Set earth gravitation
-      inline GNSSOrbit& setEarthGravitation(EarthGravitation& egm)
-      {
-         pEGM = &egm;
+        /// Set earth gravitation
+        inline GNSSOrbit& setEarthGravitation(EarthGravitation& egm)
+        {
+            pEGM = &egm;
 
-         return (*this);
-      }
+            return (*this);
+        }
 
-         /// Get earth gravitation
-      inline EarthGravitation* getEarthGravitation() const
-      {
-         return pEGM;
-      }
-
-
-         /// Set ThirdBody
-      inline GNSSOrbit& setThirdBody(ThirdBody& thd)
-      {
-          pThd = &thd;
-
-          return (*this);
-      }
-
-         /// Get ThirdBody
-      inline ThirdBody* getThirdBody() const
-      {
-          return pThd;
-      }
+        /// Get earth gravitation
+        inline EarthGravitation* getEarthGravitation() const
+        {
+            return pEGM;
+        }
 
 
-         /// Set solar pressure
-      inline GNSSOrbit& setSolarPressure(SolarPressure& srp)
-      {
-         pSRP = &srp;
+        /// Set third body
+        inline GNSSOrbit& setThirdBody(ThirdBody& thd)
+        {
+            pThd = &thd;
 
-         return (*this);
-      }
+            return (*this);
+        }
 
-         /// Get solar pressure
-      inline SolarPressure* getSolarPressure() const
-      {
-         return pSRP;
-      }
-
-
-         /// Set relativity effect
-      inline GNSSOrbit& setRelativityEffect(RelativityEffect& rel)
-      {
-         pRel = &rel;
-
-         return (*this);
-      }
-
-         /// Get relativity effect
-      inline RelativityEffect* getRelativityEffect() const
-      {
-         return pRel;
-      }
+        /// Get third body
+        inline ThirdBody* getThirdBody() const
+        {
+            return pThd;
+        }
 
 
-         /// Get derivatives
-      virtual Vector<double> getDerivatives(const double&         t,
-                                            const Vector<double>& y);
+        /// Set solar pressure
+        inline GNSSOrbit& setSolarPressure(SolarPressure& srp)
+        {
+            pSRP = &srp;
 
-   private:
+            return (*this);
+        }
 
-         /// Reference epoch
-      CommonTime utc0;
+        /// Get solar pressure
+        inline SolarPressure* getSolarPressure() const
+        {
+            return pSRP;
+        }
 
-         /// Spacecraft object
-      Spacecraft sc;
 
-         /// EarthBody object
-      EarthBody eb;
+        /// Set relativity effect
+        inline GNSSOrbit& setRelativityEffect(RelativityEffect& rel)
+        {
+            pRel = &rel;
 
-         /// Force models
-      EarthGravitation* pEGM;
-      ThirdBody*        pThd;
-      SolarPressure*    pSRP;
-      RelativityEffect* pRel;
+            return (*this);
+        }
 
-   }; // End of class 'GNSSOrbit'
+        /// Get relativity effect
+        inline RelativityEffect* getRelativityEffect() const
+        {
+            return pRel;
+        }
+
+
+        /// Get derivatives
+        virtual Vector<double> getDerivatives(const double&         t,
+                                              const Vector<double>& y);
+
+    private:
+
+        /// Reference epoch
+        CommonTime utc0;
+
+        /// Spacecraft object
+        Spacecraft sc;
+
+        /// EarthBody object
+        EarthBody eb;
+
+        /// Force models
+        EarthGravitation*   pEGM;
+        ThirdBody*          pThd;
+        SolarPressure*      pSRP;
+        RelativityEffect*   pRel;
+
+    }; // End of class 'GNSSOrbit'
 
 }  // End of namespace 'gpstk'
 

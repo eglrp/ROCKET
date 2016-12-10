@@ -33,7 +33,7 @@ int main(void)
 
     // EOP Data Store
     EOPDataStore2 eopDataStore;
-    eopDataStore.setUseBulletinB(true);
+//    eopDataStore.setUseBulletinB(true);
 
     // IERS EOP file
     string eopFile = confReader.getValue("STKEOPFILE", "DEFAULT");
@@ -48,7 +48,7 @@ int main(void)
         return 1;
     }
 
-    eopDataStore.setInterpolationPoints(8);
+    eopDataStore.setInterpPoints(8);
     eopDataStore.setRegularization(true);
     eopDataStore.setOceanTides(true);
     eopDataStore.setLibration(true);
@@ -96,23 +96,27 @@ int main(void)
     }
 
     CivilTime CT(2014,12,31,20,30,0.0, TimeSystem::GPS);
+//    CommonTime UTC0( CT.convertToCommonTime() );
+//    CommonTime UTC( UTC0 );
+//    CommonTime UTC0( rs.GPS2UTC(GPS0) );
+
     CommonTime GPS0( CT.convertToCommonTime() );
     CommonTime UTC0( rs.GPS2UTC(GPS0) );
 
-//    cout << CivilTime(UTC0) << endl;
+    cout << CivilTime(UTC0) << endl;
 
     // Loop
-    for(int i=0; i<31*4; ++i)
+    for(int i=0; i<124; ++i)
     {
         CommonTime GPS = GPS0 + i*900.0;
         CommonTime UTC = rs.GPS2UTC(GPS);
 
         Matrix<double> T2C( rs.T2CMatrix(UTC) );
 
-        JulianDate JD(GPS);
+        JulianDate JD(UTC);
         long int IJD(JD.jd+0.5);
-        double FJD( (JD.jd+0.5-IJD)*DAY_TO_SEC);
-//        cout << CivilTime(GPS);
+        double FJD( (JD.jd+0.5-IJD)*DAY_TO_SEC );
+//        cout << CivilTime(UTC);
 
         cout << fixed << setprecision(3);
         cout << setw(10) << IJD;
@@ -130,6 +134,7 @@ int main(void)
              << setw(15) << T2C(2,1) << " "
              << setw(15) << T2C(2,2) << endl;
 
+        UTC.addDays(1);
     }
 
     return 0;

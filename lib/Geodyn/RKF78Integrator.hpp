@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -36,85 +37,78 @@
 namespace gpstk
 {
 
-      /** @addtogroup GeoDynamics */
-      //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-      /** This class implements Runge Kutta Fehlberg 7(8)-th order algorithm.
-       *
-       */
-   class RKF78Integrator
-   {
-   public:
+    /** This class implements Runge Kutta Fehlberg 7(8)-th order algorithm.
+     *
+     */
+    class RKF78Integrator
+    {
+    public:
+        /// Default constructor
+        RKF78Integrator()
+            : stepSize(60.0),
+              errorTol(1.0e-5)
+        {}
 
-      /// Default constructor
-      RKF78Integrator()
-         : stepSize(60.0),
-           errorTol(1.0e-5)
-      {}
-
-
-      /// Default destructor
-      ~RKF78Integrator() {}
+        /// Default destructor
+        ~RKF78Integrator() {}
 
 
-      /// Set step size
-      inline RKF78Integrator& setStepSize(const double& size)
-      {
-         stepSize = size;
+        /// Set step size
+        inline RKF78Integrator& setStepSize(const double& size)
+        {
+            stepSize = size;
 
-         return (*this);
-      }
+            return (*this);
+        }
 
-
-      /// Get step size
-      inline double getStepSize() const
-      {
-         return stepSize;
-      }
-
-
-      /// Set error tolerance
-      inline RKF78Integrator& setErrorTolerance(const double& tol)
-      {
-         errorTol = tol;
-
-         return (*this);
-      }
+        /// Get step size
+        inline double getStepSize() const
+        {
+            return stepSize;
+        }
 
 
-      /// Get error tolerance
-      inline double getErrorTolerance() const
-      {
-         return errorTol;
-      }
+        /// Set error tolerance
+        inline RKF78Integrator& setErrorTolerance(const double& tol)
+        {
+            errorTol = tol;
+
+            return (*this);
+        }
+
+        /// Get error tolerance
+        inline double getErrorTolerance() const
+        {
+            return errorTol;
+        }
 
 
-      /// Real implementation of RKF78
-      void integrateTo(double&              t_curr,
-                       Vector<double>&      y_curr,
-                       EquationOfMotion*    peom,
-                       double               t_next);
+        /// Real implementation of RKF78
+        void integrateTo(double&              t_curr,
+                         Vector<double>&      y_curr,
+                         EquationOfMotion*    peom,
+                         double               t_next);
 
 
-   private:
+    private:
+        /// Coefficients of rkf78
+        const static double a[13];
+        const static double b[13][12];
+        const static double c1[13], c2[13];
 
-      /// Coefficients of rkf78
-      const static double a[13];
-      const static double b[13][12];
-      const static double c1[11], c2[13];
+        /// Step size
+        double stepSize;
 
+        /// Error tolerance
+        double errorTol;
 
-      /// Step size
-      double stepSize;
+    };  // End of class 'RKF78Integrator'
 
-      /// Error tolerance
-      double errorTol;
-
-   }; // End of class 'RKF78Integrator'
-
-      // @}
+    // @}
 
 }  // End of namespace 'gpstk'
-
 
 #endif // RKF78_INTEGRATOR_HPP

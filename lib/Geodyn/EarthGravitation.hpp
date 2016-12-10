@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2015
 //
 //============================================================================
@@ -53,214 +54,212 @@
 
 namespace gpstk
 {
-   /** @addtogroup GeoDynamics */
-   //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-       /** Class to do Earth Gravitation calculation.
-       */
-   class EarthGravitation : public ForceModel
-   {
-   public:
+    /** Class to do Earth Gravitation calculation.
+     */
+    class EarthGravitation : public ForceModel
+    {
+    public:
 
-         /// Struct to hold Gravity Model Data
-      struct GravityModelData
-      {
-         std::string modelName;
+        /// Struct to hold Gravity Model Data
+        struct GravityModelData
+        {
+            std::string modelName;
 
-         double GM;
-         double ae;
+            double GM;
+            double ae;
 
-         bool includesPermTide;
+            bool includesPermTide;
 
-         double refMJD;
+            double refMJD;
 
-         int maxDegree;
+            int maxDegree;
 
-         Matrix<double> normalizedCS;
+            Matrix<double> normalizedCS;
+        };
 
-      };
+    public:
 
-   public:
-
-         /** Constructor.
-          * @param n   Desired degree
-          * @param m   Desired order
-          */
-      EarthGravitation(int n=0, int m=0)
-         : desiredDegree(n),
-           desiredOrder(m),
-           pRefSys(NULL),
-           pSolidTide(NULL),
-           pOceanTide(NULL),
-           pPoleTide(NULL),
-           satGravimetry(false)
-      {
-         int size = desiredDegree*(desiredDegree+1)/2 + (desiredOrder+1);
-         gmData.normalizedCS.resize(size,4,0.0);
-      }
-
-
-         /// Default destructor
-      virtual ~EarthGravitation() {}
+        /** Constructor.
+         * @param n   Desired degree
+         * @param m   Desired order
+         */
+        EarthGravitation(int n=0, int m=0)
+            : desiredDegree(n),
+              desiredOrder(m),
+              pRefSys(NULL),
+              pSolidTide(NULL),
+              pOceanTide(NULL),
+              pPoleTide(NULL),
+              satGravimetry(false)
+        {
+            int size = desiredDegree*(desiredDegree+1)/2 + (desiredOrder+1);
+            gmData.normalizedCS.resize(size,4,0.0);
+        }
 
 
-         /// Load file
-      virtual void loadFile(const std::string& file)
-         throw(FileMissingException)
-      {}
+        /// Default destructor
+        virtual ~EarthGravitation() {}
 
 
-         /// Set desired degree and order
-         /// Warning: If you call method setDesiredDegreeOrder(), then you MUST
-         ///          call method loadFile() to reinitialize gmData struct.
-      inline EarthGravitation& setDesiredDegreeOrder(const int& n, const int& m)
-      {
-         desiredDegree  =  n;
-
-         if(n >= m)
-         {
-            desiredOrder   =  m;
-         }
-         else
-         {
-            desiredOrder   =  n;
-         }
-
-         int size = desiredDegree*(desiredDegree+1)/2 + (desiredOrder+1);
-         gmData.normalizedCS.resize(size,4,0.0);
-
-         return (*this);
-      }
+        /// Load file
+        virtual void loadFile(const std::string& file)
+            throw(FileMissingException)
+        {}
 
 
-         /// Get desired degree and order
-      inline void getDesiredDegreeOrder(int& n, int& m) const
-      {
-         n = desiredDegree;
-         m = desiredOrder;
-      }
+        /// Set desired degree and order
+        /// Warning: If you call method setDesiredDegreeOrder(), then you MUST
+        ///          call method loadFile() to reinitialize gmData struct.
+        inline EarthGravitation& setDesiredDegreeOrder(const int& n, const int& m)
+        {
+            desiredDegree  =  n;
+
+            if(n >= m)
+            {
+                desiredOrder   =  m;
+            }
+            else
+            {
+                desiredOrder   =  n;
+            }
+
+            int size = desiredDegree*(desiredDegree+1)/2 + (desiredOrder+1);
+            gmData.normalizedCS.resize(size,4,0.0);
+
+            return (*this);
+        }
 
 
-         /// Set reference system
-      inline EarthGravitation& setReferenceSystem(ReferenceSystem& ref)
-      {
-         pRefSys = &ref;
-
-         return (*this);
-      }
-
-         /// Get reference system
-      inline ReferenceSystem* getReferenceSystem() const
-      {
-         return pRefSys;
-      }
-
-         /// Set earth solid tide
-      inline EarthGravitation& setEarthSolidTide(EarthSolidTide& solidTide)
-      {
-         pSolidTide = &solidTide;
-
-         return (*this);
-      }
-
-         /// Get earth solid tide
-      inline EarthSolidTide* getEarthSolidTide() const
-      {
-         return pSolidTide;
-      }
+        /// Get desired degree and order
+        inline void getDesiredDegreeOrder(int& n, int& m) const
+        {
+            n = desiredDegree;
+            m = desiredOrder;
+        }
 
 
-         /// Set earth ocean tide
-      inline EarthGravitation& setEarthOceanTide(EarthOceanTide& oceanTide)
-      {
-         pOceanTide = &oceanTide;
+        /// Set reference system
+        inline EarthGravitation& setReferenceSystem(ReferenceSystem& ref)
+        {
+            pRefSys = &ref;
 
-         return (*this);
-      }
+            return (*this);
+        }
 
+        /// Get reference system
+        inline ReferenceSystem* getReferenceSystem() const
+        {
+            return pRefSys;
+        }
 
-         /// Get earth ocean tide
-      inline EarthOceanTide* getEarthOceanTide() const
-      {
-         return pOceanTide;
-      }
+        /// Set earth solid tide
+        inline EarthGravitation& setEarthSolidTide(EarthSolidTide& solidTide)
+        {
+            pSolidTide = &solidTide;
 
+            return (*this);
+        }
 
-         /// Set earth pole tide
-      inline EarthGravitation setEarthPoleTide(EarthPoleTide& poleTide)
-      {
-         pPoleTide = &poleTide;
-
-         return (*this);
-      }
-
-         /// Get earth pole tide
-      inline EarthPoleTide* getEarthPoleTide() const
-      {
-         return pPoleTide;
-      }
+        /// Get earth solid tide
+        inline EarthSolidTide* getEarthSolidTide() const
+        {
+            return pSolidTide;
+        }
 
 
-         /// Set satellite gravimetry
-      inline EarthGravitation& setSatGravimetry(const bool& sg)
-      {
-         satGravimetry = sg;
+        /// Set earth ocean tide
+        inline EarthGravitation& setEarthOceanTide(EarthOceanTide& oceanTide)
+        {
+            pOceanTide = &oceanTide;
 
-         return (*this);
-      }
-
-
-         /// Get satellite gravimetry
-      inline bool getSatGravimetry() const
-      {
-         return satGravimetry;
-      }
+            return (*this);
+        }
 
 
-
-         /** Compute acceleration (and related partial derivatives) of Earth
-          *  Gravitation.
-          * @param utc     time in UTC
-          * @param rb      earth body
-          * @param sc      spacecraft
-          */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc) {}
+        /// Get earth ocean tide
+        inline EarthOceanTide* getEarthOceanTide() const
+        {
+            return pOceanTide;
+        }
 
 
-         /// Return the force model name
-      inline virtual std::string forceModelName() const
-      { return "EarthGravitation"; }
+        /// Set earth pole tide
+        inline EarthGravitation setEarthPoleTide(EarthPoleTide& poleTide)
+        {
+            pPoleTide = &poleTide;
+
+            return (*this);
+        }
+
+        /// Get earth pole tide
+        inline EarthPoleTide* getEarthPoleTide() const
+        {
+            return pPoleTide;
+        }
 
 
-         /// Return the force model index
-      inline virtual int forceModelIndex() const
-      { return FMI_EarthGravitation; }
+        /// Set satellite gravimetry
+        inline EarthGravitation& setSatGravimetry(const bool& sg)
+        {
+            satGravimetry = sg;
+
+            return (*this);
+        }
 
 
-   protected:
-
-         /// Desired degree and order
-      int desiredDegree;
-      int desiredOrder;
-
-         /// Reference system
-      ReferenceSystem*  pRefSys;
-
-         /// Earth tides
-      EarthSolidTide*   pSolidTide;
-      EarthOceanTide*   pOceanTide;
-      EarthPoleTide*    pPoleTide;
-
-         /// Gravity model data
-      GravityModelData gmData;
-
-         /// Satellite gravimetry
-      bool satGravimetry;
+        /// Get satellite gravimetry
+        inline bool getSatGravimetry() const
+        {
+            return satGravimetry;
+        }
 
 
-   }; // End of class 'EarthGravitation'
 
-      // @}
+        /** Compute acceleration (and related partial derivatives) of Earth
+         *  Gravitation.
+         * @param utc     time in UTC
+         * @param rb      earth body
+         * @param sc      spacecraft
+         */
+        virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc) {}
+
+
+        /// Return the force model name
+        inline virtual std::string forceModelName() const
+        { return "EarthGravitation"; }
+
+
+        /// Return the force model index
+        inline virtual int forceModelIndex() const
+        { return FMI_EarthGravitation; }
+
+
+    protected:
+
+        /// Desired degree and order
+        int desiredDegree;
+        int desiredOrder;
+
+        /// Reference system
+        ReferenceSystem*  pRefSys;
+
+        /// Earth tides
+        EarthSolidTide*   pSolidTide;
+        EarthOceanTide*   pOceanTide;
+        EarthPoleTide*    pPoleTide;
+
+        /// Gravity model data
+        GravityModelData gmData;
+
+        /// Satellite gravimetry
+        bool satGravimetry;
+
+    }; // End of class 'EarthGravitation'
+
+    // @}
 
 }  // End of namespace 'gpstk'
 

@@ -24,7 +24,7 @@ Vector<double> TestEOM::getDerivatives(const double &t,
                                        const Vector<double>& y)
 {
    Vector<double> dy(y.size(),0.0);
-   dy(0) = std::cos(t);
+   dy(0) = std::cos(t) + 1e-10;
 
    return dy;
 }
@@ -42,7 +42,7 @@ int main(void)
    RKF78Integrator rkf;
    rkf.setStepSize(0.25);
 
-   for(int i=0; i<100000; ++i)
+   for(int i=0; i<1e4; ++i)
    {
       rkf.integrateTo(t0, y0, &eom, t0+h);
 

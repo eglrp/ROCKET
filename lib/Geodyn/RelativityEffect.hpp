@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
@@ -34,44 +35,41 @@
 
 namespace gpstk
 {
-      /** @addtogroup GeoDynamics */
-      //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-      /** Class to do Relativity Effect calculation.
-       * see IERS Conventions 2010 Section 10.3 for more details.
-       *
-       */
-   class RelativityEffect : public ForceModel
-   {
-   public:
-         /// Default constructor
-      RelativityEffect() {}
+    /** Class to do Relativity Effect calculation.
+     * see IERS Conventions 2010 Section 10.3 for more details.
+     *
+     */
+    class RelativityEffect : public ForceModel
+    {
+    public:
+        /// Default constructor
+        RelativityEffect() {}
 
-         /// Default destructor
-      virtual ~RelativityEffect() {}
+        /// Default destructor
+        virtual ~RelativityEffect() {}
 
-         /** Compute acceleration (and related partial derivatives).
-          * @param utc     time in UTC
-          * @param rb      earth body
-          * @param sc      spacecraft
-          */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+        /** Compute acceleration (and related partial derivatives).
+         * @param utc     time in UTC
+         * @param rb      earth body
+         * @param sc      spacecraft
+         */
+        virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
-         /// Return the force model name
-      inline virtual std::string modelName() const
-      { return "RelativityEffect"; }
+        /// Return the force model name
+        inline virtual std::string modelName() const
+        { return "RelativityEffect"; }
 
-         /// Return the force model index
-      inline virtual int forceIndex() const
-      { return FMI_RelativisticEffect; }
+        /// Return the force model index
+        inline virtual int forceIndex() const
+        { return FMI_RelativisticEffect; }
 
-   protected:
+    }; // End of class 'RelativityEffect'
 
-
-   }; // End of class 'RelativityEffect'
-
-      // @}
+    // @}
 
 }  // End of namespace 'gpstk'
 
-#endif   // RELATIVITY_EFFECT_HPP
+#endif  // RELATIVITY_EFFECT_HPP

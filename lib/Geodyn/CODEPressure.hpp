@@ -35,39 +35,37 @@
 
 namespace gpstk
 {
-      /** @addtogroup GeoDynamics */
-      //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-      /** Class to do CODE Pressure calculation.
-       */
-   class CODEPressure : public SolarPressure
-   {
+    /** Class to do CODE Pressure calculation.
+     */
+    class CODEPressure : public SolarPressure
+    {
+    public:
 
-   public:
+        /// Default constructor
+        CODEPressure() {}
 
-         /// Default constructor
-      CODEPressure() {}
-
-         /// Default destructor
-      virtual ~CODEPressure() {}
-
-
-         /** Compute acceleration (and related partial derivatives) of CODE
-          *  Pressure.
-          * @param utc     time in UTC
-          * @param rb      earth body
-          * @param sc      spacecraft
-          */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
-
-         /// Return the force model name
-      inline virtual std::string modelName() const
-      { return "CODEPressure"; }
+        /// Default destructor
+        virtual ~CODEPressure() {}
 
 
-   }; // End of class 'CODEPressure'
+        /** Compute acceleration (and related partial derivatives) of CODE
+         *  Pressure.
+         * @param utc     time in UTC
+         * @param rb      earth body
+         * @param sc      spacecraft
+         */
+        virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
-      // @}
+        /// Return the force model name
+        inline virtual std::string modelName() const
+        { return "CODEPressure"; }
+
+    }; // End of class 'CODEPressure'
+
+    // @}
 
 }  // End of namespace 'gpstk'
 

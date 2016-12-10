@@ -204,7 +204,7 @@ namespace gpstk
 
         return ret;
 
-   }    // End of method 'ReferenceSystem::RG_ZONT2()'
+    }    // End of method 'ReferenceSystem::RG_ZONT2()'
 
 
     // Provide the diurnal/subdiurnal tidal effects on polar motion ("), UT1 (s)
@@ -500,6 +500,11 @@ namespace gpstk
         chi = (67310.54841 + (876600.0*3600 + 8640184.812866)*t + 0.093104*t2 - 6.2e-6*t3)*15.0 + 648000.0;
         chi = std::fmod(chi, TURNAS) * AS_TO_RAD;
 
+        gmst = 67310.54841 + t*( (8640184.812866 + 3155760000) + t*(0.093104 + t*(-0.0000062)));
+        gmst = std::fmod(gmst, DAY_TO_SEC);
+        chi = gmst / (DAY_TO_SEC/TWO_PI) + PI;
+        chi = std::fmod(chi, TWO_PI);
+
         l = -0.00024470*t4 + 0.051635*t3 + 31.8792*t2 + 1717915923.2178*t + 485868.249036;
         l = std::fmod(l, TURNAS) * AS_TO_RAD;
 
@@ -523,12 +528,7 @@ namespace gpstk
         for(int i=0; i<NT; i++)
         {
             arg = 0.0;
-            arg += x[i].nchi * chi
-                 + x[i].nl * l
-                 + x[i].nlp * lp
-                 + x[i].nf * f
-                 + x[i].nd * d
-                 + x[i].nom * om;
+            arg = x[i].nchi*chi+x[i].nl*l+x[i].nlp*lp+x[i].nf*f+x[i].nd*d+x[i].nom*om;
 
             arg = std::fmod(arg, TWO_PI);
 

@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -29,65 +30,64 @@
 #include "MoonGravitation.hpp"
 #include "GNSSconstants.hpp"
 
+
 using namespace std;
+
 
 namespace gpstk
 {
 
-      /** Compute acceleration (and related partial derivatives) of Moon
-       *  Gravitation.
-       * @param utc     time in UTC
-       * @param rb      earth body
-       * @param sc      spacecraft
-       */
-   void MoonGravitation::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
-   {
-      /* Oliver P69 and P248
-       * a = GM*( (s-r)/norm(s-r)^3 - s/norm(s)^3 )
-       *
-       * da/dr = -GM*( I/norm(r-s)^3 - 3(r-s)transpose(r-s)/norm(r-s)^5)
-       */
+    /** Compute acceleration (and related partial derivatives) of Moon
+     *  Gravitation.
+     * @param utc     time in UTC
+     * @param rb      earth body
+     * @param sc      spacecraft
+     */
+    void MoonGravitation::doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc)
+    {
+        /* Oliver P69 and P248
+         * a = GM*( (s-r)/norm(s-r)^3 - s/norm(s)^3 )
+         *
+         * da/dr = -GM*( I/norm(r-s)^3 - 3(r-s)transpose(r-s)/norm(r-s)^5)
+         */
 
-      Vector<double> r_sat = sc.getCurrentPos();
+        Vector<double> r_sat = sc.getCurrentPos();
 
-      // Geocentric position of moon
-      double rv_moon[6] = {0.0};    // unit: km, km/day
-      double tt = JulianDate( pRefSys->UTC2TT(utc) ).jd;
-      pSolSys->computeState(tt,
-                            SolarSystem::Moon,
-                            SolarSystem::Earth,
-                            rv_moon);
-      Vector<double> r_moon(3,0.0); // unit: km
-      r_moon(0) = rv_moon[0];
-      r_moon(1) = rv_moon[1];
-      r_moon(2) = rv_moon[2];
-      r_moon *= 1000.0;             // unit: m
+        // moon position and velocity in ICRS, unit: km, km/day
+        double rv_moon[6] = {0.0};
+        double tt = JulianDate( pRefSys->UTC2TT(utc) ).jd;
+        SolarSystem::Planet center(SolarSystem::Earth);
+        SolarSystem::Planet target(SolarSystem::Moon);
+        pSolSys->computeState(tt, target, center, rv_moon);
 
-      double m( norm(r_moon) );
-      double m3( m*m*m );
+        // moon position in ICRS, unit: m
+        Vector<double> r_moon(3,0.0);
+        r_moon(0) = rv_moon[0];
+        r_moon(1) = rv_moon[1];
+        r_moon(2) = rv_moon[2];
+        r_moon *= 1000.0;
 
-      // Distance from satellite to moon
-      Vector<double> dist(r_moon-r_sat);
-      double d( norm(dist) );
-      double d3( d*d*d );
-      double d5( d3*d*d );
+        double m( norm(r_moon) );
+        double m3( m*m*m );
 
-      // a
-      a = GM_MOON * (dist/d3 - r_moon/m3);
+        // distance from satellite to moon
+        Vector<double> dist(r_moon-r_sat);
+        double d( norm(dist) );
+        double d3( d*d*d );
+        double d5( d3*d*d );
 
-      // da_dr
-      Matrix<double> I = ident<double>(3);
-      da_dr = -GM_MOON * (I/d3 - 3.0*outer(dist,dist)/d5);
+        // a
+        a = GM_MOON * (dist/d3 - r_moon/m3);
 
-//      cout << "df_moon/dr: " << endl;
-//      cout << setprecision(15) << da_dr << endl;
+        // da_dr
+        Matrix<double> I = ident<double>(3);
+        da_dr = -GM_MOON * (I/d3 - 3.0*outer(dist,dist)/d5);
 
-      // da_dv
-      da_dv.resize(3,3,0.0);
+        // da_dv
+        da_dv.resize(3,3,0.0);
 
-      // da_dp
+        // da_dp
 
-   }  // End of method 'MoonGravitation::doCompute()'
-
+    }  // End of method 'MoonGravitation::doCompute()'
 
 }  // End of namespace 'gpstk'

@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -51,8 +52,8 @@ namespace gpstk
 
     /* Orbit Integration.
      *
-     * @param diff  difference of predicted orbit and reference orbit
-     * @param part  partials of predicted orbit wrt initial conditions
+     * @return  predicted orbit and partials
+     *
      */
     Matrix<double> OrbitPrediction::OrbitInt()
     {
@@ -85,11 +86,13 @@ namespace gpstk
         // RKF78
         for(int i=0; i<8; ++i)
         {
+            // OI
             pRKF78->integrateTo(t, y, pOrbit, t+size_adams);
 
             t_curr.push_back(t);
             y_curr.push_back(y);
 
+            // y = (r, v, dr/dr0, dr/dv0, dv/dr0, dv/dv0, dr/dp0, dv/dp0)
             if(int(t)%int(arcInt) == 0)
             {
                 for(int j=0; j<3; ++j)
@@ -107,7 +110,7 @@ namespace gpstk
                     // dr/dp0
                     for(int k=0; k<np; ++k)
                     {
-                        orbit(3*count+j,7+k) = y(24+3*j+k);
+                        orbit(3*count+j,7+k) = y(42+np*i+k);
                     }
                 }
 
@@ -125,6 +128,7 @@ namespace gpstk
             t = t_curr[8];
             y = y_curr[8];
 
+            // y = (r, v, dr/dr0, dr/dv0, dv/dr0, dv/dv0, dr/dp0, dv/dp0)
             if(int(t)%int(arcInt) == 0)
             {
                 for(int j=0; j<3; ++j)
@@ -142,7 +146,7 @@ namespace gpstk
                     // dr/dp0
                     for(int k=0; k<np; ++k)
                     {
-                        orbit(3*count+j,7+k) = y(24+3*j+k);
+                        orbit(3*count+j,7+k) = y(42+np*j+k);
                     }
                 }
 

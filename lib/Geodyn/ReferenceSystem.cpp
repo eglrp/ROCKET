@@ -3536,7 +3536,7 @@ namespace gpstk
        X += eop.dX;
        Y += eop.dY;
 
-       // GCRS-to-CTRS matrix
+       // GCRS-to-CIRS matrix
        Matrix<double> Q = C2IXYS(X, Y, s);
 
        // Earth rotation angle
@@ -3565,16 +3565,11 @@ namespace gpstk
    }  // End of method 'ReferenceSystem::T2CMatrix()'
 
 
-      /// Earth rotation angle rate (IAU 2000 model)
+      /// Earth rotation angular rate (IAU 2000 model)
    double ReferenceSystem::dERA00(const CommonTime& UT1)
    {
-       //
-       const double t( (MJD(UT1).mjd - MJD_J2000) / JC );
 
-       //
-       double dtheta = 1.00273781191135448 * TWO_PI / DAY_TO_SEC;
-
-       return dtheta;
+       return 1.00273781191135448 * TWO_PI / DAY_TO_SEC;
 
    }  // End of method 'ReferenceSystem::dERA00()'
 

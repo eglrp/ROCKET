@@ -88,7 +88,7 @@ namespace gpstk
 
 
         /// Set interpolation points
-        inline EOPDataStore2& setInterpolationPoints(const int& points)
+        inline EOPDataStore2& setInterpPoints(const int& points)
         {
             interpPoints = points;
 

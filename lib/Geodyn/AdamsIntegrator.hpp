@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -36,65 +37,62 @@
 namespace gpstk
 {
 
-      /** @addtogroup GeoDynamics */
-      //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-      /** This class implements Adams Bashforth Moulton 8-th order algorithm.
-       *
-       */
-   class AdamsIntegrator
-   {
-   public:
+    /** This class implements Adams Bashforth Moulton 8-th order algorithm.
+     *
+     */
+    class AdamsIntegrator
+    {
+    public:
 
-      /// Default constructor
-      AdamsIntegrator()
-         : stepSize(300.0)
-      {}
+        /// Default constructor
+        AdamsIntegrator()
+            : stepSize(300.0)
+        {}
 
-
-      /// Default destructor
-      virtual ~AdamsIntegrator() {}
-
-
-      /// Set step size
-      inline AdamsIntegrator& setStepSize(const double& size)
-      {
-         stepSize = size;
-
-         return (*this);
-      }
+        /// Default destructor
+        virtual ~AdamsIntegrator() {}
 
 
-      /// Get step size
-      inline double getStepSize() const
-      {
-         return stepSize;
-      }
+        /// Set step size
+        inline AdamsIntegrator& setStepSize(const double& size)
+        {
+            stepSize = size;
+
+            return (*this);
+        }
+
+        /// Get step size
+        inline double getStepSize() const
+        {
+            return stepSize;
+        }
 
 
-      /// Real implementation of Adams
-      void integrateTo(std::vector< double >&           t_curr,
-                       std::vector< Vector<double> >&   y_curr,
-                       EquationOfMotion*                peom,
-                       double                           t_next);
+        /// Real implementation of Adams
+        void integrateTo(std::vector< double >&           t_curr,
+                         std::vector< Vector<double> >&   y_curr,
+                         EquationOfMotion*                peom,
+                         double                           t_next);
 
 
-   private:
+    private:
 
-      /// Coefficients of Adams-Bashforth
-      const static double cb[9];
+        /// Coefficients of Adams-Bashforth
+        const static double cb[9];
 
-      /// Coefficients of Adams-Moulton
-      const static double cm[9];
+        /// Coefficients of Adams-Moulton
+        const static double cm[9];
 
-      /// Step size
-      double stepSize;
+        /// Step size
+        double stepSize;
 
-   }; // End of class 'AdamsIntegrator'
+    }; // End of class 'AdamsIntegrator'
 
-      // @}
+    // @}
 
 }  // End of namespace 'gpstk'
-
 
 #endif // ADAMS_INTEGRATOR_HPP

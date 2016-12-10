@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -35,97 +36,96 @@
 
 namespace gpstk
 {
-      /** @addtogroup GeoDynamics */
-      //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-      /** Class to do Sun Gravitation calculation.
-       */
-   class SunGravitation : public ForceModel
-   {
-   public:
+    /** Class to do Sun Gravitation calculation.
+     */
+    class SunGravitation : public ForceModel
+    {
+    public:
 
-         /// Default constructor
-      SunGravitation()
-         : pSolSys(NULL),
-           pRefSys(NULL)
-      {}
-
-
-         /// Constructor
-      SunGravitation(SolarSystem&      sol,
-                     ReferenceSystem&  ref)
-      {
-         pSolSys = &sol;
-         pRefSys = &ref;
-      }
+        /// Default constructor
+        SunGravitation()
+            : pSolSys(NULL),
+              pRefSys(NULL)
+        {}
 
 
-         /// Default destructor
-      virtual ~SunGravitation() {};
+        /// Constructor
+        SunGravitation(SolarSystem&      sol,
+                       ReferenceSystem&  ref)
+        {
+            pSolSys = &sol;
+            pRefSys = &ref;
+        }
 
 
-         /// Set solar system
-      inline SunGravitation& setSolarSystem(SolarSystem& sol)
-      {
-         pSolSys = &sol;
-
-         return (*this);
-      }
+        /// Default destructor
+        virtual ~SunGravitation() {}
 
 
-         /// Get solar system
-      inline SolarSystem* getSolarSystem() const
-      {
-         return pSolSys;
-      }
+        /// Set solar system
+        inline SunGravitation& setSolarSystem(SolarSystem& sol)
+        {
+            pSolSys = &sol;
+
+            return (*this);
+        }
 
 
-         /// Set reference system
-      inline SunGravitation& setReferenceSystem(ReferenceSystem& ref)
-      {
-         pRefSys = &ref;
-
-         return (*this);
-      }
+        /// Get solar system
+        inline SolarSystem* getSolarSystem() const
+        {
+            return pSolSys;
+        }
 
 
-         /// Get reference system
-      inline ReferenceSystem* getReferenceSystem() const
-      {
-         return pRefSys;
-      }
+        /// Set reference system
+        inline SunGravitation& setReferenceSystem(ReferenceSystem& ref)
+        {
+            pRefSys = &ref;
+
+            return (*this);
+        }
 
 
-         /** Compute acceleration (and related partial derivatives) of Sun
-          *  Gravitation.
-          * @param utc     time in UTC
-          * @param rb      earth body
-          * @param sc      spacecraft
-          */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+        /// Get reference system
+        inline ReferenceSystem* getReferenceSystem() const
+        {
+            return pRefSys;
+        }
 
 
-         /// Return the force model name
-      inline virtual std::string modelName()  const
-      { return "SunGravitation"; }
-
-         /// Return the force model index
-      inline virtual int forceIndex() const
-      { return FMI_SunGravitation; }
-
-   private:
-
-         /// Solar System
-      SolarSystem* pSolSys;
-
-         /// Reference System
-      ReferenceSystem* pRefSys;
+        /** Compute acceleration (and related partial derivatives) of Sun
+         *  Gravitation.
+         * @param utc     time in UTC
+         * @param rb      earth body
+         * @param sc      spacecraft
+         */
+        virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
 
-   }; // End of class 'SunGravitation'
+        /// Return the force model name
+        inline virtual std::string modelName()  const
+        { return "SunGravitation"; }
 
-      // @}
+        /// Return the force model index
+        inline virtual int forceIndex() const
+        { return FMI_SunGravitation; }
+
+    private:
+
+        /// Solar System
+        SolarSystem* pSolSys;
+
+        /// Reference System
+        ReferenceSystem* pRefSys;
+
+    };  // End of class 'SunGravitation'
+
+    // @}
 
 }  // End of namespace 'gpstk'
 
-#endif   // SUN_GRAVITATION_HPP
+#endif  // SUN_GRAVITATION_HPP

@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -37,92 +38,90 @@
 
 namespace gpstk
 {
-      /** @addtogroup GeoDynamics */
-      //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-      /** Class to do Moon Gravitation calculation.
-       */
-   class MoonGravitation : public ForceModel
-   {
-   public:
-
-         /// Default constructor
-      MoonGravitation()
-         : pSolSys(NULL),
-           pRefSys(NULL)
-      {}
-
-
-         /// Constructor
-      MoonGravitation(SolarSystem&     sol,
-                      ReferenceSystem& ref)
-      {
-         pSolSys = &sol;
-         pRefSys = &ref;
-      }
+    /** Class to do Moon Gravitation calculation.
+     */
+    class MoonGravitation : public ForceModel
+    {
+    public:
+        /// Default constructor
+        MoonGravitation()
+            : pSolSys(NULL),
+              pRefSys(NULL)
+        {}
 
 
-         /// Default destructor
-      virtual ~MoonGravitation() {};
+        /// Constructor
+        MoonGravitation(SolarSystem&     sol,
+                        ReferenceSystem& ref)
+        {
+            pSolSys = &sol;
+            pRefSys = &ref;
+        }
 
 
-         /// Set solar system
-      inline MoonGravitation& setSolarSystem(SolarSystem& sol)
-      {
-         pSolSys = &sol;
-
-         return (*this);
-      }
-
-         /// Get solar system
-      inline SolarSystem* getSolarSystem() const
-      {
-         return pSolSys;
-      }
-
-         /// Set reference system
-      inline MoonGravitation& setReferenceSystem(ReferenceSystem& ref)
-      {
-         pRefSys = &ref;
-
-         return (*this);
-      }
-
-         /// Get reference system
-      inline ReferenceSystem* getReferenceSystem() const
-      {
-         return pRefSys;
-      }
+        /// Default destructor
+        virtual ~MoonGravitation() {}
 
 
-         /** Compute acceleration (and related partial derivatives) of Moon
-          *  Gravitation.
-          * @param utc     time in UTC
-          * @param rb      earth body
-          * @param sc      spacecraft
-          */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+        /// Set solar system
+        inline MoonGravitation& setSolarSystem(SolarSystem& sol)
+        {
+            pSolSys = &sol;
+
+            return (*this);
+        }
+
+        /// Get solar system
+        inline SolarSystem* getSolarSystem() const
+        {
+            return pSolSys;
+        }
+
+        /// Set reference system
+        inline MoonGravitation& setReferenceSystem(ReferenceSystem& ref)
+        {
+            pRefSys = &ref;
+
+            return (*this);
+        }
+
+        /// Get reference system
+        inline ReferenceSystem* getReferenceSystem() const
+        {
+            return pRefSys;
+        }
 
 
-         /// Return the force model name
-      inline virtual std::string modelName() const
-      { return "MoonGravitation"; }
+        /** Compute acceleration (and related partial derivatives) of Moon
+         *  Gravitation.
+         * @param utc     time in UTC
+         * @param rb      earth body
+         * @param sc      spacecraft
+         */
+        virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
-         /// Return the force model index
-      inline virtual int forceIndex() const
-      { return FMI_MoonGravitation; }
 
-   private:
+        /// Return the force model name
+        inline virtual std::string modelName() const
+        { return "MoonGravitation"; }
 
-         /// Solar System
-      SolarSystem* pSolSys;
+        /// Return the force model index
+        inline virtual int forceIndex() const
+        { return FMI_MoonGravitation; }
 
-         /// Reference System
-      ReferenceSystem* pRefSys;
+    private:
+        /// Solar System
+        SolarSystem* pSolSys;
 
-   }; // End of class 'MoonGravitation'
+        /// Reference System
+        ReferenceSystem* pRefSys;
 
-      // @}
+    };  // End of class 'MoonGravitation'
+
+    // @}
 
 }  // End of namespace 'gpstk'
 

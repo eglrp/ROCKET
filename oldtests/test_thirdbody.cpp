@@ -209,7 +209,7 @@ int main(void)
     ThirdBody third;
     third.setSolarSystem(solSys);
     third.setReferenceSystem(refSys);
-    third.enableSun();
+//    third.enableSun();
     third.enableMoon();
 
     // Length
@@ -225,8 +225,6 @@ int main(void)
 
         return 1;
     }
-
-    cout << fixed << setprecision(15);
 
     int i = 0;
 
@@ -272,16 +270,39 @@ int main(void)
         third.doCompute(UTC, eb, sc);
 
         Vector<double> a_third = third.getAcceleration();
+        Matrix<double> p_third = third.dA_dR();
 
-        cout << CivilTime(GPS);
-        cout << setw(20) << a_third(0)
-             << setw(20) << a_third(1)
-             << setw(20) << a_third(2)
+//        cout << CivilTime(GPS);
+//        cout << setw(20) << a_third(0)
+//             << setw(20) << a_third(1)
+//             << setw(20) << a_third(2)
+//             << endl;
+
+        JulianDate JD(GPS);
+        long int IJD(JD.jd + 0.5);
+        double FJD( (JD.jd+0.5-IJD)*DAY_TO_SEC );
+
+        cout << fixed;
+
+        cout << setprecision(3);
+        cout << setw(12) << IJD
+             << setw(12) << FJD;
+
+        cout << setprecision(20);
+        cout << setw(30) << p_third(0,0)
+             << setw(30) << p_third(0,1)
+             << setw(30) << p_third(0,2)
+             << setw(30) << p_third(1,0)
+             << setw(30) << p_third(1,1)
+             << setw(30) << p_third(1,2)
+             << setw(30) << p_third(2,0)
+             << setw(30) << p_third(2,1)
+             << setw(30) << p_third(2,2)
              << endl;
 
         i++;
 
-        if(i > length*3600/900) break;
+        if(i >= length*3600/900) break;
     }
 
     return 0;

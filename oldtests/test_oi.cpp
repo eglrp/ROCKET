@@ -1,4 +1,8 @@
-/* Test for Orbit Integration. */
+/* Test for Orbit Integration.
+ *
+ * Both the equation of motion and the variational equation are considered.
+ *
+ */
 
 #include <iostream>
 
@@ -25,6 +29,9 @@ using namespace gpstk;
 
 int main(void)
 {
+
+    //---------- Global Data ----------//
+
     // Configuration File
     ConfDataReader confData;
     try
@@ -50,6 +57,10 @@ int main(void)
         cerr << "IERS EOP File Load Error." << endl;
         return 1;
     }
+    eopDataStore.setInterpPoints(8);
+    eopDataStore.setRegularization(true);
+    eopDataStore.setOceanTides(true);
+    eopDataStore.setLibration(true);
 
     // LeapSecond File
     LeapSecStore leapSecStore;
@@ -86,6 +97,23 @@ int main(void)
         return 1;
     }
 
+    // Satellite Data File
+    SatDataReader satData;
+
+    string satDataFile = confData.getValue("SATDATAFILE", "DEFAULT");
+    try
+    {
+        satData.open(satDataFile);
+    }
+    catch(...)
+    {
+        cerr << "SatData File Open Error." << endl;
+        return 1;
+    }
+
+
+
+    //---------- Initial Conditions ----------//
 
     // Initial Time
     int year, mon, day, hour, min;
@@ -109,61 +137,6 @@ int main(void)
     CommonTime gps0( cv0.convertToCommonTime() );
     CommonTime utc0( refSys.GPS2UTC(gps0) );
 
-//    cout << CivilTime(utc0) << endl;
-
-    // SatID
-    int PRN;
-    try
-    {
-        PRN = confData.getValueAsInt("SATPRN", "DEFAULT");
-    }
-    catch(...)
-    {
-        cerr << "Get Satellite PRN Error." << endl;
-        return 1;
-    }
-
-    SatID sat(PRN, SatID::systemGPS);
-
-    // IGS SP3 File
-    SP3EphemerisStore sp3Eph;
-    sp3Eph.rejectBadPositions(true);
-    sp3Eph.setPosGapInterval(900+1);
-    sp3Eph.setPosMaxInterval(9*900+1);
-
-    string sp3File;
-    while( (sp3File=confData.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
-    {
-        try
-        {
-            sp3Eph.loadFile(sp3File);
-        }
-        catch(...)
-        {
-            cerr << "SP3 File Load Error." << endl;
-            return 1;
-        }
-    }
-
-    // Initial Position and Velocity
-
-    Matrix<double>  t2c( refSys.T2CMatrix(utc0) );
-    Matrix<double> dt2c( refSys.dT2CMatrix(utc0) );
-
-    Vector<double> r0(3,0.0), v0(3,0.0);
-    try
-    {
-        Vector<double> r_sp3 = sp3Eph.getXvt(sat,gps0).x.toVector();
-        Vector<double> v_sp3 = sp3Eph.getXvt(sat,gps0).v.toVector();
-
-        r0 = t2c * r_sp3;
-        v0 = t2c * v_sp3 + dt2c * r_sp3;
-    }
-    catch(...)
-    {
-        cerr << "Get Initial Position and Velocity Error." << endl;
-        return 1;
-    }
 
     // Initial Force Model Parameters - SRP Coefficients
     int np_srp(0);
@@ -208,29 +181,30 @@ int main(void)
     }
 
 
-    // SatData File
-    SatDataReader satData;
+    //---------- Reference Orbit ----------//
 
-    string satDataFile = confData.getValue("SATDATAFILE", "DEFAULT");
-    try
+    // IGS SP3 File
+    SP3EphemerisStore sp3Eph;
+    sp3Eph.rejectBadPositions(true);
+    sp3Eph.setPosGapInterval(900+1);
+    sp3Eph.setPosMaxInterval(9*900+1);
+
+    string sp3File;
+    while( (sp3File=confData.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
     {
-        satData.open(satDataFile);
-    }
-    catch(...)
-    {
-        cerr << "SatData File Open Error." << endl;
-        return 1;
+        try
+        {
+            sp3Eph.loadFile(sp3File);
+        }
+        catch(...)
+        {
+            cerr << "SP3 File Load Error." << endl;
+            return 1;
+        }
     }
 
-    // Spacecraft
-    Spacecraft sc;
-    sc.setCurrentTime(utc0);
-    sc.setSatID(sat);
-    sc.setCurrentPos(r0);
-    sc.setCurrentVel(v0);
-    sc.setNumOfParam(np_srp);
-    sc.setSatData(satData);
 
+    //---------- Force Model Configuration ----------//
 
     // Earth Gravitation
     EGM08GravityModel egm;
@@ -339,30 +313,7 @@ int main(void)
     RelativityEffect rel;
 
 
-    // GNSS Orbit
-    GNSSOrbit gnss;
-    gnss.setRefEpoch(utc0);
-    gnss.setSpacecraft(sc);
-
-    bool bEGM(false), bThd(false), bSRP(false), bRel(false);
-    try
-    {
-        bEGM = confData.getValueAsBoolean("EnableEGM", "FORCEMODEL");
-        bThd = confData.getValueAsBoolean("EnableThd", "FORCEMODEL");
-        bSRP = confData.getValueAsBoolean("EnableSRP", "FORCEMODEL");
-        bRel = confData.getValueAsBoolean("EnableRel", "FORCEMODEL");
-    }
-    catch(...)
-    {
-        cerr << "Get Force Model Settings Error." << endl;
-        return 1;
-    }
-
-    if(bEGM) gnss.setEarthGravitation(egm);
-    if(bThd) gnss.setThirdBody(thd);
-    if(bSRP) gnss.setSolarPressure(srp);
-    if(bRel) gnss.setRelativityEffect(rel);
-
+    //---------- Intergrator Configuration ----------//
 
     // RKF78 Integrator
     RKF78Integrator rkf78;
@@ -422,273 +373,213 @@ int main(void)
     }
 
 
-    // Debug
-    int debug = confData.getValueAsInt("DEBUG", "DEBUG");
+    //---------- Orbit Integration ----------//
 
+    // Output File
+    string filename("OI.DAT");
+    ofstream fout(filename.c_str());
+    fout << fixed;
 
-    // Output Settings
-    int width = 25;
-
-    cout << fixed;
-//    cout << setprecision(6);
-
-
-    // Initial Time and Conditions
-//    cout << "Initial Time: ";
-//    cout << setw(width) << CivilTime(gps0)
-//         << endl << endl;
-
-//    cout << "Initial Conditions: " << endl;
-
-    for(int i=0; i<3; ++i)
-    {
-//        cout << setw(width) << r0(i);
-    }
-//    cout << endl;
-
-    for(int i=0; i<3; ++i)
-    {
-//        cout << setw(width) << v0(i);
-    }
-//    cout << endl;
-
-    for(int i=1; i<=np_srp; ++i)
-    {
-//        cout << setw(width) << p0_srp(i-1);
-    }
-//    cout << endl << endl;
-
-
-    // SP3 Position and Velocity
-    Vector<double> r_sp3(3,0.0), v_sp3(3,0.0);
-    // Obs Position and Velocity
+    // Observed Position and Velocity
     Vector<double> r_obs(3,0.0), v_obs(3,0.0);
-    // Com Position and Velocity
+
+    // Computed Position and Velocity
     Vector<double> r_com(3,0.0), v_com(3,0.0);
 
-    // O-C and Partials
-    int point( int(arcLen*3600/arcInt) );
-    Vector<double> r_omc(3*point, 0.0);
-    Matrix<double> partl(3*point,6+np_srp,0.0);
+
+    // Initial Position and Velocity
+    Vector<double> r0(3,0.0), v0(3,0.0);
 
 
-    //////// RKF78 Integrator ////////
-
-    double t( 0.0 );
-
-    // Current time
-    CommonTime gps( gps0 );
-    CommonTime utc( utc0 );
-
-    // Current state
-    Vector<double> y( sc.getCurrentState() );
-
-    vector< double > t_curr;
-    vector< Vector<double> > y_curr;
-
-    t_curr.push_back(t);
-    y_curr.push_back(y);
-
-
-    Spacecraft sc_temp( gnss.getSpacecraft() );
-    double mass( sc_temp.getCurrentMass() );
-    string block( sc_temp.getCurrentBlock() );
-//    cout << "Satellite: ";
-//    cout << setw(width) << mass
-//         << setw(width) << block
-//         << endl << endl;
-
-    int count(0);
-
-    cout << setprecision(10);
-
-    // Compute 8 start points for Adams Integrator
-    for(int i=0; i<8; ++i)
+    // Loop for all GPS satellites
+    for(int prn=1; prn<32; ++prn)
     {
-        // since the gnss use t and y to get derivatives,
-        // we do not need to update it after every circle.
-        rkf78.integrateTo(t, y, &gnss, t+size_adams);
+        // SatID
+        SatID sat(prn, SatID::systemGPS);
+
+        cout << "Orbit Integration for " << sat << endl;
+
+        Matrix<double>  t2c( refSys.T2CMatrix(utc0)  );
+        Matrix<double> dt2c( refSys.dT2CMatrix(utc0) );
+
+        try
+        {
+            Vector<double> r_sp3 = sp3Eph.getXvt(sat,gps0).x.toVector();
+            Vector<double> v_sp3 = sp3Eph.getXvt(sat,gps0).v.toVector();
+
+            r0 = t2c * r_sp3;
+            v0 = t2c * v_sp3 + dt2c * r_sp3;
+        }
+        catch(...)
+        {
+            cerr << "Get Initial Position and Velocity Error." << endl;
+            continue;
+        }
+
+        // Spacecraft
+        Spacecraft sc;
+        sc.setCurrentTime(utc0);
+        sc.setSatID(sat);
+        sc.setCurrentPos(r0);
+        sc.setCurrentVel(v0);
+        sc.setNumOfParam(np_srp);
+        sc.setSatData(satData);
+
+        // GNSS Orbit
+        GNSSOrbit gnss;
+        gnss.setRefEpoch(utc0);
+        gnss.setSpacecraft(sc);
+
+        bool bEGM(false), bThd(false), bSRP(false), bRel(false);
+        try
+        {
+            bEGM = confData.getValueAsBoolean("EnableEGM", "FORCEMODEL");
+            bThd = confData.getValueAsBoolean("EnableThd", "FORCEMODEL");
+            bSRP = confData.getValueAsBoolean("EnableSRP", "FORCEMODEL");
+            bRel = confData.getValueAsBoolean("EnableRel", "FORCEMODEL");
+        }
+        catch(...)
+        {
+            cerr << "Get Force Model Settings Error." << endl;
+            break;
+        }
+
+        if(bEGM) gnss.setEarthGravitation(egm);
+        if(bThd) gnss.setThirdBody(thd);
+        if(bSRP) gnss.setSolarPressure(srp);
+        if(bRel) gnss.setRelativityEffect(rel);
+
+
+        // Current time
+        double t( 0.0 );
+        CommonTime gps( gps0 );
+        CommonTime utc( utc0 );
+
+        // Current state
+        Vector<double> y( sc.getCurrentState() );
+
+        vector< double > t_curr;
+        vector< Vector<double> > y_curr;
 
         t_curr.push_back(t);
         y_curr.push_back(y);
 
-        for(int j=0; j<3; ++j)
+
+        //////// RKF78 Integrator ////////
+
+        // Compute 8 start points for Adams Integrator
+        for(int i=0; i<8; ++i)
         {
-            r_com(j) = y(j+0);
-            v_com(j) = y(j+3);
-        }
+            // the gnss object use t and y to get derivatives, since
+            // the spacecraft object is updated during this process,
+            // we do not need to update it after each iteration.
+            rkf78.integrateTo(t, y, &gnss, t+size_adams);
 
-        gps = gps0 + t;
-        utc = refSys.GPS2UTC(gps);
+            t_curr.push_back(t);
+            y_curr.push_back(y);
 
-        t2c  = refSys.T2CMatrix(utc);
-
-        try
-        {
-            r_sp3 = sp3Eph.getXvt(sat,gps).x.toVector();
-
-            r_obs = t2c*r_sp3;
-        }
-        catch(...)
-        {
-            cerr << "Get Reference Position Error." << endl;
-            return 1;
-        }
-
-        Vector<double> dxyz(r_obs-r_com);
-        Vector<double> drtn( refSys.XYZ2RTN(dxyz,r_com,v_com) );
-
-        if(int(t)%int(arcInt) == 0)
-        {
-            r_omc(count+0) = dxyz(0);
-            r_omc(count+1) = dxyz(1);
-            r_omc(count+2) = dxyz(2);
-
-            count += 3;
-        }
-
-        if(0.0 == int(t)%900)
-        {
-            if(0 == debug)
+            for(int j=0; j<3; ++j)
             {
-                cout << setw(width) << t
-                     << setw(width) << drtn(0)
-                     << setw(width) << drtn(1)
-                     << setw(width) << drtn(2)
+                r_com(j) = y(j+0);
+                v_com(j) = y(j+3);
+            }
+
+            gps = gps0 + t;
+            utc = refSys.GPS2UTC(gps);
+
+            t2c  = refSys.T2CMatrix(utc);
+            dt2c = refSys.dT2CMatrix(utc);
+
+            try
+            {
+                Vector<double> r_sp3 = sp3Eph.getXvt(sat,gps).x.toVector();
+                Vector<double> v_sp3 = sp3Eph.getXvt(sat,gps).v.toVector();
+
+                r_obs = t2c * r_sp3;
+                v_obs = t2c * v_sp3 + dt2c * r_sp3;
+            }
+            catch(...)
+            {
+                cerr << "Get Reference Orbit Error." << endl;
+                continue;
+            }
+
+            Vector<double> dxyz( r_obs-r_com );
+
+            double doy( YDSTime(gps).doy );
+            double sod( YDSTime(gps).sod );
+
+            if(std::fmod(t,arcInt) == 0.0)
+            {
+                fout << setprecision(0);
+                fout << setw( 5) << doy;
+                fout << setw(10) << sod;
+
+                fout << setprecision(3);
+                fout << setw(10) << dxyz(0)
+                     << setw(10) << dxyz(1)
+                     << setw(10) << dxyz(2)
                      << endl;
             }
-            else if(1 == debug)
+
+        }  // End of RKF78
+
+
+        //////// Adams Integrator ////////
+
+        while(t < arcLen*3600)
+        {
+            adams.integrateTo(t_curr, y_curr, &gnss, t+size_adams);
+
+            t = t_curr[8];
+            y = y_curr[8];
+
+            r_com(0) = y(0); r_com(1) = y(1); r_com(2) = y(2);
+            v_com(0) = y(3); v_com(1) = y(4); v_com(2) = y(5);
+
+            gps = gps0 + t;
+            utc = refSys.GPS2UTC(gps);
+
+            t2c  = refSys.T2CMatrix(utc);
+            dt2c = refSys.dT2CMatrix(utc);
+
+            try
             {
-                cout << setw(width) << t << endl;
+                Vector<double> r_sp3 = sp3Eph.getXvt(sat,gps).x.toVector();
+                Vector<double> v_sp3 = sp3Eph.getXvt(sat,gps).v.toVector();
 
-                cout << setw(width) << r_obs(0)
-                     << setw(width) << r_obs(1)
-                     << setw(width) << r_obs(2)
-                     << endl;
-
-                for(int i=0; i<3; ++i)
-                {
-                    cout << setw(width) << y( 6+i)
-                         << setw(width) << y( 9+i)
-                         << setw(width) << y(12+i)
-                         << endl;
-                }
-
-                for(int i=0; i<3; ++i)
-                {
-                    cout << setw(width) << y(15+i)
-                         << setw(width) << y(18+i)
-                         << setw(width) << y(21+i)
-                         << endl;
-                }
-
-                for(int i=0; i<np_srp; ++i)
-                {
-                    cout << setw(width) << y(24+0*np_srp+i)
-                         << setw(width) << y(24+1*np_srp+i)
-                         << setw(width) << y(24+2*np_srp+i)
-                         << endl;
-                }
-
-                cout << endl;
+                r_obs = t2c * r_sp3;
+                v_obs = t2c * v_sp3 + dt2c * r_sp3;
             }
-        }
-    }
-
-
-    //////// Adams Integrator ////////
-
-    while(t < arcLen*3600)
-    {
-        adams.integrateTo(t_curr, y_curr, &gnss, t+size_adams);
-
-        t = t_curr[8];
-        y = y_curr[8];
-
-        r_com(0) = y(0); r_com(1) = y(1); r_com(2) = y(2);
-        v_com(0) = y(3); v_com(1) = y(4); v_com(2) = y(5);
-
-        gps = gps0 + t;
-        utc = refSys.GPS2UTC(gps);
-
-        t2c  = refSys.T2CMatrix(utc);
-
-        try
-        {
-            r_sp3 = sp3Eph.getXvt(sat,gps).x.toVector();
-            r_obs = t2c * r_sp3;
-        }
-        catch(...)
-        {
-            cerr << "Get Reference Position Error." << endl;
-            return 1;
-        }
-
-        Vector<double> dxyz(r_obs-r_com);
-        Vector<double> drtn( refSys.XYZ2RTN(dxyz,r_com,v_com) );
-
-        if(int(t)%int(arcInt) == 0)
-        {
-            r_omc(count+0) = dxyz(0);
-            r_omc(count+1) = dxyz(1);
-            r_omc(count+2) = dxyz(2);
-
-            count += 3;
-        }
-
-        if(0 == int(t)%900)
-        {
-            if(0 == debug)
+            catch(...)
             {
-                cout << setw(width) << t
-                     << setw(width) << drtn(0)
-                     << setw(width) << drtn(1)
-                     << setw(width) << drtn(2)
+                cerr << "Get Reference Orbit Error." << endl;
+                continue;
+            }
+
+            Vector<double> dxyz( r_obs-r_com );
+
+            double doy( YDSTime(gps).doy );
+            double sod( YDSTime(gps).sod );
+
+            if(std::fmod(t,arcInt) == 0.0)
+            {
+                fout << setprecision(0);
+                fout << setw( 5) << doy;
+                fout << setw(10) << sod;
+
+                fout << setprecision(3);
+                fout << setw(10) << dxyz(0)
+                     << setw(10) << dxyz(1)
+                     << setw(10) << dxyz(2)
                      << endl;
             }
-            else if(1 == debug)
-            {
-                cout << setw(width) << t << endl;
 
-                cout << setw(width) << r_obs(0)
-                     << setw(width) << r_obs(1)
-                     << setw(width) << r_obs(2)
-                     << endl;
+        }  // End of Adams
 
-                for(int i=0; i<3; ++i)
-                {
-                    cout << setw(width) << y( 6+i)
-                         << setw(width) << y( 9+i)
-                         << setw(width) << y(12+i)
-                         << endl;
-                }
+    }  // End of Loop for all GPS satellites
 
-                for(int i=0; i<3; ++i)
-                {
-                    cout << setw(width) << y(15+i)
-                         << setw(width) << y(18+i)
-                         << setw(width) << y(21+i)
-                         << endl;
-                }
-
-                for(int i=0; i<np_srp; ++i)
-                {
-                    cout << setw(width) << y(24+0*np_srp+i)
-                         << setw(width) << y(24+1*np_srp+i)
-                         << setw(width) << y(24+2*np_srp+i)
-                         << endl;
-                }
-
-                cout << endl;
-            }
-        }
-    }
-
-//    for(int i=1; i<=3*point; ++i)
-//    {
-//        cout << setw(20) << r_omc(i-1);
-//        if(i%3==0) cout << endl;
-//    }
+    fout.close();
 
     return 0;
 }

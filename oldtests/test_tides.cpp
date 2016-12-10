@@ -126,8 +126,8 @@ int main(void)
    double degree, order;
    try
    {
-       degree = confReader.getValueAsInt("EOTDEG", "DEFAULT");
-       order  = confReader.getValueAsInt("EOTORD", "DEFAULT");
+       degree = confReader.getValueAsInt("EOTDEG", "FORCEMODEL");
+       order  = confReader.getValueAsInt("EOTORD", "FORCEMODEL");
    }
    catch(...)
    {
@@ -141,7 +141,7 @@ int main(void)
    // EOT File
    try
    {
-      string eotFile = confReader.getValue("EOTFILE", "DEFAULT");
+      string eotFile = confReader.getValue("EOTFILE", "FORCEMODEL");
       oceanTide.loadFile(eotFile);
    }
    catch(...)
@@ -157,11 +157,79 @@ int main(void)
    poleTide.setReferenceSystem(refSys);
 
 
-   // Cnm and Snm
-   Matrix<double> CS;
+   // Correction of Cnm and Snm
+   Matrix<double> dCS;
 
-   cout << fixed << setprecision(15);
+   MJD mjd(54530.5 + 0.49983796296296296, TimeSystem::UTC);
 
+   CommonTime utc( mjd.convertToCommonTime() );
+
+   dCS = solidTide.getSolidTide(utc);
+
+   cout << fixed << setprecision(12);
+
+   cout << CivilTime(utc) << endl;
+   cout << "dC20: "
+        << setw(20) << dCS(3,0)     // dC20
+        << endl
+        << "dS20: "
+        << setw(20) << dCS(3,1)     // dS20
+        << endl
+        << "dC21: "
+        << setw(20) << dCS(4,0)     // dC21
+        << endl
+        << "dS21: "
+        << setw(20) << dCS(4,1)     // dS21
+        << endl
+        << "dC22: "
+        << setw(20) << dCS(5,0)     // dC22
+        << endl
+        << "dS22: "
+        << setw(20) << dCS(5,1)     // dS22
+        << endl
+        << "dC30: "
+        << setw(20) << dCS(6,0)     // dC30
+        << endl
+        << "dS30: "
+        << setw(20) << dCS(6,1)     // dS30
+        << endl
+        << "dC31: "
+        << setw(20) << dCS(7,0)     // dC31
+        << endl
+        << "dS31: "
+        << setw(20) << dCS(7,1)     // dS31
+        << endl
+        << "dC32: "
+        << setw(20) << dCS(8,0)     // dC32
+        << endl
+        << "dS32: "
+        << setw(20) << dCS(8,1)     // dS32
+        << endl
+        << "dC33: "
+        << setw(20) << dCS(9,0)     // dC33
+        << endl
+        << "dS33: "
+        << setw(20) << dCS(9,1)     // dS33
+        << endl
+        << "dC40: "
+        << setw(20) << dCS(10,0)    // dC40
+        << endl
+        << "dS40: "
+        << setw(20) << dCS(10,1)    // dS40
+        << endl
+        << "dC41: "
+        << setw(20) << dCS(11,0)    // dC41
+        << endl
+        << "dS41: "
+        << setw(20) << dCS(11,1)    // dS41
+        << endl
+        << "dC42: "
+        << setw(20) << dCS(12,0)    // dC42
+        << endl
+        << "dS42: "
+        << setw(20) << dCS(12,1)    // dS42
+        << endl;
+/*
    int i = 0;
 
    while(true)
@@ -170,12 +238,37 @@ int main(void)
        CommonTime gps( gps0 + i*900.0 );
        CommonTime utc( refSys.GPS2UTC(gps) );
 
-       CS = solidTide.getSolidTide(utc);
+       dCS = solidTide.getSolidTide(utc);
+
+       cout << setw(20) << dCS(3,0)     // dC20
+            << setw(20) << dCS(3,1)     // dS20
+            << setw(20) << dCS(4,0)     // dC21
+            << setw(20) << dCS(4,1)     // dS21
+            << setw(20) << dCS(5,0)     // dC22
+            << setw(20) << dCS(5,1)     // dS22
+            << setw(20) << dCS(6,0)     // dC30
+            << setw(20) << dCS(6,1)     // dS30
+            << setw(20) << dCS(7,0)     // dC31
+            << setw(20) << dCS(7,1)     // dS31
+            << setw(20) << dCS(8,0)     // dC32
+            << setw(20) << dCS(8,1)     // dS32
+            << setw(20) << dCS(9,0)     // dC33
+            << setw(20) << dCS(9,1)     // dS33
+            << setw(20) << dCS(10,0)    // dC40
+            << setw(20) << dCS(10,1)    // dS40
+            << setw(20) << dCS(11,0)    // dC41
+            << setw(20) << dCS(11,1)    // dS41
+            << setw(20) << dCS(12,0)    // dC42
+            << setw(20) << dCS(12,1)    // dS42
+            << endl;
+
+       break;
 
        i++;
 
        if(i > 24*3600/900) break;
    }
+*/
 
    return 0;
 }

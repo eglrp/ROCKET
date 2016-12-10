@@ -33,9 +33,9 @@ using namespace std;
 namespace gpstk
 {
 
-   // coefficients, cbi
-   const double AdamsIntegrator::cb[9] =
-   {
+    // coefficients, cbi
+    const double AdamsIntegrator::cb[9] =
+    {
         14097247.0,
       - 43125206.0,
         95476786.0,
@@ -45,11 +45,11 @@ namespace gpstk
         38833486.0,
       -  9664106.0,
          1070017.0,
-   };
+    };
 
-   // coefficients, cmi
-   const double AdamsIntegrator::cm[9] =
-   {
+    // coefficients, cmi
+    const double AdamsIntegrator::cm[9] =
+    {
        1070017.0,
        4467094.0,
       -4604594.0,
@@ -59,55 +59,54 @@ namespace gpstk
       -1291214.0,
         312874.0,
       -  33953.0,
-   };
+    };
 
 
-   /// Real implementation of Adams
-   void AdamsIntegrator::integrateTo(vector< double >&         t_curr,
-                                     vector< Vector<double> >& y_curr,
-                                     EquationOfMotion*         peom,
-                                     double                    t_next)
-   {
-      // Derivatives at t_curr[i] and y_curr[i]
-      vector< Vector<double> > dys;
+    /// Real implementation of Adams
+    void AdamsIntegrator::integrateTo(vector< double >&         t_curr,
+                                      vector< Vector<double> >& y_curr,
+                                      EquationOfMotion*         peom,
+                                      double                    t_next)
+    {
+        // Derivatives at t_curr[i] and y_curr[i]
+        vector< Vector<double> > dys;
 
-      Vector<double> dy_temp;
-      for(int i=0; i<9; ++i)
-      {
-         dy_temp = peom->getDerivatives(t_curr[i],y_curr[i]);
-         dys.push_back(dy_temp);
-      }
+        Vector<double> dy_temp;
+        for(int i=0; i<9; ++i)
+        {
+            dy_temp = peom->getDerivatives(t_curr[i],y_curr[i]);
+            dys.push_back(dy_temp);
+        }
 
-      // Prediction
-      Vector<double> yp(y_curr[8]);
-      for(int i=0; i<9; ++i)
-      {
-          yp += stepSize/3628800 * cb[i]*dys[8-i];
-      }
+        // Prediction
+        Vector<double> yp(y_curr[8]);
+        for(int i=0; i<9; ++i)
+        {
+            yp += stepSize/3628800 * cb[i]*dys[8-i];
+        }
 
-      // Derivatives at t(n+1), computed with yp
-      double t_np1;
-      t_np1 = t_curr[8] + stepSize;
+        // Derivatives at t(n+1), computed with yp
+        double t_np1;
+        t_np1 = t_curr[8] + stepSize;
 
-      Vector<double> dy_np1;
-      dy_np1 = peom->getDerivatives(t_np1, yp);
+        Vector<double> dy_np1;
+        dy_np1 = peom->getDerivatives(t_np1, yp);
 
-      dys.erase( dys.begin() );
-      dys.push_back( dy_np1 );
+        dys.erase( dys.begin() );
+        dys.push_back( dy_np1 );
 
-      // Correction
-      Vector<double> yc(y_curr[8]);
-      for(int i=0; i<9; ++i)
-      {
-          yc += stepSize/3628800 * cm[i]*dys[8-i];
-      }
+        // Correction
+        Vector<double> yc(y_curr[8]);
+        for(int i=0; i<9; ++i)
+        {
+            yc += stepSize/3628800 * cm[i]*dys[8-i];
+        }
 
-      // Update
-      t_curr.erase( t_curr.begin() );
-      t_curr.push_back( t_np1 );
-      y_curr.erase( y_curr.begin() );
-      y_curr.push_back( yc );
-
-   }
+        // Update
+        t_curr.erase( t_curr.begin() );
+        t_curr.push_back( t_np1 );
+        y_curr.erase( y_curr.begin() );
+        y_curr.push_back( yc );
+    }
 
 }  // End of 'namespace gpstk'

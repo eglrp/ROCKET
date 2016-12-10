@@ -178,14 +178,13 @@ int main(void)
    sc.setSatData(satData);
 
    // CODE SRP
-   Vector<double> p0(5,0.0);
-   p0(0) = -100.0;
+   Vector<double> p0(9,0.0);
+   p0(0) = 1.0;
 
    CODEPressure code;
    code.setReferenceSystem(refSys);
    code.setSolarSystem(solSys);
    code.setSRPCoeff(p0);
-
 
    double length;
 
@@ -246,16 +245,50 @@ int main(void)
        code.doCompute(UTC, eb, sc);
 
        Vector<double> a_icrs( code.getAcceleration() );
-
+       Matrix<double> p_srp( code.dA_dSRP() );
+/*
        cout << CivilTime(GPS);
        cout << setw(20) << a_icrs(0)
             << setw(20) << a_icrs(1)
             << setw(20) << a_icrs(2)
             << endl;
+*/
+       JulianDate JD(GPS);
+       long int IJD(JD.jd+0.5);
+       double FJD( (JD.jd+0.5-IJD)*DAY_TO_SEC );
 
+       cout << fixed;
+
+       cout << setprecision(3);
+       cout << setw(12) << IJD
+            << setw(12) << FJD;
+
+       cout << setprecision(20);
+
+       for(int m=0; m<9; ++m)
+       {
+           for(int n=0; n<3; ++n)
+           {
+               cout << setw(30) << p_srp(n,m);
+           }
+       }
+
+       cout << endl;
+/*
+       cout << setw(30) << p_srp(0,0)
+            << setw(30) << p_srp(0,1)
+            << setw(30) << p_srp(0,2)
+            << setw(30) << p_srp(1,0)
+            << setw(30) << p_srp(1,1)
+            << setw(30) << p_srp(1,2)
+            << setw(30) << p_srp(2,0)
+            << setw(30) << p_srp(2,1)
+            << setw(30) << p_srp(2,2)
+            << endl;
+*/
        i++;
 
-       if(i > length*3600/900) break;
+       if(i >= length*3600/900) break;
    }
 
    return 0;

@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -28,9 +29,10 @@
 
 #include "ThirdBody.hpp"
 #include "GNSSconstants.hpp"
-#include "Epoch.hpp"
+
 
 using namespace std;
+
 
 namespace gpstk
 {
@@ -47,8 +49,6 @@ namespace gpstk
          *
          * da/dr = -GM*( I/norm(r-s)^3 - 3(r-s)transpose(r-s)/norm(r-s)^5)
          */
-
-//        cout << "Thd: " << CivilTime(utc) << endl;
 
         double tt = JulianDate( pRefSys->UTC2TT(utc) ).jd;
 
@@ -76,8 +76,8 @@ namespace gpstk
         // Geocentric position of planet, unit: m
         Vector<double> r_planet(3,0.0);
 
-        // Distance from satellite to planet
-        Vector<double> dist(3,0.0);
+        // Distance from planet to satellite
+        Vector<double> r_p2s(3,0.0);
 
         double p(0.0),p3(0.0);
         double d(0.0),d3(0.0),d5(0.0);
@@ -149,20 +149,20 @@ namespace gpstk
             r_planet(1) = rv_planet[1]*1e3;
             r_planet(2) = rv_planet[2]*1e3;
 
-            dist = r_planet - r_sat;
+            r_p2s = r_sat - r_planet;
 
             p = norm(r_planet);
             p3 = p*p*p;
 
-            d = norm(dist);
+            d = norm(r_p2s);
             d3 = d*d*d;
             d5 = d3*d*d;
 
             // a
-            ap += GMP * (dist/d3 - r_planet/p3);
+            ap += -GMP * (r_p2s/d3 + r_planet/p3);
 
             // da_dr
-            dap_dr += -GMP * (I/d3 - 3.0*outer(dist,dist)/d5);
+            dap_dr += -GMP * (I/d3 - 3.0*outer(r_p2s,r_p2s)/d5);
 
             // da_dv ...
 
@@ -173,7 +173,6 @@ namespace gpstk
         a = ap;
         da_dr = dap_dr;
 
-   }  // End of method 'ThirdBody::doCompute()'
-
+    }  // End of method 'ThirdBody::doCompute()'
 
 }  // End of namespace 'gpstk'

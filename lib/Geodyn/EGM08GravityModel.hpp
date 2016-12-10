@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2015
 //
 //============================================================================
@@ -46,66 +47,66 @@
 
 namespace gpstk
 {
-   /** @addtogroup GeoDynamics */
-   //@{
+    /** @addtogroup GeoDynamics */
+    //@{
 
-   /** EGM08 Gravity Model.
-    *
-    */
-   class EGM08GravityModel : public EarthGravitation
-   {
-   public:
-         /** Constructor
-          * @param n    Desired degree
-          * @param m    Desired order
-          */
-      EGM08GravityModel (int n = 0, int m = 0)
-         : EarthGravitation(n, m)
-      {
-         // model name
-         gmData.modelName = "EGM08";
+    /** EGM08 Gravity Model.
+     *
+     */
+    class EGM08GravityModel : public EarthGravitation
+    {
+    public:
+        /** Constructor
+         * @param n    Desired degree
+         * @param m    Desired order
+         */
+        EGM08GravityModel (int n = 0, int m = 0)
+            : EarthGravitation(n, m)
+        {
+            // model name
+            gmData.modelName = "EGM08";
 
-         // earth gravitation constant
-         gmData.GM = 3.9860044150E+14;
+            // earth gravitation constant
+            gmData.GM = 3.9860044150e+14;
 
-         // radius
-         gmData.ae = 6378136.300000;
+            // radius
+            gmData.ae = 6378136.3;
 
-         // tide free
-         gmData.includesPermTide = false;
+            // tide free
+            gmData.includesPermTide = false;
 
-         // reference epoch
-         gmData.refMJD =  51544.0;
+            // reference epoch
+            gmData.refMJD =  51544.0;
 
-       }    // End of constructor
-
-
-         /// Default destructor
-      virtual ~EGM08GravityModel() {}
+        }    // End of constructor
 
 
-         /// Load file
-      void loadFile(std::string file)
-         throw(FileMissingException);
+        /// Default destructor
+        virtual ~EGM08GravityModel() {}
 
 
-         /** Compute acceleration (and related partial derivatives) of Earth
-          *  Gravitation.
-          * @param utc     time in UTC
-          * @param rb      earth body
-          * @param sc      spacecraft
-          */
-      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+        /// Load file
+        void loadFile(std::string file)
+            throw(FileMissingException);
 
 
-         /// Return the force model name
-      virtual std::string modelName() const
-      { return gmData.modelName; }
+        /** Compute acceleration (and related partial derivatives) of Earth
+         *  Gravitation.
+         * @param utc     time in UTC
+         * @param rb      earth body
+         * @param sc      spacecraft
+         */
+        virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
 
-   }; // End of class 'EGM08GravityModel'
+        /// Return the force model name
+        virtual std::string modelName() const
+        { return gmData.modelName; }
 
-   // @}
+
+    }; // End of class 'EGM08GravityModel'
+
+    // @}
 
 }  // End of namespace 'gpstk'
 

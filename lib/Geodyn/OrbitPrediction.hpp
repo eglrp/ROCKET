@@ -52,12 +52,10 @@ namespace gpstk
     public:
 
         /// Default constructor
-        OrbitPrediction()
-        {}
+        OrbitPrediction() {}
 
         /// Default destructor
-        virtual ~OrbitPrediction()
-        {}
+        virtual ~OrbitPrediction() {}
 
 
         /// Set initial time
@@ -116,41 +114,41 @@ namespace gpstk
         }
 
 
-        /// Set GNSSOrbit
+        /// Set GNSS Orbit
         inline OrbitPrediction& setSatOrbit(GNSSOrbit& o)
         {
             pOrbit = &o;
             return (*this);
         }
 
-        /// Get GNSSOrbit
+        /// Get GNSS Orbit
         inline GNSSOrbit* getSatOrbit() const
         {
             return pOrbit;
         }
 
 
-        /// Set RKF78Integrator
+        /// Set RKF78 Integrator
         inline OrbitPrediction& setRKF78Integrator(RKF78Integrator& integrator)
         {
             pRKF78 = &integrator;
             return (*this);
         }
 
-        /// Get RKF78Integrator
+        /// Get RKF78 Integrator
         inline RKF78Integrator* getRKF78Integrator() const
         {
             return pRKF78;
         }
 
-        /// Set AdamsIntegrator
+        /// Set Adams Integrator
         inline OrbitPrediction& setAdamsIntegrator(AdamsIntegrator& integrator)
         {
             pAdams = &integrator;
             return (*this);
         }
 
-        /// Get RKF78Integrator
+        /// Get Adams Integrator
         inline AdamsIntegrator* getAdamsIntegrator() const
         {
             return pAdams;
@@ -159,7 +157,8 @@ namespace gpstk
 
         /* Orbit Integration.
          *
-         * @return  predicted orbit and its partials wrt initial conditions
+         * @return  predicted orbit and partials
+         *
          */
         Matrix<double> OrbitInt();
 

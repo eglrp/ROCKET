@@ -17,6 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
+//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -41,170 +42,187 @@
  */
 
 #include "GNSSOrbit.hpp"
+#include "Epoch.hpp"
+
 
 using namespace std;
 
+
 namespace gpstk
 {
-   // get derivative dy/dt
-   Vector<double> GNSSOrbit::getDerivatives(const double&         t,
-                                            const Vector<double>& y)
-   {
-//       cout << setw(20) << t
-//            << setw(20) << y(0)
-//            << setw(20) << y(1)
-//            << setw(20) << y(2)
-//            << endl;
+    // get derivative dy/dt
+    Vector<double> GNSSOrbit::getDerivatives(const double&         t,
+                                             const Vector<double>& y)
+    {
+        // number of force model parameters
+        int np = sc.getNumOfParam();
 
-      // current epoch
-      CommonTime utc(utc0+t);
-      sc.setCurrentTime(utc);
+        /* Dot of current state
+         *
+         * dy = (v,a, dv/dr0,dv/dv0,da/dr0,da/dv0, dv/dp0,da/dp0)
+         *
+         */
+        Vector<double> dy(42+6*np,0.0);
 
-      // current state
-      sc.setCurrentState(y);
+        if(y.size() != 42+6*np)
+        {
+            cerr << "Call GNSSOrbit::getDerivatives() error."
+                 << "The size of state vector does not match."
+                 << endl;
 
-      // current acceleration and partial derivatives
-      Vector<double> a(3,0.0);          // a
-      Matrix<double> da_dr(3,3,0.0);    // da/dr
-      Matrix<double> da_dv(3,3,0.0);    // da/dv
-      int np = sc.getNumOfParam();      // np
-      Matrix<double> da_dp(3,np,0.0);   // da/dp
+            return dy;
+        }
 
-      if(pEGM != NULL)
-      {
-          pEGM->doCompute(utc,eb,sc);
-          a += pEGM->getAcceleration();
-          da_dr += pEGM->dA_dR();
-//          da_dv += pEGM->dA_dV();
-      }
+        // current epoch
+        CommonTime utc(utc0+t);
+        sc.setCurrentTime(utc);
 
-      if(pThd != NULL)
-      {
-          pThd->doCompute(utc,eb,sc);
-          a += pThd->getAcceleration();
-          da_dr += pThd->dA_dR();
-//          da_dv += pThd->dA_dV();
-      }
+        // current state
+        sc.setCurrentState(y);
 
-      if(pSRP != NULL)
-      {
-          pSRP->doCompute(utc,eb,sc);
-          a += pSRP->getAcceleration();
-          da_dr += pSRP->dA_dR();
-//          da_dv += pSRP->dA_dV();
-          da_dp += pSRP->dA_dSRP();
-      }
+        // current acceleration and partial derivatives
+        Vector<double> a(3,0.0);          // a
+        Matrix<double> da_dr(3,3,0.0);    // da/dr
+        Matrix<double> da_dv(3,3,0.0);    // da/dv
+        Matrix<double> da_dp(3,np,0.0);   // da/dp
 
-      if(pRel != NULL)
-      {
-          pRel->doCompute(utc,eb,sc);
-          a += pRel->getAcceleration();
-          da_dr += pRel->dA_dR();
-//          da_dv += pRel->dA_dV();
-      }
+        if(pEGM != NULL)
+        {
+            pEGM->doCompute(utc,eb,sc);
+            a += pEGM->getAcceleration();
+            da_dr += pEGM->dA_dR();
+        }
 
-      /* Transition Matrix, (6+np, 6+np)
-       *       |                           |
-       *       |   dr/dr0  dr/dv0  dr/dp0  |
-       *       |                           |
-       * phi = |   dv/dr0  dv/dv0  dv/dp0  |
-       *       |                           |
-       *       |   0       0       I       |
-       *       |                           |
-       */
-      Matrix<double> phi = sc.getTransitionMatrix();
+        if(pThd != NULL)
+        {
+            pThd->doCompute(utc,eb,sc);
+            a += pThd->getAcceleration();
+            da_dr += pThd->dA_dR();
+        }
 
-       /* Design Matrix, (6+np, 6+np)
-        *     |                           |
-        *     |   0       I       0       |
-        *     |                           |
-        * A = |   da/dr   da/dv   da/dp   |
-        *     |                           |
-        *     |   0       0       0       |
-        *     |                           |
-        */
-       Matrix<double> A(6+np,6+np,0.0);
-       A(0,3) = 1.0; A(1,4) = 1.0; A(2,5) = 1.0;
+        if(pSRP != NULL)
+        {
+            pSRP->doCompute(utc,eb,sc);
+            a += pSRP->getAcceleration();
+            da_dr += pSRP->dA_dR();
+            da_dp += pSRP->dA_dSRP();
+        }
 
-       for(int i=0; i<3; ++i)
-       {
-           // da/dr, da/dv
-           for(int j=0; j<3; ++j)
-           {
-               A(i+3,j+0) = da_dr(i,j);
-               A(i+3,j+3) = da_dv(i,j);
-           }
+        if(pRel != NULL)
+        {
+            pRel->doCompute(utc,eb,sc);
+            a += pRel->getAcceleration();
+            da_dr += pRel->dA_dR();
+        }
+/*
+        cout << fixed << setprecision(8);
+        cout << setw(20) << da_dr(0,0)
+             << setw(20) << da_dr(0,1)
+             << setw(20) << da_dr(0,2)
+             << endl
+             << setw(20) << da_dr(1,0)
+             << setw(20) << da_dr(1,1)
+             << setw(20) << da_dr(1,2)
+             << endl
+             << setw(20) << da_dr(2,0)
+             << setw(20) << da_dr(2,1)
+             << setw(20) << da_dr(2,2)
+             << endl
+             << endl;
+*/
+        /* Transition Matrix, (6+np, 6+np)
+         *       |                           |
+         *       |   dr/dr0  dr/dv0  dr/dp0  |
+         *       |                           |
+         * phi = |   dv/dr0  dv/dv0  dv/dp0  |
+         *       |                           |
+         *       |   0       0       I       |
+         *       |                           |
+         */
+        Matrix<double> dr_dr0 = sc.dR_dR0();
+        Matrix<double> dr_dv0 = sc.dR_dV0();
+        Matrix<double> dr_dp0 = sc.dR_dP0();
+        Matrix<double> dv_dr0 = sc.dV_dR0();
+        Matrix<double> dv_dv0 = sc.dV_dV0();
+        Matrix<double> dv_dp0 = sc.dV_dP0();
 
-           // da/dp
-           for(int j=0; j<np; ++j)
-           {
-               A(i+3,j+6) = da_dp(i,j);
-           }
-       }
 
-       /* Dot of Transition Matrix, (6+np,6+np)
-        *        |                          |
-        *        |  dv/dr0  dv/dv0  dv/dp0  |
-        *        |                          |
-        * dphi = |  da/dr0  da/dv0  da/dp0  | = A * phi
-        *        |                          |
-        *        |  0       0       0       |
-        *        |                          |
-        */
-       Matrix<double> dphi = A * phi;
+        /* Design Matrix, (6+np, 6+np)
+         *     |                           |
+         *     |   0       I       0       |
+         *     |                           |
+         * A = |   da/dr   da/dv   da/dp   |
+         *     |                           |
+         *     |   0       0       0       |
+         *     |                           |
+         */
 
-       // v
-       Vector<double> v( sc.getCurrentVel() );
 
-       /* Dot of current state
-        *      |            |          |                            |
-        *      |    v       |          |                            |
-        *      |    a       |          |                            |
-        *      |    dv/dr0  |          |    dv/dr0  dv/dv0  dv/dp0  |
-        *      |    dv/dv0  |          |                            |
-        * dy = |    dv/dp0  |   dphi = |    da/dr0  da/dv0  da/dp0  |
-        *      |    da/dr0  |          |                            |
-        *      |    da/dv0  |          |    0       0       0       |
-        *      |    da/dp0  |          |                            |
-        *      |            |          |                            |
-        */
-       Vector<double> dy(42+6*np,0.0);
+        /* Dot of Transition Matrix, (6+np,6+np)
+         *        |                          |
+         *        |  dv/dr0  dv/dv0  dv/dp0  |
+         *        |                          |
+         * dphi = |  da/dr0  da/dv0  da/dp0  | = A * phi
+         *        |                          |
+         *        |  0       0       0       |
+         *        |                          |
+         */
+        Matrix<double> da_dr0 = da_dr * dr_dr0;
+        Matrix<double> da_dv0 = da_dr * dr_dv0;
+        Matrix<double> da_dp0 = da_dr * dr_dp0 + da_dp;
 
-       for(int i=0; i<3; ++i)
-       {
-           // v
-           dy(i+0) = v(i);
-           // a
-           dy(i+3) = a(i);
-       }
+/*
+        cout << fixed << setprecision(8);
+        for(int i=0; i<3; ++i)
+        {
+            for(int j=0; j<3; ++j)
+            {
+                cout << setw(20) << dv_dv0(i,j);
+            }
+            cout << endl;
+        }
+        cout << endl;
+*/
 
-       for(int i=0; i<3; ++i)
-       {
-           for(int j=0; j<3; ++j)
-           {
-               // dv/dr0
-               dy( 6+3*i+j) = dphi(0+i,0+j);
-               // dv/dv0
-               dy(15+3*i+j) = dphi(0+i,3+j);
+        // v
+        Vector<double> v( sc.getCurrentVel() );
 
-               // da/dr0
-               dy(24+np*3+3*i+j) = dphi(3+i,0+j);
-               // da/dv0
-               dy(33+np*3+3*i+j) = dphi(3+i,3+j);
-           }
+        // v, a
+        dy(0) = v(0); dy(1) = v(1); dy(2) = v(2);
+        dy(3) = a(0); dy(4) = a(1); dy(5) = a(2);
 
-           for(int j=0; j<np; ++j)
-           {
-               // dv/dp0
-               dy(24+np*i+j) = dphi(0+i,6+j);
+        for(int i=0; i<3; ++i)
+        {
+            // dv/dr0, dv/dv0, da/dr0, da/dv0
+            for(int j=0; j<3; ++j)
+            {
+                dy( 6+3*i+j) = dv_dr0(i,j);
+                dy(15+3*i+j) = dv_dv0(i,j);
+                dy(24+3*i+j) = da_dr0(i,j);
+                dy(33+3*i+j) = da_dv0(i,j);
+            }
 
-               // da/dp0
-               dy(42+3*np+np*i+j) = dphi(3+i,6+j);
-           }
-       }
+            // dv/dp0, da/dp0
+            for(int j=0; j<np; ++j)
+            {
+                dy(42+np*(0+i)+j) = dv_dp0(i,j);
+                dy(42+np*(3+i)+j) = da_dp0(i,j);
+            }
+        }
 
-       return dy;
+/*
+        cout << fixed << setprecision(8);
 
-   }
+        for(int i=15; i<24; ++i)
+        {
+            cout << setw(20) << y(i);
+            if((i+1)%3 == 0) cout << endl;
+        }
+        cout << endl;
+*/
+
+        return dy;
+
+    }  // End of method 'GNSSOrbit::getDerivatives()'
 
 }  // End of namespace 'gpstk'

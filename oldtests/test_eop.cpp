@@ -71,7 +71,7 @@ int main(void)
 
 
     // Time
-    CivilTime ct0(2000,1,1,12,0,0.0, TimeSystem::UTC);
+    CivilTime ct0(2010,1,31,9,35,59.0, TimeSystem::UTC);
     CommonTime utc0( ct0.convertToCommonTime() );
 
     CommonTime utcx( utc0 );
@@ -86,16 +86,24 @@ int main(void)
     Vector<double> dX(np,0.0),dY(np,0.0);
 
 
-    eopDataStore.setInterpolationPoints(8);
+    eopDataStore.setInterpPoints(8);
     eopDataStore.setRegularization(true);
     eopDataStore.setOceanTides(true);
     eopDataStore.setLibration(true);
 
+    Vector<double> dpm = eopDataStore.PM_LIBR(utcx);
+    Vector<double> dut = eopDataStore.UT_LIBR(utcx);
+    Vector<double> dpmut = eopDataStore.RG_ZONT2(utcx);
+
+    cout << setprecision(12);
+    cout << dut << endl;
+
+/*
     cout << fixed << setprecision(8);
 
     for(int i=0; i<np; ++i)
     {
-        /* Comparison of EOP time series */
+        // Comparison of EOP time series
 
         eopx = eopDataStore.getEOPData(utcx);
 
@@ -111,6 +119,6 @@ int main(void)
         utcx.addDays(1);
 
     }
-
+*/
     return 0;
 }
