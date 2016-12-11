@@ -635,7 +635,7 @@ namespace gpstk
             itb = it;
             ite = it;
 
-            for(int i=0; i<half; ++i)
+            for(int i=0; i<=half; ++i)
             {
                 itb--;
                 ite++;
@@ -679,6 +679,7 @@ namespace gpstk
                     datas[i].push_back( data[i] );
                 }
             }
+
 
             // check the data continuity of UT1mUTC in datas
             // if leap second accurs, adjust UT1mUTC.
