@@ -22,9 +22,12 @@
 
 #include "Epoch.hpp"
 
+#include "StringUtils.hpp"
+
 
 using namespace std;
 using namespace gpstk;
+using namespace gpstk::StringUtils;
 
 
 int main(void)
@@ -107,100 +110,8 @@ int main(void)
     }
     catch(...)
     {
-        cerr << "SatData File Open Error." << endl;
+        cerr << "Sat Data File Open Error." << endl;
         return 1;
-    }
-
-
-
-    //---------- Initial Conditions ----------//
-
-    // Initial Time
-    int year, mon, day, hour, min;
-    double sec;
-    try
-    {
-        year = confData.getValueAsInt("YEAR", "DEFAULT");
-        mon  = confData.getValueAsInt("MON", "DEFAULT");
-        day  = confData.getValueAsInt("DAY", "DEFAULT");
-        hour = confData.getValueAsInt("HOUR", "DEFAULT");
-        min  = confData.getValueAsInt("MIN", "DEFAULT");
-        sec  = confData.getValueAsDouble("SEC", "DEFAULT");
-    }
-    catch(...)
-    {
-        cerr << "Get Initial Time Error." << endl;
-        return 1;
-    }
-
-    CivilTime cv0(year,mon,day,hour,min,sec, TimeSystem::GPS);
-    CommonTime gps0( cv0.convertToCommonTime() );
-    CommonTime utc0( refSys.GPS2UTC(gps0) );
-
-
-    // Initial Force Model Parameters - SRP Coefficients
-    int np_srp(0);
-    try
-    {
-        np_srp = confData.getValueAsInt("SRPNUM", "DEFAULT");
-    }
-    catch(...)
-    {
-        cerr << "Get The Number of SRP Parameters Error." << endl;
-        return 1;
-    }
-
-    Vector<double> p0_srp(np_srp,0.0);
-    try
-    {
-        if(9 == np_srp)
-        {
-            p0_srp(0) = confData.getValueAsDouble("D0", "DEFAULT");
-            p0_srp(1) = confData.getValueAsDouble("DC", "DEFAULT");
-            p0_srp(2) = confData.getValueAsDouble("DS", "DEFAULT");
-            p0_srp(3) = confData.getValueAsDouble("Y0", "DEFAULT");
-            p0_srp(4) = confData.getValueAsDouble("YC", "DEFAULT");
-            p0_srp(5) = confData.getValueAsDouble("YS", "DEFAULT");
-            p0_srp(6) = confData.getValueAsDouble("B0", "DEFAULT");
-            p0_srp(7) = confData.getValueAsDouble("BC", "DEFAULT");
-            p0_srp(8) = confData.getValueAsDouble("BS", "DEFAULT");
-        }
-        else if(5 == np_srp)
-        {
-            p0_srp(0) = confData.getValueAsDouble("D0", "DEFAULT");
-            p0_srp(1) = confData.getValueAsDouble("Y0", "DEFAULT");
-            p0_srp(2) = confData.getValueAsDouble("B0", "DEFAULT");
-            p0_srp(3) = confData.getValueAsDouble("Bc", "DEFAULT");
-            p0_srp(4) = confData.getValueAsDouble("Bs", "DEFAULT");
-        }
-    }
-    catch(...)
-    {
-        cerr << "Get SRP Coefficients Error." << endl;
-        return 1;
-    }
-
-
-    //---------- Reference Orbit ----------//
-
-    // IGS SP3 File
-    SP3EphemerisStore sp3Eph;
-    sp3Eph.rejectBadPositions(true);
-    sp3Eph.setPosGapInterval(900+1);
-    sp3Eph.setPosMaxInterval(9*900+1);
-
-    string sp3File;
-    while( (sp3File=confData.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
-    {
-        try
-        {
-            sp3Eph.loadFile(sp3File);
-        }
-        catch(...)
-        {
-            cerr << "SP3 File Load Error." << endl;
-            return 1;
-        }
     }
 
 
@@ -307,7 +218,6 @@ int main(void)
     CODEPressure srp;
     srp.setReferenceSystem(refSys);
     srp.setSolarSystem(solSys);
-    srp.setSRPCoeff(p0_srp);
 
     // Relativity Effect
     RelativityEffect rel;
@@ -373,12 +283,71 @@ int main(void)
     }
 
 
+    //---------- Initial Time ----------//
+    string t0;
+    try
+    {
+        t0 = confData.getValue("InitialTime", "DEFAULT");
+    }
+    catch(...)
+    {
+        cerr << "Get Initial Time Error." << endl;
+        return 1;
+    }
+
+    int     year =    asInt( t0.substr( 0, 4) );
+    int     mon  =    asInt( t0.substr( 5, 2) );
+    int     day  =    asInt( t0.substr( 8, 2) );
+    int     hour =    asInt( t0.substr(11, 2) );
+    int     min  =    asInt( t0.substr(14, 2) );
+    double  sec  = asDouble( t0.substr(17, 2) );
+
+    CivilTime cv0(year,mon,day,hour,min,sec, TimeSystem::GPS);
+    CommonTime gps0( cv0.convertToCommonTime() );
+    CommonTime utc0( refSys.GPS2UTC(gps0) );
+
+    cout << CivilTime(gps0) << endl;
+
+    //---------- Number of SRP Parameters ----------//
+    int np_srp;
+    try
+    {
+        np_srp = confData.getValueAsInt("SRPPARAMNUM", "DEFAULT");
+    }
+    catch(...)
+    {
+        cerr << "Get SRP Parameters Number Error." << endl;
+        return 1;
+    }
+
+
+    //---------- Reference Orbit ----------//
+    SP3EphemerisStore sp3Eph;
+    sp3Eph.rejectBadPositions(true);
+    sp3Eph.setPosGapInterval(900+1);
+    sp3Eph.setPosMaxInterval(9*900+1);
+
+    string sp3File;
+    while( (sp3File=confData.fetchListValue("IGSSP3LIST", "DEFAULT")) != "" )
+    {
+        try
+        {
+            sp3Eph.loadFile(sp3File);
+        }
+        catch(...)
+        {
+            cerr << "SP3 File Load Error." << endl;
+            return 1;
+        }
+    }
+
+
     //---------- Orbit Integration ----------//
 
-    // Output File
-    string filename("OI.DAT");
-    ofstream fout(filename.c_str());
-    fout << fixed;
+    // Initial Conditions
+    Vector<double> r0(3,0.0);
+    Vector<double> v0(3,0.0);
+    Vector<double> p0_srp(np_srp,0.0);
 
     // Observed Position and Velocity
     Vector<double> r_obs(3,0.0), v_obs(3,0.0);
@@ -386,35 +355,95 @@ int main(void)
     // Computed Position and Velocity
     Vector<double> r_com(3,0.0), v_com(3,0.0);
 
+    // Transformation Matrices
+    Matrix<double>  t2c(3,3,0.0);
+    Matrix<double> dt2c(3,3,0.0);
 
-    // Initial Position and Velocity
-    Vector<double> r0(3,0.0), v0(3,0.0);
-
-
-    // Loop for all GPS satellites
-    for(int prn=1; prn<32; ++prn)
+    // Sat ICS File
+    string satICSFile;
+    try
     {
+        satICSFile = confData.getValue("SATICSFILE", "DEFAULT");
+    }
+    catch(...)
+    {
+        cerr << "Get Sat ICS File Error." << endl;
+    }
+
+    ifstream fics(satICSFile.c_str());
+
+    string line;
+    while(!fics.eof())
+    {
+        getline(fics,line);
+
+        if(fics.eof()) break;
+
+        int    ok  = asInt( line.substr( 0, 1) );
+        string sys =        line.substr( 2, 3);
+        int    prn = asInt( line.substr( 6, 2) );
+
         // SatID
-        SatID sat(prn, SatID::systemGPS);
+        SatID sat;
+        sat.id = prn;
+        if(sys == "GPS")        sat.system = SatID::systemGPS;
+        else if(sys == "GLO")   sat.system = SatID::systemGlonass;
+        else if(sys == "GAL")   sat.system = SatID::systemGalileo;
+        else if(sys == "BDS")   sat.system = SatID::systemBeiDou;
 
-        cout << "Orbit Integration for " << sat << endl;
-
-        Matrix<double>  t2c( refSys.T2CMatrix(utc0)  );
-        Matrix<double> dt2c( refSys.dT2CMatrix(utc0) );
-
-        try
+        if( !ok )
         {
-            Vector<double> r_sp3 = sp3Eph.getXvt(sat,gps0).x.toVector();
-            Vector<double> v_sp3 = sp3Eph.getXvt(sat,gps0).v.toVector();
-
-            r0 = t2c * r_sp3;
-            v0 = t2c * v_sp3 + dt2c * r_sp3;
-        }
-        catch(...)
-        {
-            cerr << "Get Initial Position and Velocity Error." << endl;
+            cerr << "The ICS of " << sat << " is not ready." << endl;
             continue;
         }
+
+        // r0
+        r0(0) = asDouble( line.substr(  9,20) );
+        r0(1) = asDouble( line.substr( 30,20) );
+        r0(2) = asDouble( line.substr( 52,20) );
+
+        // v0
+        v0(0) = asDouble( line.substr( 73,15) );
+        v0(1) = asDouble( line.substr( 89,15) );
+        v0(2) = asDouble( line.substr(105,15) );
+
+        // p0_srp
+        if(np_srp == 9)
+        {
+            p0_srp(0) = asDouble( line.substr(121,10) ); // D0
+            p0_srp(1) = asDouble( line.substr(132,10) ); // Y0
+            p0_srp(2) = asDouble( line.substr(143,10) ); // B0
+            p0_srp(3) = asDouble( line.substr(154,10) ); // Dc
+            p0_srp(4) = asDouble( line.substr(165,10) ); // Ds
+            p0_srp(5) = asDouble( line.substr(176,10) ); // Yc
+            p0_srp(6) = asDouble( line.substr(187,10) ); // Ys
+            p0_srp(7) = asDouble( line.substr(198,10) ); // Bc
+            p0_srp(8) = asDouble( line.substr(209,10) ); // Bs
+        }
+        else if(np_srp == 5)
+        {
+            p0_srp(0) = asDouble( line.substr(121,10) ); // D0
+            p0_srp(1) = asDouble( line.substr(132,10) ); // Y0
+            p0_srp(2) = asDouble( line.substr(143,10) ); // B0
+            p0_srp(3) = asDouble( line.substr(154,10) ); // Bc
+            p0_srp(4) = asDouble( line.substr(165,10) ); // Bs
+        }
+
+        srp.setSRPCoeff(p0_srp);
+
+
+        // out file
+        string outFile( asString(sat.id) );
+        outFile = rightJustify(outFile, 2, '0');
+        outFile = outFile + string(".txt");
+
+        cout << outFile << endl;
+
+        ofstream fout;
+        fout.open(outFile.c_str());
+
+
+        cout << "Orbit Integration for " << sat << endl;
 
         // Spacecraft
         Spacecraft sc;
@@ -448,7 +477,6 @@ int main(void)
         if(bThd) gnss.setThirdBody(thd);
         if(bSRP) gnss.setSolarPressure(srp);
         if(bRel) gnss.setRelativityEffect(rel);
-
 
         // Current time
         double t( 0.0 );
@@ -511,6 +539,7 @@ int main(void)
 
             if(std::fmod(t,arcInt) == 0.0)
             {
+                fout << fixed;
                 fout << setprecision(0);
                 fout << setw( 5) << doy;
                 fout << setw(10) << sod;
@@ -527,7 +556,7 @@ int main(void)
 
         //////// Adams Integrator ////////
 
-        while(t < arcLen*3600)
+        while(t < (arcLen+6)*3600)
         {
             adams.integrateTo(t_curr, y_curr, &gnss, t+size_adams);
 
@@ -564,6 +593,7 @@ int main(void)
 
             if(std::fmod(t,arcInt) == 0.0)
             {
+                fout << fixed;
                 fout << setprecision(0);
                 fout << setw( 5) << doy;
                 fout << setw(10) << sod;
@@ -577,9 +607,12 @@ int main(void)
 
         }  // End of Adams
 
-    }  // End of Loop for all GPS satellites
+        fout.close();
 
-    fout.close();
+
+    }  // End of 'while(!fics.eof())'
+
+    fics.close();
 
     return 0;
 }

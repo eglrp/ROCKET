@@ -59,12 +59,12 @@ namespace gpstk
         if(9 == srpCoeff.size())
         {
             D0 = srpCoeff(0);
-            Dc = srpCoeff(1);
-            Ds = srpCoeff(2);
-            Y0 = srpCoeff(3);
-            Yc = srpCoeff(4);
-            Ys = srpCoeff(5);
-            B0 = srpCoeff(6);
+            Y0 = srpCoeff(1);
+            B0 = srpCoeff(2);
+            Dc = srpCoeff(3);
+            Ds = srpCoeff(4);
+            Yc = srpCoeff(5);
+            Ys = srpCoeff(6);
             Bc = srpCoeff(7);
             Bs = srpCoeff(8);
 
