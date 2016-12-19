@@ -101,9 +101,6 @@ namespace gpstk
             }
         }
 
-        // da_dp  add it later...
-        //da_GM da_dbeta da_gama
-
     }  // End of method 'RelativityEffect::doCompute()'
 
 }  // End of namespace 'gpstk'

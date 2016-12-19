@@ -33,7 +33,7 @@ int main(void)
 
     // EOP Data Store
     EOPDataStore2 eopDataStore;
-    eopDataStore.setUseBulletinB(true);
+    eopDataStore.setUseBulletinB(false);
 
     // IERS EOP file
     string eopFile = confReader.getValue("IERSEOPFILE", "DEFAULT");
@@ -77,7 +77,7 @@ int main(void)
     CommonTime utcx( utc0 );
 
     // Variables
-    int np = 365*10;
+    int np = 1;
 
     EOPDataStore2::EOPData eopx;
 
@@ -86,19 +86,20 @@ int main(void)
     Vector<double> dX(np,0.0),dY(np,0.0);
 
 
-    eopDataStore.setInterpPoints(8);
+    eopDataStore.setInterpPoints(4);
     eopDataStore.setRegularization(true);
     eopDataStore.setOceanTides(true);
     eopDataStore.setLibration(true);
 
+/*
     Vector<double> dpm = eopDataStore.PM_LIBR(utcx);
     Vector<double> dut = eopDataStore.UT_LIBR(utcx);
     Vector<double> dpmut = eopDataStore.RG_ZONT2(utcx);
 
     cout << setprecision(12);
     cout << dut << endl;
+*/
 
-/*
     cout << fixed << setprecision(8);
 
     for(int i=0; i<np; ++i)
@@ -107,8 +108,8 @@ int main(void)
 
         eopx = eopDataStore.getEOPData(utcx);
 
-//        cout << setw(5) << YDSTime(utcx).doy;
-        cout << setw(5) << i;
+        cout << setw(5) << YDSTime(utcx).doy;
+//        cout << setw(5) << i;
         cout << setw(20) << eopx.xp
              << setw(20) << eopx.yp
              << setw(20) << eopx.UT1mUTC
@@ -119,6 +120,6 @@ int main(void)
         utcx.addDays(1);
 
     }
-*/
+
     return 0;
 }
