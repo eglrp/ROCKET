@@ -103,7 +103,8 @@ namespace gpstk
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wreorder"
       Rinex3ClockHeader() :
-         version(3.0), valid(false), timeFirst(CommonTime::BEGINNING_OF_TIME)
+         version(3.0), valid(false), timeFirst(CommonTime::BEGINNING_OF_TIME),
+			timeSystem( TimeSystem::Any )
          {}
 #pragma clang diagnostic pop
 
@@ -193,7 +194,8 @@ namespace gpstk
       std::vector<std::string> commentList;  ///< Comments in header (optional)
       int numObsTyp;                         ///< Number of data types.
       std::vector<std::string> obsTypeList;  ///< List of observation types
-      std::string timeSystem;                ///< Time system used
+//      std::string timeSystem;                ///< Time system used
+		TimeSystem timeSystem;                 ///< Time system
       int leapSeconds;                       ///< Leap second (optional)
       int numTyp;                            ///<
       std::vector<std::string> dataTypeList; ///< List of data types

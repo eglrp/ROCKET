@@ -62,7 +62,10 @@ namespace gpstk
       virtual ~Rinex3ClockData() {}
 
          ///< clock data type
-      std::string type;
+//      std::string type;
+		std::string datatype;   ///< Data type : AR, AS, etc
+		RinexSatID sat;         ///< Satellite ID        (if AS)
+		std::string site;       ///< Site label (4-char) (if AR)
          ///< receiver or satellite name for which data are given
       std::string name;
          ///< the corresponding time to the clock data record
@@ -76,7 +79,14 @@ namespace gpstk
          ///< 3: clock rate sigma [optional] (dimensionless).
          ///< 4: clock acceleration [optional] (per second).
          ///< 5: clock acceleration sigma [optional] (per second).
-      double data[6];
+//      double data[6];
+			/// We still copy the design of RinexClockData.hpp
+		double bias;            ///< Clock bias in seconds
+		double sig_bias;        ///< Clock bias sigma in seconds
+		double drift;           ///< Clock drift in sec/sec
+		double sig_drift;       ///< Clock drift sigma in sec/sec
+		double accel;           ///< Clock acceleration in 1/sec
+		double sig_accel;       ///< Clock acceleration sigma in 1/sec
 
          // The next four lines is our common interface
          /// RinexObsData is a "data", so this function always returns true.
@@ -90,6 +100,18 @@ namespace gpstk
       virtual void dump(std::ostream& s) const;
 
    protected:
+
+		void clear(void) throw()
+		{
+			datatype = std::string();
+			sat = RinexSatID(-1,RinexSatID::systemGPS);
+			time = CommonTime::BEGINNING_OF_TIME;
+			bias = sig_bias = drift = sig_drift = accel = sig_accel = 0.0;
+//			for(int i=0; i<6; i++)
+//			{
+//				data[i] = 0;
+//			}
+		}
          /**
           * Writes a correctly formatted record from this data to stream \a s.
           * When printing comment records, you'll need to format them correctly

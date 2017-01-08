@@ -101,6 +101,8 @@ namespace gpstk
       staCoordList.clear();
       timeFirst = CommonTime::BEGINNING_OF_TIME;
 
+		timeSystem = TimeSystem::Any;
+
       return;
 
    }  // End of method 'Rinex3ClockHeader::clear()'
@@ -264,8 +266,11 @@ namespace gpstk
       else if ( label == timeSystemString )
       {
 
-         timeSystem = line.substr(3,3);
-         valid |= timeSystemValid;
+//         timeSystem = line.substr(3,3);
+//         valid |= timeSystemValid;
+			string ts(upperCase(line.substr(3,3)));
+			timeSystem.fromString(ts);
+			valid |= timeSystemValid;
 
       }
          // LEAP SECONDS
