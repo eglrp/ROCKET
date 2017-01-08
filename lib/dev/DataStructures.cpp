@@ -39,6 +39,8 @@
 //  2014/07/15   Define a temporary 'source' to initialize the value of 
 //               the source in header; (shjzhang)
 //
+//  2016/04/16   When we output the RINEX file, the phase observation(m) must
+//               divide its related wave length.(Q.Liu)
 //============================================================================
 
 
@@ -678,7 +680,7 @@ namespace gpstk
       // Modifies this object, removing these satellites.
       // @param satSet Set (SatIDSet) containing the satellites
       //               to be removed.
-   satTypeValueMap& satTypeValueMap::removeSatID(const SatIDSet& satSet)
+   satTypeValueMap& satTypeValueMap::removeSatID(const SatIDSet& satSet) throw(SVNumException)
    {
 
       for( SatIDSet::const_iterator pos = satSet.begin();
@@ -687,6 +689,10 @@ namespace gpstk
       {
          (*this).erase(*pos);
       }
+
+	  if( 0>=(*this).numSats() ){
+		GPSTK_THROW(SVNumException("SV number less than 0") );
+	  }
 
       return (*this);
 
@@ -766,6 +772,46 @@ namespace gpstk
       return result;
 
    }  // End of method 'satTypeValueMap::getVectorOfTypeID()'
+
+
+      // Returns a GPSTk::Matrix containing the data values in this set.
+      // @param typeSet  TypeIDSet of values to be returned.
+   Matrix<double> satTypeValueMap::getMatrixOfTypes(const TypeIDList& typeList)
+      const
+   {
+
+         // First, let's create a Matrix<double> of the proper size
+      Matrix<double> tempMat( (*this).numSats(), typeList.size(), 0.0 );
+
+      size_t numRow(0), numCol(0);
+
+      for( satTypeValueMap::const_iterator it = (*this).begin();
+           it != (*this).end();
+           ++it )
+      {
+         numCol=0;
+
+         for( TypeIDList::const_iterator pos = typeList.begin();
+              pos != typeList.end();
+              ++pos )
+         {
+
+            typeValueMap::const_iterator itObs( (*it).second.find(*pos) );
+            if( itObs != (*it).second.end() )
+            {
+               tempMat(numRow, numCol) = (*itObs).second;
+            }
+
+            ++numCol;
+         }
+
+         ++numRow;
+
+      }
+
+      return tempMat;
+
+   }  // End of method 'satTypeValueMap::getMatrixOfTypes()'
 
 
 
@@ -1167,7 +1213,7 @@ in matrix and number of types do not match") );
       ////// gnssSatTypeValue //////
 
 
-      // Returns a gnssSatTypeValue with only this satellite.
+      // Returns a gnssSatTypeV alue with only this satellite.
       // @param satellite Satellite to be extracted.
    gnssSatTypeValue gnssSatTypeValue::extractSatID(const SatID& satellite)
       const
@@ -1531,6 +1577,44 @@ in matrix and number of types do not match") );
 
        return (*this);
    }  // End of method 'gnssRinex::keepOnlySatSystem()'
+
+
+      // Returns a gnssRinex with only these types of data.
+      // @param satSys Satellite System value to be kept.
+   gnssRinex& gnssRinex::keepOnlySatSystem(const SatSystemSet& satSysSet)
+   {
+
+      satTypeValueMap stvMap( (*this).body );
+
+      SatIDSet satRejectedSet;
+      for(satTypeValueMap::iterator it = stvMap.begin();
+          it != stvMap.end();
+          ++it)
+      {
+//          if( it->first.system != satSys ) satRejectedSet.insert( it->first );
+
+				// Sat
+		    SatID sat( it->first );
+
+				// Identify its system
+		    SatSystemSet::const_iterator itSatSys = satSysSet.find( sat.system );
+		    if( itSatSys == satSysSet.end() )
+		    {
+					// This means undesired system
+				 satRejectedSet.insert( sat );
+
+		    }  // End of ' if( itSatSys == satSysSet.end() ) '
+		  	
+      }
+      stvMap.removeSatID(satRejectedSet);
+
+
+      (*this).body = stvMap;
+
+      return (*this);
+   }  // End of method 'gnssRinex::keepOnlySatSystem()'
+
+
 
 
 
@@ -2921,6 +3005,10 @@ in matrix and number of types do not match") );
    std::ostream& satTypeValueMap::dump( std::ostream& s,
                                         int mode ) const
    {
+	
+		// Test code vvv
+		s << fixed << setprecision(3);
+		// Test code ^^^ 
 
       for( satTypeValueMap::const_iterator it = (*this).begin();
            it!= (*this).end();
@@ -3020,6 +3108,7 @@ in matrix and number of types do not match") );
 
             return i;
          }
+
          catch (...)
          {
             return i;
@@ -3027,100 +3116,40 @@ in matrix and number of types do not match") );
       }
       if( Rinex3ObsStream::IsRinex3ObsStream(i) )     // Rinex3
       {
-         Rinex3ObsStream& strm = dynamic_cast<Rinex3ObsStream&>(i);
-
-         // If the header hasn't been read, read it...
-         if(!strm.headerRead) strm >> strm.header;
-
-         // Clear out this object
-         Rinex3ObsHeader& roh = strm.header;
-
-         Rinex3ObsData rod;
-         strm >> rod;
-
-         // Fill data
-         f.header.source.type = SatIDsystem2SourceIDtype(roh.fileSysSat);
-         f.header.source.sourceName = roh.markerName;
-         f.header.antennaType = roh.antType;
-         f.header.antennaPosition = roh.antennaPosition;
-         f.header.epochFlag = rod.epochFlag;
-         f.header.epoch = rod.time;
-
-         f.body = satTypeValueMapFromRinex3ObsData(roh, rod);
-
-         return i;
+			try
+			{
+	         Rinex3ObsStream& strm = dynamic_cast<Rinex3ObsStream&>(i);
+	
+				// If the header hasn't been read, read it...
+				if(!strm.headerRead) strm >> strm.header;
+	         // Clear out this object
+	         Rinex3ObsHeader& roh = strm.header;
+	
+	         Rinex3ObsData rod;
+	         strm >> rod;
+	
+	         // Fill data
+	         f.header.source.type = SatIDsystem2SourceIDtype(roh.fileSysSat);
+	         f.header.source.sourceName = roh.markerName;
+	         f.header.antennaType = roh.antType;
+	         f.header.antennaPosition = roh.antennaPosition;
+	         f.header.epochFlag = rod.epochFlag;
+	         f.header.epoch = rod.time;
+	
+	         f.body = satTypeValueMapFromRinex3ObsData(roh, rod);
+	
+	         return i;
+			}
+			catch (FFStreamError& e)
+			{
+			   GPSTK_THROW(e);	
+				return i;
+			}
       }
-
-      return i;
+			// Other stream case			
+		return i;
 
    }  // End of stream input for gnssRinex
-
-//    // Stream input for network gnss rinex files
-// NetworkStreams& operator>>( NetworkStreams& networkStreams, gnssDataMap& gData )
-// {
-//
-//       // Read stream for the reference station.
-//    RinexObsStream* pStreamRef = networkStreams.getStreamRef();
-//     
-//       // Store the reference rinex data
-//    gnssRinex gRef;
-//
-//       // Read the rinex data
-//    if( (*pStreamRef) >> gRef )
-//    {
-//          // Insert the rinex data from the reference station.
-//       gData.addGnssRinex(gRef);
-//
-//          // Read rover streams
-//       std::map<SourceID, RinexObsStream*> roverStreamMap;
-//       roverStreamMap = networkStreams.getRoverStreamMap();
-//
-//       std::map<SourceID, RinexObsStream*>::iterator it;
-//       for( it = roverStreamMap.begin(); it != roverStreamMap.end(); ++it )
-//       {
-//             // Warning:
-//             // In the class Synchronize, the reference data is synchronized
-//             // according to the rover data stream.
-//             // However, in this program, the rover stations will be 
-//             // synchronized with the 'MASETER' reference station.
-//             // Thus, the rover/reference is conversely between Synchronize
-//             // and NetworkStreams.
-//          Synchronize sync;
-//          sync.setReferenceStream( (*it).second );
-//          sync.setRoverData( gRef );
-//
-//             // gnssRinex for rover data store.
-//          gnssRinex gRin;
-//             
-//             // read rover data
-//          try
-//          {
-//             gRin >> sync;
-//             gdsMap.addGnssRinex(gRin);
-//          }
-//          catch(...)
-//          {
-//             if(synchronizeException)
-//             {
-//                std::stringstream ss;
-//                ss << "Exception when try to synchronize at epoch: "
-//                   << gRef.header.epoch 
-//                   << "for rover: "
-//                   << (*it).first 
-//                   << std::endl;
-//                SynchronizeException e(ss.str());
-//
-//                   // Throw
-//                GPSTK_THROW(e);
-//             }
-//          }
-//       }
-//    }
-// 
-//    return networkStreams;
-//
-// }  // End of stream input for gnssRinex
-
 
 
    // Stream output for gnssRinex
@@ -3156,19 +3185,22 @@ in matrix and number of types do not match") );
 
                while (obsTypeItr != strm.header.obsTypeList.end())
                {
-                  TypeID type = ConvertToTypeID( *obsTypeItr,
-                     RinexSatID(itSat->id,itSat->system));
+                  RinexSatID rsat(itSat->id,itSat->system);
+                  TypeID type = ConvertToTypeID( *obsTypeItr,rsat);
 
                   RinexDatum data;
                   data.data = f.body[*itSat][type];
                   data.ssi = 0;
                   data.lli = 0;
 
+                  const int n = GetCarrierBand(*obsTypeItr);
+                  double waveLength=getWavelength(rsat,n);
+
                   if( (type == TypeID::P1) || (type == TypeID::L1) )
                   {
                      if(type == TypeID::L1)
                      {
-                        data.data /= L1_WAVELENGTH_GAL;
+                        data.data /= waveLength;
                         data.ssi = f.body[*itSat][TypeID::SSI1];
                      }
 
@@ -3179,7 +3211,7 @@ in matrix and number of types do not match") );
                   {
                      if(type == TypeID::L2)
                      {
-                        data.data /= L2_WAVELENGTH_GPS;
+                        data.data /= waveLength;
                         data.ssi = f.body[*itSat][TypeID::SSI2];
                      }
 
@@ -3190,7 +3222,7 @@ in matrix and number of types do not match") );
                   {
                      if(type == TypeID::L5)
                      {
-                        data.data /= L5_WAVELENGTH_GAL;
+                        data.data /= waveLength;
                         data.ssi = f.body[*itSat][TypeID::SSI5];
                      }
 
@@ -3201,7 +3233,7 @@ in matrix and number of types do not match") );
                   {
                      if(type == TypeID::L6)
                      {
-                        data.data /= L6_WAVELENGTH_GAL;
+                        data.data /= waveLength;
                         data.ssi = f.body[*itSat][TypeID::SSI6];
                      }
 
@@ -3212,7 +3244,7 @@ in matrix and number of types do not match") );
                   {
                      if(type == TypeID::L7)
                      {
-                        data.data /= L7_WAVELENGTH_GAL;
+                        data.data /= waveLength;
                         data.ssi = f.body[*itSat][TypeID::SSI7];
                      }
 
@@ -3223,7 +3255,7 @@ in matrix and number of types do not match") );
                   {
                      if(type == TypeID::L8)
                      {
-                        data.data /= L8_WAVELENGTH_GAL;
+                        data.data /= waveLength;
                         data.ssi = f.body[*itSat][TypeID::SSI8];
                      }
 
@@ -3425,17 +3457,43 @@ in matrix and number of types do not match") );
       {
          RinexSatID sat(it->first);
 
-
          typeValueMap tvMap;
 
          map<std::string,std::vector<RinexObsID> > mapObsTypes(roh.mapObsTypes);
+         map<std::string,std::vector<RinexObsID> >priorMapObsTypes(roh.validMapObsTypes);
          const vector<RinexObsID> types = mapObsTypes[sat.toString().substr(0,1)];
+         vector<RinexObsID> priorTypes = priorMapObsTypes[sat.toString().substr(0,1)];
 
+			// Debug code vvv
+//			std::cout << "types: " <<  types.size() << std::endl;
+//			for(size_t i=0; i<types.size(); i++)
+//			{
+//				std::cout << types[i] << std::endl;
+//			}
+//			std::cout << "priorTypes: " << std::endl;
+//			for(size_t i=0; i<priorTypes.size(); i++)
+//			{
+//				std::cout << priorTypes[i] << priorTypes.size() << std::endl; 
+//			}
+			// Debug code ^^^ 
          for(size_t i=0; i<types.size(); i++)
          {
+					// Find present type in priorTypes
+				vector<RinexObsID>::iterator iter = find(priorTypes.begin(),
+																	  priorTypes.end(),
+																	  types[i]);
+				if( iter == priorTypes.end() )
+				{
+						// Here means that this type is not prior
+					continue;
+				}  // End of 'if( iter == priorTypes.end() ) '
+
+
             TypeID type = ConvertToTypeID(types[i],sat);
 
-            const int n = GetCarrierBand(types[i]);
+
+            
+				const int n = GetCarrierBand(types[i]);
 
             if(types[i].type==ObsID::otPhase)   // Phase
             {

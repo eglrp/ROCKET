@@ -29,14 +29,27 @@
 //  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007, 2008, 2009, 2011
 //
 //============================================================================
-
+// 
+// 2016/07/29
+//
+// Augment satTypeValueMapFromRinex3ObsData algorithm
+// 1. exception catch
+// 2. read prior observation type accoring to code priority in
+//		rinex3ObsHeaderInitializer.cpp
+//
+// Lei Zhao, in Inner Mongolia 
+// 
+// 2016/12/23
+// 
+// Add synonym type 'SatSystemSet' and overload method ' keepOnlySatSystem '
+// 
+//============================================================================
 
 #include <utility>
 #include <vector>
 #include <set>
 #include <map>
 #include <string>
-
 #include "DataHeaders.hpp"
 #include "FFData.hpp"
 #include "RinexObsStream.hpp"
@@ -122,7 +135,7 @@ namespace gpstk
       /// Thrown when attempting to access a value and the corresponding TypeID
       /// does not exist in the map.
       /// @ingroup exceptiongroup
-   NEW_EXCEPTION_CLASS(TypeIDNotFound, gpstk::Exception);
+//   NEW_EXCEPTION_CLASS(TypeIDNotFound, gpstk::Exception);
 
 
       /// Thrown when attempting to access a value and the corresponding SatID
@@ -171,11 +184,18 @@ namespace gpstk
       /// Set containing TypeID objects.
    typedef std::set<TypeID> TypeIDSet;
 
+		/// List containing TypeID objects.
+	typedef std::list<TypeID> TypeIDList;
+
       /// Set containing SatID objects.
    typedef std::set<SatID> SatIDSet;
 
+
       /// Set containing SourceID objects.
    typedef std::set<SourceID> SourceIDSet;
+
+		/// Set containing SatID::SatelliteSystem objects
+	typedef std::set< SatID::SatelliteSystem > SatSystemSet;
 
 
       /// Map holding TypeID with corresponding numeric value.
@@ -432,7 +452,7 @@ namespace gpstk
          /// Modifies this object, removing these satellites.
          /// @param satSet Set (SatIDSet) containing the satellites
          ///               to be removed.
-      satTypeValueMap& removeSatID(const SatIDSet& satSet);
+      satTypeValueMap& removeSatID(const SatIDSet& satSet) throw(SVNumException) ;
 
 
          /// Modifies this object, removing this type of data.
@@ -456,6 +476,10 @@ namespace gpstk
          /// Returns a GPSTk::Matrix containing the data values in this set.
          /// @param typeSet  TypeIDSet of values to be returned.
       Matrix<double> getMatrixOfTypes(const TypeIDSet& typeSet) const;
+
+         /// Returns a GPSTk::Matrix containing the data values in this set.
+         /// @param typeSet  TypeIDSet of values to be returned.
+      Matrix<double> getMatrixOfTypes(const TypeIDList& typeList) const;
 
 
          /** Modifies this object, adding one vector of data with this type,
@@ -1091,6 +1115,10 @@ namespace gpstk
          /// @param satSys Satellite System value to be kept. 
       gnssRinex& keepOnlySatSystem(const SatID::SatelliteSystem satSys);
 
+         /// Returns a gnssRinex with only these types of data.
+         /// @param satSys Satellite System value to be kept. 
+      gnssRinex& keepOnlySatSystem(const SatSystemSet& satSysSet);
+
 
 
          /// Destructor.
@@ -1509,6 +1537,34 @@ namespace gpstk
 
 
    };  // End of 'gnssEquationDefinition'
+
+
+		/// A more pratical version considering the order of types in body
+
+      /// Object defining the structure of a GNSS equation. The header is the
+      /// prefit and the body is a TypeIDSet containing the unknowns.
+   struct  gnssEquationDefinition2 : gnssData<TypeID, TypeIDList>
+   {
+
+         /// Default constructor.
+      gnssEquationDefinition2() {};
+
+
+         /// Common constructor.
+      gnssEquationDefinition2( const TypeID& h,
+                               const TypeIDList& b )
+      {
+         header = h;
+         body   = b;
+      }
+
+
+         /// Destructor.
+      virtual ~gnssEquationDefinition2() {};
+
+
+   };  // End of 'gnssEquationDefinition2'
+
 
 
 
