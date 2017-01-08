@@ -21,6 +21,10 @@
 #include "RinexClockHeader.hpp"
 #include "RinexClockData.hpp"
 
+#include "Rinex3ClockStream.hpp" 
+#include "Rinex3ClockHeader.hpp"
+#include "Rinex3ClockData.hpp"
+
 #include "FileStore.hpp"
 #include "ClockSatStore.hpp"
 #include "PositionSatStore.hpp"
@@ -210,6 +214,7 @@ namespace gpstk
             GPSTK_THROW(e);
          }
          strm.exceptions(ios::failbit);
+
          //cout << "Opened file " << filename << endl;
 
          // declare header and data
@@ -218,11 +223,13 @@ namespace gpstk
          // read the SP3 ephemeris header
          try {
             strm >> head;
+
          }
          catch(Exception& e) {
             e.addText("Error reading header of file " + filename + e.getText());
             GPSTK_RETHROW(e);
          }
+
          //cout << "Read header" << endl; head.dump();
 
          // check/save TimeSystem to storeTimeSystem
@@ -547,12 +554,19 @@ namespace gpstk
             e.addText("Error reading header of file " + filename);
             GPSTK_RETHROW(e);
          }
-         //cout << "Read header" << endl; head.dump();
+//         cout << "Read header" << endl; head.dump();
+			// Debug code vvv
+//			cout << "track the timeSystem" << endl;
+			// Debug code ^^^ 
 
          // check/save TimeSystem to storeTimeSystem
          if(head.timeSystem != TimeSystem::Any &&
             head.timeSystem != TimeSystem::Unknown)
          {
+
+			// Debug code vvv
+//			cout << "timeSystem unset" << endl;
+			// Debug code ^^^ 
             // if store time system has not been set, do so
             if(storeTimeSystem == TimeSystem::Any) {
                // NB. store-, pos- and clk- TimeSystems must always be the same
@@ -575,6 +589,9 @@ namespace gpstk
          // there is no way to determine the time system....this is a problem TD
          // TD SP3EphemerisStore::fixTimeSystem() ??
          else {
+			// Debug code vvv
+//			cout << "set timeSystem GPS" << endl;
+			// Debug code ^^^ 
             head.timeSystem = TimeSystem::GPS;
             storeTimeSystem = head.timeSystem;
             posStore.setTimeSystem(head.timeSystem);
@@ -610,6 +627,99 @@ namespace gpstk
       }
       catch(Exception& e) { GPSTK_RETHROW(e); }
    }
+
+   // Load a RINEX3 clock file; may set the 'have' bias and drift flags
+   void SP3EphemerisStore::loadRinex3ClockFile(const std::string& filename)
+      throw(Exception)
+   {
+      try {
+         if(useSP3clock) useRinexClockData();
+
+         // open the input stream
+         Rinex3ClockStream strm(filename.c_str());
+         if(!strm.is_open()) {
+            Exception e("File " + filename + " could not be opened");
+            GPSTK_THROW(e);
+         }
+         strm.exceptions(std::ios::failbit);
+//        cout << "Opened file " << filename << endl;
+
+         // declare header and data
+         Rinex3ClockHeader head;
+         Rinex3ClockData data;
+
+         // read the RINEX3 clock header
+         try {
+            strm >> head;
+         }
+         catch(Exception& e) {
+            e.addText("Error reading header of file " + filename);
+            GPSTK_RETHROW(e);
+         }
+//         cout << "Read header" << endl; head.dump( cout );
+
+         // check/save TimeSystem to storeTimeSystem
+         if(head.timeSystem != TimeSystem::Any &&
+            head.timeSystem != TimeSystem::Unknown)
+         {
+            // if store time system has not been set, do so
+            if(storeTimeSystem == TimeSystem::Any) {
+               // NB. store-, pos- and clk- TimeSystems must always be the same
+               storeTimeSystem = head.timeSystem;
+               posStore.setTimeSystem(head.timeSystem);
+               clkStore.setTimeSystem(head.timeSystem);
+            }
+
+            // if store system has been set, and it doesn't agree, throw
+            else if(storeTimeSystem != head.timeSystem)
+            {
+               InvalidRequest ir("Time system of file " + filename
+                  + " (" + head.timeSystem.asString()
+                  + ") is incompatible with store time system ("
+                  + storeTimeSystem.asString() + ").");
+               GPSTK_THROW(ir);
+            }
+         }  // end if header time system is set
+
+         // there is no way to determine the time system....this is a problem TD
+         // TD SP3EphemerisStore::fixTimeSystem() ??
+         else {
+            head.timeSystem = TimeSystem::GPS;
+            storeTimeSystem = head.timeSystem;
+            posStore.setTimeSystem(head.timeSystem);
+            clkStore.setTimeSystem(head.timeSystem);
+         }
+
+         // save in FileStore
+         clk3Files.addFile(filename, head);
+
+         // read data
+         try {
+            while(strm >> data) {
+//               data.dump(cout);
+
+               if(data.datatype == std::string("AS")) {
+                  data.time.setTimeSystem(head.timeSystem);
+                  // add this data
+                  ClockRecord rec;
+                  rec.bias = data.bias; rec.sig_bias = data.sig_bias,
+                  rec.drift = data.drift; rec.sig_drift = data.sig_drift,
+                  rec.accel = data.accel; rec.sig_accel = data.sig_accel;
+                  clkStore.addClockRecord(data.sat, data.time, rec);
+               }
+            }
+         }
+         catch(Exception& e) {
+            e.addText("Error reading data of file " + filename);
+            GPSTK_RETHROW(e);
+         }
+
+         strm.close();
+
+      }
+      catch(Exception& e) { GPSTK_RETHROW(e); }
+   }  // End of 'void SP3EphemerisStore::loadRinex3ClockFile( ... '
+
 
    //@}
 
