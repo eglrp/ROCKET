@@ -41,12 +41,26 @@
 //                           release, distribution is unlimited.
 //
 //=============================================================================
+// 
+// 2016/07/27
+// Accept C1x of BDS in Rinex 3.02 
+// Lei Zhao
+//
+// 2016/07/28
+// Designed getValidMapObsTypes()
+// Lei Zhao
+// 
+// 2016/07/30
+// Add allValid303
+// Lei Zhao
+//=============================================================================
 
 #include <vector>
 #include <list>
 #include <map>
 #include <iostream>
 #include <iomanip>
+#include <set>
 
 #include "CivilTime.hpp"
 #include "FFStream.hpp"
@@ -54,6 +68,7 @@
 #include "Triple.hpp"
 #include "RinexSatID.hpp"
 #include "RinexObsID.hpp"
+#include "Rinex3ObsHeaderInitializer.hpp"
 
 namespace gpstk
 {
@@ -81,6 +96,7 @@ namespace gpstk
          obsTypeList.clear();
          numObsForSat.clear();
          mapObsTypes.clear();
+			validMapObsTypes.clear();
          wavelengthFactor[0] = wavelengthFactor[1] = 1;
          extraWaveFactList.clear();
          valid  = 0;
@@ -120,9 +136,14 @@ namespace gpstk
       static const std::string stringSystemDCBSapplied; ///< "SYS / DCBS APPLIED"
       static const std::string stringSystemPCVSapplied; ///< "SYS / PCVS APPLIED"
       static const std::string stringSystemScaleFac;    ///< "SYS / SCALE FACTOR"
+
       static const std::string stringSystemPhaseShift;  ///< "SYS / PHASE SHIFT"
+      static const std::string stringSystemPhaseShifts;  ///< "SYS / PHASE SHIFTS"
+
       static const std::string stringGlonassSlotFreqNo; ///< "GLONASS SLOT / FRQ #"
       static const std::string stringGlonassCodPhsBias; ///< "GLONASS COD/PHS/BIS"
+      static const std::string stringGlonassCodPhsBiasFreak; ///< "GLONASS COD/PHS/BIS#"
+
       static const std::string stringLeapSeconds;       ///< "LEAP SECONDS"
       static const std::string stringNumSats;           ///< "# OF SATELLITES"
       static const std::string stringPrnObs;            ///< "PRN / # OF OBS"
@@ -177,8 +198,16 @@ namespace gpstk
          //allValid301            = 0x0C1205AB, // RINEX 3.01
          //allValid302            = 0x1C1205AB, // RINEX 3.02
          // NB 19Jun2013 MGEX data does not include GLONASS SLOT and GLONASS COD/PHS/BIS records
-         allValid301            = 0x041205AB, // RINEX 3.01
-         allValid302            = 0x041205AB // RINEX 3.02
+//         allValid301            = 0x041205AB, // RINEX 3.01
+//         allValid302            = 0x041205AB, // RINEX 3.02
+			// NB remove maker type, since it is optional in R302 and R303
+         allValid301            = 0x0412058B, // RINEX 3.01
+         allValid302            = 0x0412058B, // RINEX 3.02
+
+
+				
+				// Added by Lei Zhao, 2017/07/30
+         allValid303            = 0x041205AB // RINEX 3.03
       };
    
       /// RINEX 3 DCBS/PCVS info (for differential code bias and phase center variations corr.)
@@ -244,6 +273,7 @@ namespace gpstk
       gpstk::Triple centerOfMass;                  ///< vehicle CENTER OF MASS: XYZ    (optional)
       std::vector<RinexObsID> obsTypeList;         ///< number & types of observations R2 only
       std::map<std::string,std::vector<RinexObsID> > mapObsTypes; ///< map <sys char, vec<ObsID> >;
+      std::map<std::string,std::vector<RinexObsID> > validMapObsTypes; ///< map <sys char, vec<ObsID> >;
                                                         ///< NB defines data vec in ObsData
       std::string sigStrengthUnit;                 ///< SIGNAL STRENGTH UNIT           (optional)
       double interval;                             ///< INTERVAL                       (optional)
@@ -286,6 +316,40 @@ namespace gpstk
       virtual void dump(std::ostream& s) const;
 
 
+			/** These bunch of methods are designed to finally return  
+			 *  a prior observation types map from mapObsTypes
+			 *
+			 */
+
+		typedef std::map<std::string,std::vector<RinexObsID> > SysToObsTypesMap;
+		typedef std::map<std::string,std::map<ObsID::CarrierBand,std::set<ObsID::TrackingCode> > > SysToBandCodeVec;
+		typedef std::map<ObsID::CarrierBand,std::set<ObsID::TrackingCode> > CbCodeSet;
+		typedef std::map<ObsID::ObservationType, CbCodeSet> OtCbCodeSet;
+		typedef std::map<std::string, OtCbCodeSet> SysTypeBandCodeVec;
+		//typedef std::map<std::string, std::map<ObsID::ObservationType, std::map< ObsID::CarrierBand,std::set<ObsID::TrackingCode> > > > SysTypeBandCodeVec; 
+
+		virtual SysToObsTypesMap getValidMapObsTypes2() const;
+		virtual SysTypeBandCodeVec getCodeVec2() const;
+		virtual SysTypeBandCodeVec getPriorCode2( SysTypeBandCodeVec stbcv) const;
+		virtual SysToObsTypesMap FilterMapObsTypes( SysTypeBandCodeVec stbc ) const;
+
+		virtual SysToObsTypesMap getPriorCode3( SysTypeBandCodeVec stbcv) const;
+		virtual SysToObsTypesMap getValidMapObsTypes3() const;
+
+		virtual SysToObsTypesMap getValidMapObsTypes() const;
+		virtual SysToBandCodeVec getCodeVec() const;
+		virtual SysToBandCodeVec getPriorCode( SysToBandCodeVec stbcv ) const;
+		virtual ObsID::TrackingCode getPriorCode( std::string sys,
+																ObsID::CarrierBand cb,
+																std::set<ObsID::TrackingCode> codeSet ) const;
+		virtual SysToObsTypesMap FilterMapObsTypes( SysToBandCodeVec stbc ) const;
+
+			/// Handy print method for object of type SysToObsTypesMap
+		virtual void print(std::ostream& s, SysToObsTypesMap stom);
+
+			/// Handy print method for object of type SysToBandCodeVec
+		virtual void print(std::ostream& s, SysToBandCodeVec stbcv);
+		
          /** This method returns the numerical index of a given observation
           *
           * @param type String representing the observation type.
@@ -314,17 +378,21 @@ namespace gpstk
          unsigned long allValid;
          if(     version < 3.00) allValid = allValid2;
          else if(version < 3.01) allValid = allValid30;
-         else if(version < 3.02) allValid = allValid301;  
-         else                    allValid = allValid302;
+         else if(version < 3.02) allValid = allValid301;
+				// The following is added by Lei Zhao, 2016/07/30
+         else if(version < 3.03) allValid = allValid302;
+			else							allValid = allValid303; 
          return ((valid & allValid) == allValid);
       }
 
       /// Compute map of obs types for use in writing version 2 header and data
       void PrepareVer2Write(void) throw();
 
+			// Just want a table
+			// Added by Lei ZHao, 2015/07/29
+		static std::map< std::string, std::map<ObsID::CarrierBand, std::map<ObsID::TrackingCode, double> > > sysCbTcPriMap;
 
    protected:
-
 
       /// outputs this record to the stream correctly formatted.
       virtual void reallyPutRecord(FFStream& s) const
@@ -342,8 +410,7 @@ namespace gpstk
 
       friend class Rinex3ObsData;
 
-
-   private:
+	   private:
 
       /// Converts the daytime \a dt into a Rinex Obs time
       /// string for the header
