@@ -159,6 +159,8 @@ namespace gpstk
          Q1,      ///< precise code with minus ionospheric delays in L1
          Q2,      ///< precise code with minus ionospheric delays in L2
 
+			Q5,      ///< precise code with minus ionospheric delays in L5
+
             // Derivatives of observations and combinations
          L1dot,     ///< GPS L1 phase observation first derivative
          L1dot2,    ///< GPS L1 phase observation second derivative

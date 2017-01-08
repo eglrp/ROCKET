@@ -111,6 +111,7 @@ namespace gpstk
 
       tStrings[Q1]       = "Q1";                                                           
       tStrings[Q2]       = "Q2";                                                           
+		tStrings[Q5]       = "Q5";
 
       tStrings[L1dot]      = "L1dot";
       tStrings[L1dot2]     = "L1dot2";
