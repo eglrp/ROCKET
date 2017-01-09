@@ -38,6 +38,11 @@
 //                           release, distribution is unlimited.
 //
 //=============================================================================
+//
+// Added BeiDou and QZSS identifier: C and J
+// Lei Zhao, 2016/08/08, Inner Mongolia
+//
+//=============================================================================
 
 #include <iostream>
 #include <sstream>
@@ -145,6 +150,8 @@ namespace gpstk
          switch (system) {
             case systemGPS:     return 'G';
             case systemGalileo: return 'E';
+				case systemBeiDou:  return 'C';	// Added by Lei Zhao, 2016/08/08
+				case systemQZSS:	  return 'J';	// Added by Lei Zhao, 2016/08/08
             case systemGlonass: return 'R';
             case systemLEO:     return 'L';
             case systemMixed:   return 'M';
@@ -158,6 +165,8 @@ namespace gpstk
          switch (system) {
             case systemGPS:     return "GPS";
             case systemGalileo: return "Galileo";
+				case systemBeiDou:  return "Beidou";	// Added by Lei Zhao, 2016/08/08
+				case systemQZSS:  return "QZSS";	// Added by Lei Zhao, 2016/08/08
             case systemGlonass: return "Glonass";
             case systemLEO:     return "LEO";
             case systemMixed:   return "Mixed";
@@ -177,6 +186,7 @@ namespace gpstk
             return;                    // all whitespace yields the default
 
          iss >> c;                     // read one character (non-whitespace)
+
          switch(c)
          {
                                        // no leading system character
@@ -194,6 +204,10 @@ namespace gpstk
             case 'E': case 'e':
                system = SatID::systemGalileo;
                break;
+				case 'C': case 'c':					// Added by Lei Zhao, 2016/08/08
+					system = SatID::systemBeiDou;
+				case 'J': case 'j':
+					system = SatID::systemQZSS;
             case 'L': case 'l':
                system = SatID::systemLEO;
                break;
