@@ -13,6 +13,7 @@ class Counter{
 
    public:
       static void   begin();
+      static double now();
       static double end(); 
    
    private:

@@ -1,6 +1,6 @@
 /**
 * @file LeapSecStore.cpp
-* Class to handle interpolatable time serial data
+* Class to handle interpolatable time serial data 
 */
 
 //============================================================================
@@ -49,7 +49,7 @@ namespace gpstk
 //      cout << finalTime << endl;
 
       ifstream inpf(file.c_str());
-      if(!inpf)
+      if(!inpf) 
       {
          FileMissingException fme("Could not open leap second file " + file);
          GPSTK_THROW(fme);
@@ -63,7 +63,7 @@ namespace gpstk
          // MJD        Date        TAI-UTC (s)
          //        day month year
          // ---    --------------   ------
-         //
+         // 
          // <---
          //
       string temp;
@@ -89,7 +89,7 @@ namespace gpstk
          }
 
             // line length is actually 185
-         if( inpf.bad() )
+         if( inpf.bad() ) 
          { ok = false; break; }
 
             // Define a string stream to read 'line'
@@ -107,9 +107,9 @@ namespace gpstk
                >> day >> month >> year
                >> leapSec;
 
-         if(debug)
-            cout << "time: "
-                 << CommonTime( MJD(mjd).convertToCommonTime() )
+         if(debug) 
+            cout << "time: " 
+                 << CommonTime( MJD(mjd).convertToCommonTime() ) 
                  << " TAI - UTC " << leapSec << endl;
 
 //         cout << "mjd: " << mjd << endl;
@@ -121,7 +121,7 @@ namespace gpstk
             // Add leap second into 'leapSecData'
          leapSecData[time] = leapSec;
 
-//         cout << time << "leap: " << leapSecData[time] << endl;
+//         cout << time << "leap: " << leapSecData[time] << endl; 
 //         cout << initialTime << endl;
 //         cout << finalTime << endl;
 
@@ -141,14 +141,14 @@ namespace gpstk
 
       inpf.close();
 
-      if(!ok)
+      if(!ok) 
       {
          FileMissingException fme("LeapSec File " + file
                                   + " is corrupted or wrong format");
          GPSTK_THROW(fme);
       }
    }
-
+   
 
    double LeapSecStore::getLeapSec(const CommonTime& utc) const
       throw(InvalidRequest)
@@ -177,8 +177,9 @@ namespace gpstk
       }
 
       return leapSec;
-
+   
    }  // End of method 'LeapSecStore::getLeapSec()'
+
 
 
 }  // End of namespace gpstk

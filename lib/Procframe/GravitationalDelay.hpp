@@ -35,7 +35,7 @@
 #include <math.h>
 #include "Position.hpp"
 #include "ProcessingClass.hpp"
-
+//#include "OmpHeader.hpp"
 
 
 namespace gpstk
@@ -108,7 +108,7 @@ namespace gpstk
 
          /// Default constructor.
       GravitationalDelay() : nominalPos(0.0, 0.0, 0.0)
-      { };
+      { /*Position pos(0.0,0.0,0.0); nominalPos[0] = pos;*/ };
 
 
          /** Common constructor
@@ -116,7 +116,7 @@ namespace gpstk
           * @param stapos    Nominal position of receiver station.
           */
       GravitationalDelay(const Position& stapos) : nominalPos(stapos)
-      { };
+      { /*nominalPos[0]=stapos;*/};
 
 
          /** Returns a satTypeValueMap object, adding the new data generated
@@ -148,17 +148,24 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException);
 
+         
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
+
 
          /// Returns nominal position of receiver station.
-      virtual Position getNominalPosition(void) const
-      { return nominalPos; };
+      virtual Position getNominalPosition(void);
 
 
          /** Sets nominal position of receiver station.
           * @param stapos    Nominal position of receiver station.
           */
-      virtual GravitationalDelay& setNominalPosition(const Position& stapos)
-        { nominalPos = stapos; return (*this); };
+      virtual GravitationalDelay& setNominalPosition(const Position& stapos);
 
 
          /// Returns a string identifying this object.
@@ -174,7 +181,7 @@ namespace gpstk
 
          /// Receiver position
       Position nominalPos;
-
+      //Position nominalPos[omp_max_threads];
 
    }; // End of class 'GravitationalDelay'
 

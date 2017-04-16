@@ -155,6 +155,14 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.body); return gData; };
 
+      
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Method to get the default code type being used.
       virtual TypeID getCodeType() const
@@ -262,9 +270,15 @@ namespace gpstk
          double previousPhase; ///< Accumulated mean bias sigma squared.
       };
 
+      
+      typedef std::map<SatID, filterData>  SmoothingData;
+      typedef std::map<SourceID, SmoothingData> SmoothingDataMap;
 
          /// Map holding the information regarding every satellite
-      std::map<SatID, filterData> SmoothingData;
+      //std::map<SatID, filterData> SmoothingData;
+      
+      SmoothingData m_smoothingData;
+      SmoothingDataMap m_smoothingDataMap;
 
 
          /** Compute the smoothed code observable.

@@ -17,7 +17,6 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
-//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -28,12 +27,13 @@
  * Class to do ThirdBody Gravitation calculation.
  */
 
-#ifndef THIRD_BODY_HPP
-#define THIRD_BODY_HPP
+#ifndef GPSTK_THIRDBODY_HPP
+#define GPSTK_THIRDBODY_HPP
 
 #include "ForceModel.hpp"
 #include "SolarSystem.hpp"
 #include "ReferenceSystem.hpp"
+
 
 namespace gpstk
 {
@@ -350,10 +350,10 @@ namespace gpstk
         bool bNeptune;
         bool bPluto;
 
-    }; // End of class 'ThirdBody'
+   }; // End of class 'ThirdBody'
 
-    // @}
+      // @}
 
 }  // End of namespace 'gpstk'
 
-#endif  // THIRD_BODY_HPP
+#endif   // GPSTK_THIRDBODY_HPP

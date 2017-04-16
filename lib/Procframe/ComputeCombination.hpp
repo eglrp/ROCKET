@@ -87,6 +87,14 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.body); return gData; };
 
+      
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;

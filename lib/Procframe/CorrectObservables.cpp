@@ -74,7 +74,6 @@ namespace gpstk
          Triple dispL7( initialBias );
          Triple dispL8( initialBias );
 
-
             // Check if we have a valid Antenna object
          if( antenna.isValid() )
          {
@@ -286,7 +285,7 @@ namespace gpstk
             Triple dL6( dispL6 + L6PhaseCenter );
             Triple dL7( dispL7 + L7PhaseCenter );
             Triple dL8( dispL8 + L8PhaseCenter );
-
+	    
                // Compute vector station-satellite, in ECEF
             Triple ray(svPos - staPos);
 
@@ -305,7 +304,7 @@ namespace gpstk
             double corrL7(dL7.dot(ray));
             double corrL8(dL8.dot(ray));
 
-
+	    //std::cout<<"corrL1:"<<corrL1<<",corrL2:"<<corrL2<<std::endl;
                // Find which observables are present, and then
                // apply corrections
 
@@ -412,6 +411,50 @@ namespace gpstk
       }
 
    }  // End of method 'CorrectObservables::Process()'
+   
+   gnssDataMap& CorrectObservables::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {  
+            SourceID sourceID(sdmIt->first);
+            
+            /// set Nominal position
+            setNominalPosition(sourceID.nominalPos);
 
+            /// set ARP
+            setMonument( sourceID.antennaOffset );
+
+            if( useAntex && usePatterns )
+            {
+               /// set antenna
+               std::string antennaModel = sourceID.antType;
+               
+               try
+               {
+                  antenna = antexReader->getAntenna( antennaModel );
+               }
+               catch(ObjectNotFound& notFound)
+               {  
+                  antennaModel.replace(16,4,"NONE");
+                  antenna = antexReader->getAntenna( antennaModel );
+               }
+               
+            }
+            
+            m_tideCorr.setNominalPos( sdmIt->first.nominalPos );
+            m_tideCorr.setStationName( sdmIt->first.sourceName );
+	    setExtraBiases( m_tideCorr.correct( gdmIt->first ) ); 
+		
+            Process( gdmIt->first, sdmIt->second );
+         }
+      }
+
+      return gData;
+   }
 
 }  // End of namespace gpstk

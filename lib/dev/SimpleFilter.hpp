@@ -183,6 +183,13 @@ namespace gpstk
          throw(ProcessingException, SVNumException)
       { Process(gData.body); return gData; };
 
+      
+         /** Returns a gnssDataMap object, filtering the target observables.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException, SVNumException);
 
 
          /** Method to set the minimum limit.

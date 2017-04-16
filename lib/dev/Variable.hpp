@@ -34,12 +34,15 @@
 
 
 #include "DataStructures.hpp"
-#include "StochasticModel.hpp"
-
+//#include "StochasticModel.hpp"
+#include "StochasticModel2.hpp"
 
 
 namespace gpstk
 {
+
+//class StochasticModel2;
+//class WhiteNoiseModel2;
 
       /** @addtogroup DataStructures */
       //@{
@@ -70,7 +73,7 @@ namespace gpstk
           * @param forceCoef        Always use default coefficient.
           */
       Variable( const TypeID& type,
-                StochasticModel* pModel   = &Variable::defaultModel,
+                StochasticModel2* pModel   = &Variable::defaultModel,
                 bool sourceIndexed        = true,
                 bool satIndexed           = false,
                 double variance           = 1.0e10,
@@ -94,7 +97,7 @@ namespace gpstk
 
 
          /// Get variable model pointer
-      StochasticModel* getModel() const
+      StochasticModel2* getModel() const
       { return pVarModel; };
 
 
@@ -104,7 +107,7 @@ namespace gpstk
           *                    this variable. By default, it is a white
           *                    noise model.
           */
-      Variable& setModel(StochasticModel* pModel)
+      Variable& setModel(StochasticModel2* pModel)
       { pVarModel = pModel; return (*this); };
 
 
@@ -215,21 +218,17 @@ namespace gpstk
       Variable& setSatellite(const SatID& satellite)
       { varSat = satellite; return (*this); };
 
-      void  setNowIndex( int index){
-         m_now_index = index;
-      }
+      Variable& setNowIndex( int index)
+      {  m_now_index = index; return (*this); }
       
-      void setPreIndex( int index){
-         m_pre_index = index;
-      }
+      Variable& setPreIndex( int index)
+      { m_pre_index = index; return (*this); }
 
-      int getNowIndex() const {
-         return m_now_index;
-      }
+      int getNowIndex() const 
+      { return m_now_index; }
 
-      int getPreIndex() const{
-         return m_pre_index;
-      }
+      int getPreIndex() const
+      { return m_pre_index; }
 
          /// Equality operator
       virtual bool operator==(const Variable& right) const;
@@ -286,7 +285,7 @@ namespace gpstk
 
 
          /// Default stochastic model to be assigned to variables.
-      static WhiteNoiseModel defaultModel;
+      static WhiteNoiseModel2 defaultModel;
 
 
          /// Destructor
@@ -301,7 +300,7 @@ namespace gpstk
 
 
          /// Pointer stochastic model applying to variable
-      StochasticModel* pVarModel;
+      StochasticModel2* pVarModel;
 
 
          /** Whether this variable is or not source-specific. By default
@@ -373,7 +372,7 @@ namespace gpstk
           * @param forceCoef   Always use default coefficient.
           */
       void Init( const TypeID& type,
-                 StochasticModel* pModel = &Variable::defaultModel,
+                 StochasticModel2* pModel = &Variable::defaultModel,
                  double variance = 4.0e14,
                  double coef     = 1.0,
                  bool forceCoef  = false,

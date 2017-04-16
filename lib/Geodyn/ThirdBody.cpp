@@ -17,7 +17,6 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
-//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -30,9 +29,7 @@
 #include "ThirdBody.hpp"
 #include "GNSSconstants.hpp"
 
-
 using namespace std;
-
 
 namespace gpstk
 {
@@ -52,7 +49,7 @@ namespace gpstk
 
         double tt = JulianDate( pRefSys->UTC2TT(utc) ).jd;
 
-        Vector<double> r_sat = sc.getCurrentPos();
+        Vector<double> r_sat = sc.getPosition();
 
         Vector<bool> bPlanets(10,false);
         bPlanets(0) = bSun;
@@ -76,16 +73,16 @@ namespace gpstk
         // Geocentric position of planet, unit: m
         Vector<double> r_planet(3,0.0);
 
-        // Distance from planet to satellite
-        Vector<double> r_p2s(3,0.0);
+        // Distance from satellite to planet
+        Vector<double> dist(3,0.0);
 
         double p(0.0),p3(0.0);
         double d(0.0),d3(0.0),d5(0.0);
 
         Matrix<double> I = ident<double>(3);
 
-        Vector<double> ap(3,0.0);
-        Matrix<double> dap_dr(3,3,0.0);
+        a.resize(3,0.0);
+        da_dr.resize(3,3,0.0);
 
         // Loop
         for(int i=0; i<10; ++i)
@@ -149,20 +146,20 @@ namespace gpstk
             r_planet(1) = rv_planet[1]*1e3;
             r_planet(2) = rv_planet[2]*1e3;
 
-            r_p2s = r_sat - r_planet;
+            dist = r_planet - r_sat;
 
             p = norm(r_planet);
             p3 = p*p*p;
 
-            d = norm(r_p2s);
+            d = norm(dist);
             d3 = d*d*d;
             d5 = d3*d*d;
 
             // a
-            ap += -GMP * (r_p2s/d3 + r_planet/p3);
+            a += GMP * (dist/d3 - r_planet/p3);
 
             // da_dr
-            dap_dr += -GMP * (I/d3 - 3.0*outer(r_p2s,r_p2s)/d5);
+            da_dr += -GMP * (I/d3 - 3.0*outer(dist,dist)/d5);
 
             // da_dv ...
 
@@ -170,9 +167,7 @@ namespace gpstk
 
         }
 
-        a = ap;
-        da_dr = dap_dr;
+   }  // End of method 'ThirdBody::doCompute()'
 
-    }  // End of method 'ThirdBody::doCompute()'
 
 }  // End of namespace 'gpstk'

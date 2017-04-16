@@ -29,6 +29,7 @@
 
 
 #include "SimpleFilter.hpp"
+//#include "OmpHeader.hpp"
 
 
 namespace gpstk
@@ -68,12 +69,15 @@ namespace gpstk
             {
                try
                {
+		
                      // Try to extract the values
                   value = (*it).second(*pos);
+		  
 
                      // Now, check that the value is within bounds
                   if ( !( checkValue(value) ) )
-                  {
+                  {	
+		     //std::cout<<"value:"<<value<<std::endl;
                         // If value is out of bounds, then schedule this
                         // satellite for removal
                       satRejectedSet.insert( (*it).first );
@@ -112,6 +116,25 @@ namespace gpstk
       }
 
    }  // End of 'SimpleFilter::Process()'
+   
+   
+   gnssDataMap& SimpleFilter::Process(gnssDataMap& gData)
+      throw(ProcessingException, SVNumException)
+   {
+    
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+        
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {	
+               Process( sdmIt->second );
+         }
 
+      }
+
+      return gData;
+   }
 
 } // End of namespace gpstk

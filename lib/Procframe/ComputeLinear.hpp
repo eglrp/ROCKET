@@ -33,7 +33,7 @@
 
 
 #include "ProcessingClass.hpp"
-
+#include "StateStore.hpp"
 
 
 namespace gpstk
@@ -133,7 +133,7 @@ namespace gpstk
    public:
 
          /// Default constructor
-      ComputeLinear()
+      ComputeLinear():m_pStateStore(NULL)
       { clearAll(); };
 
 
@@ -183,12 +183,20 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
-
+      
+      
+         /** Returns a gnnsDataMap object, adding the new data generated 
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Returns the list of linear combinations to be computed.
       virtual LinearCombList getLinearCombinations(void) const
       { return linearList; };
-
+      
 
          /// Clear all linear combinations.
       virtual ComputeLinear& clearAll(void)
@@ -223,6 +231,12 @@ namespace gpstk
       virtual ComputeLinear& addLinear(const gnssLinearCombination& linear)
       { linearList.push_back(linear); return (*this); };
 
+	
+      virtual ComputeLinear setStateStore( StateStore& stateStore )
+      { m_pStateStore = &stateStore; return (*this);}    
+	
+      virtual StateStore& getStateStore() 
+      { return *m_pStateStore;}
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
@@ -234,6 +248,7 @@ namespace gpstk
 
    private:
 
+      StateStore *m_pStateStore;
 
          /// List of linear combinations to compute
       LinearCombList linearList;

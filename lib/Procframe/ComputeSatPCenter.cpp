@@ -167,6 +167,7 @@ namespace gpstk
 
 
       /* Compute the value of satellite antenna phase correction, in meters.
+       * @param sourceid  Source ID
        * @param satid     Satellite ID
        * @param time      Epoch of interest
        * @param satpos    Satellite position, as a Triple
@@ -188,6 +189,13 @@ namespace gpstk
 
          // rj = rk x ri: Rotation axis of solar panels (ECEF)
       Triple rj(rk.cross(ri));
+      
+         // receiver position
+/*      int id = 0;
+
+#ifdef _OPENMP
+      id = omp_get_thread_num();
+#endif*/
 
          // Redefine ri: ri = rj x rk (ECEF)
       ri = rj.cross(rk);
@@ -355,6 +363,71 @@ namespace gpstk
 
    }  // End of method 'ComputeSatPCenter::getSatPCenter()'
 
+   gnssDataMap& ComputeSatPCenter::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+/*#ifdef _OPENMP
+      // keep SourceID reference
+      std::vector<SourceID*> keyVec;
 
+      // keep satTypeValueMap reference
+      std::vector<satTypeValueMap*> valVec;
+
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         // add SourceID reference to 'keyVec' and
+         // add satTypeValueMap reference to 'valVec'.
+         for( sourceDataMap::iterator sdmIter = gdmIt->second.begin();
+              sdmIter != gdmIt->second.end(); sdmIter++ )
+         {  
+            SourceID& source = (SourceID&)(sdmIter->first);
+            satTypeValueMap& stvm = (satTypeValueMap&)(sdmIter->second);
+            keyVec.push_back( &source );
+            valVec.push_back( &stvm );
+         }
+      }
+#pragma omp parallel for
+         for( int i=0; i<keyVec.size(); i++ )
+         {
+            SourceID *key = keyVec[i];
+            setNominalPosition( (*key).nominalPos );
+            Process( gData.begin()->first, *(valVec[i]) );
+         }
+#else*/
+      for( gnssDataMap::iterator gdmIt = gData.begin();  
+         gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {  
+            setNominalPosition( (sdmIt->first).nominalPos );
+            Process( gdmIt->first, sdmIt->second );
+         }
+
+      }
+//#endif 
+      return gData;
+   }
+   
+   Position ComputeSatPCenter::getNominalPosition()
+   {
+/*      int id = 0;
+#ifdef USE_OPENMP
+      id = omp_get_thread_num();
+#endif*/
+      Position pos( nominalPos );
+      return pos;
+   }
+
+   ComputeSatPCenter& ComputeSatPCenter::setNominalPosition( const Position& pos ) 
+   {
+/*      int id = 0;
+#ifdef USE_OPENMP
+      id = omp_get_thread_num();
+#endif*/
+      nominalPos = pos;
+      return (*this);
+   }
 
 }  // End of namespace gpstk

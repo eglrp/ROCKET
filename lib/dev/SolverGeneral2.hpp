@@ -490,6 +490,9 @@ namespace gpstk
          /// Map holding state information
       VariableDataMap stateMap;
 
+	/// Vector holding state information
+      Vector<double> mSolution;
+
          /// Map holding covariance information
       std::map<Variable, VariableDataMap > covarianceMap;
       

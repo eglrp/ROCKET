@@ -356,10 +356,10 @@ namespace gpstk
                    typeValueMap tData( (*itEq).header.typeValueData );
 
                       // Prepare variable's stochastic model
-                   var.getModel()->Prepare(epoch,
-                                           varSource, 
-                                           varSat, 
-                                           tData);
+                   //var.getModel()->Prepare(epoch,
+                   //                        varSource, 
+                   //                        varSat, 
+                   //                        tData);
 
                       // Now, Let's get the position of this variable in 
                       // 'currentUnknowns'
@@ -378,8 +378,8 @@ namespace gpstk
                    if( oldUnknowns.find( var ) != oldUnknowns.end() )
                    {
                          // This variable is 'old'; compute its phi and q values
-                      phiValue= var.getModel()->getPhi();
-                      qValue = var.getModel()->getQ();
+                    //  phiValue= var.getModel()->getPhi();
+                    //  qValue = var.getModel()->getQ();
 
                          // Warning, here we will directly update the xhat/P 
                          // according the phi and its index. 
@@ -405,7 +405,7 @@ namespace gpstk
                       }
 
                          // Update the qMatrix 
-                      qMatrix(index,index) = var.getModel()->getQ();
+                     // qMatrix(index,index) = var.getModel()->getQ();
 
                    }
                    else

@@ -117,8 +117,7 @@ namespace gpstk
 	         XmitSOW = (double) Xmit;
          }
          beginValid = GPSWeekSecond( XmitWeek, XmitSOW, TimeSystem::GPS );
-
-	      // End of Validity.
+	      // End of Validity.	
 	      // The end of validity is calculated from the fit interval
 	      // and the Toe.  The fit interval is either trivial
 	      // (if fit interval flag==0, fit interval is 4 hours)

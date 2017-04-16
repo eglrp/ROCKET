@@ -15,9 +15,8 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
 //  Copyright 2004, The University of Texas at Austin
-//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -27,8 +26,8 @@
  * Class to do Sun Gravitation calculation.
  */
 
-#ifndef SUN_GRAVITATION_HPP
-#define SUN_GRAVITATION_HPP
+#ifndef GPSTK_SUN_GRAVITATION_HPP
+#define GPSTK_SUN_GRAVITATION_HPP
 
 #include "ForceModel.hpp"
 #include "SolarSystem.hpp"
@@ -36,96 +35,97 @@
 
 namespace gpstk
 {
-    /** @addtogroup GeoDynamics */
-    //@{
+      /** @addtogroup GeoDynamics */
+      //@{
 
-    /** Class to do Sun Gravitation calculation.
-     */
-    class SunGravitation : public ForceModel
-    {
-    public:
-
-        /// Default constructor
-        SunGravitation()
-            : pSolSys(NULL),
-              pRefSys(NULL)
-        {}
-
-
-        /// Constructor
-        SunGravitation(SolarSystem&      sol,
-                       ReferenceSystem&  ref)
-        {
-            pSolSys = &sol;
-            pRefSys = &ref;
-        }
+      /** Class to do Sun Gravitation calculation.
+       */
+   class SunGravitation : public ForceModel
+   {
+   public:
+ 
+         /// Default constructor
+      SunGravitation()
+         : pSolSys(NULL),
+           pRefSys(NULL)
+      {}
 
 
-        /// Default destructor
-        virtual ~SunGravitation() {}
+         /// Constructor
+      SunGravitation(SolarSystem&      sol,
+                     ReferenceSystem&  ref)
+      {
+         pSolSys = &sol;
+         pRefSys = &ref;
+      }
 
 
-        /// Set solar system
-        inline SunGravitation& setSolarSystem(SolarSystem& sol)
-        {
-            pSolSys = &sol;
-
-            return (*this);
-        }
+         /// Default destructor
+      virtual ~SunGravitation() {};
 
 
-        /// Get solar system
-        inline SolarSystem* getSolarSystem() const
-        {
-            return pSolSys;
-        }
+         /// Set solar system
+      inline SunGravitation& setSolarSystem(SolarSystem& sol)
+      {
+         pSolSys = &sol;
+
+         return (*this);
+      }
 
 
-        /// Set reference system
-        inline SunGravitation& setReferenceSystem(ReferenceSystem& ref)
-        {
-            pRefSys = &ref;
-
-            return (*this);
-        }
+         /// Get solar system
+      inline SolarSystem* getSolarSystem() const
+      {
+         return pSolSys;
+      }
 
 
-        /// Get reference system
-        inline ReferenceSystem* getReferenceSystem() const
-        {
-            return pRefSys;
-        }
+         /// Set reference system
+      inline SunGravitation& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
 
 
-        /** Compute acceleration (and related partial derivatives) of Sun
-         *  Gravitation.
-         * @param utc     time in UTC
-         * @param rb      earth body
-         * @param sc      spacecraft
-         */
-        virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+         /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
 
 
-        /// Return the force model name
-        inline virtual std::string modelName()  const
-        { return "SunGravitation"; }
+         /** Compute acceleration (and related partial derivatives) of Sun
+          *  Gravitation.
+          * @param utc     time in UTC
+          * @param rb      earth body
+          * @param sc      spacecraft
+          */
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
-        /// Return the force model index
-        inline virtual int forceIndex() const
-        { return FMI_SunGravitation; }
 
-    private:
+         /// Return the force model name
+      inline virtual std::string modelName()  const
+      { return "SunGravitation"; }
 
-        /// Solar System
-        SolarSystem* pSolSys;
+         /// Return the force model index
+      inline virtual int forceIndex() const
+      { return FMI_SunGravitation; }
 
-        /// Reference System
-        ReferenceSystem* pRefSys;
+   private:
 
-    };  // End of class 'SunGravitation'
+         /// Solar System
+      SolarSystem* pSolSys;
 
-    // @}
+         /// Reference System
+      ReferenceSystem* pRefSys;
+
+
+   }; // End of class 'SunGravitation'
+
+      // @}
 
 }  // End of namespace 'gpstk'
 
-#endif  // SUN_GRAVITATION_HPP
+#endif   // GPSTK_SUN_GRAVITATION_HPP

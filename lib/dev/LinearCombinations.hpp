@@ -45,7 +45,7 @@
 
 #include "DataStructures.hpp"
 #include "GNSSconstants.hpp"
-
+#include "StateStore.hpp"
 
 
 namespace gpstk

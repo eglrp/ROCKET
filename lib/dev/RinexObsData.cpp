@@ -184,7 +184,7 @@ namespace gpstk
       throw(exception, FFStreamError, gpstk::StringUtils::StringException)
    {
       RinexObsStream& strm = dynamic_cast<RinexObsStream&>(ffs);
-
+	
          // If the header hasn't been read, read it...
       if(!strm.headerRead) strm >> strm.header;
 
@@ -203,6 +203,7 @@ namespace gpstk
       bool isValidEpochLine(false);
       while( !isValidEpochLine )
       {
+
             // Get line
          strm.formattedGetLine(line, true);
 

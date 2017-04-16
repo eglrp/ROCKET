@@ -107,7 +107,7 @@ namespace gpstk
          try {
             GPSEphemeris neweph(gpseph);
             OrbitEph *oeptr = dynamic_cast<OrbitEph*>(&neweph);
-            oeptr = OrbitEphStore::addEphemeris(oeptr);
+	    oeptr = OrbitEphStore::addEphemeris(oeptr);
             return dynamic_cast<GPSEphemeris*>(oeptr);
          }
          catch(Exception& e) { GPSTK_RETHROW(e); }

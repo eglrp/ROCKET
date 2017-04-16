@@ -147,6 +147,15 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
 
+         
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling a modeling object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
+
 
          /// Method to get a pointer to the default TropModel to be used
          /// with GNSS data structures.

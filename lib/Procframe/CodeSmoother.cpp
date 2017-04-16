@@ -233,9 +233,9 @@ namespace gpstk
       if ( flag != 0.0 )
       {
             // Prepare the structure for the next iteration
-         SmoothingData[sat].previousCode = code;
-         SmoothingData[sat].previousPhase = phase;
-         SmoothingData[sat].windowSize = 1;
+         m_smoothingData[sat].previousCode = code;
+         m_smoothingData[sat].previousPhase = phase;
+         m_smoothingData[sat].windowSize = 1;
 
             // We don't need any further processing
          return code;
@@ -246,10 +246,10 @@ namespace gpstk
       double smoothedCode(0.0);
 
          // Increment size of window and check limit
-      ++SmoothingData[sat].windowSize;
-      if (SmoothingData[sat].windowSize > maxWindowSize)
+      ++m_smoothingData[sat].windowSize;
+      if (m_smoothingData[sat].windowSize > maxWindowSize)
       {
-         SmoothingData[sat].windowSize = maxWindowSize;
+         m_smoothingData[sat].windowSize = maxWindowSize;
       }
 
          // The formula used is the following:
@@ -260,18 +260,44 @@ namespace gpstk
          // weight to the previous smoothed code CSn-1 plus the phase bias
          // (Ln - Ln-1), and less weight to the current code observation Cn
       smoothedCode = ( code
-                  + ((static_cast<double>(SmoothingData[sat].windowSize)) - 1.0)
-                  * ( SmoothingData[sat].previousCode +
-                       ( phase - SmoothingData[sat].previousPhase ) ) )
-                  / (static_cast<double>(SmoothingData[sat].windowSize));
+                  + ((static_cast<double>(m_smoothingData[sat].windowSize)) - 1.0)
+                  * ( m_smoothingData[sat].previousCode +
+                       ( phase - m_smoothingData[sat].previousPhase ) ) )
+                  / (static_cast<double>(m_smoothingData[sat].windowSize));
 
          // Store results for next iteration
-      SmoothingData[sat].previousCode = smoothedCode;
-      SmoothingData[sat].previousPhase = phase;
+      m_smoothingData[sat].previousCode = smoothedCode;
+      m_smoothingData[sat].previousPhase = phase;
 
       return smoothedCode;
 
    }  // End of method 'CodeSmoother::getSmoothing()'
 
+   gnssDataMap& CodeSmoother::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+            SmoothingDataMap::iterator smoothingDataIt = m_smoothingDataMap.find( sdmIt->first );
+
+            if( smoothingDataIt != m_smoothingDataMap.end() )
+            {
+               m_smoothingData = smoothingDataIt->second;
+            }
+
+            Process(  sdmIt->second );
+
+            m_smoothingDataMap[sdmIt->first] = m_smoothingData;
+
+         }
+
+      }
+
+      return gData;
+   }
 
 }  // End of namespace gpstk

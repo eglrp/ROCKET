@@ -124,7 +124,14 @@ namespace gpstk
           */
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException);
-
+      
+         /** Returns a gnssDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Returns an index identifying this object.
       virtual int getIndex(void) const;

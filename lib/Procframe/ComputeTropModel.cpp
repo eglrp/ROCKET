@@ -141,6 +141,22 @@ namespace gpstk
       }
 
    } // End ComputeTropModel::Process()
+   
+   gnssDataMap& ComputeTropModel::Process( gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+            pTropModel->setAllParameters( gdmIt->first, sdmIt->first.nominalPos );
+            Process( gdmIt->first, sdmIt->second );
+         }
+      }
 
+      return gData;
+   }
 
 } // End of namespace gpstk

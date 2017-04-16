@@ -29,7 +29,7 @@
 
 
 #include "ProcessingList.hpp"
-
+#include "GNSSDataSerializer.hpp"
 
 namespace gpstk
 {
@@ -102,5 +102,22 @@ namespace gpstk
 
    }  // End of method 'ProcessingList::Process()'
 
+   gnssDataMap& ProcessingList::Process(gnssDataMap& gData)
+   {
+      try
+      {
+         std::list<ProcessingClass*>::const_iterator pos;
+         for(pos =proclist.begin(); pos != proclist.end(); pos++)
+         {
+	    //std::cout<<"ProcessingClass Name:"<<(*pos)->getClassName()<<std::endl;
+	    (*pos)->Process(gData);
+         }
+         return gData;
+      }
+      catch(...)
+      {
+         throw;
+      }
+   }
 
 }  // End of namespace gpstk

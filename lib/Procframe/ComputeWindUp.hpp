@@ -41,7 +41,7 @@
 #include "SatDataReader.hpp"
 #include "AntexReader.hpp"
 #include "GNSSconstants.hpp"
-
+//#include "OmpHeader.hpp"
 
 
 namespace gpstk
@@ -106,7 +106,7 @@ namespace gpstk
       ComputeWindUp()
          : pEphemeris(NULL), nominalPos(0.0, 0.0, 0.0),
            satData("PRN_GPS"), fileData("PRN_GPS"), pAntexReader(NULL)
-      { };
+      { /*Position pos(0.0,0.0,0.0); nominalPos[0]=pos;*/ };
 
 
          /** Common constructor
@@ -124,7 +124,7 @@ namespace gpstk
                      std::string filename="PRN_GPS" )
          : pEphemeris(&ephem), nominalPos(stapos), satData(filename),
            fileData(filename), pAntexReader(NULL)
-      { };
+      { /*nominalPos[0] = stapos;*/ };
 
 
          /** Common constructor. Uses satellite antenna data from an Antex file.
@@ -141,7 +141,7 @@ namespace gpstk
                      const Position& stapos,
                      AntexReader& antexObj )
          : pEphemeris(&ephem), nominalPos(stapos), pAntexReader(&antexObj)
-      { };
+      { /*nominalPos[0]=stapos;*/ };
 
 
          /** Common constructor. Uses satellite antenna data from an Antex file.
@@ -156,7 +156,7 @@ namespace gpstk
       ComputeWindUp( const Position& stapos,
                      AntexReader& antexObj )
          : pEphemeris(NULL), nominalPos(stapos), pAntexReader(&antexObj)
-      { };
+      { /*nominalPos[0]=stapos;*/ };
 
 
          /** Returns a satTypeValueMap object, adding the new data generated
@@ -189,6 +189,14 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
 
+      
+         /** Returns a gnssDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Returns name of "PRN_GPS"-like file containing satellite data.
       virtual std::string getFilename(void) const
@@ -202,15 +210,13 @@ namespace gpstk
 
 
          /// Returns nominal position of receiver station.
-      virtual Position getNominalPosition(void) const
-      { return nominalPos; };
+      virtual Position getNominalPosition(void);
 
 
          /** Sets  nominal position of receiver station.
           * @param stapos    Nominal position of receiver station.
           */
-      virtual ComputeWindUp& setNominalPosition(const Position& stapos)
-        { nominalPos = stapos; return (*this); };
+      virtual ComputeWindUp& setNominalPosition(const Position& stapos);
 
 
          /// Returns a pointer to the satellite ephemeris object
@@ -257,7 +263,10 @@ namespace gpstk
 
          /// Receiver position
       Position nominalPos;
-
+      
+      // Receiver position
+      //std::map<int, Position> nominalPos;
+      //Position nominalPos[omp_max_threads];
 
          /// Object to read satellite data file (PRN_GPS)
       SatDataReader satData;
@@ -275,22 +284,37 @@ namespace gpstk
       struct phaseData
       {
             // Default constructor initializing the data in the structure
-         phaseData() : previousPhase(0.0) {};
+         phaseData() : satPreviousPhase(0.0), staPreviousPhase(0.0), arcNum(0.0)
+         {};
 
-         double previousPhase;      ///< Previous phase.
+         double satPreviousPhase;      ///< Previous phase for satellite.
+         double staPreviousPhase;     ///< Previous phase for station.
+         double arcNum;              ///< satellite arc number
       };
+
+      
+      typedef std::map<SatID, phaseData> SatPhaseData;
+      typedef std::map<SourceID, SatPhaseData> SatPhaseDataMap;
+      
+         /// Map to holding Phase data for satellite
+      SatPhaseData  m_satPhaseData;//[omp_max_threads];
+      //std::map<int, SatPhaseData> m_satPhaseData;  
+
+         
+         /// Map to holding  Phase data for source
+      SatPhaseDataMap m_satPhaseDataMap;
 
 
          /// Map to store station phase data
-      std::map<SatID, phaseData> phase_station;
+      //std::map<SatID, phaseData> phase_station;
 
 
          /// Map to store satellite phase data
-      std::map<SatID, phaseData> phase_satellite;
+      //std::map<SatID, phaseData> phase_satellite;
 
 
          /// Map to store satellite arc data
-      std::map<SatID, double> satArcMap;
+      //std::map<SatID, double> satArcMap;
 
 
          /** Compute the value of the wind-up, in radians.

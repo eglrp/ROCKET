@@ -16,10 +16,13 @@
 #target_link_libraries(clkupdzap rocket)
 #install (TARGETS clkupdzap DESTINATION bin)
 
-add_executable(clk clk.cpp)
-target_link_libraries(clk rocket)
-install (TARGETS clk DESTINATION bin)
+#add_executable(clk clk.cpp)
+#target_link_libraries(clk rocket)
+#install (TARGETS clk DESTINATION bin)
 
+add_executable(clk_rt clk_rt.cpp)
+target_link_libraries(clk_rt rocket)
+install (TARGETS clk_rt DESTINATION bin)
 #add_executable(clksmpc clksmpc.cpp)
 #target_link_libraries(clksmpc rocket)
 #install (TARGETS clksmpc DESTINATION bin)

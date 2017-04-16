@@ -39,8 +39,9 @@
 #include "Triple.hpp"
 #include "Position.hpp"
 #include "Antenna.hpp"
+#include "AntexReader.hpp"
 #include "GNSSconstants.hpp"
-
+#include "ComputeTides.hpp"
 
 
 namespace gpstk
@@ -333,6 +334,14 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
 
+      
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Returns nominal position of receiver station.
       virtual Position getNominalPosition(void) const
@@ -515,6 +524,20 @@ namespace gpstk
       virtual CorrectObservables& setUseAzimuth(bool useAzimuthPattern)
       { useAzimuth = useAzimuthPattern; return (*this); };
 
+         /**
+          * Set antex reader
+          */
+      virtual CorrectObservables& setAntexReader( AntexReader& reader)
+      {antexReader = &reader; return (*this);};
+      
+      virtual CorrectObservables& setUseAntex( const bool useantex )
+      {useAntex = useantex; return (*this);}
+
+      virtual CorrectObservables& setUsePatterns( const bool usepatterns )
+      {usePatterns = usepatterns; return (*this);}
+      
+      virtual CorrectObservables& setTideCorr( ComputeTides& tideCorr )
+      { m_tideCorr = tideCorr; return (*this);}
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
@@ -534,14 +557,23 @@ namespace gpstk
          /// Receiver position.
       Position nominalPos;
 
+         /// correct tides effect
+      ComputeTides m_tideCorr;
 
          /// Antenna object with information taken from Antex file.
       Antenna antenna;
 
+         /// antex Reader holding information about antex file
+      AntexReader* antexReader;
 
          /// Whether azimuth-dependent antenna patterns will be used or not
       bool useAzimuth;
-
+      
+         /// Whether use antex file
+      bool useAntex;
+      
+         /// Whether use patterns
+      bool usePatterns;
 
          /// Position of antenna L1 phase center with respect to ARP ([UEN]).
       Triple L1PhaseCenter;

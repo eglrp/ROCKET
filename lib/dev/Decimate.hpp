@@ -203,6 +203,14 @@ namespace gpstk
          throw(DecimateEpoch)
       { Process(gData.header.epoch, gData.body); return gData; };
 
+      
+         /** Returns a gnnsDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(DecimateEpoch);
 
          /// Returns sampling interval, in seconds.
       virtual double getSampleInterval(void) const

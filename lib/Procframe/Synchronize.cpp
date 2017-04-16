@@ -100,9 +100,10 @@ namespace gpstk
    gnssRinex& Synchronize::Process(CommonTime time, gnssRinex& gData)
       throw(SynchronizeException)
    {
-      
+ 
       if (firstTime)
       {
+
          (*pRinexRef) >> gData;      // Get data out of ref station RINEX file
 
          gnssRinexBuffer.clear();
@@ -116,6 +117,7 @@ namespace gpstk
       if( (gData.header.epoch > time) && 
          (std::abs( gData.header.epoch - time ) > tolerance ))
       {
+
          // If synchronization is not possible, we issue an exception
          SynchronizeException e( "Unable to synchronize data at epoch "
             + time.asString() );
@@ -126,10 +128,18 @@ namespace gpstk
       // and that tolerance is within limits. If not, keep reading.
       // Note that if reference data time stamp is bigger, it will not
       // enter here, "waiting" for gData to catch up.
-
+	
       while ( ( gData.header.epoch < time ) &&
          (std::abs( gData.header.epoch - time ) > tolerance ) )
       {
+
+	 if( pRinexRef->eof() ) {
+         	// If synchronization is not possible, we issue an exception
+             SynchronizeException e( "Unable to synchronize data at epoch "
+            				+ time.asString() );
+             GPSTK_THROW(e);
+	 }
+
          (*pRinexRef) >> gData;   // Get data out of ref station RINEX file
       }
 

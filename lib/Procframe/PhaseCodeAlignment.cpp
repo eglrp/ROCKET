@@ -30,7 +30,6 @@
 
 #include "PhaseCodeAlignment.hpp"
 
-
 namespace gpstk
 {
 
@@ -98,6 +97,10 @@ namespace gpstk
       try
       {
 
+/*         int id=0;
+#ifdef USE_OPENMP
+         id = omp_get_thread_num();
+#endif*/
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
@@ -108,14 +111,14 @@ namespace gpstk
 
                // Check if satellite currently has entries
             std::map<SatID, alignData>::const_iterator itDat(
-                                                svData.find( (*it).first ) );
-            if( itDat == svData.end() )
+                                                m_svData.find( (*it).first ) );
+            if( itDat == m_svData.end() )
             {
 
                   // If it doesn't have an entry, insert one
                alignData aData;
 
-               svData[ (*it).first ] = aData;
+               m_svData[ (*it).first ] = aData;
 
             }
 
@@ -150,14 +153,14 @@ namespace gpstk
 
 
                   // Check if satellite arc has changed
-               if( svData[(*it).first].arcNumber != arcN )
+               if( m_svData[(*it).first].arcNumber != arcN )
                {
 
                      // Set flag
                   csflag = true;
 
                      // Update satellite arc information
-                  svData[(*it).first].arcNumber = arcN;
+                  m_svData[(*it).first].arcNumber = arcN;
                }
 
             }  // End of first part of 'if(useSatArcs)'
@@ -209,14 +212,14 @@ namespace gpstk
                diff = std::floor(diff);
 
                   // The new offset is the INTEGER number of cycles, in meters
-               svData[(*it).first].offset = diff * phaseWavelength;
+               m_svData[(*it).first].offset = diff * phaseWavelength;
 
             }
 
                // Let's align the phase measurement using the
                // corresponding offset
             (*it).second[phaseType] = (*it).second[phaseType]
-                                      + svData[(*it).first].offset;
+                                      + m_svData[(*it).first].offset;
 
          }
 
@@ -299,6 +302,70 @@ namespace gpstk
       }
 
    }  // End of 'PhaseCodeAlignment::Process()'
+   
+   gnssDataMap& PhaseCodeAlignment::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+/*#ifdef USE_OPENMP
+      // keep SourceID reference
+      std::vector<SourceID*> keyVec;
 
+      // keep satTypeValueMap reference
+      std::vector<satTypeValueMap*> valVec;
+
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         // add SourceID reference to 'keyVec' add
+         // add satTypeValueMap reference to 'valVec'
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+               sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+            SourceID& source = (SourceID&)(sdmIt->first);
+            satTypeValueMap& stvm = (satTypeValueMap&)(sdmIt->second);
+            keyVec.push_back( &source );
+            valVec.push_back( &stvm );
+         }
+      }
+#pragma omp parallel for
+         for( int i=0; i<keyVec.size(); i++ )
+         {
+            int id = omp_get_thread_num();
+            SourceID *key = keyVec[i];
+            SVDataMap::const_iterator svDataIt = m_svDataMap.find( *key );
+            if( svDataIt != m_svDataMap.end() )
+            {
+               m_svData[id] = svDataIt->second;
+            }
+            Process( gData.begin()->first, *(valVec[i]) );
+            m_svDataMap[*key] = m_svData[id];
+         }
+#else*/
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+            SVDataMap::const_iterator svDataIt = m_svDataMap.find( sdmIt->first );
+
+            if( svDataIt != m_svDataMap.end() )
+            {
+               m_svData = svDataIt->second;
+            }
+	    else
+	    {
+	       m_svData = SVData();
+	    }
+      
+            Process( gdmIt->first, sdmIt->second );
+
+            m_svDataMap[sdmIt->first] = m_svData;
+
+         }
+      }
+//#endif
+      return gData;
+   }
 
 } // End of namespace gpstk

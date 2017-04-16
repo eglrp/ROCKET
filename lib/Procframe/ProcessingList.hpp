@@ -100,7 +100,13 @@ namespace gpstk
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData);
-
+      
+         
+         /** Processing method. It returns a gnssDataMap object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData);
 
          /// Returns a pointer to the first element.
       virtual ProcessingClass* front(void)

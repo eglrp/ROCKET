@@ -44,7 +44,7 @@
 
 
 #include "DataStructures.hpp"
-#include "StochasticModel.hpp"
+#include "StochasticModel2.hpp"
 #include "Variable.hpp"
 
 using namespace std;
@@ -90,7 +90,6 @@ namespace gpstk
           *  default.
           */
       double constWeight;
-
 
          /** Map to store the values related to type. It is retrieved from
           *  the gnssDataMap, and used to compute the state transition matrix
@@ -154,7 +153,6 @@ namespace gpstk
        */
    struct Equation : gnssData<equationHeader, VarCoeffMap>
    {
-
          /// Default constructor.
       Equation();
 
@@ -278,7 +276,7 @@ namespace gpstk
           * @param coef             Default coefficient assigned.
           */
       virtual Equation& addVariable( const TypeID& type,
-                                     StochasticModel* pModel   =
+                                     StochasticModel2* pModel   =
                                                       &Variable::defaultModel,
                                      bool sourceIndexed        = true,
                                      bool satIndexed           = false,
@@ -364,7 +362,6 @@ namespace gpstk
 
          /// Destructor
       virtual ~Equation() {};
-
 
    }; // End of struct 'Equation'
 

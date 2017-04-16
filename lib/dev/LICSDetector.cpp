@@ -144,8 +144,7 @@ namespace gpstk
                // We will mark both cycle slip flags
             (*it).second[resultType2] = (*it).second[resultType1];
 
-         }
-
+         } 
             // Remove satellites with missing data
          gData.removeSatID(satRejectedSet);
 
@@ -263,7 +262,40 @@ namespace gpstk
       }
 
    }  // End of method 'LICSDetector::Process()'
+   
 
+   gnssDataMap& LICSDetector::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+       for( gnssDataMap::iterator gdmIt = gData.begin();
+            gdmIt != gData.end(); gdmIt++ )
+       {
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end(); sdmIt++ )
+            {     
+                  //// find SourceID
+               	  LIDataMap::iterator liDataMapIt = m_liDataMap.find( sdmIt->first );
+                  
+                  if( liDataMapIt != m_liDataMap.end() )
+                  {
+                    m_liData = liDataMapIt->second ;
+                  }
+		  else
+		  {
+		    m_liData = LIData();
+		  }
+                  
+                  /// processing
+                  Process( gdmIt->first, sdmIt->second );
+
+                  /// store to map
+                  m_liDataMap[sdmIt->first] = m_liData;
+            }
+       }
+
+       return gData;
+   }
 
       /* Method that implements the LI cycle slip detection algorithm
        *
@@ -302,16 +334,16 @@ namespace gpstk
 
          // Get the difference between current epoch and former epoch,
          // in seconds
-      currentDeltaT = ( epoch - LIData[sat].formerEpoch );
+      currentDeltaT = ( epoch - m_liData[sat].formerEpoch );
 
          // Store current epoch as former epoch
-      LIData[sat].formerEpoch = epoch;
+      m_liData[sat].formerEpoch = epoch;
 
          // Current value of LI difference
-      currentBias = li - LIData[sat].formerLI;
+      currentBias = li - m_liData[sat].formerLI;
 
          // Increment window size
-      ++LIData[sat].windowSize;
+      ++m_liData[sat].windowSize;
 
          // Check if receiver already declared cycle slip or too much time
          // has elapsed
@@ -348,24 +380,24 @@ namespace gpstk
       {
 
             // We reset the filter with this
-         LIData[sat].windowSize = 0;
+        m_liData[sat].windowSize = 0;
 
          reportCS = true;
       }
 
-      if (LIData[sat].windowSize > 1)
+      if (m_liData[sat].windowSize > 1)
       {
          deltaLimit = minThreshold + std::abs(LIDrift*currentDeltaT);
 
             // Compute a linear interpolation and compute
             // LI_predicted - LI_current
-         delta = std::abs( currentBias - (LIData[sat].formerBias *
-                           currentDeltaT / LIData[sat].formerDeltaT) );
+         delta = std::abs( currentBias - (m_liData[sat].formerBias *
+                           currentDeltaT / m_liData[sat].formerDeltaT) );
 
          if (delta > deltaLimit)
          {
                // We reset the filter with this
-            LIData[sat].windowSize = 0;
+            m_liData[sat].windowSize = 0;
 
             reportCS = true;
          }
@@ -373,9 +405,9 @@ namespace gpstk
       }
 
          // Let's prepare for the next time
-      LIData[sat].formerLI = li;
-      LIData[sat].formerBias = currentBias;
-      LIData[sat].formerDeltaT = currentDeltaT;
+      m_liData[sat].formerLI = li;
+      m_liData[sat].formerBias = currentBias;
+      m_liData[sat].formerDeltaT = currentDeltaT;
 
       if (reportCS)
       {

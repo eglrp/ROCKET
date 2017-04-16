@@ -208,6 +208,10 @@ namespace gpstk
       pcPrefitC.body[TypeID::gravDelay]    = -1.0;
       pcPrefitC.body[TypeID::satPCenter]   = -1.0;
       pcPrefitC.body[TypeID::tropoSlant]   = -1.0;
+      
+        // add correction for clock 
+      //pcPrefitC.body[TypeID::dtSat]        = +1.0;
+      //pcPrefitC.body[TypeID::cdt]          = -1.0;
 
          // Definition to compute prefit residual of LC for clock estimation
       lcPrefitC.header                     = TypeID::prefitL;
@@ -219,6 +223,10 @@ namespace gpstk
       lcPrefitC.body[TypeID::tropoSlant]   = -1.0;
          // Coefficient for LC windUp is LC wavelenght/2*PI
       lcPrefitC.body[TypeID::windUp]       = -0.1069533781421467/TWO_PI;
+      
+        // add correction for clock.
+      //lcPrefitC.body[TypeID::dtSat]        = +1.0;
+      //lcPrefitC.body[TypeID::cdt]          = -1.0;
 
 
          // Definition to compute PI combination

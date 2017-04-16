@@ -142,6 +142,14 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
 
+      
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling a modeling object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
       virtual ComputeIonoModel& setZeroModel()
       { ionoType = Zero; return (*this); }

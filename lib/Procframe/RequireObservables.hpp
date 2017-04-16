@@ -168,6 +168,15 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
       { Process(gData.body); return gData; };
+      
+      
+
+         /** Returns a gnnsDataMap object, checking the required observables.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
 
          /// Returns a string identifying this object.

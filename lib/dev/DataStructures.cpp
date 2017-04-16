@@ -2732,6 +2732,24 @@ in matrix and number of types do not match") );
       return (*this);
    }
 
+
+   gnssDataMap& gnssDataMap::removeSatID( const SourceID& source,
+					  const SatID& sat )
+   {
+	for( gnssDataMap::iterator iter = this->begin();
+	      iter != this->end(); iter++ )
+
+	{
+	   sourceDataMap::iterator sdmIter = iter->second.find( source );
+	
+	   if( iter->second.end() != sdmIter )
+	   {
+	      sdmIter->second.removeSatID(sat); 
+	   }
+	}
+
+   }
+
       // Modifies this object, removing this satellite.
       // @param sat Satellite to be removed.
    gnssDataMap& gnssDataMap::removeSatID(const SatID& sat)
@@ -2857,6 +2875,34 @@ in matrix and number of types do not match") );
       typeSet.insert(type);
 
       return removeTypeID(typeSet);
+   }
+
+	
+   gnssDataMap& gnssDataMap::removeTypeID( const SatID& satellite,
+					   const SourceID& source,
+					   const TypeID& type )
+   {
+	
+      // Iterate through all items in the gnssDataMap
+      for( gnssDataMap::iterator it = this->begin();
+           it != this->end();
+           ++it )
+      {
+         const CommonTime& time(it->first);
+
+	 sourceDataMap::iterator sdmIter = it->second.find( source );
+	 if( it->second.end() != sdmIter )
+	 {
+	    satTypeValueMap::iterator stvmIter = sdmIter->second.find( satellite );
+	    
+	    if( sdmIter->second.end() != stvmIter )
+	    {
+		stvmIter->second.removeTypeID( type );
+	    }	
+	 }
+      }  // End of 'for( gnssDataMap::const_iterator it = gdMap.begin(); ...'
+
+      return (*this);
    }
 
 
@@ -3032,19 +3078,25 @@ in matrix and number of types do not match") );
 
             RinexObsData rod;
             strm >> rod;
-
+	
             // firstly, define a new temporary Source, then copy
             // it to the source of the header
             SourceID source;
             source.type         = SatIDsystem2SourceIDtype(roh.system);
             source.sourceName   = roh.markerName;
             source.sourceNumber = roh.markerNumber;
+            source.recType      = roh.recType;
+            source.antType      = roh.antType;
+            source.antennaOffset = roh.antennaOffset;
 
             // Fill header source data 
             f.header.source.type        = source.type         ;
             f.header.source.sourceName  = source.sourceName   ;
             f.header.source.sourceNumber= source.sourceNumber ;
             f.header.source.zwdMap      = source.zwdMap       ;
+            f.header.source.recType     = source.recType      ;
+            f.header.source.antType     = source.antType      ;
+            f.header.source.antennaOffset = source.antennaOffset;
 
             // fill header data
             f.header.antennaType = roh.antType;
@@ -3053,7 +3105,7 @@ in matrix and number of types do not match") );
             f.header.epoch = rod.time;
 
             f.body = satTypeValueMapFromRinexObsData(roh, rod);
-
+		
             return i;
          }
          catch (...)

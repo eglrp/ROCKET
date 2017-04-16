@@ -44,11 +44,12 @@
 #include "AntexReader.hpp"
 #include "GNSSconstants.hpp"
 #include "StringUtils.hpp"
-
+//#include "OmpHeader.hpp"
 
 
 namespace gpstk
 {
+
 
       /** @addtogroup DataStructures */
       //@{
@@ -105,7 +106,7 @@ namespace gpstk
       ComputeSatPCenter()
          : pEphemeris(NULL), nominalPos(0.0, 0.0, 0.0),
            satData("PRN_GPS"), fileData("PRN_GPS"), pAntexReader(NULL)
-      { };
+      { /*Position pos(0.0,0.0,0.0); nominalPos[0] = pos;*/ };
 
 
          /** Common constructor
@@ -123,7 +124,7 @@ namespace gpstk
                          std::string filename="PRN_GPS" )
          : pEphemeris(&ephem), nominalPos(stapos), satData(filename),
            fileData(filename), pAntexReader(NULL)
-      { };
+      { /*nominalPos[0] = stapos;*/ };
 
 
          /** Common constructor
@@ -139,7 +140,7 @@ namespace gpstk
                          std::string filename="PRN_GPS" )
          : pEphemeris(NULL), nominalPos(stapos), satData(filename),
            fileData(filename), pAntexReader(NULL)
-      { };
+      { /*nominalPos[0] = stapos;*/};
 
 
          /** Common constructor. Uses satellite antenna data from an Antex file.
@@ -156,7 +157,7 @@ namespace gpstk
                          const Position& stapos,
                          AntexReader& antexObj )
          : pEphemeris(&ephem), nominalPos(stapos), pAntexReader(&antexObj)
-      { };
+      { /*nominalPos[0] = stapos;*/ };
 
 
          /** Common constructor. Uses satellite antenna data from an Antex file.
@@ -171,7 +172,7 @@ namespace gpstk
       ComputeSatPCenter( const Position& stapos,
                          AntexReader& antexObj )
          : pEphemeris(NULL), nominalPos(stapos), pAntexReader(&antexObj)
-      { };
+      { /*nominalPos[0] = stapos;*/ };
 
 
          /** Returns a satTypeValueMap object, adding the new data generated
@@ -181,7 +182,7 @@ namespace gpstk
           * @param gData     Data object holding the data.
           */
       virtual satTypeValueMap& Process( const CommonTime& time,
-                                        satTypeValueMap& gData )
+                                        satTypeValueMap& gData)
          throw(ProcessingException);
 
 
@@ -204,6 +205,14 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
 
+      
+         /** Returns a gnssDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Returns name of "PRN_GPS"-like file containing satellite data.
       virtual std::string getFilename(void) const
@@ -217,15 +226,12 @@ namespace gpstk
 
 
          /// Returns nominal position of receiver station.
-      virtual Position getNominalPosition(void) const
-      { return nominalPos; };
-
+      virtual Position getNominalPosition(void);
 
          /** Sets  nominal position of receiver station.
           * @param stapos    Nominal position of receiver station.
           */
-      virtual ComputeSatPCenter& setNominalPosition(const Position& stapos)
-        { nominalPos = stapos; return (*this); };
+      virtual ComputeSatPCenter& setNominalPosition(const Position& stapos);
 
 
          /// Returns a pointer to the satellite ephemeris object
@@ -272,8 +278,13 @@ namespace gpstk
 
 
          /// Receiver position
-      Position nominalPos;
+      //Position nominalPos;
 
+      // Receiver position, using the 'map' to
+      // hold position for parallel computing,
+      // default it has only one element
+      
+      Position nominalPos;//[omp_max_threads];
 
          /// Object to read satellite data file (PRN_GPS)
       SatDataReader satData;
@@ -298,7 +309,7 @@ namespace gpstk
       virtual double getSatPCenter( const SatID& satid,
                                     const CommonTime& time,
                                     const Triple& satpos,
-                                    const Triple& sunPosition );
+                                    const Triple& sunPosition);
 
 
    }; // End of class 'ComputeSatPCenter'

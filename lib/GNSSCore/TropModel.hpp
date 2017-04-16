@@ -203,6 +203,9 @@ namespace gpstk
          /// @param H      relative humidity in percent
       static void weatherByStandardAtmosphereModel(const double& ht, double& T, double& P, double& H);
 
+      virtual void setAllParameters( const CommonTime& time,
+                                     const Position& rxPos )
+      {}
    protected:
       bool valid;                 // true only if current model parameters are valid
       double temp;                // latest value of temperature (kelvin or celsius)

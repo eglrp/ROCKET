@@ -71,7 +71,7 @@ namespace gpstk
 
 
       // Default stochastic model to be assigned to variables.
-   WhiteNoiseModel Variable::defaultModel;
+   WhiteNoiseModel2 Variable::defaultModel;
 
 
 
@@ -104,7 +104,7 @@ namespace gpstk
        * @param forceCoef        Always use default coefficient.
        */
    Variable::Variable( const TypeID& type,
-                       StochasticModel* pModel,
+                       StochasticModel2* pModel,
                        bool sourceIndexed,
                        bool satIndexed,
                        double variance,
@@ -142,7 +142,7 @@ namespace gpstk
        * @param forceCoef   Always use default coefficient.
        */
    void Variable::Init( const TypeID& type,
-                        StochasticModel* pModel,
+                        StochasticModel2* pModel,
                         double variance,
                         double coef,
                         bool forceCoef, 

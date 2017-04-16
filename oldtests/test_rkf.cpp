@@ -1,6 +1,13 @@
+/*************************************************************************
+	> File Name: test_rkf.cpp
+	> Author:
+	> Mail:
+	> Created Time: 2016年07月24日 星期日 15时04分51秒
+ ************************************************************************/
+
 #include<iostream>
 
-#include "RKF78Integrator.hpp"
+#include "RungeKuttaFehlberg.hpp"
 
 #include "EquationOfMotion.hpp"
 
@@ -24,7 +31,7 @@ Vector<double> TestEOM::getDerivatives(const double &t,
                                        const Vector<double>& y)
 {
    Vector<double> dy(y.size(),0.0);
-   dy(0) = std::cos(t) + 1e-10;
+   dy(0) = std::cos(t);
 
    return dy;
 }
@@ -39,10 +46,10 @@ int main(void)
 
    Vector<double> y0(1,0.0);
 
-   RKF78Integrator rkf;
+   RungeKuttaFehlberg rkf;
    rkf.setStepSize(0.25);
 
-   for(int i=0; i<1e4; ++i)
+   for(int i=0; i<100000; ++i)
    {
       rkf.integrateTo(t0, y0, &eom, t0+h);
 

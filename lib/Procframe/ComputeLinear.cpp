@@ -29,7 +29,7 @@
 
 
 #include "ComputeLinear.hpp"
-
+//#include "OmpHeader.hpp"
 
 namespace gpstk
 {
@@ -108,5 +108,48 @@ namespace gpstk
 
    }  // End of method 'ComputeLinear::Process()'
 
+
+   gnssDataMap& ComputeLinear::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+ 
+/*#ifdef _OPENMP
+
+      // keep satTypeValueMap reference
+      std::vector<satTypeValueMap*> valVec;
+
+      for( gnssDataMap::iterator gdmIter = gData.begin();
+            gdmIter != gData.end(); gdmIter++ )
+      {
+         /// add satTypeValueMap reference to 'valVec'
+         for( sourceDataMap::iterator sdmIter = gdmIter->second.begin();
+               sdmIter != gdmIter->second.end(); sdmIter++ )
+         {
+            satTypeValueMap& stvm = (satTypeValueMap&)(sdmIter->second);
+            valVec.push_back( &stvm );
+         }
+
+      }
+         
+#pragma omp parallel for
+         for( int i=0; i<valVec.size(); i++ )
+         {
+            Process( gData.begin()->first, *(valVec[i]) );
+         }
+#else*/
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+               Process( gdmIt->first, sdmIt->second );
+         }
+
+      }
+//#endif 
+      return gData;
+   }
 
 } // End of namespace gpstk

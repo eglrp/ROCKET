@@ -620,6 +620,7 @@ namespace gpstk
       // Casts Rinex3NavData to a GPSEphemeris object.
    Rinex3NavData::operator GPSEphemeris() const throw()
    {
+
       GPSEphemeris gpse;
 
       // fill the OrbitEph parts
@@ -650,6 +651,7 @@ namespace gpstk
       gpse.health = health;
       gpse.accuracyFlag = accuracy;
       gpse.Tgd = Tgd;
+
 
       gpse.HOWtime = HOWtime;
       week = static_cast<GPSWeekSecond>(gpse.ctToe).getWeek();

@@ -16,6 +16,15 @@ void Counter::begin(){
 #endif
 }
 
+double Counter::now()
+{
+#ifndef USE_OPENMP
+   return (double)clock/CLOCKS_PER_SEC;
+#else
+   return omp_get_wtime();
+#endif
+}
+
 double Counter::end(){
    double t = 0.0;
 #ifndef USE_OPENMP

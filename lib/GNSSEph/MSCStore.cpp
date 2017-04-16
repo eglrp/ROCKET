@@ -232,7 +232,7 @@ namespace gpstk
          // Chop off any leading/trailing whitespace
       string key = StringUtils::stripTrailing(msc.mnemonic);
       key = StringUtils::stripLeading(key);
-      
+    
       StaMSCMap& mm = mscMap[key];
       mm[msc.effepoch] = msc;
       
@@ -268,6 +268,7 @@ namespace gpstk
       {
          string key = StringUtils::stripTrailing( stationID );
          key = StringUtils::stripLeading( key ); 
+         
 
          MMci mm = mscMap.find( StringUtils::lowerCase(key) );
 
@@ -277,6 +278,7 @@ namespace gpstk
          {
             mm = MM;
          }
+
 
          // Didn't find the station under the mnemonic.
             // Check for a possible station number use.
@@ -313,7 +315,6 @@ namespace gpstk
             const CommonTime& dtr = smmir->first;
             if (dtr<=t) return( smmir->second );
          }
-
             // If we reach this point, there's no time-approprate entry for 
             // this station
          InvalidRequest e("No station coordinates for station " + 

@@ -17,7 +17,6 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
-//
 //  Kaifa Kuang - Wuhan University . 2016
 //
 //============================================================================
@@ -29,80 +28,66 @@
 *
 */
 
-#ifndef EARTH_POLE_TIDE_HPP
-#define EARTH_POLE_TIDE_HPP
+#ifndef GPSTK_EARTH_POLE_TIDE_HPP
+#define GPSTK_EARTH_POLE_TIDE_HPP
 
 #include "ReferenceSystem.hpp"
 
 
 namespace gpstk
 {
-    /** @addtogroup GeoDynamics */
-    //@{
+      /** @addtogroup GeoDynamics */
+      //@{
 
-    /**
-     * Class to do Earth Pole Tide correction
-     * see IERS Conventions 2010 Section 6.4 and 6.5 for more details.
-     */
-    class EarthPoleTide
-    {
-    public:
-        /// Default constructor
-        EarthPoleTide()
-            : pRefSys(NULL)
-        {}
+      /**
+       * Class to do Earth Pole Tide correction
+       * see IERS Conventions 2010 Section 6.4 and 6.5 for more details.
+       */
+   class EarthPoleTide
+   {
+   public:
+         /// Default constructor
+      EarthPoleTide()
+         : pRefSys(NULL)
+      {}
 
-        /// Default destructor
-        ~EarthPoleTide() {}
-
-
-        /// Set reference system
-        inline EarthPoleTide& setReferenceSystem(ReferenceSystem& ref)
-        {
-            pRefSys = &ref;
-
-            return (*this);
-        }
+         /// Default destructor
+      ~EarthPoleTide() {}
 
 
-        /// Get reference system
-        inline ReferenceSystem* getReferenceSystem() const
-        {
-            return pRefSys;
-        }
+         /// Set reference system
+      inline EarthPoleTide& setReferenceSystem(ReferenceSystem& ref)
+      {
+         pRefSys = &ref;
+
+         return (*this);
+      }
 
 
-        /** Pole tide to normalized earth potential coefficients
-         *
-         * @param utc      time in UTC
-         * @param dCS      normalized earth potential coefficients
-         */
-        void getPoleTide(CommonTime utc, Matrix<double>& dCS);
+         /// Get reference system
+      inline ReferenceSystem* getReferenceSystem() const
+      {
+         return pRefSys;
+      }
 
-        /** Pole tide to normalized earth potential coefficients.
-         *
-         * @param utc  time in UTC
-         * @return     correction to normalized potential coefficients
-         */
-        Matrix<double> getPoleTide(CommonTime utc);
 
-        /** Pole tide to site displacements.
-         *
-         * @param utc  time in UTC
-         * @param pos  nominal position of interest
-         * @return     correction to site displacements
-         */
-        Vector<double> getPoleTide(CommonTime utc, const Vector<double>& pos);
+         /** Pole tide to normalized earth potential coefficients
+          *
+          * @param utc      time in UTC
+          * @param dCS      normalized earth potential coefficients
+          */
+      void getPoleTide(CommonTime utc, Matrix<double>& dCS);
 
-    protected:
+   protected:
 
-        /// Reference System
-        ReferenceSystem* pRefSys;
+         /// Reference System
+      ReferenceSystem* pRefSys;
 
-    }; // End of class 'EarthPoleTide'
 
-    // @}
+   }; // End of class 'EarthPoleTide'
+
+      // @}
 
 }  // End of namespace 'gpstk'
 
-#endif   // EARTH_POLE_TIDE_HPP
+#endif   // GPSTK_EARTH_POLE_TIDE_HPP

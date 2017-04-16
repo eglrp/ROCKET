@@ -44,7 +44,7 @@
 #include "EngEphemeris.hpp"
 #include "XvtStore.hpp"
 #include "GPSEphemerisStore.hpp"
-
+//#include "OmpHeader.hpp"
 
 namespace gpstk
 {
@@ -194,6 +194,14 @@ namespace gpstk
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
 
+      
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling a modeling object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Method to get satellite elevation cut-off angle. By default, it
          /// is set to 10 degrees.
@@ -238,7 +246,7 @@ namespace gpstk
 
          /// Either estimated or "a priori" position of receiver
       Position rxPos;
-
+      //Position rxPos[omp_max_threads];
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;

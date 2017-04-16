@@ -39,6 +39,7 @@
 
 #include "CC2NONCC.hpp"
 
+
 using namespace std;
 
 namespace gpstk
@@ -51,6 +52,11 @@ namespace gpstk
      // recType gets a value
    CC2NONCC& CC2NONCC::setRecType(const string& rectype)
    {
+/*      int id=0;
+#ifdef _OPENMP
+      id = omp_get_thread_num();
+#endif*/
+
       recType = rectype;
       return (*this);
    }
@@ -79,15 +85,22 @@ namespace gpstk
       
       try
       {
+         
+/*         int id=0;
+#ifdef _OPENMP
+         id = omp_get_thread_num();
+#endif*/
+         
          SatIDSet satRejectedSet;
 
          bool RecHasC1(false);
          bool RecHasP1(false);	
          bool RecHasP2(false);	
          bool RecHasX2(false);	
-
+         
             // Firstly, read the code types that the 'recType' supports
          set<string> recCodeSet = recTypeData.getCode(recType);
+         
 
          if( recCodeSet.size() == 0 )
          {
@@ -171,6 +184,7 @@ namespace gpstk
             }
    
          }  // End of 'for (it = gData.begin(); it != gData.end(); ++it)'
+        
          gData.removeSatID(satRejectedSet);
          return gData;
       }
@@ -194,6 +208,63 @@ namespace gpstk
       }
 
    }  // End of method 'CC2NONCC::Process()'
+   
+
+   gnssDataMap& CC2NONCC::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+/*#ifdef _OPENMP
+   // keep all sourceID
+   std::vector<SourceID*> keyVec;
+
+   // keep all satTypeValueMap
+   std::vector<satTypeValueMap*> valVec;
+
+   for( gnssDataMap::iterator gdmIter = gData.begin();
+         gdmIter != gData.end(); gdmIter++ )
+   {
+      for( sourceDataMap::iterator sdmIter = gdmIter->second.begin();
+            sdmIter != gdmIter->second.end(); sdmIter++ )
+      {
+         SourceID& source = (SourceID&)(sdmIter->first);
+         satTypeValueMap& stvm = (satTypeValueMap&)(sdmIter->second);
+         keyVec.push_back( &source );
+         valVec.push_back( &stvm );
+      }
+   }
+   
+   CommonTime time( gData.begin()->first );
+#pragma omp parallel for
+   for( int i=0; i<keyVec.size(); i++ )
+   {
+      try
+      {
+         SourceID *key = keyVec[i];
+         setRecType( (*key).recType );
+         Process( time, *(valVec[i]) );
+      }
+      catch(ProcessingException& e)
+      {
+         std::cerr<<"CC2NONCC error:"<<e<<std::endl;
+      }
+   }
+
+#else*/
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end(); sdmIt++ )
+            {
+                setRecType( (sdmIt->first).recType );
+                Process( gdmIt->first, sdmIt->second );
+            }
+      }
+//#endif  
+      return gData;
+   }
+
 
 
 }  // End of namespace gpstk

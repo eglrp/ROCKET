@@ -1417,6 +1417,11 @@ namespace gpstk
       gnssDataMap& keepOnlySatID(const SatIDSet& satSet);
 
 
+	/// Modifies this obkect, remove this satellite.
+	/// @param sat Satellite to be removed.
+      gnssDataMap& removeSatID( const SourceID& source,
+				const SatID& sat );
+
          /// Modifies this object, removing this satellite.
          /// @param sat Satellite to be removed.
       gnssDataMap& removeSatID(const SatID& sat);
@@ -1449,6 +1454,10 @@ namespace gpstk
          ///                  to be extracted.
       gnssDataMap& keepOnlyTypeID(const TypeIDSet& typeSet);
 
+
+      gnssDataMap& removeTypeID( const SatID& satellite,
+				 const SourceID& source,
+				 const TypeID& type );
 
          /// Modifies this object, removing this type.
          /// @param type Type to be removed.

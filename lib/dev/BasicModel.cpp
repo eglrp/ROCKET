@@ -137,6 +137,10 @@ namespace gpstk
       try
       {
 
+/*         int id=0;
+#ifdef _OPENMP
+         id = omp_get_thread_num();
+#endif*/
          SatIDSet satRejectedSet;
 
             // Loop through all the satellites
@@ -244,7 +248,7 @@ namespace gpstk
 
 
          } // End of loop for(stv = gData.begin()...
-
+         
             // Remove satellites with missing data
          gData.removeSatID(satRejectedSet);
 
@@ -264,6 +268,58 @@ namespace gpstk
    }  // End of method 'BasicModel::Process()'
 
 
+   gnssDataMap& BasicModel::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+/*#ifdef _OPENMP
+      
+      // keep SourceID reference 
+      std::vector<SourceID*> keyVec;
+
+      // keep satTypeValueMap reference
+      std::vector<satTypeValueMap*> valVec;
+
+      for( gnssDataMap::iterator gdmIter = gData.begin();
+            gdmIter != gData.end(); gdmIter++ )
+      {
+         // add SourceID reference to 'keyVec' and
+         // add satTypeValueMap reference to 'valVec'.
+         for( sourceDataMap::iterator sdmIter = gdmIter->second.begin();
+               sdmIter != gdmIter->second.end(); sdmIter++ )
+         {
+            SourceID& source = (SourceID&)(sdmIter->first);
+            satTypeValueMap& stvm = (satTypeValueMap&)(sdmIter->second);
+            keyVec.push_back( &source );
+            valVec.push_back( &stvm );
+         }
+
+      }
+
+#pragma omp parallel for
+      for( int i=0; i<keyVec.size(); i++ )
+      {
+         SourceID *key = keyVec[i];
+         setInitialRxPosition( (*key).nominalPos );
+         Process( gData.begin()->first, *(valVec[i]) );
+      }
+#else*/
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {  
+            
+            setInitialRxPosition( (sdmIt->first).nominalPos );
+            Process( gdmIt->first, sdmIt->second );  
+         }
+
+      }
+//#endif
+      return gData;
+   }
 
       /* Method to set the initial (a priori) position of receiver.
        * @return
@@ -299,6 +355,10 @@ namespace gpstk
 
       try
       {
+/*         int id=0;
+#ifdef USE_OPENMP
+         id = omp_get_thread_num();
+#endif*/
          rxPos = RxCoordinates;
          return 0;
       }

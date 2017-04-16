@@ -266,38 +266,34 @@ namespace gpstk
             Matrix<double> currentErrorCov(numUnknowns, numUnknowns, 0.0);
 
                // Fill the state vector
-            int i(0);      // Set an index
+      //      int i(0);      // Set an index
             for( VariableSet::const_iterator itVar = currentUnknowns.begin();
                  itVar != currentUnknowns.end();
                  ++itVar )
             {
-               currentState(i) = stateMap[ (*itVar) ];
-               ++i;
+	       int now_index = itVar->getNowIndex();
+	       int pre_index = itVar->getPreIndex();
+
+	       if( -1 != pre_index ){
+		  currentState( now_index ) = mSolution(pre_index); 
+	       }else{
+		  currentState( now_index ) = 0.0;
+	       }
+
+               //currentState(i) = stateMap[ (*itVar) ];
+        //       ++i;
             }
 
                // Fill the covariance matrix
 
                // We need a copy of 'currentUnknowns'
             VariableSet tempSet( currentUnknowns );
-            i = 0;         // Reset 'i' index
             for( VariableSet::const_iterator itVar1 = currentUnknowns.begin();
                  itVar1 != currentUnknowns.end();
                  ++itVar1 )
             {
                   // Fill the diagonal element
                  
-                  // Check if '(*itVar1)' belongs to 'covarianceMap'
-              /* if( covarianceMap.find( (*itVar1) ) != covarianceMap.end() )
-               {
-                     // If it belongs, get element from 'covarianceMap'
-                  currentErrorCov(i, i) = covarianceMap[ (*itVar1) ][ (*itVar1) ];
-               }
-               else  
-               {     
-                     // If it doesn't belong, ask for default covariance
-                  currentErrorCov(i, i) = (*itVar1).getInitialVariance();
-               }*/
-
                int now_index = itVar1->getNowIndex();
                int pre_index = itVar1->getPreIndex();
 
@@ -307,24 +303,9 @@ namespace gpstk
                   currentErrorCov( now_index, now_index ) = mCoVarMatrix( pre_index, pre_index );
                }
 
-
-               //int j(i+1);      // Set 'j' index
-
                   // Remove current Variable from 'tempSet'
                tempSet.erase( (*itVar1) );
 
-               /*for( VariableSet::const_iterator itVar2 = tempSet.begin();
-                    itVar2 != tempSet.end();
-                    ++itVar2 )
-               {
-                  currentErrorCov(i, j) =
-                     currentErrorCov(j, i) =
-                        covarianceMap[ (*itVar1) ][ (*itVar2) ];
-
-                  ++j;
-               }*/
-
-               //++i;
                for( VariableSet::const_iterator itVar2 = tempSet.begin();
                      itVar2 != tempSet.end() ; itVar2++ ){
                   
@@ -350,8 +331,6 @@ namespace gpstk
 
          }  // End of 'if(firstTime)'
 
-      //finish=clock();
-      //totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
       cout << "cputtime preCompute" << Counter::end() << endl;
 
             ////////////////////////////////////////////
@@ -401,23 +380,13 @@ namespace gpstk
                    typeValueMap tData( (*itEq).header.typeValueData );
 
                       // Prepare variable's stochastic model
-                   var.getModel()->Prepare(epoch,
-                                           varSource, 
-                                           varSat, 
-                                           tData);
+                  // var.getModel()->Prepare(epoch,
+                  //                         varSource, 
+                  //                         varSat, 
+                  //                         tData);
 
-                      // Now, Let's get the position of this variable in 
-                      // 'currentUnknowns'
-                  /* int index(0);
-                   VariableSet::const_iterator itVar1=currentUnknowns.begin();
-                   while( (*itVar1) != var )
-                   {
-                      index++;
-                      itVar1++;
-                   }*/
-                  
                    int index = var.getNowIndex(); 
-
+		 
                       // phi/q for current model
                    double phiValue, qValue;
 
@@ -425,9 +394,9 @@ namespace gpstk
                    if( oldUnknowns.find( var ) != oldUnknowns.end() )
                    {
                          // This variable is 'old'; compute its phi and q values
-                      phiValue= var.getModel()->getPhi();
-                      qValue = var.getModel()->getQ();
-
+                    //  phiValue= var.getModel()->getPhi();
+                    //  qValue = var.getModel()->getQ();
+			
                          // Warning, here we will directly update the xhat/P 
                          // according the phi and its index. 
 
@@ -452,11 +421,13 @@ namespace gpstk
                       }
 
                          // Update the qMatrix 
-                      qMatrix(index,index) = var.getModel()->getQ();
+                    //  qMatrix(index,index) = var.getModel()->getQ();
 
                    }
                    else
                    {
+
+		      //std::cout << "Variable new" << std::endl;
                          // This variable is 'new', reset the xhatminus 
                       xhat(index) = 0.0;
 
@@ -497,8 +468,6 @@ namespace gpstk
             Pminus(i,i) = Pminus(i,i) + qMatrix(i,i); 
          }
 
-      //finish=clock();
-      //totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
       cout << "cputtime TimeUpdate" << Counter::end() << endl;
 
       }
@@ -534,9 +503,6 @@ namespace gpstk
             //
             ////////////////////////////////////////////
             
-      //clock_t start,finish;
-      //double totaltime;
-      //start=clock();
          Counter::begin();
             // Now, Let's copy the predicted state/covariance to 
             // xhat/P
@@ -604,11 +570,6 @@ namespace gpstk
             }
 
                // Second, fill geometry matrix: Look for equation coefficients
-            // VariableDataMap tempCoeffMap;
-            
-            /// allocator double array to holding coeffience for Variable
-            /// double *tempCoefArray = new double[ numVar ];
-            
                // Now, let's visit all Variables and the corresponding 
                // coefficient in this equation description
             int i = 0;
@@ -655,44 +616,13 @@ namespace gpstk
 
                }  // End of 'if( (*itCol).isDefaultForced() ) ...'
 
-               //tempCoeffMap[var] = tempCoef ;
-               //tempCoefArray[ var->getNowIndex() ] = tempCoef;
                hMatrix( row, var.getNowIndex() ) = tempCoef;
                index(i) = var.getNowIndex();
                G(i) = tempCoef;
 
-              // cout << "index="<<var.getNowIndex()<<",coef="<<tempCoef<<endl;
             }  // End of 'for( VarCoeffMap::const_iterator vcmIter = ...'
                // Now, Let's create the index for current float unks
 
-               // Float unks number for current equation
-            //int numVar(tempCoeffMap.size());
-            //Vector<int> index(numVar);
-            //Vector<double> G(numVar);
-
-               // Loop the tempCoeffMap
-            //int i(0);
-            /*i=0;
-            for( VariableDataMap::const_iterator itvdm=tempCoeffMap.begin();
-                 itvdm != tempCoeffMap.end();
-                 ++itvdm )
-            {
-               int col(0);
-               VariableSet::const_iterator itVar2=currentUnknowns.begin();
-               while( (*itVar2) != (*itvdm).first )
-               {
-                  col++;
-                  itVar2++;
-               }
-               index(i) = col; 
-               G(i) = (*itvdm).second;
-
-                  // Set the geometry matrix
-               hMatrix(row, col) = (*itvdm).second;
-
-                  // Incrment of the float variable 
-               i++;
-            }*/
 
                // Temp measurement
             double z(tempPrefit);
@@ -700,8 +630,6 @@ namespace gpstk
                // Inverse weight
             double inv_W(1.0/weight);  
 
-               // M to store the value of  P*G
-            //Vector<double> M(numUnknowns,0.0);
             
                // Now, let's compute M=P*G.
             for(int i=0; i<numUnknowns; i++)
@@ -719,8 +647,6 @@ namespace gpstk
             }
 
                // Compute the Kalman gain
-            //Vector<double> K(numUnknowns,0.0); 
-
             double beta(inv_W + dotGM);
 
             K = M/beta;
@@ -764,10 +690,7 @@ namespace gpstk
 
          }  // End of 'for( std::list<Equation>::const_iterator itEq = ...'
 
-      //finish=clock();
-      //totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
       cout << "cputtime measupdate" << Counter::end() << endl;
-      //start=finish;
       Counter::begin();
 
             // Reset
@@ -781,10 +704,7 @@ namespace gpstk
             // Compute the postfit residuals Vector
          postfitResiduals = prefitResiduals - (hMatrix* solution);
 
-      //finish=clock();
-      //totaltime=(double)(finish-start)/CLOCKS_PER_SEC;
       cout << "cputtime postfitResiduals" << Counter::end() << endl;
-      //start=finish;
 
          //////////// //////////// //////////// ////////////
          //
@@ -793,53 +713,15 @@ namespace gpstk
          //
          //////////// //////////// //////////// ////////////
 
-            // Clean up values in 'stateMap' and 'covarianceMap'
-         stateMap.clear();
-         covarianceMap.clear();
-
-
-            // Get the set with unknowns being processed
-         VariableSet unkSet( equSystem.getCurrentUnknowns() );
-
-            // Store values of current state
          
          mCoVarMatrix = Matrix<double>( covMatrix );
+	
+	      mSolution = Vector<double>( solution );
 
-         int i(0);      // Set an index
-         for( VariableSet::const_iterator itVar = unkSet.begin();
-              itVar != unkSet.end();
-              ++itVar )
-         {
-            stateMap[ (*itVar) ] = solution(i);
-            ++i;
-         }
-
-            // Store values of covariance matrix
-            // We need a copy of 'unkSet'
-         /*VariableSet tempSet( unkSet );
-         i = 0;         // Reset 'i' index
-         for( VariableSet::const_iterator itVar1 = unkSet.begin();
-              itVar1 != unkSet.end();
-              ++itVar1 )
-         {
-               // Fill the diagonal element
-            covarianceMap[ (*itVar1) ][ (*itVar1) ] = covMatrix(i, i);
-            int j(i+1);      // Set 'j' index
-               // Remove current Variable from 'tempSet'
-            tempSet.erase( (*itVar1) );
-            for( VariableSet::const_iterator itVar2 = tempSet.begin();
-                 itVar2 != tempSet.end();
-                 ++itVar2 )
-            {
-               covarianceMap[ (*itVar1) ][ (*itVar2) ] = covMatrix(i, j);
-               ++j;
-            }
-            ++i;
-         }  // End of for( VariableSet::const_iterator itVar1 = unkSet...'
-         */
+	
 
             // Store the postfit residuals in the GNSS Data Structure
-         i = 0;         // Reset 'i' index
+         int i = 0;         // Reset 'i' index
             // Visit each equation in "equList"
          for( std::list<Equation>::const_iterator itEq = equList.begin();
               itEq != equList.end();
@@ -916,19 +798,18 @@ namespace gpstk
       throw(InvalidRequest)
    {
 
-         // Look the variable inside the state map
-      VariableDataMap::const_iterator it( stateMap.find( variable ) );
+     VariableSet::iterator itVar = currentUnknowns.find( variable );
 
-         // Check if the provided Variable exists in the solution. If not,
-         // an InvalidSolver exception will be issued.
-      if( it == stateMap.end() )
-      {
-         InvalidRequest e("Variable not found in solution vector.");
-         GPSTK_THROW(e);
-      }
-
-         // Return value
-      return (*it).second;
+     if( currentUnknowns.end() != itVar )
+     {
+	      return mSolution( itVar->getNowIndex() );
+     }
+     else
+     {
+	      InvalidRequest e("Variable not found in solution vector.");
+	      GPSTK_THROW(e);
+	      return 0.0;
+     }
 
    }  // End of method 'SolverGeneral2::getSolution()'
 
@@ -944,27 +825,22 @@ namespace gpstk
    double SolverGeneral2::getSolution( const TypeID& type ) const
       throw(InvalidRequest)
    {
-
-         // Declare an iterator for 'stateMap' and go to the first element
-      VariableDataMap::const_iterator it = stateMap.begin();
-
-         // Look for a variable with the same type
-      while( (*it).first.getType() != type &&
-             it != stateMap.end() )
+	
+      for( VariableSet::const_iterator itVar = currentUnknowns.begin();
+      	   itVar != currentUnknowns.end(); itVar++ )
       {
-         ++it;
-
-         // If the same type is not found, throw an exception
-         if( it == stateMap.end() )
+	   
+	      if( type == itVar->getType() )
          {
-             InvalidRequest e("Type not found in solution vector.");
-             GPSTK_THROW(e);
-         }
-      }
+		      return mSolution( itVar->getNowIndex() );
+	      }
 
-         // Else, return the corresponding value
-      return (*it).second;
+	   }
+	
+      InvalidRequest e("Type not found in solution vector.");
+      GPSTK_THROW(e);
 
+     return 0.0;
    }  // End of method 'SolverGeneral2::getSolution()'
 
 
@@ -981,28 +857,23 @@ namespace gpstk
                                       const SourceID& source ) const
       throw(InvalidRequest)
    {
-
-         // Declare an iterator for 'stateMap' and go to the first element
-      VariableDataMap::const_iterator it = stateMap.begin();
-
-         // Look for a variable with the same type and source
-      while( !( (*it).first.getType()   == type &&
-                (*it).first.getSource() == source ) &&
-             it != stateMap.end() )
+      
+	   for( VariableSet::const_iterator itVar = currentUnknowns.begin();
+	      itVar != currentUnknowns.end(); itVar++ )
       {
-         ++it;
 
-         // If it is not found, throw an exception
-         if( it == stateMap.end() )
+         if( itVar->getType() == type &&
+	    	   itVar->getSource() == source )
          {
-             InvalidRequest e("Type and source not found in solution vector.");
-             GPSTK_THROW(e);
-         }
-      }
+		      return mSolution( itVar->getNowIndex() );
+	      }
 
-         // Else, return the corresponding value
-      return (*it).second;
+	   }
 
+
+	   InvalidRequest e("Type and source not found in solution vector.");
+	   GPSTK_THROW(e);
+	   return 0.0;
    }  // End of method 'SolverGeneral2::getSolution()'
 
 
@@ -1019,28 +890,22 @@ namespace gpstk
                                       const SatID& sat ) const
       throw(InvalidRequest)
    {
-
-      // Declare an iterator for 'stateMap' and go to the first element
-      VariableDataMap::const_iterator it = stateMap.begin();
-
-      // Look for a variable with the same type and source
-      while( !( (*it).first.getType()   == type &&
-             (*it).first.getSatellite() == sat ) &&
-             it != stateMap.end() )
+	
+      for( VariableSet::const_iterator itVar = currentUnknowns.begin();
+      	   itVar != currentUnknowns.end(); itVar++ )
       {
-         ++it;
 
-         // If it is not found, throw an exception
-         if( it == stateMap.end() )
+	      if( itVar->getType() == type &&
+	          itVar->getSatellite() == sat )
          {
-            InvalidRequest e("Type and source not found in solution vector.");
-            GPSTK_THROW(e);
-         }
+	        return mSolution( itVar->getNowIndex() );
+	      }
+
       }
-
-      // Else, return the corresponding value
-      return (*it).second;
-
+	
+      InvalidRequest e("Type and satellite not found in solution vector.");
+      GPSTK_THROW(e);
+      return 0.0;
    }  // End of method 'SolverGeneral2::getSolution()'
 
 
@@ -1059,29 +924,23 @@ namespace gpstk
                                       const SatID& sat ) const
       throw(InvalidRequest)
    {
+	
+     for( VariableSet::const_iterator itVar = currentUnknowns.begin();
+     	  itVar != currentUnknowns.end(); itVar++ )
+     {
 
-         // Declare an iterator for 'stateMap' and go to the first element
-      VariableDataMap::const_iterator it = stateMap.begin();
-
-         // Look for a variable with the same type, source and satellite
-      while( !( (*it).first.getType()      == type    &&
-                (*it).first.getSource()    == source  &&
-                (*it).first.getSatellite() == sat        ) &&
-             it != stateMap.end() )
-      {
-         ++it;
-
-         // If it is not found, throw an exception
-         if( it == stateMap.end() )
+	      if( itVar->getType() == type &&
+	          itVar->getSource() == source &&
+	          itVar->getSatellite() == sat )
          {
-             InvalidRequest e("Type, source and SV not found in solution vector.");
-             GPSTK_THROW(e);
-         }
+	         return mSolution( itVar->getNowIndex() );
+	      }
+
       }
-
-         // Else, return the corresponding value
-      return (*it).second;
-
+	
+      InvalidRequest e("Type source and satellite not found in solution vector.");
+      GPSTK_THROW(e);
+      return 0.0;
    }  // End of method 'SolverGeneral2::getSolution()'
 
       /* Returns the covariance associated to a given Variable.
@@ -1093,29 +952,20 @@ namespace gpstk
                                         const Variable& var2 ) const
       throw(InvalidRequest)
    {
-      std::map<Variable, VariableDataMap >::const_iterator it1 = covarianceMap.find(var1);
-      if(it1!=covarianceMap.end())
-      {
-         VariableDataMap::const_iterator it2 = it1->second.find(var2);
-         if(it2!=it1->second.end())
-         {
-            return it2->second;
-         }
-         else
-         {
-            it1 = covarianceMap.find(var2);
-            if(it1!=covarianceMap.end())
-            {
-               it2 = it1->second.find(var1);
-               if(it2!=it1->second.end()) return it2->second;
-            }
-         }
-      }
-      
-         // Once code go here, we failed to find the value, and throw exception.
-      InvalidRequest e("Failed to get the covariance value.");
-      GPSTK_THROW(e);
 
+     VariableSet::iterator itVar1 = currentUnknowns.find( var1 );
+     VariableSet::iterator itVar2 = currentUnknowns.find( var2 );
+
+     if( currentUnknowns.end() != itVar1 &&
+     	   currentUnknowns.end() != itVar2 )
+      {   
+	
+      	return mCoVarMatrix( itVar1->getNowIndex(), itVar2->getNowIndex() );
+				    
+      }
+
+      InvalidRequest e("variable not found!");
+      GPSTK_THROW(e);
       return 0.0;
    }
 
@@ -1127,18 +977,17 @@ namespace gpstk
    double SolverGeneral2::getVariance(const Variable& variable) const 
       throw(InvalidRequest)
    {
+	
+     VariableSet::iterator itVar = currentUnknowns.find( variable );
 
-         // Check if the provided Variable exists in the solution. If not,
-         // an InvalidSolver exception will be issued.
-      if( stateMap.find( variable ) == stateMap.end() )
-      {
-         InvalidRequest e("Variable not found in covariance matrix.");
-         GPSTK_THROW(e);
-      }
+     if( currentUnknowns.end() != itVar )
+     {
+	      return mCoVarMatrix( itVar->getNowIndex(), itVar->getNowIndex() );
+     }
 
-         // Return value
-      return getCovariance(variable,variable);
-
+     InvalidRequest e("Variable not found in covariance matrix.");
+     GPSTK_THROW(e);
+     return 0.0;
    }  // End of method 'SolverGeneral2::getVariance()'
 
 
@@ -1154,27 +1003,20 @@ namespace gpstk
       throw(InvalidRequest)
    {
 
-         // Declare an iterator for 'covarianceMap' and go to the first element
-      std::map<Variable, VariableDataMap >::const_iterator it
-                                                      = covarianceMap.begin();
-
-         // Look for a variable with the same type
-      while( (*it).first.getType() != type &&
-             it != covarianceMap.end() )
+      for( VariableSet::iterator itVar = currentUnknowns.begin();
+      	  itVar != currentUnknowns.end(); itVar++ )
       {
-         ++it;
-
-         // If the same type is not found, throw an exception
-         if( it == covarianceMap.end() )
+	   
+	      if( itVar->getType() == type )
          {
-             InvalidRequest e("Type not found in covariance matrix.");
-             GPSTK_THROW(e);
-         }
+		      return mCoVarMatrix( itVar->getNowIndex(), itVar->getNowIndex() );
+	      }
+
       }
 
-         // Else, return the corresponding value
-      return getCovariance(it->first,it->first); 
-
+      InvalidRequest e("Type not found in covariance matrix.");
+      GPSTK_THROW(e);
+      return 0.0;
    }  // End of method 'SolverGeneral2::getVariance()'
 
 
@@ -1190,27 +1032,22 @@ namespace gpstk
                                       const SourceID& source ) const 
       throw(InvalidRequest)
    {
-         // Declare an iterator for 'stateMap' and go to the first element
-      VariableDataMap::const_iterator it = stateMap.begin();
 
-         // Look for a variable with the same type and source
-      while( !( (*it).first.getType()   == type &&
-         (*it).first.getSource() == source ) &&
-         it != stateMap.end() )
+	   for( VariableSet::iterator itVar = currentUnknowns.begin();
+	        itVar != currentUnknowns.end(); itVar++ )
       {
-         ++it;
-
-         // If it is not found, throw an exception
-         if( it == stateMap.end() )
+		
+	     if( itVar->getType() == type &&
+	         itVar->getSource() == source )
          {
-            InvalidRequest e("Type and source not found in solution vector.");
-            GPSTK_THROW(e);
-         }
-      }
+		      return mCoVarMatrix( itVar->getNowIndex(), itVar->getNowIndex() );
+	      }
 
-         // Else, return the corresponding value
-      return getCovariance(it->first,it->first);
+	   }
 
+	   InvalidRequest e("Type and source not found in solution vector.");
+	   GPSTK_THROW(e);
+	   return 0.0;
    }  // End of method 'SolverGeneral2::getVariance()'
 
 
@@ -1227,28 +1064,20 @@ namespace gpstk
                                       const SatID& sat ) const 
       throw(InvalidRequest)
    {
-      // Declare an iterator for 'stateMap' and go to the first element
-      VariableDataMap::const_iterator it = stateMap.begin();
 
-      // Look for a variable with the same type and source
-      while( !( (*it).first.getType()   == type &&
-             (*it).first.getSatellite() == sat ) &&
-             it != stateMap.end() )
-      {
-         ++it;
+	   for( VariableSet::iterator itVar = currentUnknowns.begin();
+	        itVar != currentUnknowns.end(); itVar++ )
+      {	
+	      if( itVar->getType() == type &&
+	          itVar->getSatellite() == sat )
+		   {
+		      return mCoVarMatrix( itVar->getNowIndex(), itVar->getNowIndex() );
+		   }
+	   }
 
-         // If it is not found, throw an exception
-         if( it == stateMap.end() )
-         {
-            InvalidRequest e("Type and source not found in solution vector.");
-            GPSTK_THROW(e);
-         }
-      }
-
-      // Else, return the corresponding value
-      return getCovariance(it->first,it->first);
-
-
+	   InvalidRequest e("Type and source not found in solution vector.");
+	   GPSTK_THROW(e);
+	   return 0.0;
    }  // End of method 'SolverGeneral2::getVariance()'
 
 
@@ -1266,28 +1095,23 @@ namespace gpstk
                                       const SatID& sat ) const 
       throw(InvalidRequest)
    {
-         // Declare an iterator for 'stateMap' and go to the first element
-      VariableDataMap::const_iterator it = stateMap.begin();
 
-         // Look for a variable with the same type, source and satellite
-      while( !( (*it).first.getType()      == type    &&
-         (*it).first.getSource()    == source  &&
-         (*it).first.getSatellite() == sat        ) &&
-         it != stateMap.end() )
+	   for( VariableSet::iterator itVar = currentUnknowns.begin();
+	        itVar != currentUnknowns.end(); itVar++ )
       {
-         ++it;
+	    
+	     if( itVar->getType() == type &&
+	         itVar->getSource() == source &&
+		      itVar->getSatellite() == sat )
+		   {
+		      return mCoVarMatrix( itVar->getNowIndex(), itVar->getNowIndex() );
+		   }
 
-         // If it is not found, throw an exception
-         if( it == stateMap.end() )
-         {
-            InvalidRequest e("Type, source and SV not found in solution vector.");
-            GPSTK_THROW(e);
-         }
-      }
-
-         // Else, return the corresponding value
-      return getCovariance(it->first,it->first);
-
+	   }
+	
+	   InvalidRequest e("Type source and satellite not found in solution vector.");
+	   GPSTK_THROW(e);
+	   return 0.0;
    }  // End of method 'SolverGeneral2::getVariance()'
 
 
@@ -1300,18 +1124,18 @@ namespace gpstk
                                               const double& val )
       throw(InvalidRequest)
    {
-      VariableDataMap::iterator it = stateMap.find(variable);
-      if(it!=stateMap.end())
+	
+      if( -1 != variable.getNowIndex() )
       {
-         stateMap[variable] = val;
+	       mSolution( variable.getNowIndex() ) = val;
       }
       else
       {
-         InvalidRequest e("The variable not exist in the solver.");
-         GPSTK_THROW(e);
+	      InvalidRequest e("The variable not exist in the solver.");
+	      GPSTK_THROW(e);
       }
 
-      return (*this);
+      return *this;
    }
 
 
@@ -1326,35 +1150,19 @@ namespace gpstk
                                               const double& cov)
       throw(InvalidRequest)
    {  
-      std::map<Variable, VariableDataMap >::iterator it1 = covarianceMap.find(var1);
-      if(it1!=covarianceMap.end())
-      {
-         VariableDataMap::iterator it2 = it1->second.find(var2);
-         if(it2!=it1->second.end())
-         {
-            covarianceMap[var1][var2] = cov;
-            return (*this);
-         }
-         else
-         {
-            it1 = covarianceMap.find(var2);
-            if(it1!=covarianceMap.end())
-            {
-               it2 = it1->second.find(var1);
-               if(it2!=it1->second.end())
-               {
-                  covarianceMap[var2][var1] = cov;
-                  return (*this);
-               }
-            }
-         }
-      }
 
-      // One code go here, we failed to find the value, and throw exception.
-      InvalidRequest e("The input variables are not exist in the solver.");
-      GPSTK_THROW(e);
-      
-      return (*this);
+      if( -1 != var1.getNowIndex() &&
+          -1 != var2.getNowIndex() )
+	   {
+	      mCoVarMatrix( var1.getNowIndex(), var2.getNowIndex() )
+	      = mCoVarMatrix( var2.getNowIndex(), var1.getNowIndex() ) = cov;
+	   }
+      else
+      {
+		   InvalidRequest e("The input variables are not exist in the solver.");
+		   GPSTK_THROW(e);
+	   }
+	   return *this;
    }
 
 }  // End of namespace gpstk

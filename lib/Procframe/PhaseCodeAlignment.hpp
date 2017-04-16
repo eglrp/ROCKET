@@ -250,7 +250,15 @@ namespace gpstk
           */
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException);
+      
 
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process( gnssDataMap& gData)
+         throw(ProcessingException);
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
@@ -294,11 +302,16 @@ namespace gpstk
          double arcNumber;       ///< Current arc number
          double offset;          ///< Offset value to be applied
       };
-
+      
+      typedef std::map<SatID, alignData>  SVData;
+      typedef std::map<SourceID, SVData>  SVDataMap;
 
          /// Map holding the information regarding every satellite
-      std::map<SatID, alignData> svData;
-
+      //std::map<SatID, alignData> svData;
+      
+      SVData     m_svData;
+      //std::map<int,SVData> m_svData;
+      SVDataMap  m_svDataMap;
 
    }; // End of class 'PhaseCodeAlignment'
 

@@ -35,19 +35,25 @@ CMAKE_COMMAND = /usr/bin/cmake
 # The command to remove a file.
 RM = /usr/bin/cmake -E remove -f
 
+# Escaping for special characters.
+EQUALS = =
+
+# The program to use to edit the cache.
+CMAKE_EDIT_COMMAND = /usr/bin/ccmake
+
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/kfkuang/rocket
+CMAKE_SOURCE_DIR = /home/gaokang/gitcode/ROCKET
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/kfkuang/rocket
+CMAKE_BINARY_DIR = /home/gaokang/gitcode/ROCKET
 
 #=============================================================================
 # Targets provided globally by CMake.
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running interactive CMake command-line interface..."
-	/usr/bin/cmake -i .
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -107,14 +113,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/kfkuang/rocket && $(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles /home/kfkuang/rocket/apps/network/CMakeFiles/progress.marks
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/kfkuang/rocket/CMakeFiles 0
+	cd /home/gaokang/gitcode/ROCKET && $(CMAKE_COMMAND) -E cmake_progress_start /home/gaokang/gitcode/ROCKET/CMakeFiles /home/gaokang/gitcode/ROCKET/apps/network/CMakeFiles/progress.marks
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f CMakeFiles/Makefile2 apps/network/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gaokang/gitcode/ROCKET/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/clean
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f CMakeFiles/Makefile2 apps/network/clean
 .PHONY : clean
 
 # The main clean target
@@ -123,246 +129,56 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/preinstall
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f CMakeFiles/Makefile2 apps/network/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/preinstall
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f CMakeFiles/Makefile2 apps/network/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/kfkuang/rocket && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/gaokang/gitcode/ROCKET && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
-apps/network/CMakeFiles/clk.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clk.dir/rule
-.PHONY : apps/network/CMakeFiles/clk.dir/rule
+apps/network/CMakeFiles/clk_rt.dir/rule:
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clk_rt.dir/rule
+.PHONY : apps/network/CMakeFiles/clk_rt.dir/rule
 
 # Convenience name for target.
-clk: apps/network/CMakeFiles/clk.dir/rule
-.PHONY : clk
+clk_rt: apps/network/CMakeFiles/clk_rt.dir/rule
+.PHONY : clk_rt
 
 # fast build rule for target.
-clk/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/build
-.PHONY : clk/fast
+clk_rt/fast:
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f apps/network/CMakeFiles/clk_rt.dir/build.make apps/network/CMakeFiles/clk_rt.dir/build
+.PHONY : clk_rt/fast
 
-# Convenience name for target.
-apps/network/CMakeFiles/clksmpc.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clksmpc.dir/rule
-.PHONY : apps/network/CMakeFiles/clksmpc.dir/rule
-
-# Convenience name for target.
-clksmpc: apps/network/CMakeFiles/clksmpc.dir/rule
-.PHONY : clksmpc
-
-# fast build rule for target.
-clksmpc/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/build
-.PHONY : clksmpc/fast
-
-# Convenience name for target.
-apps/network/CMakeFiles/clkupd.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clkupd.dir/rule
-.PHONY : apps/network/CMakeFiles/clkupd.dir/rule
-
-# Convenience name for target.
-clkupd: apps/network/CMakeFiles/clkupd.dir/rule
-.PHONY : clkupd
-
-# fast build rule for target.
-clkupd/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/build
-.PHONY : clkupd/fast
-
-# Convenience name for target.
-apps/network/CMakeFiles/clkupdzap.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/clkupdzap.dir/rule
-.PHONY : apps/network/CMakeFiles/clkupdzap.dir/rule
-
-# Convenience name for target.
-clkupdzap: apps/network/CMakeFiles/clkupdzap.dir/rule
-.PHONY : clkupdzap
-
-# fast build rule for target.
-clkupdzap/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/build
-.PHONY : clkupdzap/fast
-
-# Convenience name for target.
-apps/network/CMakeFiles/upd.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/upd.dir/rule
-.PHONY : apps/network/CMakeFiles/upd.dir/rule
-
-# Convenience name for target.
-upd: apps/network/CMakeFiles/upd.dir/rule
-.PHONY : upd
-
-# fast build rule for target.
-upd/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/build
-.PHONY : upd/fast
-
-# Convenience name for target.
-apps/network/CMakeFiles/updzap.dir/rule:
-	cd /home/kfkuang/rocket && $(MAKE) -f CMakeFiles/Makefile2 apps/network/CMakeFiles/updzap.dir/rule
-.PHONY : apps/network/CMakeFiles/updzap.dir/rule
-
-# Convenience name for target.
-updzap: apps/network/CMakeFiles/updzap.dir/rule
-.PHONY : updzap
-
-# fast build rule for target.
-updzap/fast:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/build
-.PHONY : updzap/fast
-
-clk.o: clk.cpp.o
-.PHONY : clk.o
+clk_rt.o: clk_rt.cpp.o
+.PHONY : clk_rt.o
 
 # target to build an object file
-clk.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.o
-.PHONY : clk.cpp.o
+clk_rt.cpp.o:
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f apps/network/CMakeFiles/clk_rt.dir/build.make apps/network/CMakeFiles/clk_rt.dir/clk_rt.cpp.o
+.PHONY : clk_rt.cpp.o
 
-clk.i: clk.cpp.i
-.PHONY : clk.i
-
-# target to preprocess a source file
-clk.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.i
-.PHONY : clk.cpp.i
-
-clk.s: clk.cpp.s
-.PHONY : clk.s
-
-# target to generate assembly for a file
-clk.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clk.dir/build.make apps/network/CMakeFiles/clk.dir/clk.cpp.s
-.PHONY : clk.cpp.s
-
-clksmpc.o: clksmpc.cpp.o
-.PHONY : clksmpc.o
-
-# target to build an object file
-clksmpc.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.o
-.PHONY : clksmpc.cpp.o
-
-clksmpc.i: clksmpc.cpp.i
-.PHONY : clksmpc.i
+clk_rt.i: clk_rt.cpp.i
+.PHONY : clk_rt.i
 
 # target to preprocess a source file
-clksmpc.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.i
-.PHONY : clksmpc.cpp.i
+clk_rt.cpp.i:
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f apps/network/CMakeFiles/clk_rt.dir/build.make apps/network/CMakeFiles/clk_rt.dir/clk_rt.cpp.i
+.PHONY : clk_rt.cpp.i
 
-clksmpc.s: clksmpc.cpp.s
-.PHONY : clksmpc.s
-
-# target to generate assembly for a file
-clksmpc.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clksmpc.dir/build.make apps/network/CMakeFiles/clksmpc.dir/clksmpc.cpp.s
-.PHONY : clksmpc.cpp.s
-
-clkupd.o: clkupd.cpp.o
-.PHONY : clkupd.o
-
-# target to build an object file
-clkupd.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.o
-.PHONY : clkupd.cpp.o
-
-clkupd.i: clkupd.cpp.i
-.PHONY : clkupd.i
-
-# target to preprocess a source file
-clkupd.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.i
-.PHONY : clkupd.cpp.i
-
-clkupd.s: clkupd.cpp.s
-.PHONY : clkupd.s
+clk_rt.s: clk_rt.cpp.s
+.PHONY : clk_rt.s
 
 # target to generate assembly for a file
-clkupd.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clkupd.dir/build.make apps/network/CMakeFiles/clkupd.dir/clkupd.cpp.s
-.PHONY : clkupd.cpp.s
-
-clkupdzap.o: clkupdzap.cpp.o
-.PHONY : clkupdzap.o
-
-# target to build an object file
-clkupdzap.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.o
-.PHONY : clkupdzap.cpp.o
-
-clkupdzap.i: clkupdzap.cpp.i
-.PHONY : clkupdzap.i
-
-# target to preprocess a source file
-clkupdzap.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.i
-.PHONY : clkupdzap.cpp.i
-
-clkupdzap.s: clkupdzap.cpp.s
-.PHONY : clkupdzap.s
-
-# target to generate assembly for a file
-clkupdzap.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/clkupdzap.dir/build.make apps/network/CMakeFiles/clkupdzap.dir/clkupdzap.cpp.s
-.PHONY : clkupdzap.cpp.s
-
-upd.o: upd.cpp.o
-.PHONY : upd.o
-
-# target to build an object file
-upd.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.o
-.PHONY : upd.cpp.o
-
-upd.i: upd.cpp.i
-.PHONY : upd.i
-
-# target to preprocess a source file
-upd.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.i
-.PHONY : upd.cpp.i
-
-upd.s: upd.cpp.s
-.PHONY : upd.s
-
-# target to generate assembly for a file
-upd.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/upd.dir/build.make apps/network/CMakeFiles/upd.dir/upd.cpp.s
-.PHONY : upd.cpp.s
-
-updzap.o: updzap.cpp.o
-.PHONY : updzap.o
-
-# target to build an object file
-updzap.cpp.o:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.o
-.PHONY : updzap.cpp.o
-
-updzap.i: updzap.cpp.i
-.PHONY : updzap.i
-
-# target to preprocess a source file
-updzap.cpp.i:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.i
-.PHONY : updzap.cpp.i
-
-updzap.s: updzap.cpp.s
-.PHONY : updzap.s
-
-# target to generate assembly for a file
-updzap.cpp.s:
-	cd /home/kfkuang/rocket && $(MAKE) -f apps/network/CMakeFiles/updzap.dir/build.make apps/network/CMakeFiles/updzap.dir/updzap.cpp.s
-.PHONY : updzap.cpp.s
+clk_rt.cpp.s:
+	cd /home/gaokang/gitcode/ROCKET && $(MAKE) -f apps/network/CMakeFiles/clk_rt.dir/build.make apps/network/CMakeFiles/clk_rt.dir/clk_rt.cpp.s
+.PHONY : clk_rt.cpp.s
 
 # Help Target
 help:
@@ -370,36 +186,16 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... clk"
-	@echo "... clksmpc"
-	@echo "... clkupd"
-	@echo "... clkupdzap"
+	@echo "... clk_rt"
 	@echo "... edit_cache"
 	@echo "... install"
 	@echo "... install/local"
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... upd"
-	@echo "... updzap"
-	@echo "... clk.o"
-	@echo "... clk.i"
-	@echo "... clk.s"
-	@echo "... clksmpc.o"
-	@echo "... clksmpc.i"
-	@echo "... clksmpc.s"
-	@echo "... clkupd.o"
-	@echo "... clkupd.i"
-	@echo "... clkupd.s"
-	@echo "... clkupdzap.o"
-	@echo "... clkupdzap.i"
-	@echo "... clkupdzap.s"
-	@echo "... upd.o"
-	@echo "... upd.i"
-	@echo "... upd.s"
-	@echo "... updzap.o"
-	@echo "... updzap.i"
-	@echo "... updzap.s"
+	@echo "... clk_rt.o"
+	@echo "... clk_rt.i"
+	@echo "... clk_rt.s"
 .PHONY : help
 
 
@@ -411,6 +207,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/kfkuang/rocket && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/gaokang/gitcode/ROCKET && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

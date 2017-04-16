@@ -216,13 +216,10 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
       { Process(gData.body); return gData; };
+      
 
-//    virtual gnssDataMap& Process(gnssDataMap& gData)
-//       throw(ProcessingException)
-//    { 
-//       return gData; 
-//    };
-
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+       throw(ProcessingException);
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;

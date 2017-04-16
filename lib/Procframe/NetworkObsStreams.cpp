@@ -66,13 +66,13 @@ namespace gpstk
          oData.obsSource.type = SatIDsystem2SourceIDtype(obsHeader.system);
          oData.obsSource.sourceName = obsHeader.markerName;
 
-         oData.pSynchro->setReferenceStream(*oData.pObsStream);
+         oData.pSynchro->setReferenceSource(*oData.pObsStream);
 
             // Now, we should store the data for the receiver
          allStreamData.push_back(oData);
 
-         srcStreamMap[oData.obsSource] = oData.pObsStream;
-         srcSyncMap[oData.obsSource] = oData.pSynchro;
+         mapSourceStream[oData.obsSource] = oData.pObsStream;
+         mapSourceSynchro[oData.obsSource] = oData.pSynchro;
 
          referenceSource = oData.obsSource;
 
@@ -102,29 +102,32 @@ namespace gpstk
       gdsMap.clear();
 
 
-      RinexObsStream* pRefObsStream = srcStreamMap[referenceSource];
+      RinexObsStream* pRefObsStream = mapSourceStream[referenceSource];
 
       gnssRinex gRef;
-  
+
+	
       if( (*pRefObsStream) >> gRef )
       {
+		
          gdsMap.addGnssRinex(gRef);
 
+	
          std::map<SourceID, RinexObsStream*>::iterator it;
-         for( it = srcStreamMap.begin();
-              it != srcStreamMap.end();
+         for( it = mapSourceStream.begin();
+              it != mapSourceStream.end();
             ++it)
          {
             if( it->first == referenceSource) continue;
 
-            Synchronize* synchro = srcSyncMap[it->first];
+            Synchronize* synchro = mapSourceSynchro[it->first];
             synchro->setRoverData(gRef);
-
             gnssRinex gRin;
 
             try
             {
-               gRin >> (*synchro);
+               std::cout<<"source:"<<it->first<<std::endl;
+	       gRin >> (*synchro);
                gdsMap.addGnssRinex(gRin);
             }
             catch(...)
@@ -155,7 +158,7 @@ namespace gpstk
       // do some clean operation 
    void NetworkObsStreams::cleanUp()
    {
-      srcStreamMap.clear();
+      mapSourceStream.clear();
 
       std::list<ObsData>::iterator it;
       for( it = allStreamData.begin();

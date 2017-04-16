@@ -194,6 +194,7 @@ namespace gpstk
    {
       OrbitEph *ret(0);
       try {
+
          // is the satellite found in the table? If not, create one
          if(satTables.find(eph->satID) == satTables.end()) {
             TimeOrbitEphTable newtable;
@@ -209,7 +210,7 @@ namespace gpstk
             updateTimeLimits(ret);
             return ret;
          }
-
+	
          // Search for beginValid in current keys.
          // If found candidate, should be same data
          // as already in table. Test this by comparing Toe values.
@@ -219,19 +220,26 @@ namespace gpstk
             if(it->second->ctToe == eph->ctToe) {
                message = string("duplicate Toe");
                return ret;
-            }
-            else {
+            } else if ( eph->ctToe > it->second->ctToe )
+	    {
+	       ret = eph->clone();
+	       toet[eph->beginValid] = ret;
+	       updateTimeLimits(ret);
+	       return ret;
+            }else {
                // Found matching beginValid but different Toe - This shouldn't happen
                string str = "Unexpected matching beginValid time but not Toe, for "
                   + asString(eph->satID)
                   + ", beginValid= " + printTime(eph->beginValid,fmt)
                   + ", Toe(map)= " + printTime(eph->ctToe,fmt)
-                  + ", Toe(candidate)= "+ printTime(eph->ctToe," %6.0g.");
+                  + ", Toe(candidate)= "+ printTime(eph->ctToe," %6.0g.")
+		  + ", Toe="+ printTime(it->second->ctToe,fmt)
+		  + ", beginValid="+ printTime(it->second->beginValid,fmt);
                InvalidParameter ir(str);
                GPSTK_THROW(ir);
             }
          }
-
+	
          // Did not find eph->beginValid in map
          // N.B:: lower_bound will return element beyond key since there is no match
          it = toet.lower_bound(eph->beginValid);
@@ -246,7 +254,7 @@ namespace gpstk
             updateTimeLimits(ret);
             return ret;
          }
-
+	
          if(it==toet.end()) {
             // candidate is after end of current map
             // get last item in map and check Toe
@@ -259,7 +267,6 @@ namespace gpstk
             else message = string("Toe matches last");
             return ret;
          }
-
          // candidate is "In the middle"
          // Check if iterator points to late transmission of
          // same OrbitEph as candidate
@@ -270,7 +277,6 @@ namespace gpstk
             updateTimeLimits(ret);
             return ret;
          }
-
          // Two cases:
          //    (a.) Candidate is late transmit copy of
          //         previous OrbitEph in table - discard (do nothing)
@@ -357,8 +363,10 @@ namespace gpstk
    {
       // Is this satellite found in the table?
       if(satTables.find(sat) == satTables.end())
-         return NULL;
-
+      {
+	 return NULL;
+      }
+	
       // Define reference to the relevant map of orbital elements
       const TimeOrbitEphTable& table = getTimeOrbitEphMap(sat);
 
@@ -369,7 +377,7 @@ namespace gpstk
 
       TimeOrbitEphTable::const_iterator it = table.find(t);
       if(it == table.end()) {                   // not a direct match
-         it = table.lower_bound(t);
+	it = table.lower_bound(t);
 
          // Tricky case here.  If the key is beyond the last key in the table,
          // lower_bound() will return table.end(). However, this doesn't entirely
@@ -380,8 +388,9 @@ namespace gpstk
          if(it == table.end()) {
             TimeOrbitEphTable::const_reverse_iterator rit = table.rbegin();
             if(rit->second->isValid(t))         // Last element in map works
-               return rit->second;
-
+            {
+		return rit->second;
+	    }
             // have nothing
             //string mess = "Time is beyond table for satellite " + asString(sat)
             //   + " for time " + printTime(t,fmt);

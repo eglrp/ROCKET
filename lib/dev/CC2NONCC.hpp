@@ -31,6 +31,8 @@
 #include "RecTypeDataReader.hpp"
 #include "DCBDataReader.hpp"
 #include "string"
+//#include "OmpHeader.hpp"
+
 
 namespace gpstk
 {
@@ -145,6 +147,14 @@ namespace gpstk
             throw(ProcessingException)
          { Process(gData.header.epoch, gData.body); return gData; };
 
+         
+           /** Returns a gnssDataMap object, adding the new data generated
+            *  when calling this object.
+            *
+            * @param gData     Data object holding the data.
+            */
+         virtual gnssDataMap& Process(gnssDataMap& gData)
+            throw(ProcessingException);
 
            // Returns a string identifying this object.
          virtual std::string getClassName () const;
@@ -168,6 +178,7 @@ namespace gpstk
 
            // The type of receiver
          std::string recType;
+         //std::string recType[omp_max_threads];
          
    }; // End of class 'CC2NONCC'
 

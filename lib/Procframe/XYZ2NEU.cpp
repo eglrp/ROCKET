@@ -205,6 +205,25 @@ namespace gpstk
       outputSet.insert(TypeID::dH);
 
    }  // End of method 'XYZ2NEU::init()'
+   
+   gnssDataMap& XYZ2NEU::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+      for(gnssDataMap::iterator gdmIt = gData.begin();
+          gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+            
+            setLatLon( sdmIt->first.nominalPos.getGeodeticLatitude(),
+                       sdmIt->first.nominalPos.getLongitude() );
 
+            Process( sdmIt->second );
+         }
+      }
+
+      return gData;
+   }
 
 }  // End of namespace gpstk

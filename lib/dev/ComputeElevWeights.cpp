@@ -37,8 +37,8 @@
 
 
 #include "ComputeElevWeights.hpp"
-
 #include "GNSSconstants.hpp"
+//#include "OmpHeader.hpp"
 
 
 namespace gpstk
@@ -210,5 +210,40 @@ namespace gpstk
 
    }  // End of method 'ComputeElevWeightsWeights::Process()'
 
+   gnssDataMap& ComputeElevWeights::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+/*#ifdef _OPENMP
+      std::vector<SourceID> keyVal;
+      for( gnssDataMap::iterator gdmIter = gData.begin();
+         gdmIter != gData.end(); gdmIter++ )
+      {
+         keyVal.clear();
+         for( sourceDataMap::iterator sdmIter = gdmIter->second.begin();
+               sdmIter != gdmIter->second.end(); sdmIter++ )
+         {
+            keyVal.push_back( sdmIter->first );
+         }
+#pragma omp parallel for
+         for( int i=0; i<keyVal.size(); i++ )
+         {
+            SourceID key = keyVal[i];
+            Process( gdmIter->first, gdmIter->second[key] );
+         }
+      }
+#else*/
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {     
+            Process( gdmIt->first, sdmIt->second );
+         }  
+      }
+//#endif
+      return gData;
+   }
 
 }  // End of namespace gpstk

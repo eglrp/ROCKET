@@ -33,7 +33,7 @@
 
 
 #include "ProcessingClass.hpp"
-
+//#include "OmpHeader.hpp"
 
 
 namespace gpstk
@@ -214,6 +214,15 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException);
 
+      
+         /** Returns a gnnsDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
+
 
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
@@ -280,10 +289,17 @@ namespace gpstk
          double formerDeltaT;    ///< Previous time difference, in seconds.
       };
 
+      
+      typedef std::map<SatID, filterData> LIData;
+      typedef std::map<SourceID, LIData> LIDataMap;
+         
+      /// Map holding the information regarding every satellite
+      //LIDataMap LIData;
+      LIData m_liData;
+      //LIData m_liData[omp_max_threads];   
 
-         /// Map holding the information regarding every satellite
-      std::map<SatID, filterData> LIData;
-
+         /// Map holding the information for gnssDataMap
+      LIDataMap m_liDataMap; 
 
          /** Method that implements the LI cycle slip detection algorithm
           *

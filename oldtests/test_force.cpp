@@ -1,4 +1,4 @@
-/* Test for Force Models. */
+/* Test for Orbit Integration. */
 
 #include <iostream>
 
@@ -188,9 +188,10 @@ int main(void)
    Spacecraft sc;
    sc.setCurrentTime(utc0);
    sc.setSatID(sat);
-   sc.setSatData(satData);
-   sc.setCurrentPos(r0_icrs);
-   sc.setCurrentVel(v0_icrs);
+   sc.setBlockType(satData.getBlock(sat,utc0));
+   sc.setMass(satData.getMass(sat,utc0));
+   sc.setPosition(r0_icrs);
+   sc.setVelocity(v0_icrs);
    sc.setNumOfParam(9);
 
    // Earth gravitation
@@ -264,29 +265,34 @@ int main(void)
       egm.setEarthPoleTide(poleTide);
    }
 
-   // Third body
-   ThirdBody thd;
-   thd.setSolarSystem(solSys);
-   thd.setReferenceSystem(refSys);
-   thd.enableSun();
-   thd.enableMoon();
+
+   // Sun gravitation
+   SunGravitation sg;
+   sg.setSolarSystem(solSys);
+   sg.setReferenceSystem(refSys);
+
+   // Moon gravitation
+   MoonGravitation mg;
+   mg.setSolarSystem(solSys);
+   mg.setReferenceSystem(refSys);
 
    // Solar pressure
-   CODEPressure srp;
-   srp.setReferenceSystem(refSys);
-   srp.setSolarSystem(solSys);
-   srp.setSRPCoeff(p0);
+   CODEPressure sp;
+   sp.setReferenceSystem(refSys);
+   sp.setSolarSystem(solSys);
+   sp.setSRPCoeff(p0);
 
    // Relativity effect
-   RelativityEffect rel;
+   RelativityEffect re;
 
    // Earth body
    EarthBody rb;
 
    egm.doCompute(utc0, rb, sc);
-   thd.doCompute(utc0, rb, sc);
-   srp.doCompute(utc0, rb, sc);
-   rel.doCompute(utc0, rb, sc);
+   sg.doCompute(utc0, rb, sc);
+   mg.doCompute(utc0, rb, sc);
+   sp.doCompute(utc0, rb, sc);
+   re.doCompute(utc0, rb, sc);
 
    cout << CivilTime(gps0) << endl;
 
@@ -295,19 +301,25 @@ int main(void)
    cout << r0_icrs << endl;
 
    Vector<double> f_egm( egm.getAcceleration() );
-   Vector<double> f_thd( thd.getAcceleration() );
-   Vector<double> f_srp( srp.getAcceleration() );
-   Vector<double> f_rel( rel.getAcceleration() );
+   Vector<double> f_moon( mg.getAcceleration() );
+   Vector<double> f_sun( sg.getAcceleration() );
+   Vector<double> f_srp( sp.getAcceleration() );
+   Vector<double> f_re( re.getAcceleration() );
 
    cout << "EARTH: " << endl;
    cout << setw(20) << f_egm(0) << ' '
         << setw(20) << f_egm(1) << ' '
         << setw(20) << f_egm(2) << endl;
 
-   cout << "THIRDBODY: " << endl;
-   cout << setw(20) << f_thd(0) << ' '
-        << setw(20) << f_thd(1) << ' '
-        << setw(20) << f_thd(2) << endl;
+   cout << "MOON: " << endl;
+   cout << setw(20) << f_moon(0) << ' '
+        << setw(20) << f_moon(1) << ' '
+        << setw(20) << f_moon(2) << endl;
+
+   cout << "SUN: " << endl;
+   cout << setw(20) << f_sun(0) << ' '
+        << setw(20) << f_sun(1) << ' '
+        << setw(20) << f_sun(2) << endl;
 
    cout << "SRP: " << endl;
    cout << setw(20) << f_srp(0) << ' '
@@ -315,20 +327,21 @@ int main(void)
         << setw(20) << f_srp(2) << endl;
 
    cout << "RE: " << endl;
-   cout << setw(20) << f_rel(0) << ' '
-        << setw(20) << f_rel(1) << ' '
-        << setw(20) << f_rel(2) << endl;
+   cout << setw(20) << f_re(0) << ' '
+        << setw(20) << f_re(1) << ' '
+        << setw(20) << f_re(2) << endl;
 
    // GNSS orbit
    GNSSOrbit gnss;
    gnss.setRefEpoch(utc0);
    gnss.setSpacecraft(sc);
    gnss.setEarthGravitation(egm);
-   gnss.setThirdBody(thd);
-   gnss.setSolarPressure(srp);
-   gnss.setRelativityEffect(rel);
+   gnss.setSunGravitation(sg);
+   gnss.setMoonGravitation(mg);
+   gnss.setSolarPressure(sp);
+   gnss.setRelativityEffect(re);
 
-   Vector<double> y(sc.getCurrentState());
+   Vector<double> y(sc.getStateVector());
 
    Vector<double> dy = gnss.getDerivatives(75.0, y);
 

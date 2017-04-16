@@ -401,6 +401,7 @@ namespace gpstk
       tStrings[sigma]      = "sigma";
       tStrings[iura]       = "iura";
       tStrings[Action]     = "Action";
+      tStrings[EquType]    = "EquType";
       tStrings[dummy0]     = "dummy0";
       tStrings[dummy1]     = "dummy1";
       tStrings[dummy2]     = "dummy2";

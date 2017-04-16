@@ -29,6 +29,7 @@
 
 
 #include "RequireObservables.hpp"
+//#include "OmpHeader.hpp"
 
 
 namespace gpstk
@@ -101,7 +102,7 @@ namespace gpstk
             }
 
          }
-
+         
             // Let's remove satellites without all TypeID's
          gData.removeSatID(satRejectedSet);
 
@@ -119,6 +120,52 @@ namespace gpstk
       }
 
    }  // End of 'RequireObservables::Process()'
+   
+
+   gnssDataMap& RequireObservables::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+/*#ifdef _OPENMP
+   
+   // keep satTypeValueMap reference
+   std::vector<satTypeValueMap*> valVec;
+
+   for( gnssDataMap::iterator gdmIter = gData.begin();
+         gdmIter != gData.end(); gdmIter++ )
+   {
+
+      // add satTypeValueMap reference into 'valVec'
+      for( sourceDataMap::iterator sdmIter = gdmIter->second.begin();
+            sdmIter != gdmIter->second.end(); sdmIter++ )
+      {
+         satTypeValueMap& stvm = (satTypeValueMap&)(sdmIter->second);
+         valVec.push_back( &stvm );
+      }
+
+   }
+      
+#pragma omp parallel for
+      for( int i=0; i<valVec.size(); i++ )
+      {
+         Process( *(valVec[i]) ); 
+      }
+
+#else*/
+      for( gnssDataMap::iterator gdmIter = gData.begin();
+           gdmIter != gData.end(); gdmIter++ )
+      {
+         for( sourceDataMap::iterator sdmIter = gdmIter->second.begin();
+              sdmIter != gdmIter->second.end(); sdmIter++ )
+         {
+              Process( sdmIter->second );
+         }
+
+      }
+//#endif
+      
+      return gData;
+   }
 
 
 } // End of namespace gpstk

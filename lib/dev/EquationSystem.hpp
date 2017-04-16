@@ -27,7 +27,6 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Shoujian Zhang, 2015
-//
 //============================================================================
 //
 //  2015/07/01  design a new 'equationSystem' for the generation of the equations

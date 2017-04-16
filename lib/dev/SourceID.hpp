@@ -39,6 +39,10 @@
 //  - Add 'zwd', which will be useful for RTK correction computation.
 //    shjzhang, 2014/06/17
 //
+//  - Add 'recType', support real-time preprocessing gnssDataMap.
+//    gaokang, 2016/11/10
+//
+//  - Add 'recClkBias', dealing with clock jump.
 //============================================================================
 
 
@@ -99,7 +103,8 @@ namespace gpstk
       SourceID(const SourceID& s)
          : type(s.type), sourceName(s.sourceName),
            sourceNumber(s.sourceNumber), nominalPos(s.nominalPos),
-           zwdMap(s.zwdMap), staticFlag(s.staticFlag)
+           zwdMap(s.zwdMap), staticFlag(s.staticFlag), antennaOffset(s.antennaOffset),
+           antType(s.antType), recType(s.recType),recClkBias(s.recClkBias)
       {};
 
 
@@ -167,6 +172,8 @@ namespace gpstk
          /// Number for this source, see definition in IGS documents
       std::string sourceNumber;
 
+         /// receiver type
+      std::string recType;
 
          /// Nominal position
       Position nominalPos;
@@ -179,10 +186,14 @@ namespace gpstk
          /// Zenith wet delay
       std::map<TypeID, double> zwdMap;
 
-         /// Receiver antenna type
+         /// Receiver antenna reference point
       Triple antennaOffset;
-
-
+         
+         /// Receiver antenna type
+      std::string antType;
+	
+	/// receiver clock bias
+      double recClkBias;      
 
    private:
 

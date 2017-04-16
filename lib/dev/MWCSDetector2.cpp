@@ -86,7 +86,21 @@ namespace gpstk
             
             try
             {
-                  
+         
+		
+	    //std::cout<<"source:"<<iter->first<<std::endl;
+	    /*std::cout<<"*****************"<<std::endl;
+	    for( MWData::iterator iter2 = m_mwData.begin();
+		 iter2 != m_mwData.end(); iter2++ )
+	    {
+		std::cout<<"sat:"<<iter2->first<<std::endl;
+		std::cout<<"formerEpoch:"<<iter2->second.formerEpoch<<std::endl;
+		std::cout<<"windowSize:"<<iter2->second.windowSize<<std::endl;
+		std::cout<<"meanMW:"<<iter2->second.meanMW<<std::endl;
+		std::cout<<"varMW:"<<iter2->second.varMW<<std::endl;
+	    }
+	   std::cout<<"********************"<<std::endl;*/
+      	
                   double value1(0.0);
                   double lli1(0.0);
                   double lli2(0.0);
@@ -258,6 +272,57 @@ namespace gpstk
       }  // End of method 'MWCSDetector2::Process()'
       
       
+      gnssDataMap& MWCSDetector2::Process(gnssDataMap& gData)
+         throw(ProcessingException)
+      {
+
+         for( gnssDataMap::iterator gdmIt = gData.begin();
+              gdmIt != gData.end(); gdmIt++ )
+         {
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end(); sdmIt++ )
+            {
+	      
+	
+               MWDataMap::iterator mwDataIt = m_mwDataMap.find( sdmIt->first );
+
+               if( mwDataIt != m_mwDataMap.end() )
+               {
+                  m_mwData = mwDataIt->second;
+               }
+	       else
+	       {
+		  m_mwData = MWData();
+	       }
+
+               Process( gdmIt->first, sdmIt->second );
+
+               m_mwDataMap[ sdmIt->first ] = m_mwData;
+               
+            }
+         }
+
+
+	/*for( MWDataMap::iterator iter = m_mwDataMap.begin();
+	     iter != m_mwDataMap.end(); iter++ )
+	{
+	    std::cout<<"source:"<<iter->first<<std::endl;
+	    
+	    for( MWData::iterator iter2 = iter->second.begin();
+		 iter2 != iter->second.end(); iter2++ )
+	    {
+		std::cout<<"sat:"<<iter2->first<<std::endl;
+		std::cout<<"formerEpoch:"<<iter2->second.formerEpoch<<std::endl;
+		std::cout<<"windowSize:"<<iter2->second.windowSize<<std::endl;
+		std::cout<<"meanMW:"<<iter2->second.meanMW<<std::endl;
+		std::cout<<"varMW:"<<iter2->second.varMW<<std::endl;
+	    }
+	}*/
+
+         return gData;
+      }
+
+
       
       /* Method that implements the Melbourne-Wubbena cycle slip
        *  detection algorithm
@@ -278,7 +343,7 @@ namespace gpstk
                                         const double& lli1,
                                         const double& lli2 )
       {
-            
+          
             bool reportCS(false);
             
             // Difference between current and former epochs, in sec
@@ -293,24 +358,21 @@ namespace gpstk
             double tempLLI1(0.0);
             double tempLLI2(0.0);
             
-            
+
             // Get the difference between current epoch and former epoch,
             // in seconds
-            currentDeltaT = ( epoch - MWData[sat].formerEpoch );
+            currentDeltaT = ( epoch - m_mwData[sat].formerEpoch );
            
             // Store current epoch as former epoch
-            MWData[sat].formerEpoch = epoch;
+            m_mwData[sat].formerEpoch = epoch;
             
             // Difference between current value of MW and average value
-            currentBias = std::abs(mw - MWData[sat].meanMW);
+            currentBias = std::abs(mw - m_mwData[sat].meanMW);
 
             // Increment window size
-            ++MWData[sat].windowSize;
+            ++m_mwData[sat].windowSize;
             
-            
-            
-            
-            
+
             // Check if receiver already declared cycle slip or if too much time
             // has elapsed
             // Note: If tvMap(lliType1) or tvMap(lliType2) don't exist, then 0
@@ -345,25 +407,31 @@ namespace gpstk
                 (tempLLI2==1.0) ||
                 (currentDeltaT > deltaTMax) )
             {
-                  
+            	//std::cout<<"reset"<<std::endl;
+		//std::cout<<"temp1:"<<tempLLI1<<std::endl;
+	        //std::cout<<"temp2:"<<tempLLI2<<std::endl;
+		//std::cout<<"ct:"<<currentDeltaT<<std::endl;
+		//std::cout<<"dt:"<<deltaTMax<<std::endl;	      
+      
                   // We reset the filter with this
-                  MWData[sat].windowSize = 1;
+                  m_mwData[sat].windowSize = 1;
                   
                   reportCS = true;                // Report cycle slip
             }
             
-            if (MWData[sat].windowSize > 1)
-            {
-                  
+            if (m_mwData[sat].windowSize > 1)
+            {              
+    
                     // Test if current bias is bigger than the threshold limit  
                     // if currentBias > 4*sqrt(MWData[sat].varMW), it means
                     // a cycle slip occurs at current epoch.
-                  lambdaLimit=4*std::sqrt(MWData[sat].varMW);
+                  lambdaLimit=4*std::sqrt(m_mwData[sat].varMW);
                   if ( currentBias > lambdaLimit )
                   {
-                        
+             		//std::cout<<"currBias:"<<currentBias<<std::endl;
+			//std::cout<<"lambdaLimit:"<<lambdaLimit<<std::endl;           
                         // We reset the filter with this
-                        MWData[sat].windowSize = 1;
+                        m_mwData[sat].windowSize = 1;
                         
                         reportCS = true;                // Report cycle slip
                         
@@ -373,27 +441,29 @@ namespace gpstk
             
             // Let's prepare for the next time
             // If a cycle-slip happened or just starting up
-            if (MWData[sat].windowSize < 2)
+            if (m_mwData[sat].windowSize < 2)
             {
-                  MWData[sat].meanMW = mw;
+                  m_mwData[sat].meanMW = mw;
                   //give varMW=1.0 as init
-                  MWData[sat].varMW = 0.25*0.25;
+                  m_mwData[sat].varMW = 0.25*0.25;
             }
             else
             {
                   // MW bias from the mean value
-                  double mwBias(mw - MWData[sat].meanMW);
-                  double size( static_cast<double>(MWData[sat].windowSize) );
+                  double mwBias(mw - m_mwData[sat].meanMW);
+                  double size( static_cast<double>(m_mwData[sat].windowSize) );
                   
                   // Compute average
-                  MWData[sat].meanMW += mwBias / size;
+                  m_mwData[sat].meanMW += mwBias / size;
                   
                   // Compute variance 
                   // Var(i) = Var(i-1) + [ ( mw(i) - meanMW)^2/(i)- 1*Var(i-1) ]/(i);
-                  MWData[sat].varMW  += ( mwBias*mwBias -MWData[sat].varMW ) / size;
+                  m_mwData[sat].varMW  += ( mwBias*mwBias -m_mwData[sat].varMW ) / size;
                   
             }
-            
+            //std::cout<<"windowSize:"<<m_mwData[sat].windowSize<<std::endl;
+	    //std::cout<<"sat:"<<sat<<",meanMW:"<<m_mwData[sat].meanMW<<",varMW:"<<m_mwData[sat].varMW<<std::endl;
+ 
             
             if (reportCS)
             {

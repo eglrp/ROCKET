@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
 //  Copyright 2004, The University of Texas at Austin
 //
 //  Kaifa Kuang - Wuhan University . 2015
@@ -27,46 +27,48 @@
  * Class to do CODE Pressure calculation.
  */
 
-#ifndef CODE_PRESSURE_HPP
-#define CODE_PRESSURE_HPP
+#ifndef GPSTK_CODE_PRESSURE_HPP
+#define GPSTK_CODE_PRESSURE_HPP
 
 #include "SolarPressure.hpp"
 
 
 namespace gpstk
 {
-    /** @addtogroup GeoDynamics */
-    //@{
+      /** @addtogroup GeoDynamics */
+      //@{
 
-    /** Class to do CODE Pressure calculation.
-     */
-    class CODEPressure : public SolarPressure
-    {
-    public:
+      /** Class to do CODE Pressure calculation.
+       */
+   class CODEPressure : public SolarPressure
+   {
 
-        /// Default constructor
-        CODEPressure() {}
+   public:
 
-        /// Default destructor
-        virtual ~CODEPressure() {}
+         /// Default constructor
+      CODEPressure() {}
+
+         /// Default destructor
+      virtual ~CODEPressure() {}
 
 
-        /** Compute acceleration (and related partial derivatives) of CODE
-         *  Pressure.
-         * @param utc     time in UTC
-         * @param rb      earth body
-         * @param sc      spacecraft
-         */
-        virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
+         /** Compute acceleration (and related partial derivatives) of CODE
+          *  Pressure.
+          * @param utc     time in UTC
+          * @param rb      earth body
+          * @param sc      spacecraft
+          */
+      virtual void doCompute(CommonTime utc, EarthBody& rb, Spacecraft& sc);
 
-        /// Return the force model name
-        inline virtual std::string modelName() const
-        { return "CODEPressure"; }
+         /// Return the force model name
+      inline virtual std::string modelName() const
+      { return "CODEPressure"; }
 
-    }; // End of class 'CODEPressure'
 
-    // @}
+   }; // End of class 'CODEPressure'
+
+      // @}
 
 }  // End of namespace 'gpstk'
 
-#endif   // CODE_PRESSURE_HPP
+#endif   // GPSTK_CODE_PRESSURE_HPP

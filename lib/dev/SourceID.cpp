@@ -75,7 +75,10 @@ namespace gpstk
       nominalPos = right.nominalPos;
       zwdMap = right.zwdMap;
       staticFlag = right.staticFlag;
-
+      antennaOffset = right.antennaOffset;
+      antType = right.antType;
+      recType = right.recType;
+      recClkBias = right.recClkBias;
       return *this;
 
    }  // End of 'SourceID::operator=()'
@@ -87,7 +90,9 @@ namespace gpstk
    {
 
       s << SourceID::stStrings[type] << " "
-        << sourceName;
+        << sourceName << " "
+	<< type << " "
+	<< staticFlag <<std::endl;
 
       return s;
 
@@ -126,8 +131,8 @@ namespace gpstk
    {
 
       return (type==right.type                  && 
-              sourceName==right.sourceName      &&
-              staticFlag==right.staticFlag      );
+              sourceName==right.sourceName); //     &&
+              //staticFlag==right.staticFlag      );
 
    }  // End of 'SourceID::operator==()'
 
@@ -141,14 +146,15 @@ namespace gpstk
 
       if (type == right.type)
       {
-         if( sourceName == right.sourceName )
+         /*if( sourceName == right.sourceName )
          {
             return staticFlag < right.staticFlag;
          }
          else
          {
             return sourceName < right.sourceName;
-         }
+         }*/
+	return sourceName < right.sourceName;
       }
       else
       {

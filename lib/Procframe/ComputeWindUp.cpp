@@ -54,6 +54,10 @@ namespace gpstk
 
       try
       {
+/*         int id=0;
+#ifdef _OPENMP
+         id = omp_get_thread_num();
+#endif*/
 
             // Compute Sun position at this epoch
          SunPosition sunPosition;
@@ -69,18 +73,27 @@ namespace gpstk
                it != gData.end();
                ++it )
          {
+            
 
                // First check if this satellite has previous arc information
-            if( satArcMap.find( (*it).first ) == satArcMap.end() )
+            if( m_satPhaseData.find( it->first ) == m_satPhaseData.end() )
             {
+               m_satPhaseData[it->first].arcNum = 0.0;
+            }
+
+            
+
+               // First check if this satellite has previous arc information
+            //if( satArcMap.find( (*it).first ) == satArcMap.end() )
+            //{
                   // If it doesn't have an entry, insert one
-               satArcMap[ (*it).first ] = 0.0;
-            };
+            //   satArcMap[ (*it).first ] = 0.0;
+            //};
 
                // Then, check both if there is arc information, and if current
                // arc number is different from arc number in storage (which
                // means a cycle slip happened)
-            if ( (*it).second.find(TypeID::satArc) != (*it).second.end() &&
+            /*if ( (*it).second.find(TypeID::satArc) != (*it).second.end() &&
                  (*it).second(TypeID::satArc) != satArcMap[ (*it).first ] )
             {
                   // If different, update satellite arc in storage
@@ -90,7 +103,16 @@ namespace gpstk
                phase_satellite[ (*it).first ].previousPhase = 0.0;
                phase_station[ (*it).first ].previousPhase = 0.0;
 
+            }*/
+            
+            if( it->second.find(TypeID::satArc) != it->second.end() &&
+                it->second(TypeID::satArc) != m_satPhaseData[it->first].arcNum )
+            {
+                  m_satPhaseData[it->first].arcNum = it->second(TypeID::satArc);
+                  m_satPhaseData[it->first].satPreviousPhase = 0.0;
+                  m_satPhaseData[it->first].staPreviousPhase = 0.0;
             }
+
 
 
                // Use ephemeris if satellite position is not already computed
@@ -205,6 +227,11 @@ namespace gpstk
                                     const Triple& sat,
                                     const Triple& sunPosition )
    {
+
+/*      int id=0;
+#ifdef _OPENMP
+      id = omp_get_thread_num();
+#endif*/
 
          // Get satellite rotation angle
 
@@ -322,25 +349,119 @@ namespace gpstk
 
       alpha1 = alpha1 + wind_up;
 
-      double da1(alpha1-phase_satellite[satid].previousPhase);
+      //double da1(alpha1-phase_satellite[satid].previousPhase);
 
-      double da2(alpha2-phase_station[satid].previousPhase);
+      //double da2(alpha2-phase_station[satid].previousPhase);
+      
+      double da1 = alpha1 - m_satPhaseData[satid].satPreviousPhase;
+      double da2 = alpha2 - m_satPhaseData[satid].staPreviousPhase;
 
          // Let's avoid problems when passing from 359 to 0 degrees.
-      phase_satellite[satid].previousPhase += std::atan2( std::sin(da1),
-                                                          std::cos(da1) );
+      //phase_satellite[satid].previousPhase += std::atan2( std::sin(da1),
+      //                                                    std::cos(da1) );
 
-      phase_station[satid].previousPhase += std::atan2( std::sin(da2),
-                                                        std::cos(da2) );
+      //phase_station[satid].previousPhase += std::atan2( std::sin(da2),
+      //                                                  std::cos(da2) );
+      
+      m_satPhaseData[satid].satPreviousPhase += std::atan2( std::sin(da1), std::cos(da1) );
+      m_satPhaseData[satid].staPreviousPhase += std::atan2( std::sin(da2), std::cos(da2) );
 
          // Compute wind up effect in radians
-      wind_up = phase_satellite[satid].previousPhase -
-                phase_station[satid].previousPhase;
+      // wind_up = phase_satellite[satid].previousPhase -
+      //           phase_station[satid].previousPhase;
+
+      wind_up = m_satPhaseData[satid].satPreviousPhase - m_satPhaseData[satid].staPreviousPhase;
 
       return wind_up;
 
    }  // End of method 'ComputeWindUp::getWindUp()'
 
+   gnssDataMap& ComputeWindUp::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
 
+/*#ifdef _OPENMP
+      // keep SourceID reference 
+      std::vector<SourceID*> keyVec;
+
+      // keep satTypeValueMap reference
+      std::vector<satTypeValueMap*> valVec;
+
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         // add SourceID reference to 'keyVec' and
+         // add satTypeValueMap reference to 'valVec'
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+            SourceID& source = (SourceID&)(sdmIt->first);
+            satTypeValueMap& stvm = (satTypeValueMap&)(sdmIt->second);
+            keyVec.push_back( &source );
+            valVec.push_back( &stvm );
+         }
+      }
+         
+#pragma omp parallel for
+         for( int i=0; i<keyVec.size(); i++ )
+         {
+            int id = omp_get_thread_num();
+            SourceID *key = keyVec[i];
+            setNominalPosition( (*key).nominalPos );
+            SatPhaseDataMap::iterator satPhaseDataIt = m_satPhaseDataMap.find( *key );
+            if( satPhaseDataIt != m_satPhaseDataMap.end() )
+            {
+               m_satPhaseData[i] = satPhaseDataIt->second;
+            }
+            Process( gData.begin()->first, *(valVec[i]) );
+            m_satPhaseDataMap[*key] = m_satPhaseData[id];
+         }
+#else*/
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+               setNominalPosition((sdmIt->first).nominalPos);
+               
+               SatPhaseDataMap::iterator satPhaseDataIt = m_satPhaseDataMap.find( sdmIt->first );
+
+               if( satPhaseDataIt != m_satPhaseDataMap.end() )
+               {
+                  m_satPhaseData = satPhaseDataIt->second;
+               }
+	       else
+	       {
+		  m_satPhaseData = SatPhaseData();
+	       }
+               Process( gdmIt->first, sdmIt->second );
+
+               m_satPhaseDataMap[sdmIt->first] = m_satPhaseData;
+         }
+      }
+//#endif
+      return gData;
+   }
+
+   Position ComputeWindUp::getNominalPosition()
+   {
+/*      int id=0;
+#ifdef USE_OPENMP
+      id = omp_get_thread_num();
+#endif*/
+      Position pos( nominalPos );
+      return pos;
+   }
+
+   ComputeWindUp& ComputeWindUp::setNominalPosition( const Position& stapos )
+   {
+/*      int id=0;
+#ifdef USE_OPENMP
+      id = omp_get_thread_num();
+#endif*/
+      nominalPos = stapos;
+      return (*this);
+   }
 
 }  // End of namespace gpstk

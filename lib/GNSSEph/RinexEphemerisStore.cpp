@@ -63,13 +63,11 @@ namespace gpstk
 	 {
 	   RinexNavHeader header;
 	   strm >> header;
-
 	   addFile(filename, header);
 	   
 	   RinexNavData rec;
 	   while(strm >> rec)
 	     addEphemeris(rec);
-
 	 }
 	 else
 	 {

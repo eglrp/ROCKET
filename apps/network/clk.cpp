@@ -10,23 +10,23 @@
 //
 //  CopyRight
 //  ---------
-//
-//  Shoujian Zhang, Wuhan University, 2010, 2011
+//  
+//  Shoujian Zhang, Wuhan University, 2010, 2011 
 //
 //  History
 //  -------
 //
-//  2012/05/12
+//  2012/05/12  
 //
-//  Create this program
+//  Create this program  
 //
-//  2014/10/14
+//  2014/10/14  
 //
 //  clk is modified from the old version, since many classes has been changed.
-//  remove the 'phaseCalibration' class, instead, the 'PhaseCodeAligment' is used
+//  remove the 'phaseCalibration' class, instead, the 'PhaseCodeAligment' is used 
 //  to aligh the phase observables to the code ones.
 //
-//  2015/07/24
+//  2015/07/24  
 //
 //  This version use a new designed solver, 'SolverGeneral2'. The
 //  new version of clock solver impove the computational speed
@@ -35,7 +35,7 @@
 //  In the measurement update, the update is basen on single-
 //  observable each time.
 //
-//  2016/05/23
+//  2016/05/23  
 //
 //  The configuration file is greatly changed.
 //  only the parameters related to the models are kept in the
@@ -43,13 +43,13 @@
 //  all the data and station-related parameters are given through
 //  the command line.
 //
-//  2016/05/30
+//  2016/05/30  
 //
 //  Change the interface of the OceanLoading class.
 //  The BLQ data will be loaded firstly and then inserted into the
 //  OceanLoading class.
 //
-//  2016/06/14
+//  2016/06/14 
 //  finish the calling method of this program.
 //
 //  2016/07/08
@@ -180,7 +180,7 @@
    // Class to deal with the ambiguity constraints for solver
 #include "AmbiguityDatum.hpp"
 
-   // Class to filter out the PC
+   // Class to filter out the PC 
    // outliers using prefit-residual
 #include "PrefitFilter.hpp"
 
@@ -274,7 +274,7 @@ private:
       // Data structure
    gnssDataMap gdsMap;
 
-      // Mulitmap used to store the clock data line
+      // Mulitmap used to store the clock data line 
    std::multimap<CommonTime, std::string> solutionMap;
 
       // Satellite sets for all the estimated satellite clocks
@@ -283,10 +283,10 @@ private:
       // Source sets for all the estimated receiver clocks
    SourceIDSet sourceSet;
 
-      // dcb program used in the header printing
+      // dcb program used in the header printing 
    string dcbProgram;
 
-      // dcb source used in the header printing
+      // dcb source used in the header printing 
    string dcbSource;
 
       // antex file
@@ -294,7 +294,7 @@ private:
 
       // If you want to share objects and variables among methods, you'd
       // better declare them here
-
+      
 
       // Method to print model values
    void printModel( ofstream& modelfile,
@@ -466,7 +466,7 @@ void clk::spinUp()
    // Method that will really process information
 void clk::process()
 {
-       // Preprocessing the gnss data
+       // Preprocessing the gnss data 
    preprocessing();
 
        // Generate and solve equations
@@ -482,7 +482,7 @@ void clk::preprocessing()
       /////////////////
       // Put here what you want to apply to ALL stations
       /////////////////
-
+      
       ////////////////////////////////////////////////
       // Now, Let's read SP3 Files
       ////////////////////////////////////////////////
@@ -632,7 +632,7 @@ void clk::preprocessing()
       ////////////////////////////////////////////////
       // Let's read DCB files
       ////////////////////////////////////////////////
-
+      
       // Read and store dcb data
    DCBDataReader dcbStore;
 
@@ -662,7 +662,7 @@ void clk::preprocessing()
          }
          catch(FileMissingException e)
          {
-            cerr << "Warning! The DCB file '"<< dcbFile <<"' does not exist!"
+            cerr << "Warning! The DCB file '"<< dcbFile <<"' does not exist!" 
                  << endl;
             exit(-1);
          }
@@ -675,8 +675,8 @@ void clk::preprocessing()
       ////////////////////////////////////////////////
       // Now, Let's read MSC data
       ////////////////////////////////////////////////
-
-      // Declare a "MSCStore" object to handle msc file
+      
+      // Declare a "MSCStore" object to handle msc file 
    MSCStore mscStore;
 
    try
@@ -700,10 +700,10 @@ void clk::preprocessing()
    }
 
       //***********************************************
-      // Now, Let's read the rinex files
+      // Now, Let's read the rinex files 
       //***********************************************
    vector<string> rnxFileListVec;
-
+      
       // Now read eop files from 'eopFileList'
    ifstream rnxFileListStream;
 
@@ -815,7 +815,7 @@ void clk::preprocessing()
          continue;
       }
 
-         // The Year/DayOfYear/SecOfYear format, you MUST set the timeSystem at
+         // The Year/DayOfYear/SecOfYear format, you MUST set the timeSystem at 
          // the same time.
       YDSTime yds( confReader.getValueAsInt("year"),
                    confReader.getValueAsInt("dayOfYear"),
@@ -823,7 +823,7 @@ void clk::preprocessing()
 
       CommonTime initialTime( yds.convertToCommonTime() );
 
-         // Get the station name for current rinex file
+         // Get the station name for current rinex file 
       string station = roh.markerName;
 
          // Let's check the ocean loading data for current station before
@@ -848,7 +848,7 @@ void clk::preprocessing()
       catch (InvalidRequest& ie)
       {
             // If file doesn't exist, issue a warning
-         cerr << "The station " << station << " isn't included in MSC file."
+         cerr << "The station " << station << " isn't included in MSC file." 
                                            << endl;
 
             // Warning:you must increase the iterator to process the next file,
@@ -858,7 +858,7 @@ void clk::preprocessing()
          continue;
       }
 
-         // Now, Let's change the system to GPS
+         // Now, Let's change the system to GPS 
       initialTime.setTimeSystem(TimeSystem::GPS);
 
          // Read inital position from given msc data store.
@@ -992,11 +992,11 @@ void clk::preprocessing()
             // Feed Antex reader object with Antex file
          antexReader.open( confReader.getValue( "antexFile" ) );
 
-            // Antenna model
+            // Antenna model 
          antennaModel = roh.antType;
 
             // Get receiver antenna parameters
-            // Warning: If no corrections are not found for one specific
+            // Warning: If no corrections are not found for one specific 
             //          radome, then the antenna with radome NONE are used.
          try
          {
@@ -1065,7 +1065,7 @@ void clk::preprocessing()
       linear2.addLinear(comb.q1Combination);
       linear2.addLinear(comb.q2Combination);
       pList.push_back(linear2);       // Add to processing list
-
+      
 
          // Object to align phase with code measurements
       PhaseCodeAlignment phaseAlignL1;
@@ -1106,7 +1106,7 @@ void clk::preprocessing()
          pList.push_back(pcFilter);       // Add to processing list
       }
 
-         // Now, After calibrating the L1/L2, let's compute the "new"
+         // Now, After calibrating the L1/L2, let's compute the "new" 
          // MWubbena combinations
       ComputeLinear linear4;
       linear4.addLinear(comb.mwubbenaCombination);
@@ -1114,8 +1114,8 @@ void clk::preprocessing()
 
          // Object to compute prefit-residuals for clock estimation
          // Warning: Modified by Shoujian Zhang, to determine the exact
-         //          satellite clocks 'cdt' directly, instead of the
-         //          clock correction delta('cdt')
+         //          satellite clocks 'cdt' directly, instead of the 
+         //          clock correction delta('cdt') 
       ComputeLinear linear6(comb.pcPrefitC);
       linear6.addLinear(comb.lcPrefitC);
       pList.push_back(linear6);       // Add to processing list
@@ -1166,6 +1166,7 @@ void clk::preprocessing()
          Triple tides( solid.getSolidTide( time, nominalPos )  +
                        ocean.getOceanLoading( station, time )  +
                        pole.getPoleTide( time, nominalPos )    );
+         
 
             // Update observable correction object with tides information
          corr.setExtraBiases(tides);
@@ -1210,7 +1211,7 @@ void clk::preprocessing()
 
          }
 
-            // Only keep the necessary types for 'solver'
+            // Only keep the necessary types for 'solver' 
          TypeIDSet types;
          types.insert(TypeID::weight);
          types.insert(TypeID::wetMap);
@@ -1220,7 +1221,7 @@ void clk::preprocessing()
          types.insert(TypeID::prefitL);
 
             // Delete the types not in 'types' to save the memory
-         gRin.keepOnlyTypeID(types);
+         gRin.keepOnlyTypeID(types);   
 
             // Store observation data
          gdsMap.addGnssRinex(gRin);
@@ -1344,7 +1345,7 @@ void clk::printModel( ofstream& modelfile,
    // Method to generate and solve the general equation system
 void clk::solve()
 {
-   ////> In the resolution part we start configuring the general solver
+   ////> In the resolution part we start configuring the general solver 
 
       // Declare stochastic models to be used
       // The coordinates are handled as white noise with 100 m of sigma
@@ -1382,8 +1383,6 @@ void clk::solve()
 
       // This will be the independent term for phase equations
    Variable prefitL( TypeID::prefitL );
-
-
 
       // Reference stations code equation description
    Equation equPCRef( prefitC );
@@ -1451,67 +1450,65 @@ void clk::solve()
       // Get if we want 'forwards-backwards' or 'forwards' processing only
    bool cycles( confReader.getValueAsInt("filterCycles", "DEFAULT") );
 
-   ////> Variables for the print out
+   ////> Variables for the print out 
 
       // Prepare for printing
    int precision( confReader.getValueAsInt( "precision", "DEFAULT" ) );
    cout << fixed << setprecision( precision );
 
-   ////> Now, Let's solve the equation system
-
-   ofstream sourcesInfo("sourcesData.txt", ios::out);
+   ////> Now, Let's solve the equation system 
+   
+   //ofstream sourcesInfo("sourcesData.txt", ios::out);
 
 
       // Repeat while there is preprocesed data available
    while( !gdsMap.empty() )
    {
 
-         //*Solve the system equation
+         //*Solve the system equation 
 
          // Get data out of GDS, but only the first epoch
       gnssDataMap gds( gdsMap.frontEpoch() );
 
          // Remove first element (i.e., we remove the first epoch)
       gdsMap.pop_front_epoch();
-
+      
 
       bool bValid = true;
       bool bFindMaster = false;
 
-         // print warning if there are no data for the master station
+         // print warning if there are no data for the master station 
          // at current epoch
-      for( gnssDataMap::const_iterator gdsMapIt = gds.begin();
+      for( gnssDataMap::const_iterator gdsMapIt = gds.begin(); 
             gdsMapIt != gds.end(); gdsMapIt++ ){
-
+         
          /// find master station in gnssDataMap
          sourceDataMap::const_iterator sdMapIt = gdsMapIt->second.find( master );
 
          if( sdMapIt != gdsMapIt->second.end() ){
-
+            
             bFindMaster = true;
 
-            /// if master station has no data and then skip this epoch
+            /// if master station has no data and then skip this epoch 
             if( sdMapIt->second.numSats() <= 0 ) {
-
+               
                cout << "Skip epoch:" << gds.begin()->first << endl;
                bValid = false;
                break;
 
             }
-
-            //cout << "station name :"<< sdMapIt->first << ",numSats:"<< sdMapIt->second.numSats()<<",time:"<<gds.begin()->first<<endl;
-
+         
          }
-
+            
       }
 
-      /// if current epoch cannot process, continue to next epoch
+      /// if current epoch cannot process, continue to next epoch 
       if( !bValid || !bFindMaster) continue;
-
-
+      
+      
       /////  print source information each epoch
-      SatIDSet satellites = gds.getSatIDSet();
-
+      /*SatIDSet satellites = gds.getSatIDSet();
+      
       YDSTime time_tag( gds.begin()->first );
 
       //  print CommonTime
@@ -1519,7 +1516,7 @@ void clk::solve()
 
       for( SatIDSet::iterator it = satellites.begin();
            it != satellites.end(); it++ ){
-
+         
          SourceIDSet sources = gds.getSourceIDSet( *it, gds.begin()->first );
 
          sourcesInfo << "G" << it->id << " " << sources.size()<<" ";
@@ -1530,7 +1527,7 @@ void clk::solve()
          }
 
          sourcesInfo<<endl;
-      }
+      }*/
 
 
          // Extract current epoch
@@ -1544,20 +1541,20 @@ void clk::solve()
 
    }  // End of 'while( !gdsMap.empty() )'
 
-   sourcesInfo.close();
+// sourcesInfo.close();
 
    /// We are done ////
 
 }  // End of 'clk::solve()'
 
 
-   // Method to extract the solutions from solver and
-   // temprorarily store them in the string, which will be
+   // Method to extract the solutions from solver and 
+   // temprorarily store them in the string, which will be 
    // print out to the solutionfile in the method 'printClockData'
 void clk::getClockSoluts( const SolverGeneral2& solver,
                              const CommonTime& workEpoch )
 {
-      // Mulitmap used to store the clock data line
+      // Mulitmap used to store the clock data line 
    std::string solutionRecord;
 
       // Satellite sets for all the estimated satellite clocks
@@ -1567,10 +1564,10 @@ void clk::getClockSoluts( const SolverGeneral2& solver,
    SourceIDSet currentSourceSet;
 
       // Clock bias
-   double clockBias;
+   double clockBias; 
 
       //*Now, read and print the receiver clock data record
-
+      
       // Read receiver clocks from the stateMap
    currentSourceSet = solver.getCurrentSources();
 
@@ -1597,7 +1594,7 @@ void clk::getClockSoluts( const SolverGeneral2& solver,
       solutionRecord += string(1,' '); // parse space
       solutionRecord += rightJustify((*itSource).sourceName,4); // Source name
       solutionRecord += string(1,' '); // parse space
-      solutionRecord += printTime(workEpoch,"%4Y %02m %02d %02H %02M %9.6f"); // Time
+      solutionRecord += printTime(workEpoch,"%4Y %02m %02d %02H %02M %9.6f"); // Time 
       solutionRecord += rightJustify(asString(1),3); // clock data number
       solutionRecord += string(3,' '); // parse space
       solutionRecord += rightJustify(doub2sci(clockBias, 19, 2), 19); // clock bias
@@ -1609,10 +1606,10 @@ void clk::getClockSoluts( const SolverGeneral2& solver,
    }
 
       //*Now, read and print the receiver clock data record
-
+      
       // Read satellite clocks from the stateMap
    currentSatSet = solver.getCurrentSats();
-
+      
       // Insert current satellites into satSet
    satSet.insert(currentSatSet.begin(), currentSatSet.end());
 
@@ -1640,7 +1637,7 @@ void clk::getClockSoluts( const SolverGeneral2& solver,
       solutionRecord += string(1,' '); // parse space
       solutionRecord += leftJustify(satID.toString(),4); // Source name
       solutionRecord += string(1,' '); // parse space
-      solutionRecord += printTime(workEpoch,"%4Y %02m %02d %02H %02M %9.6f"); // Time
+      solutionRecord += printTime(workEpoch,"%4Y %02m %02d %02H %02M %9.6f"); // Time 
       solutionRecord += rightJustify(asString(1),3); // clock data number
       solutionRecord += string(3,' '); // parse space
       solutionRecord += rightJustify(doub2sci(clockBias, 19, 2), 19); // clock bias
@@ -1651,9 +1648,9 @@ void clk::getClockSoluts( const SolverGeneral2& solver,
 
    }
 
-   multimap<CommonTime,string>::iterator begPos =
+   multimap<CommonTime,string>::iterator begPos = 
                                       solutionMap.lower_bound(workEpoch);
-   multimap<CommonTime,string>::iterator endPos =
+   multimap<CommonTime,string>::iterator endPos = 
                                       solutionMap.upper_bound(workEpoch);
 
    while(begPos != endPos)
@@ -1685,7 +1682,7 @@ void clk::shutDown()
 }  // End of 'clk::shutDown()'
 
 
-   // Method to print clock data
+   // Method to print clock data 
 void clk::printClockHeader( ofstream& clockStream)
 {
    using namespace StringUtils;
@@ -1713,14 +1710,14 @@ void clk::printClockHeader( ofstream& clockStream)
 
       // header line record
    string headerRecord;
-
+   
       // "RINEX VERSION / TYPE"
    double version(2.0);
    headerRecord  = rightJustify(asString(version,2), 9);
    headerRecord += string(11,' ');
    headerRecord += string("CLOCK") + string(15,' ');
    headerRecord += string("GPS") + string(17,' ');      // TD fix
-   headerRecord += versionString;
+   headerRecord += versionString;         
    clockStream << headerRecord << endl;
 
       // "PGM / RUN BY / DATE"
@@ -1734,20 +1731,20 @@ void clk::printClockHeader( ofstream& clockStream)
    headerRecord  = leftJustify(program,20);
    headerRecord += leftJustify(runby,20);
    headerRecord += leftJustify(dat, 20);
-   headerRecord += runByString;
+   headerRecord += runByString;          
    clockStream << headerRecord << endl;
 
 
       // "TIME SYSTEM ID"
    string timeSystem("GPS");
    headerRecord  = string(3,' ');  // TD
-   headerRecord += leftJustify(timeSystem,57);
-   headerRecord += timeSystemString;
+   headerRecord += leftJustify(timeSystem,57);     
+   headerRecord += timeSystemString;     
    clockStream << headerRecord << endl;
 
       // "COMMENT"
-   std::vector<std::string> commentList;
-   for(int i=0; i<commentList.size(); ++i)
+   std::vector<std::string> commentList;   
+   for(int i=0; i<commentList.size(); ++i) 
    {
       headerRecord  = leftJustify(commentList[i],60);
       headerRecord += commentString;         // "COMMENT"
@@ -1790,7 +1787,7 @@ void clk::printClockHeader( ofstream& clockStream)
       // "ANALYSIS CENTER"
    std::string analCenterDesignator("WHU");
    std::string analysisCenter("Wuhan University");
-      // print out
+      // print out 
    headerRecord  = analCenterDesignator;
    headerRecord += string(2,' ');
    headerRecord += leftJustify(analysisCenter,55);
@@ -1817,60 +1814,60 @@ void clk::printClockHeader( ofstream& clockStream)
    headerRecord += leftJustify(terrRefFrame,50);
    headerRecord += numReceiversString;    // "# OF SOLN STA / TRF"
    clockStream << headerRecord << endl;
-
+  
         // "SOLN STA NAME / NUM"
-   for(SourceIDSet::iterator itSource = sourceSet.begin();
-       itSource != sourceSet.end();
-       ++itSource)
+   for(SourceIDSet::iterator itSource = sourceSet.begin(); 
+       itSource != sourceSet.end(); 
+       ++itSource) 
    {
          // sourcename and sourceNumber number
       headerRecord  = leftJustify((*itSource).sourceName,  4) + string( 1, ' ');
       headerRecord += leftJustify((*itSource).sourceNumber,20) ;
-
+  
          // coordinate
       double coordX = floor(1000.0*(*itSource).nominalPos.X());
       double coordY = floor(1000.0*(*itSource).nominalPos.Y());
       double coordZ = floor(1000.0*(*itSource).nominalPos.Z());
-
-         // print Coordiante
+  
+         // print Coordiante 
       headerRecord += rightJustify(asString(coordX, 0), 11);
       headerRecord += string(1,' ');
       headerRecord += rightJustify(asString(coordY, 0), 11);
       headerRecord += string(1,' ');
       headerRecord += rightJustify(asString(coordZ, 0), 11);
-
+  
          // print the line
       headerRecord += solnStateString;       // "SOLN STA NAME / NUM"
       clockStream << headerRecord << endl;
    }
-
+  
       // "# OF SOLN SATS"
    headerRecord  = rightJustify(asString(satSet.size()), 6);
    headerRecord += string(54,' ');
    headerRecord += numSolnSatsString;     // "# OF SOLN SATS"
    clockStream << headerRecord << endl;
-
+  
       // "PRN LIST"
    headerRecord = string();
    int i = 0;
    for(SatIDSet::iterator itSat = satSet.begin();
        itSat != satSet.end();
        ++itSat)
-   {
+   {  
          // Satellite ID for rinex
       RinexSatID satID(*itSat);
       satID.setfill('0'); // set the fill char for output
-
+  
          // Add each PRN satellite ...
       headerRecord += rightJustify(satID.toString(), 3) + string(1,' ');
          // End of this line
-      if(((i+1) % 15) == 0 || (i==satSet.size()-1) )
+      if(((i+1) % 15) == 0 || (i==satSet.size()-1) ) 
       {
            // Add empty to the remaiding places
          headerRecord += string(60-headerRecord.size(),' ');
          headerRecord += prnListString;         // "PRN LIST"
          clockStream << headerRecord << endl;
-            // New line
+            // New line  
          headerRecord  = string();
       }
         // increment for the satellite number
@@ -1885,26 +1882,26 @@ void clk::printClockHeader( ofstream& clockStream)
 }  // End of printClockHeader
 
 
-   // Method to print clock data
+   // Method to print clock data 
 void clk::printClockData( ofstream& clockStream)
 {
-      // Time tolerance
+      // Time tolerance  
    double tolerance(0.1);
 
-      // Check if the structure isn't empty
+      // Check if the structure isn't empty  
    while( !( solutionMap.empty() ) )
    {
-         // Get the 'CommonTime' of the first element
+         // Get the 'CommonTime' of the first element 
       CommonTime firstEpoch( (*solutionMap.begin()).first );
 
          // Find the position of the first element PAST
-      multimap<CommonTime,string>::iterator endPos(
+      multimap<CommonTime,string>::iterator endPos( 
                                 solutionMap.upper_bound(firstEpoch+tolerance) );
          // Remove values
       for( multimap<CommonTime,string>::iterator pos = solutionMap.begin();
            pos != endPos; )
       {
-
+      
          clockStream << pos->second  << endl;
             // It is advisable to avoid sawing off the branch we are
             // sitting on

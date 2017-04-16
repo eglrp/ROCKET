@@ -82,7 +82,7 @@ namespace gpstk
             (*it).second[resultType] = getCombination(value1, value2);
 
          }
-
+         
             // Remove satellites with missing data
          gData.removeSatID(satRejectedSet);
 
@@ -101,5 +101,20 @@ namespace gpstk
 
    }  // End of method 'ComputeCombination::Process()'
 
+   gnssDataMap& ComputeCombination::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+            Process( sdmIt->second );
+         }
+      }
+       
+      return gData;
+   }
 
 } // End of namespace gpstk

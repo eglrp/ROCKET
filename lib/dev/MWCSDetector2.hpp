@@ -35,7 +35,7 @@
 
 #include "ProcessingClass.hpp"
 #include <list>
-
+//#include "OmpHeader.hpp"
 
 namespace gpstk
 {
@@ -222,7 +222,16 @@ namespace gpstk
              */
             virtual gnssRinex& Process(gnssRinex& gData)
             throw(ProcessingException);
-            
+           
+
+            /** Returns a gnnsDataMap object, adding the new data generated when
+             *  calling this object.
+             *
+             * @param gData    Data object holding the data.
+             */
+            virtual gnssDataMap& Process(gnssDataMap& gData)
+               throw(ProcessingException);
+
             
             /// Returns a string identifying this object.
             virtual std::string getClassName(void) const;
@@ -285,9 +294,14 @@ namespace gpstk
             };
             
             
+            typedef std::map<SatID, filterData> MWData;
+            typedef std::map<SourceID, MWData> MWDataMap;
+
             /// Map holding the information regarding every satellite
-            std::map<SatID, filterData> MWData;
-            
+            ///std::map<SatID, filterData> MWData;
+            //MWData m_mwData[omp_max_threads];
+            MWData m_mwData;
+            MWDataMap m_mwDataMap;
             
             /** Method that implements the Melbourne-Wubbena cycle slip
              *  detection algorithm

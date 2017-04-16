@@ -62,7 +62,7 @@ namespace gpstk
        *    
        *    SourceID refSource = network.sourceIDOfRinexObsFile(
        *                                          "NetworkDemo/acor1480.08o");
-       *    network.setReferenceStream(refSource);    
+       *    network.setReferenceSource(refSource);    
        *
        *    gnssDataMap gdsMap;
        *    while( network.readEpochData(gdsMap) )
@@ -102,7 +102,7 @@ namespace gpstk
           *
           * @param refSource      Reference SourceID of the newwork.
           */
-      void setReferenceStream(const SourceID& refSource)
+      void setReferenceSource(const SourceID& refSource)
       { referenceSource = refSource; }
 
 
@@ -119,7 +119,7 @@ namespace gpstk
       SourceID sourceIDOfRinexObsFile(std::string obsFile);
 
       RinexObsStream* getRinexObsStream(const SourceID& source)
-      { return srcStreamMap[source]; }
+      { return mapSourceStream[source]; }
 
    protected:
 
@@ -138,10 +138,10 @@ namespace gpstk
       std::list<ObsData> allStreamData;
 
          /// Map to easy access the streams by 'SourceID'
-      std::map<SourceID, RinexObsStream*> srcStreamMap;
+      std::map<SourceID, RinexObsStream*> mapSourceStream;
 
          /// Map to easy access the synchronize object
-      std::map<SourceID, Synchronize*> srcSyncMap;
+      std::map<SourceID, Synchronize*> mapSourceSynchro;
      
          /// Reference Sourcee
       SourceID referenceSource;

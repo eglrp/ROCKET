@@ -43,7 +43,6 @@
 
 #include "SatArcMarker2.hpp"
 
-
 namespace gpstk
 {
 
@@ -117,7 +116,7 @@ namespace gpstk
        */
    CommonTime SatArcMarker2::getArcChangedEpoch(const SatID& sat)
    {
-      std::map<SatID, CommonTime>::iterator it = satArcChangeMap.find(sat);
+      /*std::map<SatID, CommonTime>::iterator it = satArcChangeMap.find(sat);
       if(it!=satArcChangeMap.end())
       {
          return it->second;
@@ -125,9 +124,35 @@ namespace gpstk
       else
       {
          return CommonTime(CommonTime::BEGINNING_OF_TIME);
+      }*/
+      
+      SatArcData::const_iterator satArcDataIt = m_satArcData.find(sat);
+      
+      if( satArcDataIt != m_satArcData.end() )
+      {
+         return satArcDataIt->second.arcChangeTime;
+      }
+      else
+      {
+         return CommonTime( CommonTime::BEGINNING_OF_TIME );
+      }
+   }  // End of method 'SatArcMarker2::getArcChangedEpoch()'
+
+   CommonTime SatArcMarker2::getArcChangedEpoch(const SourceID& source, const SatID& sat)
+   {
+      SatArcDataMap::const_iterator satArcDataMapIt = m_satArcDataMap.find( source );
+      
+      if( satArcDataMapIt != m_satArcDataMap.end() )
+      {
+            m_satArcData = satArcDataMapIt->second;
+
+            return getArcChangedEpoch( sat );
+      }else
+      {
+         return CommonTime( CommonTime::BEGINNING_OF_TIME );
       }
 
-   }  // End of method 'SatArcMarker2::getArcChangedEpoch()'
+   }
 
 
       /* Returns a satTypeValueMap object, adding the new data generated
@@ -143,7 +168,6 @@ namespace gpstk
 
       try
       {
-
          double flag(0.0);
 
          SatIDSet satRejectedSet;
@@ -162,7 +186,7 @@ namespace gpstk
             {               
 
 //             cout << "SatArcMarker2" << (*it).first << endl;
-
+	       //std::cout<<"cannot find flags"<<std::endl;
                   // If flag is missing, then schedule this satellite
                   // for removal
                satRejectedSet.insert( (*it).first );
@@ -171,36 +195,48 @@ namespace gpstk
             }
 
                // Check if satellite currently has entries
-            std::map<SatID, double>::const_iterator itArc(
-                                                satArcMap.find( (*it).first ) );
-            if( itArc == satArcMap.end() )
-            {
+            //std::map<SatID, double>::const_iterator itArc(
+            //                                    satArcMap.find( (*it).first ) );
+            //if( itArc == satArcMap.end() )
+            //{
                   // If it doesn't have an entry, insert one
-               satArcMap[ (*it).first ] = 0.0;
-               satArcChangeMap[ (*it).first ] = CommonTime::BEGINNING_OF_TIME;
+            //   satArcMap[ (*it).first ] = 0.0;
+            //   satArcChangeMap[ (*it).first ] = CommonTime::BEGINNING_OF_TIME;
+            //}
+
+            SatArcData::const_iterator satArcIt = m_satArcData.find( it->first );
+
+            if( satArcIt == m_satArcData.end() )
+            {
+               m_satArcData[it->first].arcNum = 0.0;
+               m_satArcData[it->first].arcChangeTime = CommonTime::BEGINNING_OF_TIME;
             }
 
                // Check if there was a cycle slip
             if ( flag > 0.0 )
             {
                   // Increment the value of "TypeID::satArc"
-               satArcMap[ (*it).first ] = satArcMap[ (*it).first ] + 1.0;
+             //  satArcMap[ (*it).first ] = satArcMap[ (*it).first ] + 1.0;
+                 m_satArcData[it->first].arcNum = m_satArcData[it->first].arcNum + 1.0;
 
                   // Update arc change epoch
-               satArcChangeMap[ (*it).first ] = epoch;
+             //  satArcChangeMap[ (*it).first ] = epoch;
+                 m_satArcData[it->first].arcChangeTime = epoch;
 
                   // If we want to delete unstable satellites, we must do it
                   // also when arc changes, whether or not this SV is new
                if ( deleteUnstableSats )
                {
-                  satRejectedSet.insert( (*it).first );
+		  //std::cout<<"deleteUnstableSats"<<std::endl;
+		  satRejectedSet.insert( (*it).first );
                }
             }
 
 
                // Check if we are inside unstable period
-            bool insideUnstable(std::abs(epoch-satArcChangeMap[(*it).first]) <=
-                                                               unstablePeriod );
+            // bool insideUnstable(std::abs(epoch-satArcChangeMap[(*it).first]) <=
+            //                                                   unstablePeriod );         
+            bool insideUnstable = std::abs( epoch - m_satArcData[it->first].arcChangeTime ) <= unstablePeriod;
 
                // Test if we want to delete unstable satellites. Only do if this
                // satellite in inside the unstable period.
@@ -208,12 +244,14 @@ namespace gpstk
             if ( insideUnstable &&
                  deleteUnstableSats )
             {
+	       //std::cout<<"insideUnstable"<<std::endl;
+	       //std::cout<<"epoch:"<<epoch<<",arcChangeTime:"<<m_satArcData[it->first].arcChangeTime<<std::endl;
 //             cout << "SatArcMarker2" << (*it).first << endl;
                satRejectedSet.insert( (*it).first );
             }
 
                // We will insert satellite arc number
-            (*it).second[TypeID::satArc] = satArcMap[ (*it).first ];
+            (*it).second[TypeID::satArc] = m_satArcData[it->first].arcNum;//satArcMap[ (*it).first ];
 
          }
 
@@ -301,5 +339,36 @@ namespace gpstk
    }  // End of method 'SatArcMarker2::Process()'
 
 
+   gnssDataMap& SatArcMarker2::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end(); gdmIt++ )
+      {
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end(); sdmIt++ )
+            {
+		  
+               SatArcDataMap::iterator satArcDataIt = m_satArcDataMap.find( sdmIt->first );
+
+               if( satArcDataIt != m_satArcDataMap.end() )
+               {
+                  m_satArcData = satArcDataIt->second;
+               }
+	       else
+	       {
+		  m_satArcData = SatArcData();
+	       }
+		
+               Process( gdmIt->first, sdmIt->second );
+               
+               m_satArcDataMap[sdmIt->first] = m_satArcData;
+            
+            }   
+      }
+      return gData;
+
+   }
 
 }  // End of namespace gpstk
