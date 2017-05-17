@@ -42,10 +42,190 @@ namespace gpstk
 	{
 		switch( intEstimator )
 		{
-			case IR: return SRRound( Qahat, srt, decor, bias );		break;
-			case IB: return SRBoot( Qahat, srt, decor, bias );			break;
+			case IR:  return SRRound( Qahat, srt, decor, bias );		break;
+			case IB:  return SRBoot( Qahat, srt, decor, bias );		break;
+			case ILS: return SRILS( Qahat, srt, bias );					break;
 		};
 	}
+
+		/** Return IB success rate
+		 * 
+		 * @param Q
+		 * @param srty
+		 * @param decorr
+		 * @param b
+		 */
+	double SuccessRate::SRBoot( Matrix<double>& Q,
+										 SuccessRateType& srty, 
+										 bool decorr,
+										 Vector<double>& b )
+	{
+
+			// Decorrelate the float ambiguity estimates 
+		if( decorr )
+		{
+			// Qzhat = Z'T*Qahat*Z	
+			Matrix<double> L( Q.rows(), Q.rows(), 0.0 );
+			Vector<double> D( Q.rows(), 0.0 );
+
+			Matrix<double> Z( Q.rows(), Q.rows(), 0.0 );
+			Matrix<double> Qzhat( Q.rows(), Q.rows(), 0.0 );
+
+		   if( !factorize( Q, L, D) )
+			{
+				reduction( L, D, Z );
+				Qzhat = transpose(Z)*Q*Z;
+
+				Q = Qzhat;
+			}
+			else
+			{
+				Exception e(" SuccessRate::factorize error ");
+				GPSTK_THROW(e);;
+			}
+		}   // End of ' if( decorr ) '
+
+		if( b.empty() )	// Unbiased success rate
+		{
+			switch( srty )
+			{
+				case Exact:					return SRBootExact( Q );		break; 
+				case UpperBoundADOP:		return SRILSADOPAP( Q );		break;
+				default: 
+					Exception e("illegal success rate type for IB");
+					GPSTK_THROW(e);
+				break;
+			}
+		}
+		else					// Biased success rate 
+		{
+			std::cout << "biased SR" << std::endl;
+		}
+
+		return 0;
+	}   // End of ' double SRBoot( Matrix<double>& Q, ... '  
+
+
+		/** Compute Q = L'*diag(D)*L   
+		 *
+		 * @param Q			input
+		 * @param L			output
+		 * @param D			output
+		 */
+	int SuccessRate::factorize( const Matrix<double>& Q,
+										 Matrix<double>& L, 
+										 Vector<double>& D )
+
+	{
+	   // TODO: CHECK UNEXPECTED INPUT
+      // L:nxn Z:nxn 0<=(i,j)<n
+		
+      const int n = static_cast<int>(Q.rows());
+
+      Matrix<double> QC(Q);
+      L.resize(n, n, 0.0);
+      D.resize(n, 0.0);
+
+      for(int i = n-1; i >= 0; i--) 
+      {
+         D(i) = QC(i,i);
+         if( D(i) <= 0.0 ) return -1;
+         double temp = std::sqrt(D(i));
+         for(int j=0; j<=i; j++) L(i,j) = QC(i,j)/temp;
+         for(int j=0; j<=i-1; j++) 
+         {
+            for(int k=0; k<=j; k++) QC(j,k) -= L(i,k) * L(i,j);
+         }
+         for(int j=0; j<=i; j++) L(i,j) /= L(i,i);
+      }
+
+      return 0;
+
+	}   // End of ' int SuccessRate::factorize( const Matrix<double>& Q, ... '
+
+		/// Integer Gauss transformation 
+	void SuccessRate::gauss(Matrix<double>& L, Matrix<double>& Z, int i, int j)
+   {
+      //TODO: CHECK UNEXPECTED INPUT
+      // L:nxn Z:nxn 0<=(i,j)<n
+
+      const int n = L.rows();
+      const int mu = (int)round(L(i,j));
+      if(mu != 0) 
+      {
+         for(int k=i; k<n; k++) L(k,j) -= (double)mu*L(k,i);
+         for(int k=0; k<n; k++) Z(k,j) -= (double)mu*Z(k,i);
+      }
+   }  // End of method 'ARLambda::gauss()'
+
+   
+   void SuccessRate::permute( Matrix<double>& L, 
+                           Vector<double>& D, 
+                           int j, 
+                           double del, 
+                           Matrix<double>& Z )
+   {  
+      //TODO: CHECK UNEXPECTED INPUT
+      // L:nxn D:nx1 Z:nxn 0<=j<n
+
+      const int n = L.rows();
+
+      double eta=D(j)/del;
+      double lam=D(j+1)*L(j+1,j)/del;
+
+      D[j]=eta*D(j+1); 
+      D(j+1)=del;
+      for(int k=0;k<=j-1;k++) 
+      {
+         double a0=L(j,k); 
+         double a1=L(j+1,k);
+         L(j,k) =-L(j+1,j)*a0 + a1;
+         L(j+1,k) = eta*a0 + lam*a1;
+      }
+      L(j+1,j)=lam;
+      for(int k=j+2; k<n; k++) swap(L(k,j),L(k,j+1));
+      for(int k=0; k<n; k++) swap(Z(k,j),Z(k,j+1));
+
+   }  // End of method 'ARLambda::permute()'
+
+   
+   void SuccessRate::reduction( Matrix<double>& L, 
+                             Vector<double>& D,
+                             Matrix<double>& Z)
+   {
+      //TODO: CHECK UNEXPECTED INPUT
+      // L:nxn D:nx1 Z:nxn 0<=j<n
+
+      const int n = L.rows();
+
+      int j(n-2), k(n-2);
+      while(j>=0) 
+      {
+         if(j<=k)
+         {
+            for (int i=j+1; i<n; i++) 
+            {
+               gauss(L,Z,i,j);
+            }
+         } 
+
+         double del=D(j)+L(j+1,j)*L(j+1,j)*D(j+1);
+
+         if(del+1E-6<D(j+1)) 
+         { 
+            permute(L,D,j,del,Z);
+            k=j; j=n-2;
+         }
+         else
+         { 
+            j--;
+         }
+
+      }  // end while
+
+   }  // End of method 'ARLambda::reduction()'
+
+		
 
 }   // End of namespace gpstk 
 

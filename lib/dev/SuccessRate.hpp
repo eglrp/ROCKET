@@ -111,7 +111,44 @@ namespace gpstk
 		{ return this->bias ;}
 
 
+	protected:
 
+		/** Compute Q = L'*diag(D)*L   
+		 *
+		 * @param Q			input
+		 * @param L			output
+		 * @param D			output
+		 */
+      int factorize( const Matrix<double>& Q,
+                     Matrix<double>& L, 
+                     Vector<double>& D );
+
+       /// integer gauss transformation
+      void gauss(Matrix<double>& L, Matrix<double>& Z, int i, int j );
+
+
+         /// permutations
+      void permute( Matrix<double>& L, 
+                    Vector<double>& D, 
+                    int j, 
+                    double del, 
+                    Matrix<double>& Z);
+
+
+         /* lambda reduction (z=Z'*a, Qz=Z'*Q*Z=L'*diag(D)*L)
+			 *
+			 * @param L		input
+			 * @param D		input
+			 * @param Z		output
+			 *
+			 */
+      void reduction( Matrix<double>& L, 
+                      Vector<double>& D, 
+                      Matrix<double>& Z );
+
+			// swap `
+      void swap(double& a,double& b)
+      { double t(a); a = b; b = t; }
 		
 
 	private:
@@ -145,12 +182,23 @@ namespace gpstk
 		 * @param Q
 		 * @param srty
 		 * @param decorr 
+		 * @param b
 		 */
 		double SRBoot( Matrix<double>& Q,
 							SuccessRateType& srty, 
 							bool decorr,
-							Vector<double>& b )
-		{ return 0; }
+							Vector<double>& b );
+
+		/// Return unbiased exact success rate of IB estimator
+		double SRBootExact( Matrix<double>& Q ) { return 0; }
+
+		/// Return unbiased ADOP-based approximation of IB success rate 
+		double SRILSADOPAP( Matrix<double>& Q ) {  return 0;}
+
+		/// Return biased exact success rate of IB estimator
+		double SRBootExact( Matrix<double>& Q, Vector<double>& b );
+
+		
 		
 		/// For IB and IR, this parameter is needed. Their success rates differ
 		/// with respect to original and decorrelated Qa
@@ -165,6 +213,7 @@ namespace gpstk
 		Matrix<double> Qahat;   ///< VC matrix of float ambiguity estimates. 
 
 		Vector<double> bias;   ///< bias vector 
+
 
 	};   // End of class 'SuccessRate' 
 
