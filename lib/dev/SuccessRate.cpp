@@ -68,15 +68,29 @@ namespace gpstk
 			Matrix<double> L( Q.rows(), Q.rows(), 0.0 );
 			Vector<double> D( Q.rows(), 0.0 );
 
-			Matrix<double> Z( Q.rows(), Q.rows(), 0.0 );
+			Matrix<double> Z( ident<double>( Q.rows() ) );
 			Matrix<double> Qzhat( Q.rows(), Q.rows(), 0.0 );
 
 		   if( !factorize( Q, L, D) )
 			{
+				// Debug code vvv
+				std::cout << "L: " << std::endl << L << std::endl;  
+				std::cout << "D: " << std::endl << D << std::endl;  
+				// Debug code ^^^ 
 				reduction( L, D, Z );
 				Qzhat = transpose(Z)*Q*Z;
 
 				Q = Qzhat;
+
+				// vvv debug code vvv
+				std::cout << "Qzhat: " << std::endl << Qzhat << std::endl;  
+				// ^^^ debug code ^^^ 
+
+				if( !b.empty() )		// Biased
+				{
+					Vector<double> tempb(b);
+					b = transpose(Z)*tempb;
+				}
 			}
 			else
 			{
@@ -85,22 +99,15 @@ namespace gpstk
 			}
 		}   // End of ' if( decorr ) '
 
-		if( b.empty() )	// Unbiased success rate
+		switch( srty )
 		{
-			switch( srty )
-			{
-				case Exact:					return SRBootExact( Q );		break; 
-				case UpperBoundADOP:		return SRILSADOPAP( Q );		break;
-				default: 
-					Exception e("illegal success rate type for IB");
-					GPSTK_THROW(e);
-				break;
-			}
-		}
-		else					// Biased success rate 
-		{
-			std::cout << "biased SR" << std::endl;
-		}
+			case Exact:					return SRBootExact( Q, b );		break; 
+			case UpperBoundADOP:		return SRILSADOPAP( Q, b );		break;
+			default: 
+				Exception e("illegal success rate type for IB");
+				GPSTK_THROW(e);
+			break;
+		}   // End of ' switch( srty ) '
 
 		return 0;
 	}   // End of ' double SRBoot( Matrix<double>& Q, ... '  
@@ -225,7 +232,49 @@ namespace gpstk
 
    }  // End of method 'ARLambda::reduction()'
 
+	
+	/// Return unbiased exact success rate of IB estimator
+	double SuccessRate::SRBootExact( Matrix<double>& Q, Vector<double>& b )
+	{
+
+		bool unbiased( b.empty() );
+			// Num of rows for Q
+		const int n = Q.rows();
+
+			// Decomposition Q = L'*diag(D)*L 
+		Matrix<double> L( n, n, 0.0 );
+		Vector<double> D( n, 0.0 );
+
+		if( !factorize( Q, L, D) )
+		{
+			double Ps(1.0);
+			GaussianDistribution normal;
+
+			if( unbiased )		// Unbiased success rate
+			{
+				for( int i=0; i<n; i++ )
+				{
+					Ps = Ps * ( 2 * normal.cdf( 0.5/std::sqrt( D(i) ) ) - 1 );	
+				}
+			}
+			else {				// Biased success rate  
+				Vector<double> bias( inverse(L)*b );
+				for( int i=0; i<n; i++ )
+				{
+					double sigma( std::sqrt( D(i) ) );
+					Ps = Ps * ( normal.cdf( (1 - 2*bias(i))/(2*sigma) ) +
+									normal.cdf( (1 + 2*bias(i))/(2*sigma) ) - 1 );
+				}
 		
+			}   // End of ' if( unbiased ) '
+
+			return Ps;
+		}    // End of ' if( !factorize( Q, L, D) ) '
+
+		return 0.0;
+
+	}   // End of ' double SuccessRate::SRBootExact( Matrix<double>& Q ) '
+
 
 }   // End of namespace gpstk 
 

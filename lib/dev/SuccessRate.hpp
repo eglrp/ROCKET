@@ -36,6 +36,7 @@
 #include "Exception.hpp"
 #include "Matrix.hpp"
 #include "Vector.hpp" 
+#include "GaussianDistribution.hpp"
 
 
 namespace gpstk
@@ -189,14 +190,11 @@ namespace gpstk
 							bool decorr,
 							Vector<double>& b );
 
-		/// Return unbiased exact success rate of IB estimator
-		double SRBootExact( Matrix<double>& Q ) { return 0; }
-
-		/// Return unbiased ADOP-based approximation of IB success rate 
-		double SRILSADOPAP( Matrix<double>& Q ) {  return 0;}
-
 		/// Return biased exact success rate of IB estimator
 		double SRBootExact( Matrix<double>& Q, Vector<double>& b );
+
+		/// Return unbiased ADOP-based approximation of IB success rate 
+		double SRILSADOPAP( Matrix<double>& Q, Vector<double>& b ) {  return 0;}
 
 		
 		
