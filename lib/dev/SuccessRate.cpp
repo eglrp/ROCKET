@@ -27,6 +27,7 @@
 //
 //============================================================================
 //  Date :			2017/05/16 - 2017/05/17
+//	 Version:		0.0
 //  Author(s):		Lei Zhao, a Ph.D. candiate
 //  School of Geodesy and Geomatics, Wuhan University 
 //============================================================================
@@ -73,18 +74,15 @@ namespace gpstk
 
 		   if( !factorize( Q, L, D) )
 			{
-				// Debug code vvv
-				std::cout << "L: " << std::endl << L << std::endl;  
-				std::cout << "D: " << std::endl << D << std::endl;  
-				// Debug code ^^^ 
 				reduction( L, D, Z );
 				Qzhat = transpose(Z)*Q*Z;
 
 				Q = Qzhat;
 
-				// vvv debug code vvv
-				std::cout << "Qzhat: " << std::endl << Qzhat << std::endl;  
-				// ^^^ debug code ^^^ 
+				// Debug code vvv
+				std::cout << "Z: " << std::endl << Z << std::endl;
+				std::cout << "Qzaht: " << std::endl << Qzhat << std::endl;
+				// Debug code ^^^ 
 
 				if( !b.empty() )		// Biased
 				{

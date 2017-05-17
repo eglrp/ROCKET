@@ -28,7 +28,8 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //============================================================================
-//  Date :			16-MAY-2017
+//  Date :			2017/05/16 - 2017/05/12
+//  Version:		0.0
 //  Author(s):		Lei Zhao, a Ph.D. candiate
 //  School of Geodesy and Geomatics, Wuhan University 
 //============================================================================
@@ -95,11 +96,11 @@ namespace gpstk
 		 * @param b				bias vector 
 		 */
 		SuccessRate( const Matrix<double>& Q, 
+						 const Vector<double>& b = 0, 
 						 const IntegerEstimator& ie = IB,
 						 const SuccessRateType& srty = Exact, 
-						 const bool decorr = true,
-						 const Vector<double>& b = 0 ) : 
-						 Qahat(Q), intEstimator(ie), srt(srty), decor(decorr), bias(b) 
+						 const bool decorr = true ) : 
+						 Qahat(Q), bias(b), intEstimator(ie), srt(srty), decor(decorr) 
 		{}
 
 
