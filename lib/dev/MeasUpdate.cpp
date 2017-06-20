@@ -158,10 +158,14 @@ namespace gpstk
 
       int times = 0;
 
+	
+      //bool add = false;
+
+
       try
       {
 
-      do{
+       do{
 	
             ////////////////////////////////////////////
             //                    
@@ -204,6 +208,7 @@ namespace gpstk
               itEq != equList.end();
               ++itEq )
          {
+
                // Get the type value data from the header of the equation
             typeValueMap tData( (*itEq).header.typeValueData );
 
@@ -212,7 +217,7 @@ namespace gpstk
 
                // Now, Let's get current prefit
             double tempPrefit(tData(indepType));
-
+		
                // Weight
             double weight;
 
@@ -242,6 +247,23 @@ namespace gpstk
                weight = (*itEq).header.constWeight; // Weights matrix = Equation weight
             }
 
+           
+	    if( indepType == TypeID::prefitC ) 
+	    {  
+		if( tData.find( TypeID::dummy1 ) != tData.end() )
+		{
+		   weight = weight * tData(TypeID::dummy1);
+		}
+	    } 
+	    else
+	    {
+		if( tData.find( TypeID::dummy0 ) != tData.end() )
+		{
+		   weight = weight * tData(TypeID::dummy0);
+		}
+	    }
+
+
                // Second, fill geometry matrix: Look for equation coefficients
                // Now, let's visit all Variables and the corresponding 
                // coefficient in this equation description
@@ -250,6 +272,7 @@ namespace gpstk
                  vcmIter != (*itEq).body.end();
                  ++vcmIter, i++ )
             {
+
                   // We will work with a copy of current Variable
                Variable var( (*vcmIter).first );
 
@@ -374,7 +397,8 @@ namespace gpstk
          //cout << "cputtime postfitResiduals:" << Counter::end() << endl;
          
 
-	} while( !postfitFilter( gdsMap ) && times <= 2); 
+	} while( !postfitFilter( gdsMap ) && times <= 10 ); 
+
 
          //////////// //////////// //////////// ////////////
          //
@@ -386,6 +410,44 @@ namespace gpstk
 	  m_pStateStore->setStateVector( xhat );
 	  m_pStateStore->setCovarMatrix( P );
 	  m_pStateStore->setVariableSet( equSystem.getCurrentUnknowns() );	
+
+
+    	 /* double sigma = 0.0;
+	
+    	  int i = 0;
+    	  for( std::list<Equation>::iterator itEq = equList.begin();
+	 	itEq != equList.end(); itEq++ )
+    	  {
+	    TypeID residualType( (*itEq).header.indTerm.getType() );
+	    double weight = (*itEq).header.constWeight;
+	    typeValueMap tvm( (*itEq).header.typeValueData );
+	
+	    if( tvm.end() != tvm.find(TypeID::weight) )
+	    {
+	      weight = weight * tvm(TypeID::weight);
+	    }
+
+	    sigma += std::pow( postfitResiduals(i), 2 ) * weight;
+
+	    std::string typeString="C";
+	
+	    if( residualType == TypeID::prefitL ) {
+	       typeString = "L";
+	    } 
+	
+            std::cout<<"MeasUpdate:"<<(*itEq).header.equationSource.sourceName
+    	     	     <<","<<(*itEq).header.equationSat
+    	             <<","<<typeString
+                     <<","<< std::fabs( postfitResiduals(i) ) * std::sqrt(weight)
+    	             <<std::endl;
+		i++;
+   	   }
+    
+    	   int n =  equList.size();
+    	   int t =  equSystem.getCurrentNumVariables();
+    	   sigma = std::sqrt( sigma/(n-t) );
+    	   std::cout<<"sigma:"<<sigma<<std::endl;
+	*/
 
 	 /// holding the solution and covariance matrix
          //  in StateStore
@@ -487,24 +549,45 @@ namespace gpstk
 	   weight = weight * tvm(TypeID::weight);
 	}
 
+	if( residualType == TypeID::prefitC ) 
+	{  
+	   if( tvm.find( TypeID::dummy1 ) != tvm.end() )
+	    {
+	      weight = weight * tvm(TypeID::dummy1);
+	    }
+	} else
+	{
+            if( tvm.find( TypeID::dummy0 ) != tvm.end() )
+	    {
+	       weight = weight * tvm(TypeID::dummy0);
+            }
+	}
+
 	sigma += std::pow( postfitResiduals(i), 2 ) * weight;
 
-        std::cout<<"sat:"<<(*itEq).header.equationSat
-    	     	 <<",source:"<<(*itEq).header.equationSource
-    	         <<",type:"<<(*itEq).header.indTerm.getType()
-                 <<",v:"<< std::fabs( postfitResiduals(i) ) * std::sqrt(weight)
-    	         <<",postfit="<<std::fabs( postfitResiduals(i) )<<std::endl;
+	std::string typeString="C";
+	
+	if( residualType == TypeID::prefitL ) {
+	    typeString = "L";
+	} 	
+
+	if( std::fabs( postfitResiduals(i) ) * std::sqrt(weight) > 1 ){
+        	std::cout<<"MeasUpdate:"<<(*itEq).header.equationSat
+    	     	 	 <<","<<(*itEq).header.equationSource.sourceName
+    	         	 <<","<<typeString
+                 	 <<","<< std::fabs( postfitResiduals(i) ) * std::sqrt(weight)
+    	         	 <<","<<std::fabs( postfitResiduals(i) )<<std::endl;
+	}
+
 	i++;
     }
     
     int n =  equList.size();
     int t =  equSystem.getCurrentNumVariables();
     sigma = std::sqrt( sigma/(n-t) );
+
     std::cout<<"sigma:"<<sigma<<std::endl;
-
-    mSigma = sigma;
-
-    if( sigma <= mMaxSigma ) return true;
+    //mSigma = sigma;
 
 	
     i = 0;
@@ -521,24 +604,75 @@ namespace gpstk
 	   weight = weight * tvm(TypeID::weight);
 	}
 	
-	double v = std::sqrt(weight) * std::fabs( postfitResiduals(i) );
+	if( residualType == TypeID::prefitC ) 
+	{  
+	   if( tvm.find( TypeID::dummy1 ) != tvm.end() )
+	    {
+	      weight = weight * tvm(TypeID::dummy1);
+	    }
+	} else
+	{
+            if( tvm.find( TypeID::dummy0 ) != tvm.end() )
+	    {
+	       weight = weight * tvm(TypeID::dummy0);
+            }
+	}
 
-	if( v  >= 3*sigma )
+	double v = std::sqrt(weight) * std::fabs( postfitResiduals(i) );
+		
+	if( (v>1.5*sigma) && (v<=2.5*sigma) ) 
+	{
+	   isValid = false;
+	   if( residualType == TypeID::prefitL ) {
+	      if( tvm.find(TypeID::dummy0) == tvm.end() ) 
+	      { tvm[TypeID::dummy0] = 1.0; }
+	      tvm(TypeID::dummy0) = tvm(TypeID::dummy0) * 1.5 * sigma / v;
+	   } else {
+	      if( tvm.find(TypeID::dummy1) == tvm.end() )
+	      { tvm[TypeID::dummy1] = 1.0; }
+	      tvm(TypeID::dummy1) = tvm(TypeID::dummy1) * 1.5 * sigma / v;
+	   }
+	} else if( v  >= 2.5 * sigma )
 	{
 	   isValid = false;
 	   gData.removeSatID( (*itEq).header.equationSource,
 		              (*itEq).header.equationSat );
 
-           std::cout<<"sat:"<<(*itEq).header.equationSat
-    	     	    <<",source:"<<(*itEq).header.equationSource
-    	            <<",type:"<<(*itEq).header.indTerm.getType()
-	            <<",v:"<<v
-    	            <<",postfit="<<std::fabs( postfitResiduals(i) )<<std::endl;
+	    if( residualType == TypeID::prefitL )
+	    {
+		(*m_pStateStore).addCycleSlip( (*itEq).header.equationSource,
+					    (*itEq).header.equationSat );
+	    }
 	 }
-
 	i++;
      }
-	 
+
+
+    for( gnssDataMap::iterator gdsIter = gData.begin();
+	  gdsIter != gData.end();)
+    {
+	for( sourceDataMap::iterator sdmIter = (*gdsIter).second.begin();
+	       sdmIter != (*gdsIter).second.end();)
+	{
+	   if( (*sdmIter).second.numSats() <= 3 )
+	   {
+	      (*gdsIter).second.erase(sdmIter++);
+	   } else {
+	      sdmIter++;
+	   }	
+	}
+	
+	if( (*gdsIter).second.size() <= 0 )
+	{
+	   gData.erase(gdsIter++);
+	}else{
+	   gdsIter++;
+	}
+    }
+	
+    double temp = mSigma;
+    mSigma = sigma;	
+    if( std::fabs(temp - sigma) <= 0.001 ) return true;
 
     return isValid;	
  }
