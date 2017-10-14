@@ -20,7 +20,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -28,13 +28,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -75,56 +75,69 @@ namespace gpstk
       catch(Exception& e) { GPSTK_RETHROW(e); }
    }
 
-   // adjustBeginningValidity determines the beginValid and endValid times.
+   // adjustValidity determines the beginValid and endValid times.
    // @throw Invalid Request if the required data has not been stored.
    void GPSEphemeris::adjustValidity(void)
    {
       try {
          OrbitEph::adjustValidity();   // for dataLoaded check
 
-	      // Beginning of Validity
+         int debug(1);
+
+         if(debug)
+         {
+             beginValid = ctToe - (fitDuration/2)*3600;
+             endValid = ctToe + (fitDuration/2)*3600;
+         }
+         else
+         {
+
+          // Beginning of Validity
                // New concept.  Admit the following.
-	      //  (a.) The collection system may not capture the data at earliest transmit.
-	      //  (b.) The collection system may not capture the three SFs consecutively.
-	      // Consider a couple of IS-GPS-200 promises,
-	      //  (c.) By definition, beginning of validity == beginning of transmission.
-	      //  (d.) Except for uploads, cutovers will only happen on hour boundaries
-	      //  (e.) Cutovers can be detected by non-even Toc.
-	      //  (f.) Even uploads will cutover on a frame (30s) boundary.
+          //  (a.) The collection system may not capture the data at earliest transmit.
+          //  (b.) The collection system may not capture the three SFs consecutively.
+          // Consider a couple of IS-GPS-200 promises,
+          //  (c.) By definition, beginning of validity == beginning of transmission.
+          //  (d.) Except for uploads, cutovers will only happen on hour boundaries
+          //  (e.) Cutovers can be detected by non-even Toc.
+          //  (f.) Even uploads will cutover on a frame (30s) boundary.
                // Therefore,
-	      //   1.) If Toc is NOT even two hour interval, pick lowest HOW time,
-	      //   round back to even 30s.  That's the earliest Xmit time we can prove.
-	      //   NOTE: For the case where this is the SECOND SF 1/2/3 after an upload,
-	      //   this may yield a later time as such a SF 1/2/3 will be on a even
-	      //   hour boundary.  Unfortunately, we have no way of knowing whether
-	      //   this item is first or second after upload without additional information
-	      //   2.) If Toc IS even two hour interval, pick time from SF 1,
-	      //   round back to nearest EVEN two hour boundary.  This assumes collection
-	      //   SOMETIME in first hour of transmission.  Could be more
-	      //   complete by looking at fit interval and IODC to more accurately
-	      //   determine earliest transmission time.
+          //   1.) If Toc is NOT even two hour interval, pick lowest HOW time,
+          //   round back to even 30s.  That's the earliest Xmit time we can prove.
+          //   NOTE: For the case where this is the SECOND SF 1/2/3 after an upload,
+          //   this may yield a later time as such a SF 1/2/3 will be on a even
+          //   hour boundary.  Unfortunately, we have no way of knowing whether
+          //   this item is first or second after upload without additional information
+          //   2.) If Toc IS even two hour interval, pick time from SF 1,
+          //   round back to nearest EVEN two hour boundary.  This assumes collection
+          //   SOMETIME in first hour of transmission.  Could be more
+          //   complete by looking at fit interval and IODC to more accurately
+          //   determine earliest transmission time.
+
          long longToc = static_cast<GPSWeekSecond>(ctToc).getSOW();
          long XmitWeek = static_cast<GPSWeekSecond>(transmitTime).getWeek();
+
          double XmitSOW = 0.0;
          if ( (longToc % 7200) != 0)     // NOT an even two hour change
          {
             long Xmit = HOWtime - (HOWtime % 30);
-	         XmitSOW = (double) Xmit;
+            XmitSOW = (double) Xmit;
          }
          else
          {
             long Xmit = HOWtime - HOWtime % 7200;
-	         XmitSOW = (double) Xmit;
+            XmitSOW = (double) Xmit;
          }
+
          beginValid = GPSWeekSecond( XmitWeek, XmitSOW, TimeSystem::GPS );
 
-	      // End of Validity.
-	      // The end of validity is calculated from the fit interval
-	      // and the Toe.  The fit interval is either trivial
-	      // (if fit interval flag==0, fit interval is 4 hours)
-	      // or a look-up table based on the IODC.
-	      // Round the Toe value to the hour to elminate confusion
-	      // due to possible "small offsets" indicating uploads
+          // End of Validity.
+          // The end of validity is calculated from the fit interval
+          // and the Toe.  The fit interval is either trivial
+          // (if fit interval flag==0, fit interval is 4 hours)
+          // or a look-up table based on the IODC.
+          // Round the Toe value to the hour to elminate confusion
+          // due to possible "small offsets" indicating uploads
          long epochWeek = static_cast<GPSWeekSecond>(ctToe).getWeek();
          double Toe = static_cast<GPSWeekSecond>(ctToe).getSOW();
          long ToeOffset = (long) Toe % 3600;
@@ -141,10 +154,12 @@ namespace gpstk
             endFitWk++;
          }
          endValid = GPSWeekSecond(endFitWk, endFitSOW, TimeSystem::GPS);
+
+         }
       }
       catch(Exception& e) { GPSTK_RETHROW(e); }
    }
-      
+
    // Dump the overhead information as a string containing a single line.
    // @throw Invalid Request if the required data has not been stored.
    string GPSEphemeris::asString(void) const
@@ -189,7 +204,7 @@ namespace gpstk
 
          // ... and add this for GPS
          os << " SVN ";
-         SVNumXRef svNumXRef; 
+         SVNumXRef svNumXRef;
          try {
             os << svNumXRef.getNAVSTAR(satID.id, ctToe );
          }

@@ -20,7 +20,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -28,13 +28,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -67,9 +67,12 @@ namespace gpstk
          id = p; system = s;
          switch(system) {
             case systemGPS:
-            case systemGlonass:
+            case systemGLONASS:
             case systemGalileo:
-            case systemLEO: break;
+            case systemSBAS:
+            case systemQZSS:
+            case systemBDS:
+            case systemIRNSS: break;
             // invalidate anything non-SP3
             default:
                system = systemUnknown;
@@ -144,9 +147,12 @@ namespace gpstk
       {
          switch (system) {
             case systemGPS:     return 'G';
+            case systemGLONASS: return 'R';
             case systemGalileo: return 'E';
-            case systemGlonass: return 'R';
-            case systemLEO:     return 'L';
+            case systemSBAS:    return 'S';
+            case systemQZSS:    return 'J';
+            case systemBDS:     return 'C';
+            case systemIRNSS:   return 'I';
             case systemMixed:   return 'M';
             // non-SP3
             default: return '?';
@@ -157,9 +163,12 @@ namespace gpstk
       {
          switch (system) {
             case systemGPS:     return "GPS";
+            case systemGLONASS: return "GLONASS";
             case systemGalileo: return "Galileo";
-            case systemGlonass: return "Glonass";
-            case systemLEO:     return "LEO";
+            case systemSBAS:    return "SBAS";
+            case systemQZSS:    return "QZSS";
+            case systemBDS:     return "BDS";
+            case systemIRNSS:   return "IRNSS";
             case systemMixed:   return "Mixed";
             default:            return "Unknown";
          }
@@ -189,13 +198,22 @@ namespace gpstk
                system = SatID::systemGPS;
                break;
             case 'R': case 'r':
-               system = SatID::systemGlonass;
+               system = SatID::systemGLONASS;
                break;
             case 'E': case 'e':
                system = SatID::systemGalileo;
                break;
-            case 'L': case 'l':
-               system = SatID::systemLEO;
+            case 'S': case 's':
+               system = SatID::systemSBAS;
+               break;
+            case 'J': case 'j':
+               system = SatID::systemQZSS;
+               break;
+            case 'C': case 'c':
+               system = SatID::systemBDS;
+               break;
+            case 'I': case 'i':
+               system = SatID::systemIRNSS;
                break;
             case 'M': case 'm':
                system = SatID::systemMixed;

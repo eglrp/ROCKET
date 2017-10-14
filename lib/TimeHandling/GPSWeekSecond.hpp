@@ -1,15 +1,10 @@
-/// @file GPSWeekSecond.hpp  Define GPS week and seconds-of-week; inherits WeekSecond
-
-#ifndef GPSTK_GPSWEEKSECOND_HPP
-#define GPSTK_GPSWEEKSECOND_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -39,70 +34,112 @@
 //
 //=============================================================================
 
+/** @file GPSWeekSecond.hpp Define GPS week and seconds-of-week;
+ * inherits WeekSecond */
+
+#ifndef GPSWEEKSECOND_HPP
+#define GPSWEEKSECOND_HPP
+
 #include "WeekSecond.hpp"
 
 namespace gpstk
 {
-   /// This class handles GPS Week and Seconds-of-week. It inherits WeekSecond
-   /// The GPS week is specified by
-   /// 10-bit ModWeek, rollover at 1024, bitmask 0x3FF and epoch GPS_EPOCH_MJD
+      /// @ingroup TimeHandling
+      //@{
+
+      /// This class handles GPS Week and Seconds-of-week. It inherits
+      /// WeekSecond
+      /// The GPS week is specified by 10-bit ModWeek, rollover at
+      /// 1024, bitmask 0x3FF and epoch GPS_EPOCH_MJD
    class GPSWeekSecond : public WeekSecond
    {
    public:
 
-      /// Constructor.
+         /// Constructor.
       GPSWeekSecond(unsigned int w = 0,
-                       double s = 0.,
-                       TimeSystem ts = TimeSystem::GPS)
-         : WeekSecond(w,s)
+                    double s = 0.,
+                    TimeSystem ts = TimeSystem::GPS)
+            : WeekSecond(w,s)
       { timeSystem = ts; }
 
-      /// Constructor from CommonTime
+         /// Constructor from CommonTime
       GPSWeekSecond( const CommonTime& right )
       {
          convertFromCommonTime( right );
       }
 
-      /// Destructor.
+         /// Destructor.
       ~GPSWeekSecond() {}
-      
-      /// Return the number of bits in the bitmask used to get the ModWeek from the
-      /// full week.
+
+         /// Return the number of bits in the bitmask used to get the
+         /// ModWeek from the full week.
       int Nbits(void) const
       {
          static const int n=10;
          return n;
       }
 
-      /// Return the bitmask used to get the ModWeek from the full week.
+         /// Return the bitmask used to get the ModWeek from the full week.
       int bitmask(void) const
       {
          static const int bm=0x3FF;
          return bm;
       }
 
-      /// Return the Modified Julian Date (MJD) of epoch for this system.
+         /// Return the Modified Julian Date (MJD) of epoch for this system.
       long MJDEpoch(void) const
       {
          static const long e=GPS_EPOCH_MJD;
          return e;
       }
 
-      /// Return a string containing the characters that this class
-      /// understands when printing times.
+         /** @name WeekSecond Comparison Operators
+          * All comparison operators have a parameter "right" which
+          * corresponds to the GPSWeekSecond object to the right of
+          * the symbol.  All comparison operators are const and return
+          * true on success and false on failure. */
+         //@{
+      inline bool operator==( const GPSWeekSecond& right ) const
+      {
+         return WeekSecond::operator==( right );
+      }
+      inline bool operator!=( const GPSWeekSecond& right ) const
+      {
+         return WeekSecond::operator!=( right );
+      }
+      inline bool operator<( const GPSWeekSecond& right ) const
+      {
+         return WeekSecond::operator<( right );
+      }
+      inline bool operator>( const GPSWeekSecond& right ) const
+      {
+         return WeekSecond::operator>( right );
+      }
+      inline bool operator<=( const GPSWeekSecond& right ) const
+      {
+         return WeekSecond::operator<=( right );
+      }
+      inline bool operator>=( const GPSWeekSecond& right ) const
+      {
+         return WeekSecond::operator>=( right );
+      }
+         //@}
+
+         /// Return a string containing the characters that this class
+         /// understands when printing times.
       virtual std::string getPrintChars() const
       {
          return "EFGwgP";
       }
 
-      /// Return a string containing the default format to use in printing.
+         /// Return a string containing the default format to use in printing.
       virtual std::string getDefaultFormat() const
       {
          return "%F %g %P";
       }
 
-      /// This function formats this time to a string.  The exceptions
-      /// thrown would only be due to problems parsing the fmt string.
+         /// This function formats this time to a string.  The exceptions
+         /// thrown would only be due to problems parsing the fmt string.
       virtual std::string printf(const std::string& fmt) const
       {
          try {
@@ -127,8 +164,8 @@ namespace gpstk
          { GPSTK_RETHROW(e); }
       }
 
-      /// This function works similarly to printf.  Instead of filling
-      /// the format with data, it fills with error messages.
+         /// This function works similarly to printf.  Instead of filling
+         /// the format with data, it fills with error messages.
       virtual std::string printError(const std::string& fmt) const
       {
          try {
@@ -142,9 +179,9 @@ namespace gpstk
             rv = formattedPrint( rv, getFormatPrefixInt() + "G",
                                  "Gs", "BadGPSmweek");
             rv = formattedPrint( rv, getFormatPrefixInt() + "w",
-                                 "wu", "BadGPSdow");
+                                 "ws", "BadGPSdow");
             rv = formattedPrint( rv, getFormatPrefixFloat() + "g",
-                                 "gf", "BadGPSsow");
+                                 "gs", "BadGPSsow");
             rv = formattedPrint( rv, getFormatPrefixInt() + "P",
                                  "Ps", "BadGPSsys");
             return rv;
@@ -153,33 +190,31 @@ namespace gpstk
          { GPSTK_RETHROW(e); }
       }
 
-      /// Set this object using the information provided in \a info.
-      /// @param info the IdToValue object to which this object shall be set.
-      /// @return true if this object was successfully set using the
-      ///  data in \a info, false if not.
+         /// Set this object using the information provided in \a info.
+         /// @param info the IdToValue object to which this object shall be set.
+         /// @return true if this object was successfully set using the
+         ///  data in \a info, false if not.
       bool setFromInfo( const IdToValue& info )
       {
-         using namespace gpstk::StringUtils;
-
          for( IdToValue::const_iterator i = info.begin(); i != info.end(); i++ )
          {
                // based on the character, we know what to do...
             switch ( i->first )
             {
                case 'E':
-                  setEpoch( asInt( i->second ) );
+                  setEpoch( gpstk::StringUtils::asInt( i->second ) );
                   break;
                case 'F':
-                  week = asInt( i->second );
+                  week = gpstk::StringUtils::asInt( i->second );
                   break;
                case 'G':
-                  setModWeek( asInt( i->second ) );
+                  setModWeek( gpstk::StringUtils::asInt( i->second ) );
                   break;
                case 'w':
-                  sow = static_cast<double>(asInt(i->second))*SEC_PER_DAY;
+                  sow = static_cast<double>(gpstk::StringUtils::asInt(i->second))*SEC_PER_DAY;
                   break;
                case 'g':
-                  sow = asDouble( i->second );
+                  sow = gpstk::StringUtils::asDouble( i->second );
                   break;
                case 'P':
                   timeSystem.fromString(i->second);
@@ -196,6 +231,8 @@ namespace gpstk
 
    }; // end class GPSWeekSecond
 
+      //@}
+
 } // namespace
 
-#endif // GPSTK_GPSWEEKSECOND_HPP
+#endif // GPSWEEKSECOND_HPP

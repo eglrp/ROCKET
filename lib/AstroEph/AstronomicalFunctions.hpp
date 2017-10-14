@@ -17,7 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
-//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007 
+//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007
 //
 //============================================================================
 
@@ -48,7 +48,7 @@
 
 #include "CommonTime.hpp"
 #include "Triple.hpp"
-#include "GNSSconstants.hpp"
+#include "constants.hpp"
 
 
 namespace gpstk

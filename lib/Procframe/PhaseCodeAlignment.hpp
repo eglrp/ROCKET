@@ -234,7 +234,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
+         /** Returns a gnssSatTypeValue object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -243,12 +243,21 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsRinex object, adding the new data generated when
+         /** Returns a gnssRinex object, adding the new data generated when
           *  calling this object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData)
+         throw(ProcessingException);
+
+
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
          throw(ProcessingException);
 
 
@@ -296,8 +305,14 @@ namespace gpstk
       };
 
 
+      typedef std::map<SatID, alignData> SVData;
+      typedef std::map<SourceID, SVData> SVDataMap;
+
          /// Map holding the information regarding every satellite
-      std::map<SatID, alignData> svData;
+      SVData m_svData;
+
+         /// Map holding the information for gnssDataMap
+      SVDataMap m_svDataMap;
 
 
    }; // End of class 'PhaseCodeAlignment'

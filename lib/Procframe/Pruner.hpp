@@ -97,7 +97,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Prunes data from a gnnsSatTypeValue object.
+         /** Prunes data from a gnssSatTypeValue object.
           *
           * @param gData    Data object holding the data.
           */
@@ -106,13 +106,22 @@ namespace gpstk
       { Process(gData.body); return gData; };
 
 
-         /** Prunes data from a gnnsRinex object.
+         /** Prunes data from a gnssRinex object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process( gnssRinex& gData )
          throw(ProcessingException)
       { Process(gData.body); return gData; };
+
+
+         /** Prunes data from a gnssDataMap object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process( gnssDataMap& gData )
+         throw(ProcessingException)
+      { return gData; };
 
 
          /** Method to set the TypeID to be deleted.

@@ -24,9 +24,9 @@
 //
 //============================================================================
 
+#include <cmath>
 #include "TimeConverters.hpp"
 #include "TimeConstants.hpp"
-#include <math.h>
 
 namespace gpstk
 {

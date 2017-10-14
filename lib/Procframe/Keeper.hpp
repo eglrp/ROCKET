@@ -97,7 +97,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Keeps data from a gnnsSatTypeValue object.
+         /** Keeps data from a gnssSatTypeValue object.
           *
           * @param gData    Data object holding the data.
           */
@@ -106,13 +106,22 @@ namespace gpstk
       { Process(gData.body); return gData; };
 
 
-         /** Keeps data from a gnnsRinex object.
+         /** Keeps data from a gnssRinex object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process( gnssRinex& gData )
          throw(ProcessingException)
       { Process(gData.body); return gData; };
+
+
+         /** Keeps data from a gnssDataMap object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process( gnssDataMap& gData )
+         throw(ProcessingException)
+      { return gData; };
 
 
          /** Method to set the TypeID to be kept.

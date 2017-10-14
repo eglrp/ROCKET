@@ -1,4 +1,4 @@
-//#pragma ident "$Id$"
+#pragma ident "$Id$"
 
 //============================================================================
 //
@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -27,8 +27,8 @@
  * Encapsulate SSC header, including I/O
  */
 
-#ifndef GPSTK_SSCHEADER_HPP
-#define GPSTK_SSCHEADER_HPP
+#ifndef SSCHEADER_HPP
+#define SSCHEADER_HPP
 
 #include <vector>
 #include <list>
@@ -41,61 +41,55 @@
 #include "YDSTime.hpp"
 
 
-
 namespace gpstk
 {
-   /** @addtogroup SSC */
-   //@{
+    /** @addtogroup SSC */
+    //@{
 
-   /** 
-    * This class does not really do anything.  It is here to conform to the
-    * other file types, even though the SSC file type 
-    * does not have any header information.
-    *
-    * @sa tests/SSC for examples
-    * @sa SSCStream.
-    * @sa SSCData for more information on reading SSC files.
-    */
-   class SSCHeader : public SSCBase
-   {
-	
-   public:
-      /// Default Constructor.
-      SSCHeader() : releaseTime(0,0,0), beginningTime(0,0,0), 
-		endTime(0,0,0) 
-		{}
+    /**
+     * This class does not really do anything.  It is here to conform to the
+     * other file types, even though the SSC file type
+     * does not have any header information.
+     *
+     * @sa tests/SSC for examples
+     * @sa SSCStream.
+     * @sa SSCData for more information on reading SSC files.
+     */
+    class SSCHeader : public SSCBase
+    {
+    public:
+        /// Default Constructor.
+        SSCHeader()
+            : releaseTime(0,0,0),
+              beginningTime(0,0,0),
+              endTime(0,0,0)
+        {}
 
-      /// Destructor
-      virtual ~SSCHeader() {}
-      
-		/*** Modified at 2015/10/28 14:35 ***/
-      //virtual void dump(std::ostream& s) const {};
-      
-		/*** Modified at 2015/10/28 14:35 ***/
-      //! This class is a "header" so this function always returns "true". 
-      //virtual bool isHeader() const {return true;}
-		
-		
-		YDSTime releaseTime, beginningTime, endTime;
-		
-		friend class SSCData;
+        /// Destructor
+        virtual ~SSCHeader() {}
 
-	
-   protected:      
-      virtual void reallyPutRecord(FFStream& s) const 
-      		throw(std::exception, FFStreamError, 
-      		   	gpstk::StringUtils::StringException);
-     	
-  
-      virtual void reallyGetRecord(FFStream& ffs)  
-         throw(std::exception, FFStreamError, 
-               gpstk::StringUtils::StringException);
-      
-      
-   }; // class SSCHeader
+        /*** Modified at 2015/10/28 14:35 ***/
+        //virtual void dump(std::ostream& s) const {};
 
-   //@}
+        /*** Modified at 2015/10/28 14:35 ***/
+        //! This class is a "header" so this function always returns "true".
+        //virtual bool isHeader() const {return true;}
 
-} // namespace
+        YDSTime releaseTime, beginningTime, endTime;
 
-#endif
+        friend class SSCData;
+
+    protected:
+        virtual void reallyPutRecord(FFStream& s) const
+            throw(std::exception, FFStreamError, StringUtils::StringException);
+
+        virtual void reallyGetRecord(FFStream& ffs)
+            throw(std::exception, FFStreamError, StringUtils::StringException);
+
+    };  // End of class 'SSCHeader'
+
+    //@}
+
+}  // namespace gpstk
+
+#endif  // SSCHEADER_HPP

@@ -15,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -35,63 +35,55 @@
 
 namespace gpstk
 {
-	class SSCData : public SSCBase
-	{
-	public:
-		/// Constructor
-		SSCData()
+    class SSCData : public SSCBase
+    {
+    public:
+        /// Constructor
+        SSCData()
+            : station(" "), stationCoorFlag(false), antennaOffsetFlag(false),
+              antennaTypeFlag(false), containVelFlag(false)
+        {}
 
-		/*** Modified at 2015/10/28 16:29 ***/ 
-		: station(" "), stationCoorFlag(false), antennaOffsetFlag(false), 
-							antennaTypeFlag(false), containVelFlag(false)
-			{}
-		
-		/// Destructor
-	virtual ~SSCData() {}
-	/*** Modified at 2015/10/28 15:38 ***/
-	//virtual bool isData() const {return true;}
+        /// Destructor
+        virtual ~SSCData() {}
 
-		///@name data members
-		//@{
-	std::string GPSWeek;				///< GPSWeek in this file
+        ///@name data members
+        //@{
+        std::string GPSWeek;            ///< GPSWeek in this file
 
-	//SourceID source; 					///< Station name.
+        gpstk::Triple coordinates;      ///< Station coordinates.
 
-	gpstk::Triple coordinates;		///< Station coordinates.
+        gpstk::Triple antennaOffset;    ///< Antenna offset.
 
-	gpstk::Triple antennaOffset;	///< Antenna offset.
+        gpstk::Triple vel;              ///< Station velocity
 
-	gpstk::Triple vel;				///< Station velocity
+        std::string station;            ///< Station ID
 
-	std::string station;				///< Station ID
-		
-	std::string antennaType;		///< Antenna type.
-	
-	YDSTime RefEpoch;					///< Solution reference epoch
+        std::string antennaType;        ///< Antenna type.
 
-	bool stationCoorFlag;			///< Station coordinates flag, 
-											///	'+SOLUTION/ESTIMATE' in file
-	bool antennaOffsetFlag;			///< Antenna offset flag,
-											///	'+SITE/ECCENTRICITY' in file
-	bool antennaTypeFlag; 			///< Antenna type flag,
-											///	'+SITE/ANTENNA' in file 
-	bool containVelFlag;				///< if contain velocity
-	//}@
+        YDSTime RefEpoch;               ///< Solution reference epoch
 
-	protected:
+        bool stationCoorFlag;           ///< Station coordinates flag,
+                                        /// '+SOLUTION/ESTIMATE' in file
+        bool antennaOffsetFlag;         ///< Antenna offset flag,
+                                        /// '+SITE/ECCENTRICITY' in file
+        bool antennaTypeFlag;           ///< Antenna type flag,
+                                        /// '+SITE/ANTENNA' in file
+        bool containVelFlag;            ///< if contain velocity
+        //}@
 
-		virtual void reallyGetRecord(FFStream& ffs)
-			throw(std::exception, gpstk::FFStreamError,
-					gpstk::StringUtils::StringException);
+    protected:
 
-	
-		virtual void reallyPutRecord(FFStream& ffs) const
-       throw(std::exception, gpstk::FFStreamError,
-             gpstk::StringUtils::StringException);
-	
-	}; //	end of class SSCData
+        virtual void reallyGetRecord(FFStream& ffs)
+            throw(std::exception, gpstk::FFStreamError,
+                  gpstk::StringUtils::StringException);
+
+        virtual void reallyPutRecord(FFStream& ffs) const
+            throw(std::exception, gpstk::FFStreamError,
+                  gpstk::StringUtils::StringException);
+
+    }; //   end of class SSCData
 
 } // end of "namespace gpstk"
 
 #endif
-

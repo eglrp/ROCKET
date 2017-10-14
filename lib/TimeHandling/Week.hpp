@@ -108,14 +108,14 @@ namespace gpstk
       Week(int w = 0, TimeSystem ts = TimeSystem::Unknown )
             : week(w)
       { timeSystem = ts; }
-      
+
       /// Virtual Destructor.
       virtual ~Week()
       {}
-      
+
       /// Assignment Operator.
       Week& operator=(const Week& right);
-      
+
          /// @name Comparison Operators.
          //@{
       inline bool operator==(const Week& right) const
@@ -133,25 +133,25 @@ namespace gpstk
          timeSystemCheck;
          return (week != right.week);
       }
-      
+
       inline bool operator<(const Week& right) const
       {
          timeSystemCheck;
          return week < right.week;
       }
-      
+
       inline bool operator<=(const Week& right) const
       {
          timeSystemCheck;
          return week <= right.week;
       }
-      
+
       inline bool operator>(const Week& right) const
       {
          timeSystemCheck;
          return week > right.week;
       }
-      
+
       inline bool operator>=(const Week& right) const
       {
          timeSystemCheck;
@@ -170,19 +170,19 @@ namespace gpstk
       {
          return (week & bitmask());
       }
-      
+
       inline virtual unsigned int getEpoch() const
       {
          return (week >> Nbits());
       }
-      
+
       inline virtual void getEpochModWeek(unsigned int& e,
                                           unsigned int& w) const
       {
          e = getEpoch();
          w = getModWeek();
       }
-      
+
       inline virtual void setEpoch(unsigned int e)
       {
          week &= bitmask();
@@ -194,7 +194,7 @@ namespace gpstk
          week &= ~bitmask();
          week |= w & bitmask();
       }
-      
+
       inline virtual void setEpochModWeek(unsigned int e,
                                           unsigned int w)
       {
@@ -222,14 +222,14 @@ namespace gpstk
       }
 
          //@}
-      
+
       /// Return a string containing the characters that this class
       /// understands when printing times.
       inline virtual std::string getPrintChars() const
       {
          return "EFGP";
       }
-         
+
       /// Return a string containing the default format to use in printing.
       inline virtual std::string getDefaultFormat() const
       {
@@ -240,12 +240,12 @@ namespace gpstk
       {
          return ((week >= 0) && (week <= MAXWEEK()));
       }
-      
+
       inline virtual void reset()
       {
          week = 0;
       }
-      
+
       /// Force this interface on this classes descendants.
       virtual unsigned int getDayOfWeek() const = 0;
 

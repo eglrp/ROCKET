@@ -1,22 +1,10 @@
-#pragma ident "$Id$"
-
-
-
-/**
- * @file RinexNavStream.hpp
- * File stream for Rinex navigation file data
- */
-
-#ifndef GPSTK_RINEXNAVSTREAM_HPP
-#define GPSTK_RINEXNAVSTREAM_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -46,18 +34,21 @@
 //
 //=============================================================================
 
+/**
+ * @file RinexNavStream.hpp
+ * File stream for Rinex navigation file data
+ */
 
-
-
-
+#ifndef RINEXNAVSTREAM_HPP
+#define RINEXNAVSTREAM_HPP
 
 #include "FFTextStream.hpp"
 #include "RinexNavHeader.hpp"
 
 namespace gpstk
 {
-   /** @addtogroup RinexNav */
-   //@{
+      /// @ingroup FileHandling
+      //@{
 
       /**
        * This class performs file i/o on a RINEX NAV file.
@@ -69,35 +60,30 @@ namespace gpstk
    {
    public:
          /// Default constructor
-      RinexNavStream()
-            : headerRead(false)
-         {}
+      RinexNavStream();
       
          /** Constructor 
           * Opens a file named \a fn using ios::openmode \a mode.
           */
-      RinexNavStream(const char* fn, std::ios::openmode mode=std::ios::in)
-            : FFTextStream(fn, mode), headerRead(false) {}
+      RinexNavStream(const char* fn, std::ios::openmode mode=std::ios::in);
       
          /// Destructor
-      virtual ~RinexNavStream() {}
+      virtual ~RinexNavStream();
       
          /// overrides open to reset the header
-      virtual void open(const char* fn, std::ios::openmode mode)
-         { 
-            FFTextStream::open(fn, mode); 
-            headerRead = false; 
-            header = RinexNavHeader();
-         }
+      virtual void open(const char* fn, std::ios::openmode mode);
 
          /// RINEX NAV header for this file.
       RinexNavHeader header;
      
          /// Flag showing whether or not the header has been read.
       bool headerRead;
+
+   private:
+      void init();
    };
 
-   //@}
+      //@}
 
 }
 

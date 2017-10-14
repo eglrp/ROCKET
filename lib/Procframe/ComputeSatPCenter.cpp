@@ -35,9 +35,9 @@ using namespace std;
 namespace gpstk
 {
 
-      // Returns a string identifying this object.
-   std::string ComputeSatPCenter::getClassName() const
-   { return "ComputeSatPCenter"; }
+    // Returns a string identifying this object.
+    std::string ComputeSatPCenter::getClassName() const
+    { return "ComputeSatPCenter"; }
 
 
       /* Returns a satTypeValueMap object, adding the new data generated when
@@ -46,124 +46,164 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeSatPCenter::Process(const CommonTime& time,
-                                           satTypeValueMap& gData)
-      throw(ProcessingException)
-   {
+    satTypeValueMap& ComputeSatPCenter::Process( const CommonTime& time,
+                                                 satTypeValueMap& gData )
+        throw(ProcessingException)
+    {
 
-      try
-      {
+        try
+        {
 
             // Compute Sun position at this epoch
-         SunPosition sunPosition;
-         Triple sunPos(sunPosition.getPosition(time));
+            SunPosition sunPosition;
+            Triple sunPos(sunPosition.getPosition(time));
 
             // Define a Triple that will hold satellite position, in ECEF
-         Triple svPos(0.0, 0.0, 0.0);
+            Triple satPos(0.0, 0.0, 0.0);
 
-         SatIDSet satRejectedSet;
+            SatIDSet satRejectedSet;
+
+            SatID sat;
 
             // Loop through all the satellites
-         satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it)
-         {
-
-               // Use ephemeris if satellite position is not already computed
-            if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satY) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
+            satTypeValueMap::iterator it;
+            for(satTypeValueMap::iterator it = gData.begin();
+                it != gData.end();
+                ++it)
             {
+                sat = it->first;
 
-               if(pEphemeris==NULL)
-               {
+                // Use ephemeris if satellite position is not already computed
+                if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
+                    ( (*it).second.find(TypeID::satY) == (*it).second.end() ) ||
+                    ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
+                {
 
-                     // If ephemeris is missing, then remove all satellites
-                  satRejectedSet.insert( (*it).first );
+                    if(pEphStore==NULL)
+                    {
+                        // If ephemeris is missing, then remove all satellites
+                        satRejectedSet.insert( sat );
+                        continue;
+                    }
+                    else
+                    {
+                        // Try to get satellite position
+                        // if it is not already computed
+                        try
+                        {
+                            // For our purposes, position at receive time
+                            // is fine enough
+                            Xvt satPosVel(pEphStore->getXvt( sat, time ));
 
-                  continue;
-               }
-               else
-               {
+                            // If everything is OK, then continue processing.
+                            satPos[0] = satPosVel.x.theArray[0];
+                            satPos[1] = satPosVel.x.theArray[1];
+                            satPos[2] = satPosVel.x.theArray[2];
+                        }
+                        catch(...)
+                        {
+                            // If satellite is missing, then schedule it
+                            // for removal
+                            satRejectedSet.insert( sat );
+                            continue;
+                        }
+                    }
+                }
+                else
+                {
+                    // Get satellite position out of GDS
+                    satPos[0] = (*it).second[TypeID::satX];
+                    satPos[1] = (*it).second[TypeID::satY];
+                    satPos[2] = (*it).second[TypeID::satZ];
 
-                     // Try to get satellite position
-                     // if it is not already computed
-                  try
-                  {
-                        // For our purposes, position at receive time
-                        // is fine enough
-                     Xvt svPosVel(pEphemeris->getXvt( (*it).first, time ));
-
-                        // If everything is OK, then continue processing.
-                     svPos[0] = svPosVel.x.theArray[0];
-                     svPos[1] = svPosVel.x.theArray[1];
-                     svPos[2] = svPosVel.x.theArray[2];
-
-                  }
-                  catch(...)
-                  {
-
-                        // If satellite is missing, then schedule it
-                        // for removal
-                     satRejectedSet.insert( (*it).first );
-
-                     continue;
-                  }
-
-               }
-
-            }
-            else
-            {
-
-                  // Get satellite position out of GDS
-               svPos[0] = (*it).second[TypeID::satX];
-               svPos[1] = (*it).second[TypeID::satY];
-               svPos[2] = (*it).second[TypeID::satZ];
-
-            }  // End of 'if( ( (*it).second.find(TypeID::satX) == ...'
+                }  // End of 'if( ( (*it).second.find(TypeID::satX) == ...'
 
 
-               // Let's get the satellite antenna phase correction value in
-               // meters, and insert it in the GNSS data structure.
-            (*it).second[TypeID::satPCenter] =
-               getSatPCenter((*it).first, time, svPos, sunPos);
+                // Let's get the satellite antenna phase correction value in
+                // meters, and insert it in the GNSS data structure.
 
-         }  // End of 'for (it = gData.begin(); it != gData.end(); ++it)'
+                Vector<double> satPCenter
+                            = getSatPCenter((*it).first, time, satPos, sunPos);
+
+                (*it).second[TypeID::satPCenterX] = satPCenter[0];
+                (*it).second[TypeID::satPCenterY] = satPCenter[1];
+                (*it).second[TypeID::satPCenterZ] = satPCenter[2];
+                (*it).second[TypeID::satPCenter]  = satPCenter[3];
+
+            }  // End of 'for (it = gData.begin(); it != gData.end(); ++it)'
 
             // Remove satellites with missing data
-         gData.removeSatID(satRejectedSet);
+            gData.removeSatID(satRejectedSet);
 
-         return gData;
+            return gData;
 
-      }
-      catch(Exception& u)
-      {
-
+        }
+        catch(Exception& u)
+        {
             // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+            ProcessingException e( getClassName() + ":" + u.what() );
 
-         GPSTK_THROW(e);
+            GPSTK_THROW(e);
+        }
 
-      }
-
-   }  // End of method 'ComputeSatPCenter::Process()'
+    }  // End of method 'ComputeSatPCenter::Process()'
 
 
+     /** Returns a gnssDataMap object, adding the new data generated
+      *  when calling this object.
+      *
+      * @param gData    Data object holding the data.
+      */
+    gnssDataMap& ComputeSatPCenter::Process(gnssDataMap& gData)
+        throw(ProcessingException)
+    {
+        SourceIDSet sourceRejectedSet;
 
-      /* Sets name of "PRN_GPS"-like file containing satellite data.
-       * @param name      Name of satellite data file.
-       */
-   ComputeSatPCenter& ComputeSatPCenter::setFilename(const string& name)
-   {
+        SourceID source;
+        string station;
 
-      fileData = name;
-      satData.open(fileData);
+        for( gnssDataMap::iterator gdmIt = gData.begin();
+             gdmIt != gData.end();
+             ++gdmIt )
+        {
+            CommonTime epoch( gdmIt->first );
+            epoch.setTimeSystem( TimeSystem::Unknown );
 
-      return (*this);
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end();
+                 ++sdmIt )
+            {
+                source = sdmIt->first;
+                station = source.sourceName;
 
-   }  // End of method 'ComputeSatPCenter::setFilename()'
+                if(pMSCStore == NULL)
+                {
+                    sourceRejectedSet.insert( source );
+                    continue;
+                }
 
+                MSCData mscData;
+                try
+                {
+                    mscData = pMSCStore->findMSC(station,epoch);
+                }
+                catch(...)
+                {
+                    sourceRejectedSet.insert( source );
+                    continue;
+                }
+
+                nominalPos = mscData.coordinates;
+
+                Process( gdmIt->first, sdmIt->second );
+            }
+        }
+
+        gData.removeSourceID( sourceRejectedSet );
+
+        return gData;
+
+    }  // End of method 'ComputeSatPCenter::Process()'
 
 
       /* Compute the value of satellite antenna phase correction, in meters.
@@ -174,187 +214,318 @@ namespace gpstk
        *
        * @return Satellite antenna phase correction, in meters.
        */
-   double ComputeSatPCenter::getSatPCenter( const SatID& satid,
-                                            const CommonTime& time,
-                                            const Triple& satpos,
-                                            const Triple& sunPosition )
-   {
+    Vector<double> ComputeSatPCenter::getSatPCenter( const SatID& satid,
+                                                     const CommonTime& time,
+                                                     const Triple& satpos,
+                                                     const Triple& sunpos )
+    {
 
-         // Unitary vector from satellite to Earth mass center (ECEF)
-      Triple rk( ( (-1.0)*(satpos.unitVector()) ) );
+        // Unitary vector from satellite to geocenter (ECEF)
+        Triple rk( ( (-1.0)*(satpos.unitVector()) ) );
 
-         // Unitary vector from Earth mass center to Sun (ECEF)
-      Triple ri( sunPosition.unitVector() );
+        // Vector from Sun to satellite (ECEF)
+        Triple sat2sun( sunpos - satpos );
 
-         // rj = rk x ri: Rotation axis of solar panels (ECEF)
-      Triple rj(rk.cross(ri));
+        // Unitary vector from Sun to satellite (ECEF)
+        Triple ri( sat2sun.unitVector() );
 
-         // Redefine ri: ri = rj x rk (ECEF)
-      ri = rj.cross(rk);
+        // rj = rk x ri: Rotation axis of solar panels (ECEF)
+        Triple rj(rk.cross(ri));
 
-         // Let's convert ri to an unitary vector. (ECEF)
-      ri = ri.unitVector();
+        // Redefine ri: ri = rj x rk (ECEF)
+        ri = rj.cross(rk);
 
-         // Get vector from Earth mass center to receiver
-      Triple rxPos(nominalPos.X(), nominalPos.Y(), nominalPos.Z());
+        // Let's convert ri to an unitary vector (ECEF)
+        ri = ri.unitVector();
 
-         // Compute unitary vector vector from satellite to RECEIVER
-      Triple rrho( (rxPos-satpos).unitVector() );
+        // Get vector from geocenter to station
+        Triple stapos(nominalPos.X(), nominalPos.Y(), nominalPos.Z());
 
-         // When not using Antex information, if satellite belongs to block
-         // "IIR" its correction is 0.0, else it will depend on satellite model.
+        // Compute unitary vector from satellite to station
+        Triple rrho( (satpos-stapos).unitVector() );
 
-         // This variable that will hold the correction, 0.0 by default
-      double svPCcorr(0.0);
 
-         // Check is Antex antenna information is available or not, and if
-         // available, whether satellite phase center information is absolute
-         // or relative
-      bool absoluteModel( false );
-      if( pAntexReader != NULL )
-      {
-         absoluteModel = pAntexReader->isAbsolute();
-      }
+        // This variable that will hold the correction, 0.0 by default
+        Vector<double> satPCcorr(4, 0.0);
 
-      if( absoluteModel )
-      {
+
+        // Check is Antex antenna information is available or not, and if
+        // available, whether satellite phase center information is absolute
+        // or relative
+        bool absoluteModel( false );
+        if( pAntexReader != NULL )
+        {
+            absoluteModel = pAntexReader->isAbsolute();
+        }
+
+        if( absoluteModel )
+        {
 
             // We will need the elevation, in degrees. It is found using
             // dot product and the corresponding unitary angles
 
-         double nadir = std::acos( rrho.dot(rk) ) * RAD_TO_DEG;
+            double temp( rrho.dot(rk) );
+            if(temp > +1.0) temp = +1.0;
 
-            // The nadir angle should always smaller than 14.0 deg, 
-            // but some times it's a bit bigger than 14.0 deg, we 
-            // force it to 14.0 deg to stop throwing an exception.
-            // The Reference is available at:
-            // http://igscb.jpl.nasa.gov/igscb/resource/pubs/02_ott/session_8.pdf
-         nadir = (nadir>14) ? 14.0 : nadir;
+            double nadir( std::acos( temp ) * RAD_TO_DEG );
 
-         double elev( 90.0 - nadir );
+            double elev( 0.0 );
 
             // Get satellite information in Antex format. Currently this
-            // only works for GPS and Glonass.
-         if( satid.system == SatID::systemGPS )
-         {
-            std::stringstream sat;
-            sat << "G";
-            if( satid.id < 10 )
+            // only works for GPS and GLONASS.
+            if( satid.system == SatID::systemGPS )
             {
-               sat << "0";
+                std::stringstream sat;
+                sat << "G";
+                if( satid.id < 10 ) sat << "0";
+                sat << satid.id;
+
+                // Get satellite antenna information out of AntexReader object
+                Antenna antenna( pAntexReader->getAntenna( sat.str(), time ) );
+
+                double zen2( antenna.getZen2() );
+
+                nadir = (nadir>zen2) ? zen2 : nadir;
+
+                elev = 90.0 - nadir;
+
+                try
+                {
+                    // Get antenna eccentricity for frequency "G01" (L1), in
+                    // satellite reference system.
+                    // NOTE: It is NOT in ECEF, it is in UEN!!!
+                    Triple satAnt( antenna.getAntennaEccentricity( Antenna::G01) );
+
+                    // Now, get the phase center variation.
+                    Triple var( antenna.getAntennaPCVariation( Antenna::G01, elev) );
+
+                    // We must substract them
+                    satAnt = satAnt;
+
+                    // Change to ECEF
+                    Triple satAntenna( satAnt[2]*ri + satAnt[1]*rj + satAnt[0]*rk );
+
+                    satPCcorr[0] = satAntenna.theArray[0];
+                    satPCcorr[1] = satAntenna.theArray[1];
+                    satPCcorr[2] = satAntenna.theArray[2];
+
+                    // Projection of "satAntenna" vector to line of sight vector rrho
+                    // This correction is interpreted as an "advance" in the signal,
+                    // instead of a delay. Therefore, it has negative sign
+                    satPCcorr[3] =  rrho.dot(satAntenna) + var[0];
+
+                    return satPCcorr;
+
+                }
+                catch(...)
+                {
+                    return satPCcorr;
+                }
             }
-            sat << satid.id;
-
-               // Get satellite antenna information out of AntexReader object
-            Antenna antenna( pAntexReader->getAntenna( sat.str(), time ) );
-
-               // Get antenna eccentricity for frequency "G01" (L1), in
-               // satellite reference system.
-               // NOTE: It is NOT in ECEF, it is in UEN!!!
-            Triple satAnt( antenna.getAntennaEccentricity( Antenna::G01) );
-
-               // Now, get the phase center variation.
-            Triple var( antenna.getAntennaPCVariation( Antenna::G01, elev) );
-
-               // We must substract them
-            satAnt = satAnt - var;
-
-                  // Change to ECEF
-            Triple svAntenna( satAnt[2]*ri + satAnt[1]*rj + satAnt[0]*rk );
-
-               // Projection of "svAntenna" vector to line of sight vector rrho
-            svPCcorr =  (rrho.dot(svAntenna));
-
-         }
-         else
-         {
-               // Check if this satellite belongs to Glonass system
-            if( satid.system == SatID::systemGlonass )
+            // Check if this satellite belongs to GLONASS system
+            else if(satid.system == SatID::systemGLONASS)
             {
-               std::stringstream sat;
-               sat << "R";
-               if( satid.id < 10 )
-               {
-                  sat << "0";
-               }
-               sat << satid.id;
+                std::stringstream sat;
+                sat << "R";
+                if( satid.id < 10 ) sat << "0";
+                sat << satid.id;
 
-                  // Get satellite antenna information out of AntexReader object
-               Antenna antenna( pAntexReader->getAntenna( sat.str(), time ) );
+                // Get satellite antenna information out of AntexReader object
+                Antenna antenna( pAntexReader->getAntenna( sat.str(), time ) );
 
-                  // Get antenna offset for frequency "R01" (Glonass), in
-                  // satellite reference system.
-                  // NOTE: It is NOT in ECEF, it is in UEN!!!
-               Triple satAnt( antenna.getAntennaEccentricity( Antenna::R01) );
+                double zen2( antenna.getZen2() );
 
-                  // Now, get the phase center variation.
-               Triple var( antenna.getAntennaPCVariation( Antenna::R01, elev) );
+                nadir = (nadir>zen2) ? zen2 : nadir;
 
-                  // We must substract them
-               satAnt = satAnt - var;
+                elev = 90.0 - nadir;
 
-                     // Change to ECEF
-               Triple svAntenna( satAnt[2]*ri + satAnt[1]*rj + satAnt[0]*rk );
+                try
+                {
+                    // Get antenna offset for frequency "R01" (GLONASS), in
+                    // satellite reference system.
+                    // NOTE: It is NOT in ECEF, it is in UEN!!!
+                    Triple satAnt( antenna.getAntennaEccentricity( Antenna::R01) );
 
-                  // Project "svAntenna" vector to line of sight vector rrho
-               svPCcorr = (rrho.dot(svAntenna));
+                    // Now, get the phase center variation.
+                    Triple var( antenna.getAntennaPCVariation( Antenna::R01, elev) );
 
+                    // We must substract them
+                    satAnt = satAnt;
+
+                    // Change to ECEF
+                    Triple satAntenna( satAnt[2]*ri + satAnt[1]*rj + satAnt[0]*rk );
+
+                    satPCcorr[0] = satAntenna.theArray[0];
+                    satPCcorr[1] = satAntenna.theArray[1];
+                    satPCcorr[2] = satAntenna.theArray[2];
+
+                    // Project "satAntenna" vector to line of sight vector rrho
+                    // This correction is interpreted as an "advance" in the signal,
+                    // instead of a delay. Therefore, it has negative sign
+                    satPCcorr[3] = rrho.dot(satAntenna) - var[0];
+
+                    return satPCcorr;
+                }
+                catch(...)
+                {
+                    return satPCcorr;
+                }
+            }
+            // Check if this satellite belongs to Galileo system
+            else if( satid.system == SatID::systemGalileo )
+            {
+                std::stringstream sat;
+                sat << "E";
+                if( satid.id < 10 ) sat << "0";
+                sat << satid.id;
+
+                // Get satellite antenna information out of AntexReader object
+                Antenna antenna( pAntexReader->getAntenna( sat.str(), time ) );
+
+                double zen2( antenna.getZen2() );
+
+                nadir = (nadir>zen2) ? zen2 : nadir;
+
+                elev = 90.0 - nadir;
+
+                try
+                {
+                    // Get antenna offset for frequency "E01" (Galileo), in
+                    // satellite reference system.
+                    // NOTE: It is NOT in ECEF, it is in UEN!!!
+                    Triple satAnt( antenna.getAntennaEccentricity( Antenna::E01) );
+
+                    // Now, get the phase center variation.
+                    Triple var( antenna.getAntennaPCVariation( Antenna::E01, elev) );
+
+                    // We must substract them
+                    satAnt = satAnt - var;
+
+                    // Change to ECEF
+                    Triple satAntenna( satAnt[2]*ri + satAnt[1]*rj + satAnt[0]*rk );
+
+                    satPCcorr[0] = satAntenna.theArray[0];
+                    satPCcorr[1] = satAntenna.theArray[1];
+                    satPCcorr[2] = satAntenna.theArray[2];
+
+                    // Project "satAntenna" vector to line of sight vector rrho
+                    // This correction is interpreted as an "advance" in the signal,
+                    // instead of a delay. Therefore, it has negative sign
+                    satPCcorr[3] = rrho.dot(satAntenna) - var[0];
+
+                    return satPCcorr;
+                }
+                catch(...)
+                {
+                    return satPCcorr;
+                }
+            }
+            // Check if this satellite belongs to BeiDou system
+            else if( satid.system == SatID::systemBDS )
+            {
+                std::stringstream sat;
+                sat << "C";
+                if( satid.id < 10 ) sat << "0";
+                sat << satid.id;
+
+                if(satid.id > 30) return satPCcorr;
+
+                // Get satellite antenna information out of AntexReader object
+                Antenna antenna( pAntexReader->getAntenna( sat.str(), time ) );
+
+                double zen2( antenna.getZen2() );
+
+                nadir = (nadir>zen2) ? zen2 : nadir;
+
+                elev = 90.0 - nadir;
+
+                try
+                {
+                    // Get antenna offset for frequency "C01" (BeiDou), in
+                    // satellite reference system.
+                    // NOTE: It is NOT in ECEF, it is in UEN!!!
+                    Triple satAnt( antenna.getAntennaEccentricity( Antenna::C01) );
+
+                    // Now, get the phase center variation.
+                    Triple var( antenna.getAntennaPCVariation( Antenna::C01, elev) );
+
+                    // Change to ECEF
+                    Triple satAntenna( satAnt[2]*ri + satAnt[1]*rj + satAnt[0]*rk );
+
+                    satPCcorr[0] = satAntenna.theArray[0];
+                    satPCcorr[1] = satAntenna.theArray[1];
+                    satPCcorr[2] = satAntenna.theArray[2];
+
+                    // Project "satAntenna" vector to line of sight vector rrho
+                    // This correction is interpreted as an "advance" in the signal,
+                    // instead of a delay. Therefore, it has negative sign
+                    satPCcorr[3] = rrho.dot(satAntenna) - var[0];
+
+                    return satPCcorr;
+                }
+                catch(...)
+                {
+                    return satPCcorr;
+                }
+            }
+            // Check if this satellite belongs to QZSS system
+            else if( satid.system == SatID::systemQZSS )
+            {
+                std::stringstream sat;
+                sat << "J";
+                if( satid.id < 10 ) sat << "0";
+                sat << satid.id;
+
+                // Get satellite antenna information out of AntexReader object
+                Antenna antenna( pAntexReader->getAntenna( sat.str(), time ) );
+
+                double zen2( antenna.getZen2() );
+
+                nadir = (nadir>zen2) ? zen2 : nadir;
+
+                elev = 90.0 - nadir;
+
+                try
+                {
+                    // Get antenna offset for frequency "J01" (QZSS), in
+                    // satellite reference system.
+                    // NOTE: It is NOT in ECEF, it is in UEN!!!
+                    Triple satAnt( antenna.getAntennaEccentricity( Antenna::J01) );
+
+                    // Now, get the phase center variation.
+                    Triple var( antenna.getAntennaPCVariation( Antenna::J01, elev) );
+
+                    // Change to ECEF
+                    Triple satAntenna( satAnt[2]*ri + satAnt[1]*rj + satAnt[0]*rk );
+
+                    satPCcorr[0] = satAntenna.theArray[0];
+                    satPCcorr[1] = satAntenna.theArray[1];
+                    satPCcorr[2] = satAntenna.theArray[2];
+
+                    // Project "satAntenna" vector to line of sight vector rrho
+                    // This correction is interpreted as an "advance" in the signal,
+                    // instead of a delay. Therefore, it has negative sign
+                    satPCcorr[3] = rrho.dot(satAntenna) - var[0];
+
+                    return satPCcorr;
+                }
+                catch(...)
+                {
+                    return satPCcorr;
+                }
             }
             else
             {
-                  // In this case no correction will be computed
-               svPCcorr = 0.0;
+                // In this case no correction will be computed
+                return satPCcorr;
             }
+        }
+        else
+        {
+            return satPCcorr;
+        }
 
-         }  // End of 'if( satid.system == SatID::systemGPS )...'
-
-      }
-      else
-      {
-            // If no Antex information is given, or if phase center information
-            // uses a relative model, then use a simpler, older approach
-
-            // Please note that in this case all GLONASS satellite are
-            // considered as having phase center at (0.0, 0.0, 0.0). The former
-            // is not true for 'GLONASS-M' satellites (-0.545, 0.0, 0.0 ), but
-            // currently there is no simple way to take this into account.
-
-            // For satellites II and IIA:
-         if( (satData.getBlock( satid, time ) == "II") ||
-             (satData.getBlock( satid, time ) == "IIA") )
-         {
-
-               // First, build satellite antenna vector for models II/IIA
-            Triple svAntenna(0.279*ri + 1.023*rk);
-
-               // Projection of "svAntenna" vector to line of sight vector rrho
-            svPCcorr =  (rrho.dot(svAntenna));
-
-         }
-         else
-         {
-               // For satellites belonging to block "I"
-            if( (satData.getBlock( satid, time ) == "I") )
-            {
-
-                  // First, build satellite antenna vector for model I
-               Triple svAntenna(0.210*ri + 0.854*rk);
-
-                  // Projection of "svAntenna" to line of sight vector (rrho)
-               svPCcorr =  (rrho.dot(svAntenna));
-            }
-
-         }  // End of 'if( (satData.getBlock( satid, time ) == "II") ||...'
-
-      }  // End of 'if( absoluteModel )...'
-
-
-         // This correction is interpreted as an "advance" in the signal,
-         // instead of a delay. Therefore, it has negative sign
-      return (-svPCcorr);
-
-   }  // End of method 'ComputeSatPCenter::getSatPCenter()'
-
+    }  // End of method 'ComputeSatPCenter::getSatPCenter()'
 
 
 }  // End of namespace gpstk

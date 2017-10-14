@@ -197,7 +197,7 @@ namespace gpstk
                                         const bool expectEOF )
          throw(EndOfFile, FFStreamError, gpstk::StringUtils::StringException)
    {
- 
+
       try
       {
             // The following constant used to be 256, but with the change to
@@ -210,6 +210,7 @@ namespace gpstk
          const int MAX_LINE_LENGTH = 1500;
          char templine[MAX_LINE_LENGTH + 1];
          getline(templine, MAX_LINE_LENGTH);
+
          lineNumber++;
             //check if line was longer than 256 characters, if so error
          if(fail() && !eof())

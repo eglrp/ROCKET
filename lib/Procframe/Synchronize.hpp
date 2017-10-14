@@ -1,20 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file Synchronize.hpp
- * This class synchronizes two GNSS Data Structures data streams.
- */
-
-#ifndef GPSTK_SYNCHRONIZE_HPP
-#define GPSTK_SYNCHRONIZE_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -26,9 +16,32 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
+//  Copyright 2004, The University of Texas at Austin
 //  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2008, 2011
 //
 //============================================================================
+
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software.
+//
+//Pursuant to DoD Directive 523024
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file Synchronize.hpp
+ * This class synchronizes two GNSS Data Structures data streams.
+ */
+
+#ifndef GPSTK_SYNCHRONIZE_HPP
+#define GPSTK_SYNCHRONIZE_HPP
 
 #include <list>
 #include "Exception.hpp"
@@ -44,7 +57,7 @@ namespace gpstk
    NEW_EXCEPTION_CLASS(SynchronizeException, gpstk::Exception);
 
 
-      /** @addtogroup DataStructures */
+      /// @ingroup DataStructures
       //@{
 
 
@@ -161,11 +174,11 @@ namespace gpstk
           * @param roverData     gnssRinex that holds ROVER receiver data
           * @param tol           Tolerance, in seconds.
           */
-      Synchronize( RinexObsStream& rinexObs,
+      Synchronize( Rinex3ObsStream& rinexObs,
                    gnssRinex& roverData,
                    const double tol = 1.0 )
          : tolerance(tol), firstTime(true)
-      { setReferenceStream(rinexObs); setRoverData(roverData); };
+      { setReferenceSource(rinexObs); setRoverData(roverData); };
 
 
          /** Common constructor.
@@ -174,14 +187,14 @@ namespace gpstk
           * @param roverData     gnssSatTypeValue that holds ROVER receiver data
           * @param tol           Tolerance, in seconds.
           */
-      Synchronize( RinexObsStream& rinexObs,
+      Synchronize( Rinex3ObsStream& rinexObs,
                    gnssSatTypeValue& roverData,
                    const double tol = 1.0 )
          : tolerance(tol), firstTime(true)
-      { setReferenceStream(rinexObs); setRoverData(roverData); };
+      { setReferenceSource(rinexObs); setRoverData(roverData); };
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data
+         /** Returns a gnssSatTypeValue object, adding the new data
           *  generated when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -190,13 +203,23 @@ namespace gpstk
          throw(SynchronizeException);
 
 
-         /** Returns a gnnsRinex object, adding the new data generated
+         /** Returns a gnssRinex object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(SynchronizeException);
+
+
+         /** Returns a gnssDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(SynchronizeException)
+      { return gData; }
 
 
          /// Returns tolerance, in seconds.
@@ -212,7 +235,7 @@ namespace gpstk
 
 
          /// Returns a pointer to the RinexObsStream object of reference data.
-      virtual RinexObsStream* getPtrReferenceSource(void) const
+      virtual Rinex3ObsStream* getPtrReferenceSource(void) const
       { return pRinexRef; };
 
 
@@ -220,7 +243,7 @@ namespace gpstk
           *
           * @param rinexObs      RinexObsStream object of reference data.
           */
-      virtual Synchronize& setReferenceStream(RinexObsStream& rinexObs)
+      virtual Synchronize& setReferenceSource(Rinex3ObsStream& rinexObs)
       { pRinexRef = &rinexObs; firstTime=true; return (*this); }
 
 
@@ -258,7 +281,7 @@ namespace gpstk
 
 
          /// Pointer to input observation file stream for reference station.
-      RinexObsStream* pRinexRef;
+      Rinex3ObsStream* pRinexRef;
 
 
          /// Pointer to gnnsRinex data structure (GDS) that holds ROVER data.

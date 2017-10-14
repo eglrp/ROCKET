@@ -40,7 +40,7 @@ namespace gpstk
 
 
 
-      /* Processing method. It returns a gnnsSatTypeValue object.
+      /* Processing method. It returns a gnssSatTypeValue object.
        *
        * @param gData    Data object holding the data.
        */
@@ -72,11 +72,43 @@ namespace gpstk
 
 
 
-      /* Processing method. It returns a gnnsRinex object.
+      /* Processing method. It returns a gnssRinex object.
        *
        * @param gData    Data object holding the data.
        */
    gnssRinex& ProcessingList::Process(gnssRinex& gData)
+   {
+
+      try
+      {
+
+         std::list<ProcessingClass*>::const_iterator pos;
+         for (pos = proclist.begin(); pos != proclist.end(); ++pos)
+         {
+            (*pos)->Process(gData);
+         }
+
+         return gData;
+
+      }
+      catch(...)
+      {
+
+            // This method must throw the same exceptions it may get from
+            // the 'ProcessingList' elements, without altering them.
+         throw;
+
+      }
+
+   }  // End of method 'ProcessingList::Process()'
+
+
+
+      /* Processing method. It returns a gnssDataMap object.
+       *
+       * @param gData    Data object holding the data.
+       */
+   gnssDataMap& ProcessingList::Process(gnssDataMap& gData)
    {
 
       try

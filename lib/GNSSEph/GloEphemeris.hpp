@@ -1,13 +1,10 @@
-/// @file GloEphemeris.hpp
-/// Ephemeris data for GLONASS.
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -18,10 +15,28 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
+//  Copyright 2004, The University of Texas at Austin
 //  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2011
 //
 //============================================================================
+
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/// @file GloEphemeris.hpp
+/// Ephemeris data for GLONASS.
 
 #ifndef GPSTK_GLOEPHEMERIS_HPP
 #define GPSTK_GLOEPHEMERIS_HPP
@@ -37,7 +52,7 @@
 namespace gpstk
 {
 
-      /** @addtogroup ephemcalc */
+      /// @ingroup GNSSEph
       //@{
 
       /**
@@ -51,7 +66,7 @@ namespace gpstk
 
          /// Default constructor
       GloEphemeris()
-         : valid(false), step(1.0)
+            : valid(false), step(1.0)
       {};
 
 
@@ -74,6 +89,17 @@ namespace gpstk
       Xvt svXvt(const CommonTime& epoch) const
          throw( gpstk::InvalidRequest );
 
+         /** Compute satellite position & velocity at the given time
+          *  using this ephemeris data.  HOWEVER, DO NOT check whether
+          *  the requested time is in the fit interval for this data set.
+          *
+          *  THIS IS ONLY INTENDED FOR SPECIAL TEST PURPOSES.  GENERAL
+          *  USE IS STRONGLY DISCOURAGED. 
+          *
+          * @param epoch   Epoch to compute position and velocity.
+          *
+          */
+      Xvt svXvtOverrideFit(const CommonTime& epoch) const;
 
          /// Get the epoch time for this ephemeris
       CommonTime getEphemerisEpoch() const
@@ -203,7 +229,7 @@ namespace gpstk
       short PRNID;         ///< SV PRN ID
       CommonTime ephTime;  ///< Epoch for this ephemeris
       Triple a;            ///< SV acceleration (x,y,z), Earth-fixed [meters]
-      long MFtime;        ///< Message frame time [sec of UTC week]
+      long MFtime;         ///< Message frame time [sec of UTC week]
       short health;        ///< SV health
       short freqNum;       ///< Frequency (channel) number (-7..+12)
       double ageOfInfo;    ///< Age of oper. information [days]
@@ -235,9 +261,9 @@ namespace gpstk
       friend std::ostream& operator<<( std::ostream& s,
                                        const GloEphemeris& glo );
 
-      //@}
+   };  // End of class 'GloEphemeris'
 
-  };  // End of class 'GloEphemeris'
+      //@}
 
 }  // End of namespace gpstk
 

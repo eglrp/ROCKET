@@ -1,12 +1,10 @@
-#pragma ident "$Id$"
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -93,8 +91,8 @@ namespace gpstk
       
       if (valid & versionValid)
       {
-         line  = rightJustify(asString(version,3), 10);
-         line += string(10, ' ');
+         line  = rightJustify(asString(version,2), 9);
+         line += string(11, ' ');
          line += string("NAVIGATION"); //leftJustify(fileType, 20);
          line += string(30, ' ');
          line += versionString;

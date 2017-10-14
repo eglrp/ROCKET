@@ -139,8 +139,8 @@ namespace gpstk
           */
       FFStream( const char* fn, std::ios::openmode mode=std::ios::in )
          : std::fstream(fn, mode), recordNumber(0), filename(fn)
-      { 
-         clear(); 
+      {
+         clear();
       }
 
 
@@ -196,7 +196,7 @@ namespace gpstk
       static bool IsFFStream(std::istream& i)
       {
          try
-         { 
+         {
             FFStream& r = dynamic_cast<FFStream&>(i);
             #pragma unused(r)
          }

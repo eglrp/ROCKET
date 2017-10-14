@@ -27,7 +27,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -48,7 +48,7 @@ namespace gpstk
  * This class pretty much duplicates std::valarray<T> except it's fully
  * STL container compliant.  Remember that operators +=, -=, *= and /=
  * are provided by RefVectorBase.
- * 
+ *
  * @sa matvectest.cpp for examples
  */
    template <class T>
@@ -139,13 +139,13 @@ namespace gpstk
              size_t num) : v(NULL),s(0)
          {
                // sanity checks...
-            if ( top >= vec.size() || 
+            if ( top >= vec.size() ||
                  top + num > vec.size())
             {
                VectorException e("Invalid dimensions or size for Vector(VectorBase)");
                GPSTK_THROW(e);
             }
-         
+
             v = new T[num];
             if(!v) {
                VectorException e("Vector(subvector) failed to allocate");
@@ -156,7 +156,7 @@ namespace gpstk
                v[i] = vec(top+i);
             s = num;
          }
-   
+
          /// Destructor
       ~Vector()
          { if (v) delete [] v; }
@@ -181,13 +181,13 @@ namespace gpstk
       size_t max_size() const { return std::numeric_limits<size_t>().max(); }
 
          /// Non-const operator []
-      T& operator[] (size_t i) 
+      T& operator[] (size_t i)
          { return v[i]; }
          /// Const operator []
       T operator[] (size_t i) const
          { return v[i]; }
          /// Non-const operator ()
-      T& operator() (size_t i) 
+      T& operator() (size_t i)
          { return v[i]; }
          /// Const operator ()
       T operator() (size_t i) const
@@ -223,16 +223,16 @@ namespace gpstk
           size_t vs = x.size();
           (*this).resize(vs);
 
-          for (i = 0; i < vs; i++) 
+          for (i = 0; i < vs; i++)
               (*this)[i] = x[i];
 
-          return (*this); 
+          return (*this);
       }
 
          /// Resizes the vector.  if index > size, the vector will be
          /// erased and the contents destroyed.
       Vector& resize(const size_t index)
-         { 
+         {
             if (index > s)
             {
                if (v)
@@ -286,13 +286,13 @@ namespace gpstk
    }
 
    /// Returns the concatenation of this Vector and a scalar of type T
-   inline Vector& operator<<(const T &b) 
+   inline Vector& operator<<(const T &b)
    {
        return (*this) << Vector(1,b);
    }
 
     /// Returns the concatenation of this Vector and Vector b
-    inline Vector operator&&(const Vector &b) 
+    inline Vector operator&&(const Vector &b)
     {
         size_t i;
         size_t vs = this->size();
@@ -310,7 +310,7 @@ namespace gpstk
     }
 
     /// Returns the concatenation of this Vector and a scalar of type T
-    inline Vector operator&&(const T &b) 
+    inline Vector operator&&(const T &b)
     {
         size_t i;
         size_t vs = this->size();
@@ -338,7 +338,7 @@ namespace gpstk
             return true;
 #endif
          }
-   
+
          /// The vector
       T* v;
          /// The size of the vector.
@@ -347,7 +347,7 @@ namespace gpstk
    // end class Vector<T>
 
 /**
- * A slice of Vector<T> that can be modified.  
+ * A slice of Vector<T> that can be modified.
  * @warning Remember that (VectorSlice = VectorSlice) will
  * assign elements to the VectorSlice, not copy the VectorSlice internal data!
  */
@@ -364,7 +364,7 @@ namespace gpstk
       VectorSlice(Vector<T>& vv)
             : v(&vv), s(std::slice(0,vv.size(),1))
          { }
-            
+
          /// Makes a slice of the vector with the given std::slice.
       VectorSlice(Vector<T>& vv, const std::slice& ss)
             : v(&vv), s(ss)
@@ -388,13 +388,13 @@ namespace gpstk
          { return this->assignFrom(x); }
 
          /// Returns the modifiable i'th element of the slice.
-      T& operator[] (size_t i) 
+      T& operator[] (size_t i)
          { return (*v)[start() + i * stride()]; }
          /// Returns the const i'th element of the slice.
       T operator[] (size_t i) const
          { return (*v)[start() + i * stride()]; }
          /// Returns the modifiable i'th element of the slice.
-      T& operator() (size_t i) 
+      T& operator() (size_t i)
          { return (*v)[start() + i * stride()]; }
          /// Returns the const i'th element of the slice.
       T operator() (size_t i) const
@@ -404,7 +404,7 @@ namespace gpstk
       inline size_t size() const { return s.size(); }
          /// returns the index in the vector of the first element.
       inline size_t start() const { return s.start(); }
-         /// returns the number of elements to skip between (*this)[i] and 
+         /// returns the number of elements to skip between (*this)[i] and
          /// (*this)[i+1]
       inline size_t stride() const { return s.stride(); }
    private:
@@ -415,7 +415,7 @@ namespace gpstk
    };
 
 /**
- * A Vector<T> slice that doesn't allow modification. 
+ * A Vector<T> slice that doesn't allow modification.
  */
    template <class T>
    class ConstVectorSlice : public ConstVectorSliceBase<T, ConstVectorSlice<T> >
@@ -430,7 +430,7 @@ namespace gpstk
       ConstVectorSlice(const Vector<T>& vv)
             : v(&vv), s(std::slice(0,vv.size(),1))
          { }
-            
+
          /// Uses the given slice and vector.
       ConstVectorSlice(const Vector<T>& vv, const std::slice& ss)
             : v(&vv), s(ss)
@@ -447,7 +447,7 @@ namespace gpstk
       inline size_t size() const { return s.size(); }
          /// returns the index in the vector of the first element.
       inline size_t start() const { return s.start(); }
-         /// returns the number of elements to skip between (*this)[i] and 
+         /// returns the number of elements to skip between (*this)[i] and
          /// (*this)[i+1]
       inline size_t stride() const { return s.stride(); }
 

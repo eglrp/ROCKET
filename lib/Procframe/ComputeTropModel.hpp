@@ -35,6 +35,7 @@
 
 #include "ProcessingClass.hpp"
 #include "TropModel.hpp"
+#include "MSCStore.hpp"
 
 
 namespace gpstk
@@ -94,27 +95,21 @@ namespace gpstk
        * @sa TropModel.hpp
        *
        */
-   class ComputeTropModel : public ProcessingClass
-   {
-   public:
+    class ComputeTropModel : public ProcessingClass
+    {
+    public:
 
          /// Default constructor.
-      ComputeTropModel()
-         : pTropModel(NULL)
-      { };
+        ComputeTropModel() : pTropModel(NULL) {};
 
 
          /** Explicit constructor.
           *
-          * @param RxCoordinates Reference station coordinates.
-          * @param dEphemeris    EphemerisStore object to be used by default.
-          * @param dObservable   Observable type to be used by default.
-          * @param applyTGD      Whether or not C1 observable will be
-          *                      corrected from TGD effect.
+          * @param tropoModel   Tropospheric Model.
           *
           */
-      ComputeTropModel(TropModel& tropoModel)
-      { pTropModel = &tropoModel; };
+        ComputeTropModel(TropModel& tropoModel)
+        { pTropModel = &tropoModel; };
 
 
          /** Returns a satTypeValueMap object, adding the new data generated
@@ -123,35 +118,44 @@ namespace gpstk
           * @param time      Epoch.
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process( const CommonTime& time,
-                                        satTypeValueMap& gData )
-         throw(ProcessingException);
+        virtual satTypeValueMap& Process( const CommonTime& time,
+                                          satTypeValueMap& gData )
+            throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
+         /** Returns a gnssSatTypeValue object, adding the new data generated
           *  when calling a modeling object.
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.header.epoch, gData.body); return gData; };
+        virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
+            throw(ProcessingException)
+        { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated when
+         /** Returns a gnssRinex object, adding the new data generated when
           *  calling a modeling object.
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
-         throw(ProcessingException)
-      { Process(gData.header.epoch, gData.body); return gData; };
+        virtual gnssRinex& Process(gnssRinex& gData)
+            throw(ProcessingException)
+        { Process(gData.header.epoch, gData.body); return gData; };
+
+
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling a modeling object.
+          *
+          * @param gData    Data object holding the data.
+          */
+        virtual gnssDataMap& Process(gnssDataMap& gData)
+            throw(ProcessingException);
 
 
          /// Method to get a pointer to the default TropModel to be used
          /// with GNSS data structures.
-      virtual TropModel *getTropModel() const
-      { return pTropModel; };
+        virtual TropModel *getTropModel() const
+        { return pTropModel; };
 
 
          /** Method to set the default TropModel to be used with GNSS
@@ -159,27 +163,41 @@ namespace gpstk
           *
           * @param tropoModel   TropModel object to be used by default
           */
-      virtual ComputeTropModel& setTropModel(TropModel& tropoModel)
-      { pTropModel = &tropoModel; return (*this); };
+        virtual ComputeTropModel& setTropModel(TropModel& tropoModel)
+        { pTropModel = &tropoModel; return (*this); };
+
+
+         /// Returns a pointer to the MSCStore object currently in use.
+        virtual MSCStore *getMSCStore(void) const
+        { return pMSCStore; };
+
+
+         /** Sets MSCStore object to be used.
+          *
+          * @param msc     MSCStore object.
+          */
+        virtual ComputeTropModel& setMSCStore(MSCStore& msc)
+        { pMSCStore = &msc; return (*this); };
 
 
          /// Returns a string identifying this object.
-      virtual std::string getClassName(void) const;
+        virtual std::string getClassName(void) const;
 
 
          /// Destructor.
-      virtual ~ComputeTropModel() {};
+        virtual ~ComputeTropModel() {};
 
 
-   private:
-
+    private:
 
          /// Pointer to default TropModel object when working with GNSS
          /// data structures.
-      TropModel *pTropModel;
+        TropModel *pTropModel;
 
+         /// Pointer to object contatining station nominal position
+        MSCStore* pMSCStore;
 
-   }; // End of class 'ComputeTropModel'
+    }; // End of class 'ComputeTropModel'
 
       //@}
 

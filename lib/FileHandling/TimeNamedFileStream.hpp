@@ -2,7 +2,7 @@
 
 /**
  * @file TimeNamedFileStream.hpp
- * Writes data to a file whose name is derived from a pattern and a nominal epoch. 
+ * Writes data to a file whose name is derived from a pattern and a nominal epoch.
  */
 
 #ifndef GPSTK_TIME_NAMED_FILE_STREAM_HPP
@@ -62,7 +62,7 @@ namespace gpstk
    {
    public:
 
-      TimeNamedFileStream() 
+      TimeNamedFileStream()
          : omode(std::ios::in), debugLevel(0)
       {};
 #pragma clang diagnostic push
@@ -94,7 +94,7 @@ namespace gpstk
 
 
       // Get the filename of the current file
-      std::string getCurrentFilename(void) const 
+      std::string getCurrentFilename(void) const
       { return currentFilename; };
 
 
@@ -143,7 +143,7 @@ namespace gpstk
    private:
       /// Pattern on which to create new files
       std::string filespec;
-      
+
       /// Name of the current output file.
       std::string currentFilename;
 

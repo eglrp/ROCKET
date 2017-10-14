@@ -1,13 +1,10 @@
-/// @file RinexUtilities.cpp
-/// Miscellaneous RINEX-related utilities.
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -18,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -26,16 +23,19 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software.
+//duplicate, distribute, disclose, or release this software. 
 //
-//Pursuant to DoD Directive 523024
+//Pursuant to DoD Directive 523024 
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
 //                           release, distribution is unlimited.
 //
 //=============================================================================
+
+/// @file RinexUtilities.cpp
+/// Miscellaneous RINEX-related utilities.
 
 // system includes
 #include <map>
@@ -155,7 +155,7 @@ try {
    return 0;
 }
 catch(Exception& e) { GPSTK_RETHROW(e); }
-catch(exception& e) { Exception E("std except: "+string(e.what())); GPSTK_THROW(E); }
+catch(std::exception& e) { Exception E("std except: "+string(e.what())); GPSTK_THROW(E); }
 catch(...) { Exception e("Unknown exception"); GPSTK_THROW(e); }
 }
 
@@ -182,7 +182,7 @@ bool isSP3File(const string& file)
    {
       GPSTK_RETHROW(e);
    }
-   catch(exception& e)
+   catch(std::exception& e)
    {
       Exception E("std except: "+string(e.what()));
       GPSTK_THROW(E);
@@ -208,18 +208,18 @@ bool isRinexNavFile(const string& file)
          rnstream.exceptions(fstream::failbit);
       }
       catch(Exception& e) { return false; }
-      catch(exception& e) { return false;}
+      catch(std::exception& e) { return false;}
       try {
          rnstream >> header;
       }
       catch(Exception& e) { return false; }
-      catch(exception& e) { return false; }
+      catch(std::exception& e) { return false; }
 
       rnstream.close();
       return true;
    }
    catch(Exception& e) { GPSTK_RETHROW(e); }
-   catch(exception& e) {
+   catch(std::exception& e) {
       Exception E("std except: "+string(e.what()));
       GPSTK_THROW(E);
    }
@@ -243,12 +243,12 @@ bool isRinex3NavFile(const string& file)
          rnstream.exceptions(fstream::failbit);
       }
       catch(Exception& e) { return false; }
-      catch(exception& e) { return false; }
+      catch(std::exception& e) { return false; }
       try {
          rnstream >> header;
       }
       catch(Exception& e) { return false; }
-      catch(exception& e) { return false; }
+      catch(std::exception& e) { return false; }
 
       rnstream.close();
       return true;
@@ -257,7 +257,7 @@ bool isRinex3NavFile(const string& file)
    {
       GPSTK_RETHROW(e);
    }
-   catch(exception& e)
+   catch(std::exception& e)
    {
       Exception E("std except: "+string(e.what()));
       GPSTK_THROW(E);
@@ -283,19 +283,19 @@ bool isRinexObsFile(const string& file)
          rostream.exceptions(fstream::failbit);
       }
       catch(Exception& e) { return false; }
-      catch(exception& e) { return false; }
+      catch(std::exception& e) { return false; }
 
       try {
          rostream >> header;
       }
       catch(Exception& e) { return false; }
-      catch(exception& e) { return false; }
+      catch(std::exception& e) { return false; }
 
       rostream.close();
       return true;
    }
    catch(Exception& e) { GPSTK_RETHROW(e); }
-   catch(exception& e) {
+   catch(std::exception& e) {
       Exception E("std except: "+string(e.what()));
       GPSTK_THROW(E);
    }
@@ -319,19 +319,19 @@ bool isRinex3ObsFile(const string& file)
          rostream.exceptions(fstream::failbit);
       }
       catch(Exception& e) { return false; }
-      catch(exception& e) { return false; }
+      catch(std::exception& e) { return false; }
 
       try {
          rostream >> header;
       }
       catch(Exception& e) { return false; }
-      catch(exception& e) { return false; }
+      catch(std::exception& e) { return false; }
 
       rostream.close();
       return true;
    }
    catch(Exception& e) { GPSTK_RETHROW(e); }
-   catch(exception& e) {
+   catch(std::exception& e) {
       Exception E("std except: "+string(e.what()));
       GPSTK_THROW(E);
    }
@@ -389,7 +389,7 @@ try {
    return msg;
 }
 catch(Exception& e) { GPSTK_RETHROW(e); }
-catch(exception& e) { Exception E("std except: "+string(e.what())); GPSTK_THROW(E); }
+catch(std::exception& e) { Exception E("std except: "+string(e.what())); GPSTK_THROW(E); }
 catch(...) { Exception e("Unknown exception"); GPSTK_THROW(e); }
 }
 
@@ -439,7 +439,7 @@ string sortRinex3ObsFiles(vector<string>& files)
       }
    }
    catch(Exception& e) { GPSTK_RETHROW(e); }
-   catch(exception& e) {
+   catch(std::exception& e) {
       Exception E("std except: "+string(e.what()));
       GPSTK_THROW(E);
    }
@@ -500,7 +500,7 @@ int FillEphemerisStore(const vector<string>& files, SP3EphemerisStore& PE,
       return nread;
    }
    catch(Exception& e) { GPSTK_RETHROW(e); }
-   catch(exception& e) {
+   catch(std::exception& e) {
       Exception E("std except: "+string(e.what()));
       GPSTK_THROW(E);
    }

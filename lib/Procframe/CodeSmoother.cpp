@@ -76,18 +76,6 @@ namespace gpstk
             resultType  = TypeID::C2;
             break;
 
-         case TypeID::P1:
-            phaseType   = TypeID::L1;
-            csFlag      = TypeID::CSL1;
-            resultType  = TypeID::P1;
-            break;
-
-         case TypeID::P2:
-            phaseType   = TypeID::L2;
-            csFlag      = TypeID::CSL2;
-            resultType  = TypeID::P2;
-            break;
-
          case TypeID::C5:
             phaseType   = TypeID::L5;
             csFlag      = TypeID::CSL5;
@@ -191,6 +179,31 @@ namespace gpstk
 
    }  // End of method 'CodeSmoother::Process()'
 
+
+     /** Returns a gnssDataMap object, adding the new data generated when
+      *  calling this object.
+      *
+      * @param gData    Data object holding the data.
+      */
+    gnssDataMap& CodeSmoother::Process(gnssDataMap& gData)
+        throw(ProcessingException)
+    {
+
+        for( gnssDataMap::iterator gdmIt = gData.begin();
+             gdmIt != gData.end();
+             ++gdmIt )
+        {
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end();
+                 ++sdmIt )
+            {
+                Process(  sdmIt->second );
+            }
+        }
+
+        return gData;
+
+    }  // End of method 'CodeSmoother::Process()'
 
 
       /* Method to set the maximum size of filter window, in samples.

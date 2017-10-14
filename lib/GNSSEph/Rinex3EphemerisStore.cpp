@@ -1,14 +1,10 @@
-/// @file Rinex3EphemerisStore.cpp
-/// Read and store RINEX formated navigation message (Rinex3Nav) data, following
-/// the RINEX 3.02 spec. Support for GNSS GPS, GAL, GLO, BDS, QZS.
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -19,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -27,16 +23,20 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
+
+/// @file Rinex3EphemerisStore.cpp
+/// Read and store RINEX formated navigation message (Rinex3Nav) data, following
+/// the RINEX 3.02 spec. Support for GNSS GPS, GAL, GLO, BDS, QZS.
 
 #include "Rinex3EphemerisStore.hpp"
 
@@ -45,7 +45,6 @@
 #include "GPSEphemeris.hpp"
 #include "GalEphemeris.hpp"
 #include "BDSEphemeris.hpp"
-#include "QZSEphemeris.hpp"
 
 using namespace std;
 
@@ -57,9 +56,7 @@ namespace gpstk
    bool Rinex3EphemerisStore::addEphemeris(const Rinex3NavData& inRdata)
    {
       Rinex3NavData Rdata(inRdata);
-      TimeSystem ts = TimeSystem::GPS;
-#pragma unused(ts)
-       
+
       switch(Rdata.sat.system) {
          case SatID::systemGPS:
          {
@@ -77,30 +74,13 @@ namespace gpstk
             break;
          }
 
-         case SatID::systemBeiDou:
+         case SatID::systemBDS:
          {
             Rdata.time = correctTimeSystem(Rdata.time, TimeSystem::BDT);
             BDSEphemeris eph(Rdata);
             return ORBstore.addEphemeris(dynamic_cast<OrbitEph*>(&eph));
             break;
          }
-
-         case SatID::systemQZSS:
-         {
-            Rdata.time = correctTimeSystem(Rdata.time, TimeSystem::QZS);
-            QZSEphemeris eph(Rdata);
-            return ORBstore.addEphemeris(dynamic_cast<OrbitEph*>(&eph));
-            break;
-         }
-
-         case SatID::systemGlonass:
-            Rdata.time = correctTimeSystem(Rdata.time, TimeSystem::GLO);
-            return GLOstore.addEphemeris(GloEphemeris(Rdata));
-            break;
-
-         case SatID::systemGeosync:
-            //return GEOstore.addEphemeris(GeoEphemeris(Rdata));
-            break;
 
          default:
             break;
@@ -119,7 +99,7 @@ namespace gpstk
          int nread(0);
          Rinex3NavStream strm;
          what = string();
-         
+
          strm.open(filename.c_str(), ios::in);
          if(!strm.is_open()) {
             what = string("File ") + filename + string(" could not be opened.");
@@ -153,7 +133,7 @@ namespace gpstk
                   + string(" : ") + e.getText();
                return -3;
             }
-            catch(exception& e) {
+            catch(std::exception& e) {
                what = string("std excep: ") + e.what();
                return -3;
             }
@@ -271,23 +251,13 @@ namespace gpstk
          switch(sat.system) {
             case SatID::systemGPS:
             case SatID::systemGalileo:
-            case SatID::systemBeiDou:
-            case SatID::systemQZSS:
+            case SatID::systemBDS:
                if(sat.system == SatID::systemGPS    ) ts = TimeSystem::GPS;
                if(sat.system == SatID::systemGalileo) ts = TimeSystem::GAL;
-               if(sat.system == SatID::systemBeiDou ) ts = TimeSystem::BDT;
-               if(sat.system == SatID::systemQZSS   ) ts = TimeSystem::QZS;
+               if(sat.system == SatID::systemBDS    ) ts = TimeSystem::BDT;
                ttag = correctTimeSystem(inttag, ts);
                xvt = ORBstore.getXvt(sat,ttag);
                break;
-            case SatID::systemGlonass:
-               ttag = correctTimeSystem(inttag, TimeSystem::GLO);
-               xvt = GLOstore.getXvt(sat,ttag);
-               break;
-            //case SatID::systemGeosync:
-            //   ttag = correctTimeSystem(inttag, TimeSystem::GEO);
-            //   xvt = GEOstore.getXvt(sat,ttag);
-            //   break;
             default:
                InvalidRequest e("Unsupported satellite system");
                GPSTK_THROW(e);
@@ -322,20 +292,10 @@ namespace gpstk
          ORBstore.dump(os, detail);
       }
 
-      if(GLOstore.size()) {
-         os << "Dump of GLO ephemeris store:\n";
-         GLOstore.dump(os, detail);
-      }
-
-      //if(GEOstore.size()) {
-         //os << "Dump of GEO ephemeris store:\n";
-         //GEOstore.dump(os, detail);
-      //}
-
       os << "End dump of Rinex3EphemerisStore\n";
    }
 
-   // Determine the earliest time for which this object can successfully 
+   // Determine the earliest time for which this object can successfully
    // determine the Xvt for any object.
    // @return the earliest time in the table
    // @throw InvalidRequest if the object has no data.
@@ -347,29 +307,19 @@ namespace gpstk
          // CommonTime does not allow comparisions unless TimeSystems agree,
          // or if one is "Any"
          retTime.setTimeSystem(TimeSystem::Any);
-         
+
          time = ORBstore.getInitialTime();
          if(time < retTime) {
             retTime = time;
             retTime.setTimeSystem(TimeSystem::Any);
          }
-         time = GLOstore.getInitialTime();
-         if(time < retTime) {
-            retTime = time;
-            retTime.setTimeSystem(TimeSystem::Any);
-         }
-         //time = GEOstore.getInitialTime();
-         //if(time < retTime) {
-         //   retTime = time;
-         //   retTime.setTimeSystem(TimeSystem::Any);
-         //}
 
          return retTime;
       }
       catch(InvalidRequest& ir) { GPSTK_RETHROW(ir); }
    }
 
-   // Determine the latest time for which this object can successfully 
+   // Determine the latest time for which this object can successfully
    // determine the Xvt for any object.
    // @return the latest time in the table
    // @throw InvalidRequest if the object has no data.
@@ -381,29 +331,19 @@ namespace gpstk
          // CommonTime does not allow comparisions unless TimeSystems agree,
          // or if one is "Any"
          retTime.setTimeSystem(TimeSystem::Any);
-         
+
          time = ORBstore.getInitialTime();
          if(time > retTime) {
             retTime = time;
             retTime.setTimeSystem(TimeSystem::Any);
          }
-         time = GLOstore.getInitialTime();
-         if(time > retTime) {
-            retTime = time;
-            retTime.setTimeSystem(TimeSystem::Any);
-         }
-         //time = GEOstore.getInitialTime();
-         //if(time > retTime) {
-         //   retTime = time;
-         //   retTime.setTimeSystem(TimeSystem::Any);
-         //}
 
          return retTime;
       }
       catch(InvalidRequest& ir) { GPSTK_RETHROW(ir); }
    }
 
-   // Determine the earliest time for which this object can successfully 
+   // Determine the earliest time for which this object can successfully
    // determine the Xvt for any object.
    // @param SatID sat satellite, or system if sat.id==-1
    // @return the earliest time in the table
@@ -420,13 +360,8 @@ namespace gpstk
          switch(sat.system) {
             case SatID::systemGPS:
             case SatID::systemGalileo:
-            case SatID::systemBeiDou:
-            case SatID::systemQZSS:
+            case SatID::systemBDS:
                retTime = ORBstore.getInitialTime(sat);
-            case SatID::systemGlonass:
-               retTime = GLOstore.getInitialTime(sat);
-            //case SatID::systemGeosync:
-               //retTime = GEOstore.getInitialTime(sat);
             default:
                break;
          }
@@ -436,7 +371,7 @@ namespace gpstk
       catch(InvalidRequest& ir) { GPSTK_RETHROW(ir); }
    }
 
-   // Determine the latest time for which this object can successfully 
+   // Determine the latest time for which this object can successfully
    // determine the Xvt for any object.
    // @param SatID sat satellite, or system if sat.id==-1
    // @return the latest time in the table
@@ -453,13 +388,8 @@ namespace gpstk
          switch(sat.system) {
             case SatID::systemGPS:
             case SatID::systemGalileo:
-            case SatID::systemBeiDou:
-            case SatID::systemQZSS:
+            case SatID::systemBDS:
                retTime = ORBstore.getFinalTime(sat);
-            case SatID::systemGlonass:
-               retTime = GLOstore.getFinalTime(sat);
-            //case SatID::systemGeosync:
-               //retTime = GEOstore.getFinalTime(sat);
             default:
                break;
          }
@@ -480,13 +410,9 @@ namespace gpstk
       const bool keepAll(sysSat.system == SatID::systemMixed);
       const bool keepGPS(keepAll || sysSat.system==SatID::systemGPS);
       const bool keepGAL(keepAll || sysSat.system==SatID::systemGalileo);
-      const bool keepGLO(keepAll || sysSat.system==SatID::systemGlonass);
-      const bool keepBDS(keepAll || sysSat.system==SatID::systemBeiDou);
-      const bool keepQZS(keepAll || sysSat.system==SatID::systemQZSS);
-      const bool keepGEO(keepAll || sysSat.system==SatID::systemGeosync);
-      const bool keepOrb(keepAll || keepGPS || keepGAL || keepBDS || keepQZS);
-#pragma unused(keepGEO)
-       
+      const bool keepBDS(keepAll || sysSat.system==SatID::systemBDS);
+      const bool keepOrb(keepAll || keepGPS || keepGAL || keepBDS);
+
       if(keepOrb) {
          list<OrbitEph*> OElist;
          ORBstore.addToList(OElist);
@@ -504,36 +430,13 @@ namespace gpstk
                theList.push_back(Rinex3NavData(*sysptr));
                n++;
             }
-            else if((ptr->satID).system == SatID::systemBeiDou && keepBDS) {
+            else if((ptr->satID).system == SatID::systemBDS && keepBDS) {
                BDSEphemeris *sysptr = dynamic_cast<BDSEphemeris*>(ptr);
-               theList.push_back(Rinex3NavData(*sysptr));
-               n++;
-            }
-            else if((ptr->satID).system == SatID::systemQZSS && keepQZS) {
-               QZSEphemeris *sysptr = dynamic_cast<QZSEphemeris*>(ptr);
                theList.push_back(Rinex3NavData(*sysptr));
                n++;
             }
          }
       }
-      if(keepGLO) {
-         list<GloEphemeris> GLOlist;
-         n += GLOstore.addToList(GLOlist);
-
-         list<GloEphemeris>::const_iterator it;
-         for(it=GLOlist.begin(); it != GLOlist.end(); ++it)
-            theList.push_back(Rinex3NavData(*it));
-      }
-      /*
-      if(keepGEO) {
-         list<GeoRecord> GEOlist;
-         n += GEOstore.addToList(GEOlist);
-
-         list<GeoRecord>::const_iterator it;
-         for(it=GEOlist.begin(); it != GEOlist.end(); ++it)
-            theList.push_back(Rinex3NavData(*it));
-      }
-      */
       return n;
    }
 

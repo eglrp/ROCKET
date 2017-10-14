@@ -114,7 +114,7 @@ namespace gpstk
          /// Default constructor, setting default parameters and C1 and L1
          /// as observables.
       CodeSmoother() : codeType(TypeID::C1), phaseType(TypeID::L1),
-         resultType(TypeID::C1), maxWindowSize(100), csFlag(TypeID::CSL1) 
+         resultType(TypeID::C1), maxWindowSize(100), csFlag(TypeID::CSL1)
       { };
 
 
@@ -136,7 +136,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
+         /** Returns a gnssSatTypeValue object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -146,7 +146,7 @@ namespace gpstk
       { Process(gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated when
+         /** Returns a gnssRinex object, adding the new data generated when
           *  calling this object.
           *
           * @param gData    Data object holding the data.
@@ -154,6 +154,15 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
       { Process(gData.body); return gData; };
+
+
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
 
          /// Method to get the default code type being used.

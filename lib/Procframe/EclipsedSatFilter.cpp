@@ -63,7 +63,7 @@ namespace gpstk
 
 
 
-      /* Sets time after exiting shadow that satellite will still be 
+      /* Sets time after exiting shadow that satellite will still be
        *  filtered out, in seconds.
        * @param pShTime    Time after exiting shadow that satellite will
        *                   still be filtered out, in seconds.
@@ -112,7 +112,7 @@ namespace gpstk
 
             // Loop through all the satellites
          satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it) 
+         for (it = gData.begin(); it != gData.end(); ++it)
          {
                // Check if satellite position is not already computed
             if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
@@ -120,7 +120,7 @@ namespace gpstk
                 ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
             {
 
-                  // If satellite position is missing, then schedule this 
+                  // If satellite position is missing, then schedule this
                   // satellite for removal
                satRejectedSet.insert( (*it).first );
                continue;
@@ -197,7 +197,7 @@ namespace gpstk
    }  // End of 'EclipsedSatFilter::Process()'
 
 
-      /* Returns a gnnsRinex object, adding the new data generated when
+      /* Returns a gnssRinex object, adding the new data generated when
        *  calling this object.
        *
        * @param gData    Data object holding the data.
@@ -223,6 +223,33 @@ namespace gpstk
          GPSTK_THROW(e);
 
       }
+
+   }  // End of 'EclipsedSatFilter::Process()'
+
+
+
+      /* Returns a gnssDataMap object, adding the new data generated when
+       *  calling this object.
+       *
+       * @param gData    Data object holding the data.
+       */
+   gnssDataMap& EclipsedSatFilter::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+        for( gnssDataMap::iterator gdmIt = gData.begin();
+             gdmIt != gData.end();
+             ++gdmIt )
+        {
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end();
+                 ++sdmIt )
+            {
+               Process( gdmIt->first, sdmIt->second );
+            }
+        }
+
+        return gData;
 
    }  // End of 'EclipsedSatFilter::Process()'
 

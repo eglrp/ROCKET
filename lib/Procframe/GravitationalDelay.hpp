@@ -32,10 +32,10 @@
 
 
 
-#include <math.h>
-#include "Position.hpp"
+#include <cmath>
 #include "ProcessingClass.hpp"
-
+#include "Position.hpp"
+#include "MSCStore.hpp"
 
 
 namespace gpstk
@@ -102,21 +102,23 @@ namespace gpstk
        * @sa BasicModel.hpp and LinearCombinations.hpp.
        *
        */
-   class GravitationalDelay : public ProcessingClass
-   {
-      public:
+    class GravitationalDelay : public ProcessingClass
+    {
+    public:
 
          /// Default constructor.
-      GravitationalDelay() : nominalPos(0.0, 0.0, 0.0)
-      { };
+        GravitationalDelay()
+            : nominalPos(0.0, 0.0, 0.0), pMSCStore(NULL)
+        {};
 
 
          /** Common constructor
           *
           * @param stapos    Nominal position of receiver station.
           */
-      GravitationalDelay(const Position& stapos) : nominalPos(stapos)
-      { };
+        GravitationalDelay(const Position& staPos)
+            : nominalPos(staPos), pMSCStore(NULL)
+        {};
 
 
          /** Returns a satTypeValueMap object, adding the new data generated
@@ -125,58 +127,81 @@ namespace gpstk
           * @param epoch     Time of observations.
           * @param gData     Data object holding the data.
           */
-      virtual satTypeValueMap& Process( const CommonTime& epoch,
-                                        satTypeValueMap& gData )
-         throw(ProcessingException);
+        virtual satTypeValueMap& Process( const CommonTime& epoch,
+                                          satTypeValueMap& gData )
+            throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
+         /** Returns a gnssSatTypeValue object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
-         throw(ProcessingException)
-      { Process(gData.header.epoch, gData.body); return gData; };
+        virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData)
+            throw(ProcessingException)
+        { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated when
+         /** Returns a gnssRinex object, adding the new data generated when
           *  calling this object.
           *
           * @param gData    Data object holding the data.
           */
-      virtual gnssRinex& Process(gnssRinex& gData)
-         throw(ProcessingException);
+        virtual gnssRinex& Process(gnssRinex& gData)
+            throw(ProcessingException);
+
+
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+        virtual gnssDataMap& Process(gnssDataMap& gData)
+            throw(ProcessingException);
 
 
          /// Returns nominal position of receiver station.
-      virtual Position getNominalPosition(void) const
-      { return nominalPos; };
+        virtual Position getNominalPosition(void) const
+        { return nominalPos; };
 
 
          /** Sets nominal position of receiver station.
           * @param stapos    Nominal position of receiver station.
           */
-      virtual GravitationalDelay& setNominalPosition(const Position& stapos)
-        { nominalPos = stapos; return (*this); };
+        virtual GravitationalDelay& setNominalPosition(const Position& staPos)
+        { nominalPos = staPos; return (*this); };
+
+
+         /// Returns a pointer to the MSCStore object currently in use.
+        virtual MSCStore *getMSCStore(void) const
+        { return pMSCStore; };
+
+
+         /** Sets MSCStore object to be used.
+          *
+          * @param msc     MSCStore object.
+          */
+        virtual GravitationalDelay& setMSCStore(MSCStore& mscStore)
+        { pMSCStore = &mscStore; return (*this); };
 
 
          /// Returns a string identifying this object.
-      virtual std::string getClassName(void) const;
+        virtual std::string getClassName(void) const;
 
 
          /// Destructor
-      virtual ~GravitationalDelay() {};
+        virtual ~GravitationalDelay() {};
 
 
-   private:
+    private:
 
+        /// Station position
+        Position nominalPos;
 
-         /// Receiver position
-      Position nominalPos;
+        /// Pointer to MSCStore object
+        MSCStore* pMSCStore;
 
-
-   }; // End of class 'GravitationalDelay'
+    }; // End of class 'GravitationalDelay'
 
       //@}
 

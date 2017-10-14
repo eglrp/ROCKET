@@ -59,7 +59,7 @@
 #include "Exception.hpp"
 #include "CommonTime.hpp"
 #include "Xvt.hpp"
-#include "GNSSconstants.hpp"
+#include "constants.hpp"
 #include "SatID.hpp"
 #include "ObsID.hpp"
 #include "MathBase.hpp"
@@ -72,7 +72,8 @@ namespace gpstk
    {
    public:
          /// Constructors
-	      /// Default constuctor
+
+         /// Default constuctor
       OrbElem( );
 
 
@@ -80,13 +81,13 @@ namespace gpstk
       virtual ~OrbElem() {}
 
          /// Clone method.
-	 /// Return pointer to new copy of this type.
-	 /// Implication of the "= 0" at this end is that this is a
-	 /// "pure virtual" method and that makes OrbElem an abstract
-	 /// class.  That is to say no objects of type OrbElem may
-	 /// be constructed.   This is a good thing since OrbElem
-	 /// doesn't even provide methods to load its' members.
-	 /// Only its' descendents may be instantiated.
+     /// Return pointer to new copy of this type.
+     /// Implication of the "= 0" at this end is that this is a
+     /// "pure virtual" method and that makes OrbElem an abstract
+     /// class.  That is to say no objects of type OrbElem may
+     /// be constructed.   This is a good thing since OrbElem
+     /// doesn't even provide methods to load its' members.
+     /// Only its' descendents may be instantiated.
       virtual OrbElem* clone() const = 0;
 
          /**
@@ -95,7 +96,7 @@ namespace gpstk
           */
       virtual bool isValid(const CommonTime& ct) const throw(InvalidRequest);
 
-	 /**
+         /**
           *   Return true if orbit data have been loaded.
           *   Returns false if the object has been instantiated,
           *   but no data have been loaded.
@@ -173,18 +174,18 @@ namespace gpstk
          throw( InvalidRequest );
 
       virtual void dump(std::ostream& s = std::cout) const
-	 throw( InvalidRequest );
+         throw( InvalidRequest );
 
          /// Overhead information
          //@{
       bool    dataLoadedFlag;  /**< True if data is present, False otherwise */
-      SatID   satID;	       /**< Define satellite system and specific SV */
+      SatID   satID;           /**< Define satellite system and specific SV */
       ObsID   obsID;           /**< Defines carrier and tracking code */
       CommonTime ctToe;        /**< Orbit epoch in commontime format */
       bool    healthy;         /**< SV health (healthy=true, other=false */
               //@}
 
-	 /// Harmonic perturbations
+         /// Harmonic perturbations
          //@{
       double   Cuc;           /**< Cosine latitude (rad) */
       double   Cus;           /**< Sine latitude (rad) */
@@ -198,7 +199,7 @@ namespace gpstk
          //@{
       double   M0;            /**< Mean anomaly (rad) */
       double   dn;            /**< Correction to mean motion (rad/sec) */
-      double   dndot;	      /**< Rate of correction to mean motion (rad/sec/sec) */
+      double   dndot;         /**< Rate of correction to mean motion (rad/sec/sec) */
       double   ecc;           /**< Eccentricity */
       double   A;             /**< Semi-major axis (m) */
       double   Adot;          /**< Rate of semi-major axis (m/sec) */
@@ -211,7 +212,7 @@ namespace gpstk
 
          /// Clock information
          //@{
-      CommonTime ctToc;	    /**< Clock Epoch in commontime format */
+      CommonTime ctToc;     /**< Clock Epoch in commontime format */
       double af0;           /**< SV clock error (sec) */
       double af1;           /**< SV clock drift (sec/sec) */
       double af2;           /**< SV clock drift rate (sec/sec**2) */
@@ -234,8 +235,6 @@ namespace gpstk
          //@{
       CommonTime beginValid;    /**< Time at beginning of validity */
       CommonTime endValid;      /**< Time at end of fit validity */
-
-
 
    }; // end class OrbElem
 

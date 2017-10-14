@@ -1,7 +1,7 @@
 #pragma ident "$Id$"
 
 /**
- * @file GNSSconstants.hpp
+ * @file GPS_URA.hpp
  * Constants as defined in the GPS-ICD-200D and by all RINEX GNSSs
  */
 
@@ -25,7 +25,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -33,13 +33,13 @@
 //============================================================================
 //
 // This software developed by Applied Research Laboratories at the University
-// of Texas at Austin, under contract to an agency or agencies within the U.S. 
+// of Texas at Austin, under contract to an agency or agencies within the U.S.
 // Department of Defense. The U.S. Government retains all rights to use,
-// duplicate, distribute, disclose, or release this software. 
+// duplicate, distribute, disclose, or release this software.
 //
-// Pursuant to DoD Directive 523024 
+// Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -80,19 +80,19 @@ namespace gpstk
                                            384.0, 768.0, 1536.0, 3072.0,
                                            6144.0};
      /// map for SV accuracy/Nominal URA indices
-     /// Further details in 
+     /// Further details in
      /// IS-GPS-200 30.3.3.1.1.4
      /// IS-GPS-705 20.3.3.1.1.4
      /// IS_GPS-800 3.5.3.5
    const double SV_CNAV_ACCURACY_GPS_NOM_INDEX[] = {0.011049, 0.015625, 0.022097, 0.03125,
                                            0.044194, 0.0625, 0.088388, 0.125, 0.176777,
-                                           0.25, 0.353553, 0.5, 0.707107, 1, 1.414214, 2, 
+                                           0.25, 0.353553, 0.5, 0.707107, 1, 1.414214, 2,
                                            2.8, 4, 5.7, 8, 11.3, 16, 32, 64, 128, 256, 512,
                                            1024, 2048, 4096};
        /// constant for max array index in gps nom index table
   const int SV_CNAV_NOMINAL_MAX_INDEX = 30;
- 
-       /// constant for gps nom index table offset 
+
+       /// constant for gps nom index table offset
   const int SV_CNAV_INDEX_OFFSET = 15;
 
        /// map from SV accuracy/URA flag to maximum accuracy values in m
@@ -116,7 +116,7 @@ namespace gpstk
          ura = SV_ACCURACY_GPS_MAX_INDEX_VALUE;
       return ura;
    }
-   
+
    inline
    double ura2accuracy(const short& ura) throw()
    {
@@ -138,7 +138,7 @@ namespace gpstk
          ura = SV_ACCURACY_GPS_MAX_INDEX_VALUE;
       return ura;
    }
-   
+
    inline
    double ura2nominalAccuracy(const short& ura) throw()
    {
@@ -162,7 +162,7 @@ namespace gpstk
    }
 
    inline
-   double ura2CNAVaccuracy(const short& ura) 
+   double ura2CNAVaccuracy(const short& ura)
       throw( InvalidRequest )
    {
       short ndx = ura+SV_CNAV_INDEX_OFFSET;
@@ -170,8 +170,8 @@ namespace gpstk
       {
          InvalidRequest exc("URA index out of range");
          GPSTK_THROW(exc);
-      }      
-       return SV_CNAV_ACCURACY_GPS_MAX_INDEX[ndx];   
+      }
+       return SV_CNAV_ACCURACY_GPS_MAX_INDEX[ndx];
    }
 
    inline
@@ -184,7 +184,7 @@ namespace gpstk
          InvalidRequest exc("URA index out of range");
          GPSTK_THROW(exc);
       }
-      return SV_CNAV_ACCURACY_GPS_NOM_INDEX[ndx]; 
+      return SV_CNAV_ACCURACY_GPS_NOM_INDEX[ndx];
    }
 
 } // namespace

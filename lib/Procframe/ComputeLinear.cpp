@@ -53,11 +53,20 @@ namespace gpstk
 
       try
       {
+         LinearCombList linearList;
 
             // Loop through all the satellites
          satTypeValueMap::iterator it;
          for( it = gData.begin(); it != gData.end(); ++it )
          {
+             SatID sat = (*it).first;
+
+            if(sat.system == SatID::systemGPS)
+                linearList = linearListOfGPS;
+            else if(sat.system == SatID::systemGalileo)
+                linearList = linearListOfGAL;
+            else if(sat.system == SatID::systemBDS)
+                linearList = linearListOfBDS;
 
                // Loop through all the defined linear combinations
             LinearCombList::const_iterator pos;
@@ -107,6 +116,33 @@ namespace gpstk
       }
 
    }  // End of method 'ComputeLinear::Process()'
+
+
+
+     /** Returns a gnssDataMap object, adding the new data generated
+      *  when calling this object.
+      *
+      * @param gData    Data object holding the data.
+      */
+    gnssDataMap& ComputeLinear::Process(gnssDataMap& gData)
+        throw(ProcessingException)
+    {
+        for( gnssDataMap::iterator gdmIt = gData.begin();
+             gdmIt != gData.end();
+             ++gdmIt )
+        {
+
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end();
+                 ++sdmIt )
+            {
+                Process( gdmIt->first, sdmIt->second );
+            }
+        }
+
+        return gData;
+
+    }  // End of method 'ComputeLinear::Process()'
 
 
 } // End of namespace gpstk

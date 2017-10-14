@@ -67,7 +67,7 @@ namespace gpstk
        *   prefitComb.body[TypeID::PC] = +1.0;
        *   prefitComb.body[TypeID::rho] = -1.0;
        *   prefitComb.body[TypeID::dtSat] = +1.0;
-       *   prefitComb.body[TypeID::rel] = -1.0;
+       *   prefitComb.body[TypeID::relativity] = -1.0;
        *   prefitComb.body[TypeID::tropoSlant] = -1.0;
        *
        *
@@ -141,17 +141,32 @@ namespace gpstk
           *
           * @param linearComb   Linear combination to be computed.
           */
-      ComputeLinear( const gnssLinearCombination& linearComb )
-      { linearList.push_back(linearComb); };
+      ComputeLinear( const SatID::SatelliteSystem& sys,
+                     const gnssLinearCombination& linearComb )
+      {
+          if(sys == SatID::systemGPS)
+              linearListOfGPS.push_back(linearComb);
+          else if(sys == SatID::systemGalileo)
+              linearListOfGAL.push_back(linearComb);
+          else if(sys == SatID::systemBDS)
+              linearListOfBDS.push_back(linearComb);
+      };
 
 
          /** Common constructor
           *
           * @param list    List of linear combination definitions to compute.
           */
-      ComputeLinear(const LinearCombList& list)
-         : linearList(list)
-      { };
+      ComputeLinear( const SatID::SatelliteSystem& sys,
+                     const LinearCombList& list )
+      {
+          if(sys == SatID::systemGPS)
+              linearListOfGPS = list;
+          else if(sys == SatID::systemGalileo)
+              linearListOfGAL = list;
+          else if(sys == SatID::systemBDS)
+              linearListOfBDS = list;
+      };
 
 
          /** Returns a satTypeValueMap object, adding the new data generated
@@ -165,7 +180,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data 
+         /** Returns a gnssSatTypeValue object, adding the new data
           *  generated when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -175,7 +190,7 @@ namespace gpstk
       { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated 
+         /** Returns a gnssRinex object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -185,14 +200,37 @@ namespace gpstk
       { Process(gData.header.epoch, gData.body); return gData; };
 
 
+         /** Returns a gnssDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
+
+
          /// Returns the list of linear combinations to be computed.
-      virtual LinearCombList getLinearCombinations(void) const
-      { return linearList; };
+      virtual LinearCombList getLinearCombinations(
+                        const SatID::SatelliteSystem& sys=SatID::systemGPS) const
+      {
+          if(sys == SatID::systemGPS)
+              return linearListOfGPS;
+          else if(sys == SatID::systemGalileo)
+              return linearListOfGAL;
+          else if(sys == SatID::systemBDS)
+              return linearListOfBDS;
+      };
 
 
          /// Clear all linear combinations.
       virtual ComputeLinear& clearAll(void)
-      { linearList.clear(); return (*this); };
+      {
+          linearListOfGPS.clear();
+          linearListOfGAL.clear();
+          linearListOfBDS.clear();
+
+          return (*this);
+      };
 
 
          /** Sets a linear combinations to be computed.
@@ -201,9 +239,27 @@ namespace gpstk
           *
           * @warning All previous linear combinations will be deleted.
           */
-      virtual ComputeLinear& setLinearCombination(
-                                       const gnssLinearCombination& linear )
-      { clearAll(); linearList.push_back(linear); return (*this); };
+      virtual ComputeLinear& setLinearCombination( const SatID::SatelliteSystem& sys,
+                                                   const gnssLinearCombination& linear )
+      {
+          if(sys == SatID::systemGPS)
+          {
+              linearListOfGPS.clear();
+              linearListOfGPS.push_back(linear);
+          }
+          else if(sys == SatID::systemGalileo)
+          {
+              linearListOfGAL.clear();
+              linearListOfGAL.push_back(linear);
+          }
+          else if(sys == SatID::systemBDS)
+          {
+              linearListOfBDS.clear();
+              linearListOfBDS.push_back(linear);
+          }
+
+          return (*this);
+      };
 
 
          /** Sets the list of linear combinations to be computed.
@@ -212,16 +268,45 @@ namespace gpstk
           *
           * @warning All previous linear combinations will be deleted.
           */
-      virtual ComputeLinear& setLinearCombination(const LinearCombList& list)
-      { clearAll(); linearList = list; return (*this); };
+      virtual ComputeLinear& setLinearCombination( const SatID::SatelliteSystem& sys,
+                                                   const LinearCombList& list )
+      {
+          if(sys == SatID::systemGPS)
+          {
+              linearListOfGPS.clear();
+              linearListOfGPS = list;
+          }
+          else if(sys == SatID::systemGalileo)
+          {
+              linearListOfGAL.clear();
+              linearListOfGAL = list;
+          }
+          else if(sys == SatID::systemBDS)
+          {
+              linearListOfBDS.clear();
+              linearListOfBDS = list;
+          }
+
+          return (*this);
+      };
 
 
          /** Add a linear combination to be computed.
           *
           * @param linear    Linear combination definitions to be added.
           */
-      virtual ComputeLinear& addLinear(const gnssLinearCombination& linear)
-      { linearList.push_back(linear); return (*this); };
+      virtual ComputeLinear& addLinear( const SatID::SatelliteSystem& sys,
+                                        const gnssLinearCombination& linear )
+      {
+          if(sys == SatID::systemGPS)
+              linearListOfGPS.push_back(linear);
+          else if(sys == SatID::systemGalileo)
+              linearListOfGAL.push_back(linear);
+          else if(sys == SatID::systemBDS)
+              linearListOfBDS.push_back(linear);
+
+          return (*this);
+      };
 
 
          /// Returns a string identifying this object.
@@ -236,7 +321,9 @@ namespace gpstk
 
 
          /// List of linear combinations to compute
-      LinearCombList linearList;
+      LinearCombList linearListOfGPS;
+      LinearCombList linearListOfGAL;
+      LinearCombList linearListOfBDS;
 
 
    }; // End class ComputeLinear

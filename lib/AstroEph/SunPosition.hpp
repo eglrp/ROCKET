@@ -17,7 +17,7 @@
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
 //  Copyright 2004, The University of Texas at Austin
-//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007 
+//  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007
 //
 //============================================================================
 
@@ -49,7 +49,7 @@
 
 #include "CommonTime.hpp"
 #include "Triple.hpp"
-#include "GNSSconstants.hpp"
+#include "constants.hpp"
 #include "AstronomicalFunctions.hpp"
 
 
@@ -101,7 +101,7 @@ namespace gpstk
           *    pole movement is not taken into account, neither precession
           *    nor nutation.
           */
-      Triple getPosition(const CommonTime& t) const 
+      Triple getPosition(const CommonTime& t) const
          throw(InvalidRequest);
 
 
@@ -110,7 +110,7 @@ namespace gpstk
           *
           * @param t Epoch
           */
-      Triple getPositionCIS(const CommonTime& t) const 
+      Triple getPositionCIS(const CommonTime& t) const
          throw(InvalidRequest);
 
 

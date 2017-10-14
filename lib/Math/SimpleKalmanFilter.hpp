@@ -82,15 +82,15 @@ namespace gpstk
        *
        *       // Call this method to reset the filter
        *    kalman.Reset(initialValue,initialErrorVariance);
-       *    
+       *
        *       // One time time update
        *    kalman.TimeUpdate(phiMatrix, processNoiseCovariance );
        *
        *       // Following several times measurement update
-       *    kalman.MeasUpdate( measurements1, measurementsMatrix1, 
+       *    kalman.MeasUpdate( measurements1, measurementsMatrix1,
        *                                               measurementsCovariance1);
        *
-       *    kalman.MeasUpdate( measurements2, measurementsMatrix2, 
+       *    kalman.MeasUpdate( measurements2, measurementsMatrix2,
        *                                               measurementsCovariance2);
        *      // Get the final solution
        *    Vector<double> x = kalman.xwhat;
@@ -278,7 +278,7 @@ namespace gpstk
          /** Predicts (or "time updates") the a priori estimate of the
           *  system state, as well as the a priori estimate error
           *  covariance matrix.
-          *  This version assumes that the phiMatrix is indedify matrix, 
+          *  This version assumes that the phiMatrix is indedify matrix,
           *  previousState is the last state of the filter, no process
           *  noise, and no control inputs act on the system.
           *
@@ -350,10 +350,10 @@ namespace gpstk
                               const Matrix<double>& measurementsMatrix,
                               const Matrix<double>& measurementsNoiseCovariance)
          throw(InvalidSolver)
-      { 
+      {
          return Correct(measurements,
                         measurementsMatrix,
-                        measurementsNoiseCovariance); 
+                        measurementsNoiseCovariance);
       }
 
 

@@ -91,7 +91,7 @@ namespace gpstk
        * @param gData     Data object holding the data.
        */
    satTypeValueMap& PhaseCodeAlignment::Process( const CommonTime& epoch,
-                                           satTypeValueMap& gData )
+                                                 satTypeValueMap& gData )
       throw(ProcessingException)
    {
 
@@ -108,14 +108,14 @@ namespace gpstk
 
                // Check if satellite currently has entries
             std::map<SatID, alignData>::const_iterator itDat(
-                                                svData.find( (*it).first ) );
-            if( itDat == svData.end() )
+                                                m_svData.find( (*it).first ) );
+            if( itDat == m_svData.end() )
             {
 
                   // If it doesn't have an entry, insert one
                alignData aData;
 
-               svData[ (*it).first ] = aData;
+               m_svData[ (*it).first ] = aData;
 
             }
 
@@ -150,14 +150,14 @@ namespace gpstk
 
 
                   // Check if satellite arc has changed
-               if( svData[(*it).first].arcNumber != arcN )
+               if( m_svData[(*it).first].arcNumber != arcN )
                {
 
                      // Set flag
                   csflag = true;
 
                      // Update satellite arc information
-                  svData[(*it).first].arcNumber = arcN;
+                  m_svData[(*it).first].arcNumber = arcN;
                }
 
             }  // End of first part of 'if(useSatArcs)'
@@ -209,14 +209,14 @@ namespace gpstk
                diff = std::floor(diff);
 
                   // The new offset is the INTEGER number of cycles, in meters
-               svData[(*it).first].offset = diff * phaseWavelength;
+               m_svData[(*it).first].offset = diff * phaseWavelength;
 
             }
 
                // Let's align the phase measurement using the
                // corresponding offset
             (*it).second[phaseType] = (*it).second[phaseType]
-                                      + svData[(*it).first].offset;
+                                      + m_svData[(*it).first].offset;
 
          }
 
@@ -240,7 +240,7 @@ namespace gpstk
 
 
 
-      /* Returns a gnnsSatTypeValue object, adding the new data generated
+      /* Returns a gnssSatTypeValue object, adding the new data generated
        *  when calling this object.
        *
        * @param gData    Data object holding the data.
@@ -271,7 +271,7 @@ namespace gpstk
 
 
 
-      /* Returns a gnnsRinex object, adding the new data generated when
+      /* Returns a gnssRinex object, adding the new data generated when
        *  calling this object.
        *
        * @param gData    Data object holding the data.
@@ -297,6 +297,50 @@ namespace gpstk
          GPSTK_THROW(e);
 
       }
+
+   }  // End of 'PhaseCodeAlignment::Process()'
+
+
+      /* Returns a gnssDataMap object, adding the new data generated when
+       *  calling this object.
+       *
+       * @param gData    Data object holding the data.
+       */
+   gnssDataMap& PhaseCodeAlignment::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+      SourceID source;
+
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end();
+           ++gdmIt )
+      {
+
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end();
+              ++sdmIt )
+         {
+            source = sdmIt->first;
+
+            SVDataMap::iterator svDataIt = m_svDataMap.find(source);
+
+            if( svDataIt != m_svDataMap.end() )
+            {
+                m_svData = svDataIt->second;
+            }
+            else
+            {
+                m_svData = SVData();
+            }
+
+            Process( gdmIt->first, sdmIt->second );
+
+            m_svDataMap[source] = m_svData;
+         }
+      }
+
+      return gData;
 
    }  // End of 'PhaseCodeAlignment::Process()'
 

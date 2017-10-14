@@ -1,16 +1,10 @@
-/// @file BDSEphemerisStore.hpp
-/// Class for storing and/or computing position, velocity, and clock data using
-/// tables of <SatID, <time, BDSEphemeris> >. Inherits OrbitEphStore, which includes
-/// initial and final times and search methods. BDSEphemeris inherits OrbitEph and
-/// adds health and accuracy information, which this class makes use of.
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -21,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -29,16 +23,22 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
+
+/// @file BDSEphemerisStore.hpp
+/// Class for storing and/or computing position, velocity, and clock data using
+/// tables of <SatID, <time, BDSEphemeris> >. Inherits OrbitEphStore, which includes
+/// initial and final times and search methods. BDSEphemeris inherits OrbitEph and
+/// adds health and accuracy information, which this class makes use of.
 
 #ifndef GPSTK_BDSORBITEPHSTORE_HPP
 #define GPSTK_BDSORBITEPHSTORE_HPP
@@ -51,7 +51,7 @@
 
 namespace gpstk
 {
-   /** @addtogroup ephemstore */
+   /// @ingroup ephemstore
    //@{
 
    /// Class for storing and accessing an objects position,
@@ -81,10 +81,10 @@ namespace gpstk
 
       /// Add a BDSEphemeris object to this collection
       /// @return pointer to the new object, or NULL if it could not be added
-       
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
-       
+
       virtual BDSEphemeris* addEphemeris(const BDSEphemeris& gpseph)
       {
          try {
@@ -103,11 +103,11 @@ namespace gpstk
       /// @param sat the satellite of interest
       /// @param t the time of interest
       /// @return a pointer to the desired OrbitEph, or NULL if no OrbitEph found.
-      /// @throw InvalidRequest if the satellite system is not BeiDou, or if
+      /// @throw InvalidRequest if the satellite system is not BDS, or if
       /// ephemeris is not found.
       const BDSEphemeris& findEphemeris(const SatID& sat, const CommonTime& t) const
       {
-         if(sat.system != SatID::systemBeiDou) {
+         if(sat.system != SatID::systemBDS) {
             InvalidRequest e("Invalid satellite system");
             GPSTK_THROW(e);
          }
@@ -131,7 +131,7 @@ namespace gpstk
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
        int addToList(std::list<BDSEphemeris>& bdslist,
-                        SatID sat=SatID(-1,SatID::systemBeiDou)) const;
+                        SatID sat=SatID(-1,SatID::systemBDS)) const;
 #pragma clang diagnostic pop
    }; // end class BDSEphemerisStore
 

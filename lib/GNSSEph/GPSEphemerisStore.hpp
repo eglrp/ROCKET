@@ -21,7 +21,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -29,13 +29,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -48,7 +48,6 @@
 #include "Exception.hpp"
 #include "SatID.hpp"
 #include "CommonTime.hpp"
-#include "RinexNavData.hpp"
 
 namespace gpstk
 {
@@ -102,7 +101,7 @@ namespace gpstk
       /// @return pointer to the new object, or NULL if it could not be added
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Woverloaded-virtual"
-       virtual GPSEphemeris* addEphemeris(const GPSEphemeris& gpseph)
+      virtual GPSEphemeris* addEphemeris(const GPSEphemeris& gpseph)
       {
          try {
             GPSEphemeris neweph(gpseph);
@@ -118,11 +117,11 @@ namespace gpstk
       /// @param sat the satellite of interest
       /// @param t the time of interest
       /// @return a pointer to the desired OrbitEph, or NULL if no OrbitEph found.
-      /// @throw InvalidRequest if the satellite system is not BeiDou, or if
+      /// @throw InvalidRequest if the satellite system is not GPS, or if
       /// ephemeris is not found.
       const GPSEphemeris& findEphemeris(const SatID& sat, const CommonTime& t) const
       {
-         if(sat.system != SatID::systemBeiDou) {
+         if(sat.system != SatID::systemGPS) {
             InvalidRequest e("Invalid satellite system");
             GPSTK_THROW(e);
          }

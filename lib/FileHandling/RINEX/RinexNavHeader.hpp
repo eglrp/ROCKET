@@ -1,22 +1,10 @@
-#pragma ident "$Id$"
-
-
-
-/**
- * @file RinexNavHeader.hpp
- * Encapsulate header of Rinex navigation file
- */
-
-#ifndef GPSTK_RINEXNAVHEADER_HPP
-#define GPSTK_RINEXNAVHEADER_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -46,18 +34,21 @@
 //
 //=============================================================================
 
+/**
+ * @file RinexNavHeader.hpp
+ * Encapsulate header of Rinex navigation file
+ */
 
-
-
-
+#ifndef GPSTK_RINEXNAVHEADER_HPP
+#define GPSTK_RINEXNAVHEADER_HPP
 
 #include "FFStream.hpp"
 #include "RinexNavBase.hpp"
 
 namespace gpstk
 {
-   /** @addtogroup RinexNav */
-   //@{
+      /// @ingroup FileHandling
+      //@{
 
       /**
        * This class models the RINEX NAV header for a RINEX NAV file.
@@ -106,9 +97,6 @@ namespace gpstk
          allValid211 = 0x080000003
       };
 
-         /** @name HeaderValues
-          */
-         //@{
       double version;           ///< RINEX Version
 
       std::string fileType;            
@@ -123,11 +111,7 @@ namespace gpstk
       long UTCRefTime;
       long UTCRefWeek;
       long leapSeconds;
-         //@}
 
-         /** @name FormattingStd::Strings
-          */
-         //@{
       static const std::string versionString; //"RINEX VERSION / TYPE"
       static const std::string runByString; //"PGM / RUN BY / DATE"
       static const std::string commentString; // "COMMENT"
@@ -136,7 +120,6 @@ namespace gpstk
       static const std::string deltaUTCString; //"DELTA-UTC: A0,A1,T,W"
       static const std::string leapSecondsString; //"LEAP SECONDS"
       static const std::string endOfHeader;  //"END OF HEADER"
-         //@}
 
    protected:
          /// Writes a correctly formatted record from this data to stream \a s.
@@ -158,7 +141,7 @@ namespace gpstk
                gpstk::StringUtils::StringException);
    }; // class RinexNavHeader
 
-   //@}
+      //@}
 
 } // namespace
 

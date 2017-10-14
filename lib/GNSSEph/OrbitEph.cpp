@@ -47,7 +47,7 @@
 #include "OrbitEph.hpp"
 
 #include "MathBase.hpp"
-#include "GNSSconstants.hpp"
+#include "constants.hpp"
 #include "CivilTime.hpp"
 #include "GPSWeekSecond.hpp"
 #include "GALWeekSecond.hpp"
@@ -289,7 +289,7 @@ namespace gpstk {
          switch(satID.system) {
             case SatID::systemGPS: sys = "G"; break;
             case SatID::systemGalileo: sys = "E"; break;
-            case SatID::systemBeiDou: sys = "C"; break;
+            case SatID::systemBDS: sys = "C"; break;
             case SatID::systemQZSS: sys = "J"; break;
             default:
                os << "EPH Error - invalid satellite system "
@@ -332,7 +332,7 @@ namespace gpstk {
             ptr = new BDSWeekSecond(t);
          else if(t.getTimeSystem() == TimeSystem::QZS)
             ptr = new QZSWeekSecond(t);
-         else 
+         else
             ptr = new GPSWeekSecond(t);
 
          os << setw(4) << ptr->week << "(";
@@ -434,7 +434,7 @@ namespace gpstk {
          int week = rnd.weeknum;
          if(dt < -HALFWEEK) week++;
          else if(dt > HALFWEEK) week--;
-      
+
          //MGEX NB MGEX data has GPS week numbers in all systems except BeiDou,
          //MGEX so must implement temporary fixes: use GPS Toc for GAL and QZSS
          CommonTime gpstoc = GPSWeekSecond(week, rnd.Toc, TimeSystem::GPS);   //MGEX
@@ -482,7 +482,7 @@ namespace gpstk {
          af0 = rnd.af0;
          af1 = rnd.af1;
          af2 = rnd.af2;
-   
+
          // Major orbit parameters
          M0 = rnd.M0;
          dn = rnd.dn;
@@ -496,7 +496,7 @@ namespace gpstk {
          // modern nav msg
          dndot = 0.;
          Adot = 0.;
-   
+
          // Harmonic perturbations
          Cuc = rnd.Cuc;
          Cus = rnd.Cus;
@@ -504,7 +504,7 @@ namespace gpstk {
          Crs = rnd.Crs;
          Cic = rnd.Cic;
          Cis = rnd.Cis;
-   
+
          dataLoadedFlag = true;
          adjustValidity();
 

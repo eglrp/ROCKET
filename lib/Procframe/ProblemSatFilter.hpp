@@ -43,10 +43,10 @@ namespace gpstk
       //@{
 
 
-      /** This class filters out satellites that are in the Satellite Problem 
+      /** This class filters out satellites that are in the Satellite Problem
        *  File(*.CRX) of Bernese GPS Software 5.0. These CRX files can be
        *  downloaded from 'ftp.unibe.ch/aiub/BSWUSER50/GEN'.
-       *  
+       *
        * This class is meant to be used with the GNSS data structures objects
        * found in "DataStructures" class.
        *
@@ -57,7 +57,7 @@ namespace gpstk
        *   RinexObsStream rin("ebre0300.02o");
        *
        *   ProblemSatFilter satFilter;
-       *   satFilter.loadSatelliteProblemFile("SAt_2010.CRX");
+       *   satFilter.loadSatelliteProblemFile("SAT_2010.CRX");
        *
        *   gnssRinex gRin;  // GNSS data structure for fixed station data
        *
@@ -74,7 +74,7 @@ namespace gpstk
       public:
 
          /// Default constructor.
-      ProblemSatFilter() 
+      ProblemSatFilter()
       { };
 
 
@@ -89,7 +89,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
+         /** Returns a gnssSatTypeValue object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -99,13 +99,23 @@ namespace gpstk
       { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated when
+         /** Returns a gnssRinex object, adding the new data generated when
           *  calling this object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException);
+
+
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException)
+      { return gData; }
 
 
          /// Returns a string identifying this object.
@@ -121,7 +131,7 @@ namespace gpstk
       void clear()
       { satDataMap.clear(); }
 
-      
+
       /// Destructor
       virtual ~ProblemSatFilter() {};
 
@@ -146,7 +156,7 @@ namespace gpstk
 
       typedef std::list<SatData> SatDataList;
       typedef std::map<SatID, SatDataList > SatDataMap;
-         
+
          /// Object to holding all the data
       SatDataMap  satDataMap;
 

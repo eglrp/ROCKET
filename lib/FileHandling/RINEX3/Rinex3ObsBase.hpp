@@ -1,20 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file Rinex3ObsBase.hpp
- * Base class for RINEX observation file data
- */
-
-#ifndef GPSTK_RINEX3OBSBASE_HPP
-#define GPSTK_RINEX3OBSBASE_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -44,26 +34,34 @@
 //
 //=============================================================================
 
+/**
+ * @file Rinex3ObsBase.hpp
+ * Base class for RINEX observation file data
+ */
+
+#ifndef GPSTK_RINEX3OBSBASE_HPP
+#define GPSTK_RINEX3OBSBASE_HPP
+
 #include "FFData.hpp"
 
 namespace gpstk
 {
-   /** @defgroup Rinex3Obs RINEX 3 observation files */
-   //@{
+      /// @ingroup FileHandling
+      //@{
 
-  /** This level isn't serving any purpose other than to make
-   * the class diagram look nice...
-   */
+      /** This level isn't serving any purpose other than to make
+       * the class diagram look nice...
+       */
 
    class Rinex3ObsBase : public FFData
    {
    public:
 
-     /// Destructor
-     virtual ~Rinex3ObsBase() {}
+         /// Destructor
+      virtual ~Rinex3ObsBase() {}
    };
 
-   //@}
+      //@}
 
 }  // namespace
 

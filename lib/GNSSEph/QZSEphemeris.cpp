@@ -1,15 +1,10 @@
-/// @file QZSEphemeris.cpp Encapsulates the QZSS broadcast ephemeris and clock.
-/// Inherits OrbitEph, which does most of the work; this class adds health and
-/// accuracy information, fit interval, ionospheric correction terms and data
-/// flags.
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -39,9 +34,13 @@
 //
 //=============================================================================
 
+/// @file QZSEphemeris.cpp Encapsulates the QZSS broadcast ephemeris and clock.
+/// Inherits OrbitEph, which does most of the work; this class adds health and
+/// accuracy information, fit interval, ionospheric correction terms and data
+/// flags.
+
 #include <string>
 #include "Exception.hpp"
-#include "SVNumXRef.hpp"
 #include "QZSWeekSecond.hpp"
 
 #include "QZSEphemeris.hpp"

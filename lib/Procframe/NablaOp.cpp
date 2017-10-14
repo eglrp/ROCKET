@@ -52,9 +52,9 @@ namespace gpstk
 
          // Insert default types to be differenced
       diffTypes.insert(TypeID::prefitC);
-      diffTypes.insert(TypeID::dx);
-      diffTypes.insert(TypeID::dy);
-      diffTypes.insert(TypeID::dz);
+      diffTypes.insert(TypeID::dStaX);
+      diffTypes.insert(TypeID::dStaY);
+      diffTypes.insert(TypeID::dStaZ);
 
    }  // End of constructor 'NablaOp::NablaOp()'
 
@@ -71,9 +71,9 @@ namespace gpstk
 
          // Insert default types to be differenced
       diffTypes.insert(TypeID::prefitC);
-      diffTypes.insert(TypeID::dx);
-      diffTypes.insert(TypeID::dy);
-      diffTypes.insert(TypeID::dz);
+      diffTypes.insert(TypeID::dStaX);
+      diffTypes.insert(TypeID::dStaY);
+      diffTypes.insert(TypeID::dStaZ);
 
    }  // End of constructor 'NablaOp::NablaOp()'
 

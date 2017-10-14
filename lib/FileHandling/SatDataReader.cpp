@@ -122,7 +122,7 @@ namespace gpstk
             {
                if (block.substr(0, 3) == "GLO")
                {
-                  sat.system = SatID::systemGlonass;
+                  sat.system = SatID::systemGLONASS;
                }
             }
 

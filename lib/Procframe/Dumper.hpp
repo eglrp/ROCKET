@@ -95,7 +95,7 @@ namespace gpstk
        *      // Deactivate SourceID printing
        *   dumpObj.setPrintSourceID( false );
        *
-       *      // Limit TypeIDs to print. It is a good idea to start with 
+       *      // Limit TypeIDs to print. It is a good idea to start with
        *      // 'setType()' to clear all TypeIDs previously set, and then
        *      // follow adding new TypeIDs using 'addType()'.
        *   dumpObj.setType(TypeID::satArc);
@@ -171,7 +171,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Dumps data from a gnnsSatTypeValue object.
+         /** Dumps data from a gnssSatTypeValue object.
           *
           * @param gData    Data object holding the data.
           */
@@ -180,12 +180,21 @@ namespace gpstk
       { gnssRinex gRin(gData); Process(gRin); return gData; };
 
 
-         /** Dumps data from a gnnsRinex object.
+         /** Dumps data from a gnssRinex object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process( gnssRinex& gData )
          throw(ProcessingException);
+
+
+         /** Dumps data from a gnssDataMap object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process( gnssDataMap& gData )
+         throw(ProcessingException)
+      { return gData; }
 
 
          /// Returns pointer to stream object used for output.

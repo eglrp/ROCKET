@@ -1,12 +1,10 @@
-#pragma ident "$Id$"
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -17,7 +15,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
+//  
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -25,13 +23,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software.
+//duplicate, distribute, disclose, or release this software. 
 //
-//Pursuant to DoD Directive 523024
+//Pursuant to DoD Directive 523024 
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -55,45 +53,53 @@
 #include <limits>
 
 #ifdef _WIN32
-	#if _MSC_VER < 1700
-        // For lower version of visual studio 2012 use gnu regex
-		#include <regex.h>
-		#pragma comment(lib, "regex.lib")
-	#else
-        // visual studio 2012 support c++ 0x, and we use std::regex
-		#include <regex>
-	#endif
+#if _MSC_VER < 1700
+// For lower version of visual studio 2012 use gnu regex
+#include <regex.h>
+#pragma comment(lib, "regex.lib")
 #else
-    // TODO: we should use std::regex for upper than g++ 4.6
-	#include <regex.h>
+// visual studio 2012 support c++ 0x, and we use std::regex
+#include <regex>
+#endif
+#else
+// TODO: we should use std::regex for upper than g++ 4.6
+#include <regex.h>
 #endif
 
 #include "Exception.hpp"
 
 namespace gpstk
 {
+      /** @defgroup stringutilsgroup Text String Manipulation Tools
+       * @copydoc gpstk::StringUtils
+       */
+
       /**
-       * Stuff to make the C++ string class a little easier to use.  All the
-       * functionality here is inlined since they are farily small
-       * functions.
+       * Stuff to make the C++ string class a little easier to use.
        *
-       * All functions here will throw gpstk::StringUtils::StringException
-       * on an error. Any std::exception is converted to a
-       * gpstk::StringUtils::StringException so
-       * that's the only exception a user of this class needs to catch.
+       * All functions here will throw
+       * gpstk::StringUtils::StringException on an error. Any
+       * std::exception is converted to a
+       * gpstk::StringUtils::StringException so that's the only
+       * exception a user of this class needs to catch.
        *
        * For any function that modifies a string, make sure there is a
-       * non-const (std::string&) version and a const (const std::string&)
-       * version. The convention for writing the functions is the non-const
-       * version fully implements the function and the const version calls
-       * the non-const version.
-       *
-       * @sa stringutiltest.cpp for some examples.
+       * non-const (std::string&) version and a const (const
+       * std::string&) version. The convention for writing the
+       * functions is the non-const version fully implements the
+       * function and the const version calls the non-const version.
        */
    namespace StringUtils
    {
-         /** @defgroup stringutilsgroup Text String Manipulation Tools */
+         // All the functionality here is inlined since they are
+         // farily small functions.
+
+         /// @ingroup stringutilsgroup
          //@{
+
+         /** @example StringUtils_T.cpp
+          * Some tests for StringUtils which may also serve as example code.
+          */
 
          /// This is thrown instread of a std::exception when a
          /// gpstk::StringUtils function fails.
@@ -118,10 +124,10 @@ namespace gpstk
                            char aseparator, unsigned atextWS)
                : showIndex(ashowIndex), hexIndex(ahexIndex),
                  upperHex(aupperHex), idxDigits(aidxDigits),
-                 indexWS(aindexWS), groupBy(agroupBy), groupWS(agroupWS),
-                 group2By(agroup2By), group2WS(agroup2WS),
-                 bytesPerLine(abytesPerLine), showText(ashowText),
-                 separator(aseparator), textWS(atextWS)
+            indexWS(aindexWS), groupBy(agroupBy), groupWS(agroupWS),
+            group2By(agroup2By), group2WS(agroup2WS),
+            bytesPerLine(abytesPerLine), showText(ashowText),
+            separator(aseparator), textWS(atextWS)
          {}
          bool showIndex; ///< display index into string on each line.
          bool hexIndex; ///< if true, use hex index numbers (else decimal).
@@ -772,7 +778,7 @@ namespace gpstk
           * @return string representation of \a x.
           */
       inline std::string asString(const long double x,
-                             const std::string::size_type precision = 21);
+                                  const std::string::size_type precision = 21);
 
          /**
           * Convert a double to a string in fixed notation.
@@ -781,7 +787,7 @@ namespace gpstk
           * @return string representation of \a x.
           */
       inline std::string asString(const double x,
-                             const std::string::size_type precision = 17);
+                                  const std::string::size_type precision = 17);
 
          /**
           * Convert any old object to a string.
@@ -968,7 +974,7 @@ namespace gpstk
                          const char anyChar = '.' )
          throw(StringException)
       { return matches(s, aPattern, zeroOrMore, oneOrMore, anyChar) !=
-           std::string(); }
+            std::string(); }
 
 
          /**
@@ -1149,9 +1155,9 @@ namespace gpstk
           * @param delimiter character that marks the start and end of a word.
           * @return a vector of the words (strings)
           */
-       inline std::vector<std::string> split(const std::string& str,
-                                             const char delimiter = ' ')
-          throw(StringException);
+      inline std::vector<std::string> split(const std::string& str,
+                                            const char delimiter = ' ')
+         throw(StringException);
 
          /**
           * Removes indicated words from the string \a s.
@@ -1254,8 +1260,9 @@ namespace gpstk
 
          /**
           * Change a string into printable characters.  Control
-          * characters (0-26) are changed to ^@, ^A, etc.  Other
-          * non-printable characters are changed to hex sequences
+          * characters 0, 1, ... 31 are changed to ^@, ^A, ... ^_ ;
+          * control character 127 is changed to ^? (as per Caret-notation).
+          * Other non-printable characters are changed to hex sequences
           * enclosed in <>.
           * @param aStr the string to make printable.
           */
@@ -1306,36 +1313,39 @@ namespace gpstk
       }
 
          /** Split a string by some delimiters
-          * @param  aStr           the string to be splitted
+          * @param  aStr           the string to be split
           * @param  theDelimiters  the delimiters to split the string
           * @param  trimWhitespace will trim the token string, default is false
           * @param  ignoreEmpty    will ignore the empty tokens, default is true
           */
       inline std::vector<std::string> split(const std::string& aStr,
-                                            const std::string& theDelimiters=" ",
+                                            const std::string& theDelimiters,
                                             bool trimWhitespace = false,
-                                            bool ignoreEmpty = true)
-      {
-         std::vector<std::string> toReturn;
+                                            bool ignoreEmpty = true);
 
-         std::string::size_type lastPos = aStr.find_first_not_of(theDelimiters, 0);
-         std::string::size_type pos     = aStr.find_first_of(theDelimiters, lastPos);
+         /// Split a string on the given delimiter, respecting fields enclosed by
+         /// a pair of either single or double quotes. Quotes are removed in output,
+         /// and optionally also leading and trailing whitespace.
+         /// @param  aStr           the string to be split
+         /// @param  delimiter      character delimiter (not ' or ")
+         /// @param  trimWhitespace will trim the token string, default is true
+         /// @param  ignoreEmpty    will ignore the empty tokens, default is true
+      inline std::vector<std::string> splitWithQuotes(const std::string& aStr,
+                                                      const char delimiter = ' ',
+                                                      bool trimWhitespace = true,
+                                                      bool ignoreEmpty = true);
 
-         while (std::string::npos != pos || std::string::npos != lastPos)
-         {
-            std::string token = aStr.substr(lastPos, pos - lastPos);
-
-            if(trimWhitespace) token = StringUtils::strip(token);
-
-            if(!token.empty() || !ignoreEmpty) toReturn.push_back(token);
-
-            lastPos = aStr.find_first_not_of(theDelimiters, pos);
-            pos = aStr.find_first_of(theDelimiters, lastPos);
-         }
-
-         return toReturn;
-      }
-
+      /// Split a string on the given delimiter, respecting fields enclosed by
+      /// a pair of double quotes. Quotes are removed in output, and optionally
+      /// also leading and trailing whitespace.
+      /// @param  aStr           the string to be split
+      /// @param  delimiter      character delimiter (not ")
+      /// @param  trimWhitespace will trim the token string, default is true
+      /// @param  ignoreEmpty    will ignore the empty tokens, default is true
+      inline std::vector<std::string> splitWithDoubleQuotes(const std::string& aStr,
+                                                      const char delimiter = ' ',
+                                                      bool trimWhitespace = true,
+                                                      bool ignoreEmpty = true);
    } // namespace StringUtils
 
 } // namespace gpstk
@@ -1517,15 +1527,15 @@ namespace gpstk
       {
          try
          {
-            std::string::size_type pos = s.length() - aString.length();
-
-               // empty string, etc.
-            if ((pos > s.length()) || (aString == ""))
+               // empty string, etc.; cannot let (size_type) pos = negative
+            if (s.length() < aString.length() || (aString == ""))
                return s;
 
+            std::string::size_type pos = s.length() - aString.length();
+
             while((num > 0) &&
-                  (s.rfind(aString,pos) == pos) &&
-                  (s.length() > 0))
+                  (s.length() >= aString.length()) &&
+                  (s.rfind(aString,pos) == pos))
             {
                s.erase(pos, std::string::npos);
                --num;
@@ -1580,7 +1590,8 @@ namespace gpstk
          return rv;
       }
 
-      inline std::string change(const std::string& aString, const std::string& inputString,
+      inline std::string change(const std::string& aString,
+                           const std::string& inputString,
                            const std::string& outputString,
                            std::string::size_type startPos, unsigned numChanges)
       {
@@ -1593,7 +1604,7 @@ namespace gpstk
                             const std::string& outputString,
                             std::string::size_type startPos, unsigned numChanges)
       {
-    unsigned count = 0;
+         unsigned count = 0;
          std::string::size_type opos = startPos;
 
          while (count < numChanges)
@@ -2298,8 +2309,9 @@ namespace gpstk
                   startPos = pos;
                   // get first delimter after word wordNum
                pos = s.find(delimiter, pos);
-               if (((int)numWords != -1) && ((int)wordNum == (int)(firstWord + (numWords-1))))
-                  break;
+               if (((int)numWords != -1)
+                  && ((int)wordNum == (int)(firstWord + (numWords-1))))
+                     break;
                pos = s.find_first_not_of(delimiter, pos);
                wordNum++;
             }
@@ -2363,6 +2375,138 @@ namespace gpstk
             StringException strexc("Exception thrown: " + std::string(e.what()));
             GPSTK_THROW(strexc);
          }
+      }
+
+      inline std::vector<std::string> split(const std::string& aStr,
+                                            const std::string& theDelimiters,
+                                            bool trimWhitespace,
+                                            bool ignoreEmpty)
+      {
+         std::vector<std::string> toReturn;
+
+         std::string::size_type lastPos = aStr.find_first_not_of(theDelimiters, 0);
+         std::string::size_type pos     = aStr.find_first_of(theDelimiters, lastPos);
+
+         while (std::string::npos != pos || std::string::npos != lastPos)
+         {
+            std::string token = aStr.substr(lastPos, pos - lastPos);
+
+            if(trimWhitespace) token = StringUtils::strip(token);
+
+            if(!token.empty() || !ignoreEmpty) toReturn.push_back(token);
+
+            lastPos = aStr.find_first_not_of(theDelimiters, pos);
+            pos = aStr.find_first_of(theDelimiters, lastPos);
+         }
+
+         return toReturn;
+      }
+
+      inline std::vector<std::string> splitWithQuotes(const std::string& aStr,
+                                                      const char delimiter,
+                                                      bool trimWhitespace,
+                                                      bool ignoreEmpty)
+      {
+         std::vector<std::string> toReturn;
+         std::string::size_type begPos = 0;
+         std::string::size_type endPos = 0;
+         std::string::size_type tokenLength;
+         char currentDelimiter;
+
+         if(delimiter == '\'' || delimiter == '"')
+            GPSTK_THROW(StringException("Delimiter must not be quote"));
+
+         while(endPos != std::string::npos && endPos <= aStr.length())
+         {
+            currentDelimiter = delimiter;
+
+            // if first character is a quote, set current delimiter to it
+            if(aStr.compare(begPos,1,"\"") == 0) currentDelimiter = '"';
+            if(aStr.compare(begPos,1,"\'") == 0) currentDelimiter = '\'';
+
+            // find next delimiter
+            endPos = aStr.find_first_of(currentDelimiter,
+                                 begPos + (currentDelimiter == delimiter ? 0 : 1));
+
+            // if this token is quoted, make sure to capture the trailing quote
+            // if(delimiter is a quote and second quote is found) include it
+            if(currentDelimiter != delimiter && std::string::npos != endPos) endPos++;
+
+            // length of new field
+            tokenLength = endPos - begPos;
+            // copy out the field
+            std::string token = aStr.substr(begPos, tokenLength);
+
+            // if quoted, remove the quotes
+            if(currentDelimiter != delimiter)
+               token = gpstk::StringUtils::strip(token,currentDelimiter);
+
+            // remove whitespace at beginning and end
+            if(trimWhitespace) token = gpstk::StringUtils::strip(token);
+
+            // save it
+            if(!token.empty() || !ignoreEmpty) toReturn.push_back(token);
+
+            // find the next token, and go back to delimiter
+            begPos = endPos;
+            if(begPos != std::string::npos) begPos++;
+            endPos = begPos;
+         }
+
+         return toReturn;
+      }
+
+      inline std::vector<std::string> splitWithDoubleQuotes(const std::string& aStr,
+                                                      const char delimiter,
+                                                      bool trimWhitespace,
+                                                      bool ignoreEmpty)
+      {
+         std::vector<std::string> toReturn;
+         std::string::size_type begPos = 0;
+         std::string::size_type endPos = 0;
+         std::string::size_type tokenLength;
+         char currentDelimiter;
+
+         if(delimiter == '"')
+            GPSTK_THROW(StringException("Delimiter must not be quote"));
+
+         while(endPos != std::string::npos && endPos <= aStr.length())
+         {
+            currentDelimiter = delimiter;
+
+            // if first character is a quote, set current delimiter to it
+            if(aStr.compare(begPos,1,"\"") == 0) currentDelimiter = '"';
+
+            // find next delimiter
+            endPos = aStr.find_first_of(currentDelimiter,
+                                 begPos + (currentDelimiter == delimiter ? 0 : 1));
+
+            // if this token is quoted, make sure to capture the trailing quote
+            // if(delimiter is a quote and second quote is found) include it
+            if(currentDelimiter != delimiter && std::string::npos != endPos) endPos++;
+
+            // length of new field
+            tokenLength = endPos - begPos;
+            // copy out the field
+            std::string token = aStr.substr(begPos, tokenLength);
+
+            // if quoted, remove the quotes
+            if(currentDelimiter != delimiter)
+               token = gpstk::StringUtils::strip(token,currentDelimiter);
+
+            // remove whitespace at beginning and end
+            if(trimWhitespace) token = gpstk::StringUtils::strip(token);
+
+            // save it
+            if(!token.empty() || !ignoreEmpty) toReturn.push_back(token);
+
+            // find the next token, and go back to delimiter
+            begPos = endPos;
+            if(begPos != std::string::npos) begPos++;
+            endPos = begPos;
+         }
+
+         return toReturn;
       }
 
       inline std::string& removeWords(std::string& s,
@@ -2665,22 +2809,28 @@ namespace gpstk
       {
          try
          {
-            std::string rv(aStr);
+            std::string rv;
+            size_t len = aStr.length();
+            rv.reserve(len);
 
-            for (int i = 0; i < (int)rv.length(); i++)
+            for (int i = 0; i < len; i++)
             {
-               char c = rv[i];
-               if (!isprint(c))
+               char c = aStr[i];
+               if (c > 31 && c < 127)  // Handle printable ASCII characters
                {
-                  if (iscntrl(c))
+                  rv.append(1,c);
+               }
+               else
+               {
+                  if (c < 0 || c > 127)  // Handle non-ASCII characters
                   {
-                     rv.replace(i,1,2,'^');
-                     rv.replace(i+1,1,1, 64+(c));
+                     rv.append("<" + c2x(aStr.substr(i,1)) + ">");
                   }
-                  else
+                  else  // Handle control characters
                   {
-                     std::string mess(c2x(rv.substr(i,1)));
-                     rv.replace(i,1,"<"+mess+">");
+                     char ctrl = (int)c ^ 0x40;  // Flip the 7th bit
+                     rv.append(1,'^');
+                     rv.append(1,ctrl);
                   }
                }
             }
@@ -2774,6 +2924,3 @@ namespace gpstk
 
 } // namespace gpstk
 #endif // GPSTK_STRINGUTILS_HPP
-
-
-

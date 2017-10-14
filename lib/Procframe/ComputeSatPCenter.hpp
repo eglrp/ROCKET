@@ -40,10 +40,10 @@
 #include "Position.hpp"
 #include "SunPosition.hpp"
 #include "XvtStore.hpp"
-#include "SatDataReader.hpp"
+#include "MSCStore.hpp"
 #include "AntexReader.hpp"
-#include "GNSSconstants.hpp"
 #include "StringUtils.hpp"
+#include "constants.hpp"
 
 
 
@@ -103,8 +103,8 @@ namespace gpstk
 
          /// Default constructor
       ComputeSatPCenter()
-         : pEphemeris(NULL), nominalPos(0.0, 0.0, 0.0),
-           satData("PRN_GPS"), fileData("PRN_GPS"), pAntexReader(NULL)
+         : pEphStore(NULL), nominalPos(0.0, 0.0, 0.0),
+           pMSCStore(NULL), pAntexReader(NULL)
       { };
 
 
@@ -118,11 +118,10 @@ namespace gpstk
           * @warning If filename is not given, this class will look for a
           * file named "PRN_GPS" in the current directory.
           */
-      ComputeSatPCenter( XvtStore<SatID>& ephem,
-                         const Position& stapos,
-                         std::string filename="PRN_GPS" )
-         : pEphemeris(&ephem), nominalPos(stapos), satData(filename),
-           fileData(filename), pAntexReader(NULL)
+      ComputeSatPCenter( XvtStore<SatID>& ephStore,
+                         const Position& staPos )
+         : pEphStore(&ephStore), nominalPos(staPos),
+           pAntexReader(NULL), pMSCStore(NULL)
       { };
 
 
@@ -135,10 +134,9 @@ namespace gpstk
           * @warning If filename is not given, this class will look for a
           * file named "PRN_GPS" in the current directory.
           */
-      ComputeSatPCenter( const Position& stapos,
-                         std::string filename="PRN_GPS" )
-         : pEphemeris(NULL), nominalPos(stapos), satData(filename),
-           fileData(filename), pAntexReader(NULL)
+      ComputeSatPCenter( const Position& stapos )
+         : pEphStore(NULL), nominalPos(stapos),
+           pAntexReader(NULL), pMSCStore(NULL)
       { };
 
 
@@ -152,10 +150,11 @@ namespace gpstk
           * @warning If 'AntexReader' object holds an Antex file with relative
           * antenna data, a simple satellite phase center model will be used.
           */
-      ComputeSatPCenter( XvtStore<SatID>& ephem,
-                         const Position& stapos,
+      ComputeSatPCenter( XvtStore<SatID>& ephStore,
+                         const Position& staPos,
                          AntexReader& antexObj )
-         : pEphemeris(&ephem), nominalPos(stapos), pAntexReader(&antexObj)
+         : pEphStore(&ephStore), nominalPos(staPos),
+           pAntexReader(&antexObj), pMSCStore(NULL)
       { };
 
 
@@ -168,9 +167,10 @@ namespace gpstk
           * @warning If 'AntexReader' object holds an Antex file with relative
           * antenna data, a simple satellite phase center model will be used.
           */
-      ComputeSatPCenter( const Position& stapos,
+      ComputeSatPCenter( const Position& staPos,
                          AntexReader& antexObj )
-         : pEphemeris(NULL), nominalPos(stapos), pAntexReader(&antexObj)
+         : pEphStore(NULL), nominalPos(staPos),
+           pAntexReader(&antexObj), pMSCStore(NULL)
       { };
 
 
@@ -185,7 +185,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data
+         /** Returns a gnssSatTypeValue object, adding the new data
           *  generated when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -195,7 +195,7 @@ namespace gpstk
       { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated
+         /** Returns a gnssRinex object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -205,15 +205,13 @@ namespace gpstk
       { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /// Returns name of "PRN_GPS"-like file containing satellite data.
-      virtual std::string getFilename(void) const
-      { return fileData; };
-
-
-         /** Sets name of "PRN_GPS"-like file containing satellite data.
-          * @param name      Name of satellite data file.
+         /** Returns a gnssDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
           */
-      virtual ComputeSatPCenter& setFilename(const std::string& name);
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
 
          /// Returns nominal position of receiver station.
@@ -221,7 +219,7 @@ namespace gpstk
       { return nominalPos; };
 
 
-         /** Sets  nominal position of receiver station.
+         /** Sets nominal position of receiver station.
           * @param stapos    Nominal position of receiver station.
           */
       virtual ComputeSatPCenter& setNominalPosition(const Position& stapos)
@@ -230,16 +228,29 @@ namespace gpstk
 
          /// Returns a pointer to the satellite ephemeris object
          /// currently in use.
-      virtual XvtStore<SatID> *getEphemeris(void) const
-      { return pEphemeris; };
+      virtual XvtStore<SatID> *getEphStore(void) const
+      { return pEphStore; };
 
 
          /** Sets satellite ephemeris object to be used.
           *
           * @param ephem     Satellite ephemeris object.
           */
-      virtual ComputeSatPCenter& setEphemeris(XvtStore<SatID>& ephem)
-      { pEphemeris = &ephem; return (*this); };
+      virtual ComputeSatPCenter& setEphStore(XvtStore<SatID>& ephStore)
+      { pEphStore = &ephStore; return (*this); };
+
+
+         /// Returns a pointer to the MSCStore object currently in use.
+      virtual MSCStore *getMSCStore(void) const
+      { return pMSCStore; };
+
+
+         /** Sets MSCStore object to be used.
+          *
+          * @param msc     MSCStore object.
+          */
+      virtual ComputeSatPCenter& setMSCStore(MSCStore& mscStore)
+      { pMSCStore = &mscStore; return (*this); };
 
 
          /// Returns a pointer to the AntexReader object currently in use.
@@ -267,23 +278,16 @@ namespace gpstk
    private:
 
 
-         /// Satellite ephemeris to be used
-      XvtStore<SatID> *pEphemeris;
+         /// Pointer to XvtStore<SatID> object
+      XvtStore<SatID> *pEphStore;
 
-
-         /// Receiver position
+         /// Station position
       Position nominalPos;
 
+         /// Pointer to MSCStore object
+      MSCStore* pMSCStore;
 
-         /// Object to read satellite data file (PRN_GPS)
-      SatDataReader satData;
-
-
-         /// Name of "PRN_GPS"-like file containing satellite data.
-      std::string fileData;
-
-
-         /// Pointer to object containing satellite antenna data, if available.
+         /// Pointer to AntexReader object
       AntexReader* pAntexReader;
 
 
@@ -295,10 +299,10 @@ namespace gpstk
           *
           * @return Satellite antenna phase correction, in meters.
           */
-      virtual double getSatPCenter( const SatID& satid,
-                                    const CommonTime& time,
-                                    const Triple& satpos,
-                                    const Triple& sunPosition );
+      virtual Vector<double> getSatPCenter( const SatID& satid,
+                                            const CommonTime& time,
+                                            const Triple& satpos,
+                                            const Triple& sunpos );
 
 
    }; // End of class 'ComputeSatPCenter'

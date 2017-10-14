@@ -23,7 +23,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -31,13 +31,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -109,9 +109,13 @@ namespace gpstk
       static const std::string stringAntennaZeroDirAzi; ///< "ANTENNA: ZERODIR AZI"
       static const std::string stringAntennaZeroDirXYZ; ///< "ANTENNA: ZERODIR XYZ"
       static const std::string stringCenterOfMass;      ///< "CENTER OF MASS: XYZ"
+
       static const std::string stringNumObs;            ///< "# / TYPES OF OBSERV"   R2 only
+
       static const std::string stringSystemNumObs;      ///< "SYS / # / OBS TYPES"
+
       static const std::string stringWaveFact;          ///< "WAVELENGTH FACT L1/2"  R2 only
+
       static const std::string stringSigStrengthUnit;   ///< "SIGNAL STRENGTH UNIT"
       static const std::string stringInterval;          ///< "INTERVAL"
       static const std::string stringFirstTime;         ///< "TIME OF FIRST OBS"
@@ -167,7 +171,7 @@ namespace gpstk
          validNumSats           = 0x40000000, ///< "# OF SATELLITES"       optional
          validPrnObs            = 0x80000000, ///< "PRN / # OF OBS"        optional
          //do away with this  validEoH               =0x100000000, ///< "END OF HEADER"
-   
+
          /// This mask is for all required valid fields
          allValid2              = 0x001207CB, // RINEX 2
 
@@ -177,14 +181,15 @@ namespace gpstk
          //allValid301            = 0x0C1205AB, // RINEX 3.01
          //allValid302            = 0x1C1205AB, // RINEX 3.02
          // NB 19Jun2013 MGEX data does not include GLONASS SLOT and GLONASS COD/PHS/BIS records
-         allValid301            = 0x041205AB, // RINEX 3.01
-         allValid302            = 0x041205AB // RINEX 3.02
+         allValid301            = 0x0012058B, // RINEX 3.01
+         allValid302            = 0x0012058B, // RINEX 3.02
+         allValid303            = 0x0012058B  // RINEX 3.03
       };
-   
+
       /// RINEX 3 DCBS/PCVS info (for differential code bias and phase center variations corr.)
       struct Rinex3CorrInfo
       {
-         std::string satSys,  ///< 1-char SV system (G/R/E/S)
+         std::string satSys,  ///< 1-char SV system (G/R/E/S/J/C/I)
                      name,    ///< program name used to apply corrections
                      source;  ///< source of corrections (URL)
       };
@@ -208,7 +213,7 @@ namespace gpstk
       /// Scale Factor corrections for observations
       typedef std::map<RinexObsID,int> sfacMap; ///< scale factor map <ObsType, ScaleFactor>
       std::map<std::string,sfacMap> sysSfacMap; ///< sat. system map of scale factor maps
-                                                ///< <(G/R/E/S), <Rinex3ObsType, scalefactor>>
+                                                ///< <(G/R/E/S/J/C/I), <Rinex3ObsType, scalefactor>>
 
       /// @name Rinex3ObsHeaderValues
       //@{
@@ -239,10 +244,14 @@ namespace gpstk
       gpstk::Triple antennaBsightXYZ;              ///< ANTENNA B.SIGHT XYZ            (optional)
       double        antennaZeroDirAzi;             ///< ANTENNA ZERODIR AZI            (optional)
       gpstk::Triple antennaZeroDirXYZ;             ///< ANTENNA ZERODIR XYZ            (optional)
+
       short wavelengthFactor[2];                   ///< default WAVELENGTH FACT        R2 only
       std::vector<ExtraWaveFact> extraWaveFactList;///< extra (per sat) WAVELENGTH FACT R2 only
+
       gpstk::Triple centerOfMass;                  ///< vehicle CENTER OF MASS: XYZ    (optional)
+
       std::vector<RinexObsID> obsTypeList;         ///< number & types of observations R2 only
+
       std::map<std::string,std::vector<RinexObsID> > mapObsTypes; ///< map <sys char, vec<ObsID> >;
                                                         ///< NB defines data vec in ObsData
       std::string sigStrengthUnit;                 ///< SIGNAL STRENGTH UNIT           (optional)
@@ -314,14 +323,14 @@ namespace gpstk
          unsigned long allValid;
          if(     version < 3.00) allValid = allValid2;
          else if(version < 3.01) allValid = allValid30;
-         else if(version < 3.02) allValid = allValid301;  
-         else                    allValid = allValid302;
+         else if(version < 3.02) allValid = allValid301;
+         else if(version < 3.03) allValid = allValid302;
+         else                    allValid = allValid303;
          return ((valid & allValid) == allValid);
       }
 
       /// Compute map of obs types for use in writing version 2 header and data
       void PrepareVer2Write(void) throw();
-
 
    protected:
 

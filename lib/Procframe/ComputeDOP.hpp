@@ -113,7 +113,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data 
+         /** Returns a gnssSatTypeValue object, adding the new data
           *  generated when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -123,7 +123,7 @@ namespace gpstk
       { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated 
+         /** Returns a gnssRinex object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -131,6 +131,15 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
+
+
+         /** Returns a gnssDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
 
          /// Returns GDOP.

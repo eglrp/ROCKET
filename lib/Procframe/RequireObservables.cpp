@@ -30,7 +30,6 @@
 
 #include "RequireObservables.hpp"
 
-
 namespace gpstk
 {
 
@@ -44,16 +43,29 @@ namespace gpstk
        *
        * @param typeSet    Set of TypeID's to be required.
        */
-   RequireObservables& RequireObservables::addRequiredType(TypeIDSet& typeSet)
+   RequireObservables& RequireObservables::addRequiredType(const SatID::SatelliteSystem& sys,
+                                                           const TypeIDSet& typeSet)
    {
+       if(sys == SatID::systemGPS)
+       {
+           requiredTypeSetOfGPS.insert( typeSet.begin(), typeSet.end() );
+       }
+       else if(sys == SatID::systemGLONASS)
+       {
+           requiredTypeSetOfGLO.insert( typeSet.begin(), typeSet.end() );
+       }
+       else if(sys == SatID::systemGalileo)
+       {
+           requiredTypeSetOfGAL.insert( typeSet.begin(), typeSet.end() );
+       }
+       else if(sys == SatID::systemBDS)
+       {
+           requiredTypeSetOfBDS.insert( typeSet.begin(), typeSet.end() );
+       }
 
-      requiredTypeSet.insert( typeSet.begin(),
-                              typeSet.end() );
+       return (*this);
 
-      return (*this);
-
-   }  // End of method 'RequireObservables::addRequiredType()'
-
+   }  // End of method 'RequireObservables::addRequiredTypeOfGPS()'
 
 
       // Returns a satTypeValueMap object, filtering the target observables.
@@ -69,20 +81,44 @@ namespace gpstk
 
          SatIDSet satRejectedSet;
 
+         TypeIDSet requiredTypeSet;
+
             // Loop through all the satellites
          for ( satTypeValueMap::iterator satIt = gData.begin();
                satIt != gData.end();
                ++satIt )
          {
+              // get the SatelliteSystem
+            SatID::SatelliteSystem system = (*satIt).first.system;
 
+            if (system == SatID::systemGPS)
+            {
+                requiredTypeSet = requiredTypeSetOfGPS;
+            }
+            else if (system == SatID::systemGLONASS)
+            {
+                requiredTypeSet = requiredTypeSetOfGLO;
+            }
+            else if (system == SatID::systemGalileo)
+            {
+                requiredTypeSet = requiredTypeSetOfGAL;
+            }
+            else if (system == SatID::systemBDS)
+            {
+                requiredTypeSet = requiredTypeSetOfBDS;
+            }
 
                // Check all the indicated TypeID's
+            if (requiredTypeSet.empty())
+            {
+               satRejectedSet.insert( (*satIt).first );
+               continue;
+            }
+
             for ( TypeIDSet::const_iterator typeIt = requiredTypeSet.begin();
                   typeIt != requiredTypeSet.end();
                   ++typeIt )
             {
-
-
                   // Try to find required type
                typeValueMap::iterator it( (*satIt).second.find(*typeIt) );
 
@@ -94,12 +130,13 @@ namespace gpstk
                   satRejectedSet.insert( (*satIt).first );
 
                      // It is not necessary to keep looking
-                  typeIt = requiredTypeSet.end();
-                  --typeIt;
+                  //typeIt = requiredTypeSet.end();
+                  //--typeIt;
+
+                  break;
                }
 
             }
-
          }
 
             // Let's remove satellites without all TypeID's
@@ -117,6 +154,30 @@ namespace gpstk
          GPSTK_THROW(e);
 
       }
+
+   }  // End of 'RequireObservables::Process()'
+
+
+      // Returns a gnssDataMap object, filtering the target observables.
+      //
+      // @param gData     Data object holding the data.
+      //
+   gnssDataMap& RequireObservables::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+      for( gnssDataMap::iterator gdmIter = gData.begin();
+           gdmIter != gData.end();
+           ++gdmIter )
+      {
+         for( sourceDataMap::iterator sdmIter = gdmIter->second.begin();
+              sdmIter != gdmIter->second.end();
+              ++sdmIter )
+         {
+              Process( sdmIter->second );
+         }
+      }
+
+      return gData;
 
    }  // End of 'RequireObservables::Process()'
 

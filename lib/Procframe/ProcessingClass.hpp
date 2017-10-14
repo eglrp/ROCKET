@@ -83,18 +83,25 @@ namespace gpstk
    public:
 
 
-         /** Abstract method. It returns a gnnsSatTypeValue object.
+         /** Abstract method. It returns a gnssSatTypeValue object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData) = 0;
 
 
-         /** Abstract method. It returns a gnnsRinex object.
+         /** Abstract method. It returns a gnssRinex object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData) = 0;
+
+
+         /** Abstract method. It returns a gnssDataMap object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData) = 0;
 
 
          /// Abstract method. It returns a string identifying the class the
@@ -119,6 +126,12 @@ namespace gpstk
       /// Input operator from gnssRinex to ProcessingClass.
    inline gnssRinex& operator>>( gnssRinex& gData,
                                  ProcessingClass& procClass )
+   { procClass.Process(gData); return gData; }
+
+
+      /// Input operator from gnssDataMap to ProcessingClass.
+   inline gnssDataMap& operator>>( gnssDataMap& gData,
+                                   ProcessingClass& procClass )
    { procClass.Process(gData); return gData; }
 
 

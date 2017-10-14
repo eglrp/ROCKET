@@ -65,7 +65,7 @@ namespace gpstk
 
       /// Destructor.
       ~GALWeekSecond() throw() {}
-      
+
       /// Return the number of bits in the bitmask used to get the ModWeek from the
       /// full week.
       int Nbits(void) const

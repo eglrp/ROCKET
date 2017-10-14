@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -25,23 +25,23 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
 
 /**
  * @file OrbElemStore.hpp
- * Abstract base class for storing and/or computing position, velocity, 
+ * Abstract base class for storing and/or computing position, velocity,
  * and clock data.
  */
- 
+
 #ifndef GPSTK_ORBELEMSTORE_HPP
 #define GPSTK_ORBELEMSTORE_HPP
 
@@ -57,13 +57,13 @@ namespace gpstk
    /** @addtogroup ephemstore */
    //@{
 
-   /// Abstract base class for storing and accessing an objects position, 
+   /// Abstract base class for storing and accessing an objects position,
    /// velocity, and clock data. Also defines a simple interface to remove
    /// data that has been added.
    class OrbElemStore : public XvtStore<SatID>
    {
    public:
-      
+
       OrbElemStore()
          throw()
       {}
@@ -95,7 +95,7 @@ namespace gpstk
       /// Edit the dataset, removing data outside the indicated time interval
       /// @param[in] tmin defines the beginning of the time interval
       /// @param[in] tmax defines the end of the time interval
-      virtual void edit(const CommonTime& tmin, 
+      virtual void edit(const CommonTime& tmin,
                         const CommonTime& tmax = CommonTime::END_OF_TIME)
          throw()
          = 0;
@@ -104,7 +104,7 @@ namespace gpstk
       virtual void clear(void) throw()
          = 0;
 
-      /// Determine the earliest time for which this object can successfully 
+      /// Determine the earliest time for which this object can successfully
       /// determine the Xvt for any object.
       /// @return The initial time
       /// @throw InvalidRequest This is thrown if the object has no data.
@@ -112,7 +112,7 @@ namespace gpstk
          throw()
          = 0;
 
-      /// Determine the latest time for which this object can successfully 
+      /// Determine the latest time for which this object can successfully
       /// determine the Xvt for any object.
       /// @return The final time
       /// @throw InvalidRequest This is thrown if the object has no data.

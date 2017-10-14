@@ -153,7 +153,7 @@ namespace gpstk
           *                  will be deleted from the later (this is the
           *                  default behaviour).
           */
-    
+
       DeltaOp( const satTypeValueMap& gData,
                const bool& delSats = true )
          : refData(gData), deleteMissingSats(delSats), updateCSFlag(true)
@@ -444,7 +444,7 @@ namespace gpstk
       { Process(gData.body); return gData; };
 
 
-         /** Returns a reference to a gnnsRinex object after differencing
+         /** Returns a reference to a gnssRinex object after differencing
           *  data type values given in 'diffTypes' field with respect to
           *  reference station data in 'refData' field.
           *
@@ -453,6 +453,17 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
       { Process(gData.body); return gData; };
+
+
+         /** Returns a reference to a gnssDataMap object after differencing
+          *  data type values given in 'diffTypes' field with respect to
+          *  reference station data in 'refData' field.
+          *
+          * @param gData      Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException)
+      { return gData; };
 
 
          /// Returns a string identifying this object.
@@ -470,7 +481,7 @@ namespace gpstk
       satTypeValueMap refData;
 
 
-         /// Flag indicating if the CSF(Cycle Slip Flag) input GDS will be 
+         /// Flag indicating if the CSF(Cycle Slip Flag) input GDS will be
          /// synchronized with the refData
       bool updateCSFlag;
 

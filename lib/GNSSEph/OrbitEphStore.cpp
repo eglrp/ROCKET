@@ -49,6 +49,7 @@
 #include "StringUtils.hpp"
 #include "MathBase.hpp"
 #include "CivilTime.hpp"
+#include "GPSWeekSecond.hpp"
 #include "TimeString.hpp"
 #include "RinexSatID.hpp"  // for dump
 
@@ -192,8 +193,12 @@ namespace gpstk
    // If keys are repeated, keep the one with the earliest transmit time.
    OrbitEph* OrbitEphStore::addEphemeris(const OrbitEph* eph)
    {
+
+//      std::cout << eph->satID << std::endl;
+
       OrbitEph *ret(0);
       try {
+
          // is the satellite found in the table? If not, create one
          if(satTables.find(eph->satID) == satTables.end()) {
             TimeOrbitEphTable newtable;
@@ -214,12 +219,28 @@ namespace gpstk
          // If found candidate, should be same data
          // as already in table. Test this by comparing Toe values.
          TimeOrbitEphTable::iterator it = toet.find(eph->beginValid);
+
          if(it != toet.end()) {
+
+//             std::cout << GPSWeekSecond(eph->ctToe).sow << " "
+//                       << GPSWeekSecond(it->second->ctToe).sow << std::endl;
+
             // is a duplicate found in the table?
             if(it->second->ctToe == eph->ctToe) {
                message = string("duplicate Toe");
                return ret;
             }
+
+            // accout for possibly equal beginValid times with non-equal ctToe
+            // from  https://github.com/SGL-UT/GPSTk/issues/9
+            else if(it->second->ctToe < eph->ctToe)
+            {
+                ret = eph->clone();
+                toet[eph->beginValid] = ret;
+                updateTimeLimits(ret);
+                return ret;
+            }
+
             else {
                // Found matching beginValid but different Toe - This shouldn't happen
                string str = "Unexpected matching beginValid time but not Toe, for "
@@ -227,6 +248,7 @@ namespace gpstk
                   + ", beginValid= " + printTime(eph->beginValid,fmt)
                   + ", Toe(map)= " + printTime(eph->ctToe,fmt)
                   + ", Toe(candidate)= "+ printTime(eph->ctToe," %6.0g.");
+//               std::cout << str << std::endl;
                InvalidParameter ir(str);
                GPSTK_THROW(ir);
             }
@@ -431,7 +453,6 @@ namespace gpstk
    const OrbitEph* OrbitEphStore::findNearOrbitEph(const SatID& sat,
                                                    const CommonTime& t) const
    {
-
         // Check for any OrbitEph for this SV
       if(satTables.find(sat) == satTables.end())
          return NULL;
@@ -440,7 +461,12 @@ namespace gpstk
       // Define reference to the relevant map of orbital elements
       const TimeOrbitEphTable& table = getTimeOrbitEphMap(sat);
 
+//      TimeOrbitEphTable::const_iterator iter;
+//      for(iter = table.begin(); iter != table.end(); iter++)
+//          cout << iter->first << endl;
+
       TimeOrbitEphTable::const_iterator itNext = table.find(t);
+
       if(itNext != table.end())               // exact match
          return itNext->second;
 

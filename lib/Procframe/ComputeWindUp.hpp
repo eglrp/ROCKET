@@ -34,13 +34,12 @@
 
 #include <string>
 #include "ProcessingClass.hpp"
-#include "Triple.hpp"
-#include "Position.hpp"
 #include "SunPosition.hpp"
 #include "XvtStore.hpp"
+#include "MSCStore.hpp"
 #include "SatDataReader.hpp"
 #include "AntexReader.hpp"
-#include "GNSSconstants.hpp"
+#include "constants.hpp"
 
 
 
@@ -104,7 +103,7 @@ namespace gpstk
 
          /// Default constructor
       ComputeWindUp()
-         : pEphemeris(NULL), nominalPos(0.0, 0.0, 0.0),
+         : pEphStore(NULL), nominalPos(0.0, 0.0, 0.0), pMSCStore(NULL),
            satData("PRN_GPS"), fileData("PRN_GPS"), pAntexReader(NULL)
       { };
 
@@ -119,10 +118,11 @@ namespace gpstk
           * @warning If filename is not given, this class will look for a
           * file named "PRN_GPS" in the current directory.
           */
-      ComputeWindUp( XvtStore<SatID>& ephem,
-                     const Position& stapos,
+      ComputeWindUp( XvtStore<SatID>& ephStore,
+                     const Position& staPos,
                      std::string filename="PRN_GPS" )
-         : pEphemeris(&ephem), nominalPos(stapos), satData(filename),
+         : pEphStore(&ephStore), nominalPos(staPos),
+           pMSCStore(NULL), satData(filename),
            fileData(filename), pAntexReader(NULL)
       { };
 
@@ -137,10 +137,12 @@ namespace gpstk
           * @warning If 'AntexReader' object holds an Antex file with relative
           * antenna data, a simple satellite phase center model will be used.
           */
-      ComputeWindUp( XvtStore<SatID>& ephem,
-                     const Position& stapos,
+      ComputeWindUp( XvtStore<SatID>& ephStore,
+                     const Position& staPos,
+                     MSCStore& mscStore,
                      AntexReader& antexObj )
-         : pEphemeris(&ephem), nominalPos(stapos), pAntexReader(&antexObj)
+         : pEphStore(&ephStore), nominalPos(staPos),
+           pMSCStore(&mscStore), pAntexReader(&antexObj)
       { };
 
 
@@ -153,9 +155,10 @@ namespace gpstk
           * @warning If 'AntexReader' object holds an Antex file with relative
           * antenna data, a simple satellite phase center model will be used.
           */
-      ComputeWindUp( const Position& stapos,
+      ComputeWindUp( const Position& staPos,
                      AntexReader& antexObj )
-         : pEphemeris(NULL), nominalPos(stapos), pAntexReader(&antexObj)
+         : pEphStore(NULL), nominalPos(staPos),
+           pMSCStore(NULL), pAntexReader(&antexObj)
       { };
 
 
@@ -170,7 +173,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data
+         /** Returns a gnssSatTypeValue object, adding the new data
           *  generated when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -180,7 +183,7 @@ namespace gpstk
       { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated
+         /** Returns a gnssRinex object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -188,6 +191,15 @@ namespace gpstk
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
       { Process(gData.header.epoch, gData.body); return gData; };
+
+
+         /** Returns a gnssDataMap object, adding the new data generated
+          *  when calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
 
          /// Returns name of "PRN_GPS"-like file containing satellite data.
@@ -215,15 +227,15 @@ namespace gpstk
 
          /// Returns a pointer to the satellite ephemeris object
          /// currently in use.
-      virtual XvtStore<SatID> *getEphemeris(void) const
-      { return pEphemeris; };
+      virtual XvtStore<SatID> *getEphStore(void) const
+      { return pEphStore; };
 
 
          /** Sets satellite ephemeris object to be used.
           * @param ephem     Satellite ephemeris object.
           */
-      virtual ComputeWindUp& setEphemeris(XvtStore<SatID>& ephem)
-      { pEphemeris = &ephem; return (*this); };
+      virtual ComputeWindUp& setEphStore(XvtStore<SatID>& ephStore)
+      { pEphStore = &ephStore; return (*this); };
 
 
          /// Returns a pointer to the AntexReader object currently in use.
@@ -240,6 +252,19 @@ namespace gpstk
       { pAntexReader = &antexObj; return (*this); };
 
 
+         /// Returns a pointer to the MSCStore object currently in use.
+      virtual MSCStore *getMSCStore(void) const
+      { return pMSCStore; };
+
+
+         /** Sets MSCStore object to be used.
+          *
+          * @param msc  MSCStore object.
+          */
+      virtual ComputeWindUp& setMSCStore(MSCStore& msc)
+      { pMSCStore = &msc; return (*this); };
+
+
          /// Returns a string identifying this object.
       virtual std::string getClassName(void) const;
 
@@ -252,11 +277,15 @@ namespace gpstk
 
 
          /// Satellite ephemeris to be used
-      XvtStore<SatID> *pEphemeris;
+      XvtStore<SatID> *pEphStore;
 
 
          /// Receiver position
       Position nominalPos;
+
+
+         /// Pointer to MSCStore object
+      MSCStore* pMSCStore;
 
 
          /// Object to read satellite data file (PRN_GPS)
@@ -275,22 +304,25 @@ namespace gpstk
       struct phaseData
       {
             // Default constructor initializing the data in the structure
-         phaseData() : previousPhase(0.0) {};
+         phaseData() : satPreviousPhase(0.0),
+                       staPreviousPhase(0.0),
+                       arcNum(0.0)
+         {};
 
-         double previousPhase;      ///< Previous phase.
+         double satPreviousPhase;      ///< Previous phase for satellite.
+         double staPreviousPhase;      ///< Previous phase for station.
+         double arcNum;                ///< Satellite arc number.
       };
 
 
-         /// Map to store station phase data
-      std::map<SatID, phaseData> phase_station;
-
+      typedef std::map<SatID, phaseData> SatPhaseData;
+      typedef std::map<SourceID, SatPhaseData> SatPhaseDataMap;
 
          /// Map to store satellite phase data
-      std::map<SatID, phaseData> phase_satellite;
+      SatPhaseData m_satPhaseData;
 
-
-         /// Map to store satellite arc data
-      std::map<SatID, double> satArcMap;
+         /// Map to store station phase date
+      SatPhaseDataMap m_satPhaseDataMap;
 
 
          /** Compute the value of the wind-up, in radians.

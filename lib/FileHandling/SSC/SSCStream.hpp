@@ -1,4 +1,5 @@
-//#pragma ident "$Id$"
+#pragma ident "$Id$"
+
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
@@ -16,7 +17,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -24,13 +25,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -38,59 +39,60 @@
 
 /**
  * @file SSCStream.hpp
- * Read/Write the set of station coordinate file data
+ * Read/Write Set of Station Coordinate file data
  */
 
-#ifndef SSCSTREAM_INCLUDE
-#define SSCSTREAM_INCLUDE
+#ifndef SSCSTREAM_HPP
+#define SSCSTREAM_HPP
 
 #include "FFTextStream.hpp"
 #include "SSCHeader.hpp"
 
 namespace gpstk
 {
-      /** @addtogroup MSC */
-      //@{
+    /** @addtogroup MSC */
+    //@{
 
-      /// Stream used to obtain data from a Set of Station Coordinates File
-   class SSCStream : public gpstk::FFTextStream
-   {
-   public:
-         /// Default constructor
-      SSCStream()
-			: line(std::string())
-				/// if we need to write a file
-				// wroteENDSNX(false),
-		  	 	// writingMode(false),
-			  
-		{}
+    /// Stream used to obtain data from a Set of Station Coordinates file
+    class SSCStream : public FFTextStream
+    {
+    public:
+        /// Default constructor
+        SSCStream()
+            : line(std::string())
+            /// if we need to write a file
+            /// wroteENDSNX(false),
+            /// writingMode(false),
+        {}
 
-         /**
-          * Common Constructor : open (default: read)
-          * @param filename : the file to open
-          * @param mode the ios::openmode to be used in opening a file 
-          */
-      SSCStream(const char* filename, std::ios::openmode mode=std::ios::in)
-				: FFTextStream(filename, mode)
-		{ open(filename, mode); }
-      
-         /// Destructor
-      virtual ~SSCStream() {}
-		
-		virtual void open(const char* filename, std::ios::openmode mode) 
-		{
-			FFTextStream::open(filename, mode);
-			header = SSCHeader();
-		}
-		
-			///@name data members
-			//@{
-		SSCHeader header;			///< SSCHeader for this file
-		std::string line;			///< line read
-			//@}
+        /**
+         * Common constructor : open (default: read)
+         *
+         * @param filename : the file to open
+         * @param mode the ios::openmode to be used in opening a file
+         */
+        SSCStream(const char* filename, std::ios::openmode mode=std::ios::in)
+            : FFTextStream(filename, mode)
+        { open(filename, mode); }
 
-   }; // class SSCStream
+        /// Destructor
+        virtual ~SSCStream() {}
+
+        virtual void open(const char* filename, std::ios::openmode mode)
+        {
+            FFTextStream::open(filename, mode);
+            header = SSCHeader();
+        }
+
+        ///@name data members
+        //@{
+        SSCHeader header;         ///< SSCHeader for this file
+        std::string line;         ///< line read
+
+      //@}
+
+    };  // End of class 'SSCStream'
 
 } // namespace gpstk
 
-#endif   
+#endif  // SSCSTREAM_HPP

@@ -1,13 +1,10 @@
-/// @file Rinex3NavData.cpp
-/// Encapsulates RINEX 3 Navigation data.
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -37,6 +34,9 @@
 //
 //=============================================================================
 
+/// @file Rinex3NavData.cpp
+/// Encapsulates RINEX 3 Navigation data.
+
 #include "Rinex3NavData.hpp"
 
 #include "CivilTime.hpp"
@@ -45,7 +45,7 @@
 #include "BDSWeekSecond.hpp"
 #include "QZSWeekSecond.hpp"
 #include "TimeString.hpp"
-#include "GNSSconstants.hpp"
+#include "constants.hpp"
 #include "StringUtils.hpp"
 
 namespace gpstk
@@ -61,8 +61,8 @@ namespace gpstk
       satSys = "G";
       PRNID = rnd.PRNID;
       sat = RinexSatID(PRNID,SatID::systemGPS);
-      HOWtime = rnd.HOWtime;
-      weeknum = rnd.weeknum;
+      HOWtime = rnd.getHOWWS().sow;
+      weeknum = rnd.getHOWWS().week;
       accuracy = rnd.accuracy;
       health = rnd.health;
 
@@ -73,7 +73,7 @@ namespace gpstk
       IODE = rnd.IODE;
 
       // clock
-      Toc = rnd.Toc;
+      Toc = rnd.getTocWS().sow;
       af0 = rnd.af0;
       af1 = rnd.af1;
       af2 = rnd.af2;
@@ -218,65 +218,6 @@ namespace gpstk
       fitint = qzseph.fitint;
    }
 
-   // Deprecated; used GPSEphemeris.
-   // This routine uses EngEphemeris, so is for GPS data only.
-   // The comments about GPS v. Galileo next to each elements are just notes
-   // from sorting out the ICDs in the RINEX 3 documentation. Please leave
-   // them there until we add a routine for handling GalRecord or similar.
-   Rinex3NavData::Rinex3NavData(const EngEphemeris& ee) // GPS only
-   {
-      // epoch info
-      satSys = ee.getSatSys();
-      PRNID  = ee.getPRNID();
-      sat    = RinexSatID(PRNID,SatID::systemGPS);
-      time   = ee.getEpochTime();
-
-      Toc     = ee.getToc();
-      HOWtime = long(ee.getHOWTime(1));
-      weeknum = ee.getFullWeek();
-
-      accuracy = ee.getAccuracy();
-      health   = ee.getHealth();
-
-      // GPS or Galileo data
-
-      af0 = ee.getAf0(); // GPS and Galileo only
-      af1 = ee.getAf1(); // GPS and Galileo only
-      af2 = ee.getAf2(); // GPS and Galileo only
-
-      Crs = ee.getCrs(); // GPS and Galileo only
-      dn  = ee.getDn();  // GPS and Galileo only
-      M0  = ee.getM0();  // GPS and Galileo only
-
-      Cuc   = ee.getCuc();   // GPS and Galileo only
-      ecc   = ee.getEcc();   // GPS and Galileo only
-      Cus   = ee.getCus();   // GPS and Galileo only
-      Ahalf = ee.getAhalf(); // GPS and Galileo only
-
-      Toe    = ee.getToe();    // GPS and Galileo only
-      Cic    = ee.getCic();    // GPS and Galileo only
-      OMEGA0 = ee.getOmega0(); // GPS and Galileo only
-      Cis    = ee.getCis();    // GPS and Galileo only
-
-      i0       = ee.getI0();       // GPS and Galileo only
-      Crc      = ee.getCrc();      // GPS and Galileo only
-      w        = ee.getW();        // GPS and Galileo only
-      OMEGAdot = ee.getOmegaDot(); // GPS and Galileo only
-
-      idot = ee.getIDot(); // GPS and Galileo only
-
-      // GPS-only data
-
-      IODE = ee.getIODE(); // GPS only
-
-      codeflgs = ee.getCodeFlags(); // GPS only
-      L2Pdata  = ee.getL2Pdata();   // GPS only
-
-      Tgd  = ee.getTgd();  // GPS only
-      IODC = ee.getIODC(); // GPS only
-
-      fitint = ee.getFitInterval(); // GPS only
-   }  // End of 'Rinex3NavData::Rinex3NavData(const EngEphemeris& ee)'
 
       // This constructor initializes R3NavData with Glonass data.
    Rinex3NavData::Rinex3NavData(const GloEphemeris& gloe)
@@ -285,7 +226,7 @@ namespace gpstk
          // Epoch info
       satSys = gloe.getSatSys();
       PRNID  = gloe.getPRNID();
-      sat    = RinexSatID(PRNID,SatID::systemGlonass);
+      sat    = RinexSatID(PRNID,SatID::systemGLONASS);
       time   = gloe.getEpochTime();
 
          // GLONASS parameters
@@ -324,7 +265,7 @@ namespace gpstk
        *          to its pre-read position.
        */
    void Rinex3NavData::reallyGetRecord(FFStream& ffs)
-      throw(exception, FFStreamError, StringException)
+      throw(std::exception, FFStreamError, StringException)
    {
 
       try {
@@ -335,7 +276,7 @@ namespace gpstk
             try {
                strm >> strm.header;
             }
-            catch(exception& e) {
+            catch(std::exception& e) {
                FFStreamError fse(string("std::exception reading header ") + e.what());
                GPSTK_THROW(fse);
             }
@@ -355,7 +296,7 @@ namespace gpstk
          if(satSys == "G" || satSys == "E" || satSys == "J" || satSys == "C")
             for(int i=4; i<=7; i++) getRecord(i, strm);
       }
-      catch(exception& e) {
+      catch(std::exception& e) {
          FFStreamError fse(string("std::exception: ") + e.what());
          GPSTK_THROW(fse);
       }
@@ -367,7 +308,7 @@ namespace gpstk
 
       // Outputs the record to the FFStream \a s.
    void Rinex3NavData::reallyPutRecord(FFStream& ffs) const
-      throw(exception, FFStreamError, StringException)
+      throw(std::exception, FFStreamError, StringException)
    {
 
       try {
@@ -385,7 +326,7 @@ namespace gpstk
          if(satSys == "G" || satSys == "C" || satSys == "E" || satSys == "J")
             for(int i=4; i<=7; i++) putRecord(i, strm);
       }
-      catch(exception& e) {
+      catch(std::exception& e) {
          FFStreamError fse(string("std::exception: ") + e.what());
          GPSTK_THROW(fse);
       }
@@ -472,101 +413,6 @@ namespace gpstk
 
    }  // End of method 'Rinex3NavData::asString
 
-      // Deprecated; use GPSEphemeris.
-      // Converts this Rinex3NavData to an EngEphemeris object.
-   Rinex3NavData::operator EngEphemeris() const throw()
-   {
-      EngEphemeris ee;
-
-      // There's no TLM word in Rinex3NavData, so it's set to 0.
-      // Likewise, there's no AS alert or tracker.
-      // Also, in RINEX, the accuracy is in meters, and setSF1 expects
-      // the accuracy flag.  We'll give it zero and pass the accuracy
-      // separately via the setAccuracy() method.
-
-      ee.tlm_message[0] = 0;           
-      ee.tlm_message[1] = 0;
-      ee.tlm_message[2] = 0;
-      ee.HOWtime[0] = HOWtime;  // RINEX does not actually specify 
-      ee.HOWtime[1] = HOWtime;  // how the transmit time is derived.  Therefore,
-      ee.HOWtime[2] = HOWtime;  // These values may be misleading.  
-      ee.ASalert[0] = 1;               //AS and alert flags set to 1 (default)
-      ee.ASalert[1] = 1;
-      ee.ASalert[2] = 1;
-
-      ee.weeknum    = weeknum;
-      ee.codeflags  = codeflgs;
-      ee.health     = health;  
-      ee.IODC       = short(IODC);
-      ee.L2Pdata    = L2Pdata;
-      ee.Tgd        = Tgd;
-      ee.tracker    = 0;
-      ee.PRNID      = PRNID;
-      ee.satSys     = satSys;
-      bool healthy = false;
-      if (health == 0) healthy = true;
-      short accFlag = 0; //will be set later.
-          //BrcClockCorrection takes a flag, while EngEphemeris takes a double.
-      double toc    = Toc;
-
-      double timeDiff =toc - ee.HOWtime[0];
-      short epochWeek = ee.weeknum;
-      if (timeDiff < -HALFWEEK) epochWeek++;
-      else if (timeDiff > HALFWEEK) epochWeek--;
-
-      CommonTime tocCT = GPSWeekSecond(epochWeek, Toc, TimeSystem::GPS);
-
-         // The observation ID has a type of navigation, but the
-         // carrier and code types are undefined.  They could be
-         // L1/L2 C/A, P, Y,.....
-      ObsID obsID(ObsID::otNavMsg, ObsID::cbUndefined, ObsID::tcUndefined);
-      ee.bcClock.loadData( satSys, obsID, PRNID, tocCT,
-                        accFlag, healthy, af0, af1, af2);
-
-      ee.IODE    = short(IODE);      
-      ee.fitint  = (fitint > 4) ? 1 : 0;
-      //double toe = Toe; //?????
-      
-      //Needed for modernized nav quatities
-      double A = Ahalf * Ahalf;
-      double dndot = 0.0;
-      double Adot = 0.0;
-
-      short fitHours = getLegacyFitInterval(ee.IODC, ee.fitint);
-      long beginFitSOW = Toe - (fitHours/2)*3600.0;
-      long endFitSOW = Toe + (fitHours/2)*3600.0;
-      short beginFitWk = ee.weeknum;
-      short endFitWk = ee.weeknum;
-
-      if (beginFitSOW < 0)
-      {
-         beginFitSOW += FULLWEEK;
-         beginFitWk--;
-      }
-      CommonTime beginFit = GPSWeekSecond(beginFitWk, beginFitSOW, TimeSystem::GPS);
-      if (endFitSOW >= FULLWEEK)
-      {
-         endFitSOW += FULLWEEK;
-         endFitWk++;
-      }
-
-      CommonTime endFit = GPSWeekSecond(endFitWk, endFitSOW, TimeSystem::GPS);
-      CommonTime toeCT = GPSWeekSecond(epochWeek, Toe, TimeSystem::GPS);
-
-      ee.orbit.loadData( satSys, obsID, PRNID, beginFit, endFit, toeCT,
-                      accFlag, healthy, Cuc, Cus, Crc, Crs, Cic, Cis, 
-                      M0, dn, dndot, ecc, A, Ahalf, Adot, OMEGA0, i0, 
-                      w, OMEGAdot, idot);
-
-      ee.haveSubframe[0] = true;    // need to be true to perform certain EngEphemeris functions
-      ee.haveSubframe[1] = true;    // examples: ee.dump(), ee.setAccuracy()
-      ee.haveSubframe[2] = true;
-
-      ee.setAccuracy(accuracy);
-
-     return ee;
-
-   }  // End of 'Rinex3NavData::operator EngEphemeris()'
 
    // Private helper routine for casts from this to OrbitEph-based Ephemerides
    void Rinex3NavData::castTo(OrbitEph *oeptr) const
@@ -589,7 +435,7 @@ namespace gpstk
          oeptr->af0 = af0;
          oeptr->af1 = af1;
          oeptr->af2 = af2;
-   
+
          // Major orbit parameters
          oeptr->M0 = M0;
          oeptr->dn = dn;
@@ -603,7 +449,7 @@ namespace gpstk
          // modern nav msg
          oeptr->dndot = 0.;
          oeptr->Adot = 0.;
-   
+
          // Harmonic perturbations
          oeptr->Cuc = Cuc;
          oeptr->Cus = Cus;
@@ -611,7 +457,7 @@ namespace gpstk
          oeptr->Crs = Crs;
          oeptr->Cic = Cic;
          oeptr->Cis = Cis;
-   
+
          oeptr->dataLoadedFlag = true;
       }
       catch(Exception& e) { GPSTK_RETHROW(e); }
@@ -633,13 +479,34 @@ namespace gpstk
       if(!gpse.dataLoadedFlag)
          return gpse;          // throw?
 
+         // Special case to address common problem in IGS aggregate brdc
+         // files.   In some cases (typ. beginning of week) the last
+         // SF 1/2/3 for the previous day is being output with a HOWtime of
+         // zero.  This leaves it in conflict with the first SF 1/2/3 of
+         // the new day (which typically has a HOW of zero)
+      long adjHOWtime = HOWtime;
+      short adjWeeknum = weeknum;
+      long lToc = (long) Toc;
+      if ((HOWtime%SEC_PER_DAY)==0 &&
+         ((lToc)%SEC_PER_DAY)==0 &&
+           HOWtime == lToc)
+      {
+         adjHOWtime = HOWtime - 30;
+         if (adjHOWtime<0)
+         {
+            adjHOWtime += FULLWEEK;
+            adjWeeknum--;
+         }
+      }
+         // end special case adjustment (except for use of adjHOWtime below)
+
       // get the epochs right
       CommonTime ct = time;
       //unsigned int year = static_cast<CivilTime>(ct).year;
 
       // Get week for clock, to build Toc
-      double dt = Toc - HOWtime;
-      int week = weeknum;
+      double dt = Toc - adjHOWtime;
+      int week = adjWeeknum;
       if(dt < -HALFWEEK) week++; else if(dt > HALFWEEK) week--;
       gpse.ctToc = GPSWeekSecond(week, Toc, TimeSystem::GPS);
       gpse.ctToc.setTimeSystem(TimeSystem::GPS);
@@ -653,7 +520,8 @@ namespace gpstk
 
       gpse.HOWtime = HOWtime;
       week = static_cast<GPSWeekSecond>(gpse.ctToe).getWeek();
-      gpse.transmitTime = GPSWeekSecond(weeknum, static_cast<double>(HOWtime),
+
+      gpse.transmitTime = GPSWeekSecond(adjWeeknum, static_cast<double>(adjHOWtime),
          TimeSystem::GPS);
 
       gpse.codeflags = codeflgs;
@@ -750,7 +618,7 @@ namespace gpstk
       castTo(ptr);                                    // set dataLoadedFlag
 
       // is it right?
-      if(bdse.satID.system != SatID::systemBeiDou)
+      if(bdse.satID.system != SatID::systemBDS)
          bdse.dataLoadedFlag = false;
 
       if(!bdse.dataLoadedFlag)
@@ -1323,13 +1191,13 @@ namespace gpstk
             else {
                fitint  =        StringUtils::for2doub(line.substr(n,19)); n+=19;
             }
-   
+
             // Some RINEX files have HOW < 0.
             while(HOWtime < 0) {
                HOWtime += (long)FULLWEEK;
                weeknum--;
             }
-   
+
             // In RINEX *files*, weeknum is the week of TOE.
             // Internally (Rinex3NavData), weeknum is week of HOW
             if(HOWtime - Toe > HALFWEEK)

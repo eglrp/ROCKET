@@ -60,7 +60,7 @@ namespace gpstk
 
             // Loop through all the satellites
          satTypeValueMap::iterator it;
-         for( it = gData.begin(); it != gData.end(); ++it ) 
+         for( it = gData.begin(); it != gData.end(); ++it )
          {
 
             try
@@ -100,6 +100,32 @@ namespace gpstk
       }
 
    }  // End of method 'ComputeCombination::Process()'
+
+
+     /** Returns a gnssDataMap object, adding the new data generated when
+      *  calling this object.
+      *
+      * @param gData    Data object holding the data.
+      */
+    gnssDataMap& ComputeCombination::Process(gnssDataMap& gData)
+        throw(ProcessingException)
+    {
+
+        for( gnssDataMap::iterator gdmIt = gData.begin();
+             gdmIt != gData.end();
+             ++gdmIt )
+        {
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end();
+                 ++sdmIt )
+            {
+                Process( sdmIt->second );
+            }
+        }
+
+        return gData;
+
+    }  // End of method 'ComputeCombination::Process()'
 
 
 } // End of namespace gpstk

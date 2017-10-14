@@ -29,8 +29,12 @@
 //  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2007, 2008, 2011
 //
 //============================================================================
-
-
+//  Revision
+//
+//  2016/06/08, add the TypeIDSet for Glonass, Galileo and BeiDou
+//
+//
+//============================================================================
 
 #include "ProcessingClass.hpp"
 
@@ -42,7 +46,7 @@ namespace gpstk
       //@{
 
 
-      /** This class filters out satellites that don't have the required 
+      /** This class filters out satellites that don't have the required
        *  observations.
        *
        * This class is meant to be used with the GNSS data structures objects
@@ -56,8 +60,8 @@ namespace gpstk
        *   gnssRinex gRin;
        *
        *   TypeIDSet requiredSet;
-       *   requiredSet.insert(TypeID::P1);
-       *   requiredSet.insert(TypeID::P2);
+       *   requiredSet.insert(TypeID::C1);
+       *   requiredSet.insert(TypeID::C2);
        *
        *   RequireObservables requireTypes(requiredSet);
        *
@@ -88,19 +92,38 @@ namespace gpstk
 
          /** Explicit constructor
           *
+          * @param sys       System to be required.
           * @param type      TypeID to be required.
           */
-      RequireObservables(const TypeID& type)
-      { setRequiredType(type); };
+      RequireObservables(const SatID::SatelliteSystem& sys,
+                         const TypeID& type)
+      { setRequiredType(sys,type); };
 
 
          /** Explicit constructor
           *
           * @param typeSet   Set of TypeID's to be required.
           */
-      RequireObservables(const TypeIDSet& typeSet)
-         : requiredTypeSet(typeSet)
-      { };
+      RequireObservables(const SatID::SatelliteSystem& sys,
+                         const TypeIDSet& typeSet)
+      {
+          if(sys == SatID::systemGPS)
+          {
+              requiredTypeSetOfGPS = typeSet;
+          }
+          else if(sys == SatID::systemGLONASS)
+          {
+              requiredTypeSetOfGLO = typeSet;
+          }
+          else if(sys == SatID::systemGalileo)
+          {
+              requiredTypeSetOfGAL = typeSet;
+          }
+          else if(sys == SatID::systemBDS)
+          {
+              requiredTypeSetOfBDS = typeSet;
+          }
+      };
 
 
          /** Returns a satTypeValueMap object, checking the required
@@ -116,15 +139,36 @@ namespace gpstk
           *
           * @param type      Extra TypeID to be required.
           */
-      virtual RequireObservables& addRequiredType(const TypeID& type)
-      { requiredTypeSet.insert(type); return (*this); };
+      virtual RequireObservables& addRequiredType(const SatID::SatelliteSystem& sys,
+                                                  const TypeID& type)
+      {
+          if(sys == SatID::systemGPS)
+          {
+              requiredTypeSetOfGPS.insert(type);
+          }
+          else if(sys == SatID::systemGLONASS)
+          {
+              requiredTypeSetOfGLO.insert(type);
+          }
+          else if(sys == SatID::systemGalileo)
+          {
+              requiredTypeSetOfGAL.insert(type);
+          }
+          else if(sys == SatID::systemBDS)
+          {
+              requiredTypeSetOfBDS.insert(type);
+          }
+
+          return (*this);
+      };
 
 
          /** Method to add a set of TypeID's to be required.
           *
           * @param typeSet    Set of TypeID's to be required.
           */
-      virtual RequireObservables& addRequiredType(TypeIDSet& typeSet);
+      virtual RequireObservables& addRequiredType(const SatID::SatelliteSystem& sys,
+                                                  const TypeIDSet& typeSet);
 
 
          /** Method to set a TypeID to be required. This method will erase
@@ -132,8 +176,32 @@ namespace gpstk
           *
           * @param type      TypeID to be required.
           */
-      virtual RequireObservables& setRequiredType(const TypeID& type)
-      { requiredTypeSet.clear(); requiredTypeSet.insert(type); return *this; };
+      virtual RequireObservables& setRequiredType(const SatID::SatelliteSystem& sys,
+                                                  const TypeID& type)
+      {
+          if(sys == SatID::systemGPS)
+          {
+              requiredTypeSetOfGPS.clear();
+              requiredTypeSetOfGPS.insert(type);
+          }
+          else if(sys == SatID::systemGLONASS)
+          {
+              requiredTypeSetOfGLO.clear();
+              requiredTypeSetOfGLO.insert(type);
+          }
+          else if(sys == SatID::systemGalileo)
+          {
+              requiredTypeSetOfGAL.clear();
+              requiredTypeSetOfGAL.insert(type);
+          }
+          else if(sys == SatID::systemBDS)
+          {
+              requiredTypeSetOfBDS.clear();
+              requiredTypeSetOfBDS.insert(type);
+          }
+
+          return (*this);
+      };
 
 
          /** Method to set the TypeID's to be required. This method will erase
@@ -141,16 +209,61 @@ namespace gpstk
           *
           * @param typeSet       Set of TypeID's to be required.
           */
-      virtual RequireObservables& setRequiredType(const TypeIDSet& typeSet)
-      { requiredTypeSet.clear(); requiredTypeSet = typeSet; return (*this); };
+      virtual RequireObservables& setRequiredType(const SatID::SatelliteSystem& sys,
+                                                  const TypeIDSet& typeSet)
+      {
+          if(sys == SatID::systemGPS)
+          {
+              requiredTypeSetOfGPS.clear();
+              requiredTypeSetOfGPS = typeSet;
+          }
+          else if(sys == SatID::systemGLONASS)
+          {
+              requiredTypeSetOfGLO.clear();
+              requiredTypeSetOfGLO = typeSet;
+          }
+          else if(sys == SatID::systemGalileo)
+          {
+              requiredTypeSetOfGAL.clear();
+              requiredTypeSetOfGAL = typeSet;
+          }
+          else if(sys == SatID::systemBDS)
+          {
+              requiredTypeSetOfBDS.clear();
+              requiredTypeSetOfBDS = typeSet;
+          }
+
+          return (*this);
+      };
 
 
          /// Method to get the set of TypeID's to be required.
-      virtual TypeIDSet getRequiredType() const
-      { return requiredTypeSet; };
+      virtual TypeIDSet getRequiredType(const SatID::SatelliteSystem& sys) const
+      {
+          TypeIDSet ret;
+
+          if(sys == SatID::systemGPS)
+          {
+              ret = requiredTypeSetOfGPS;
+          }
+          else if(sys == SatID::systemGLONASS)
+          {
+              ret = requiredTypeSetOfGLO;
+          }
+          else if(sys == SatID::systemGalileo)
+          {
+              ret = requiredTypeSetOfGAL;
+          }
+          else if(sys == SatID::systemBDS)
+          {
+              ret = requiredTypeSetOfBDS;
+          }
+
+          return ret;
+      };
 
 
-         /** Returns a gnnsSatTypeValue object, checking the required
+         /** Returns a gnssSatTypeValue object, checking the required
           *  observables.
           *
           * @param gData    Data object holding the data.
@@ -161,13 +274,21 @@ namespace gpstk
 
 
 
-         /** Returns a gnnsRinex object, checking the required observables.
+         /** Returns a gnssRinex object, checking the required observables.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData)
          throw(ProcessingException)
       { Process(gData.body); return gData; };
+
+
+         /** Returns a gnssDataMap object, checking the required observables.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
+         throw(ProcessingException);
 
 
          /// Returns a string identifying this object.
@@ -180,10 +301,11 @@ namespace gpstk
 
    private:
 
-
          /// Set of types to be required
-      TypeIDSet requiredTypeSet;
-
+      TypeIDSet requiredTypeSetOfGPS;
+      TypeIDSet requiredTypeSetOfGLO;
+      TypeIDSet requiredTypeSetOfGAL;
+      TypeIDSet requiredTypeSetOfBDS;
 
    }; // End of class 'RequireObservables'
 

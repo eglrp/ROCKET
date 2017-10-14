@@ -87,18 +87,25 @@ namespace gpstk
       { };
 
 
-         /** Processing method. It returns a gnnsSatTypeValue object.
+         /** Processing method. It returns a gnssSatTypeValue object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssSatTypeValue& Process(gnssSatTypeValue& gData);
 
 
-         /** Processing method. It returns a gnnsRinex object.
+         /** Processing method. It returns a gnssRinex object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData);
+
+
+         /** Processing method. It returns a gnssDataMap object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData);
 
 
          /// Returns a pointer to the first element.

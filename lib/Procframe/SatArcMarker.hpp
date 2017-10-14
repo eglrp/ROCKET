@@ -165,6 +165,15 @@ namespace gpstk
           */
       virtual CommonTime getArcChangedEpoch(const SatID& sat);
 
+
+         /** Method to get the arc changed epoch.
+          * @param source           Interested SourceID.
+          * @param sat              Interested SatID.
+          */
+      virtual CommonTime getArcChangedEpoch(const SourceID& source,
+                                            const SatID& sat);
+
+
          /** Returns a satTypeValueMap object, adding the new data generated
           *  when calling this object.
           *
@@ -176,7 +185,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
+         /** Returns a gnssSatTypeValue object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -185,12 +194,21 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsRinex object, adding the new data generated when
+         /** Returns a gnssRinex object, adding the new data generated when
           *  calling this object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData)
+         throw(ProcessingException);
+
+
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
          throw(ProcessingException);
 
 
@@ -218,16 +236,29 @@ namespace gpstk
       double unstablePeriod;
 
 
+      struct arcData
+      {
+          arcData()
+              : arcNum(0),
+                arcChangeTime(CommonTime::BEGINNING_OF_TIME),
+                arcNew(false)
+          {};
+
+          double arcNum;
+          CommonTime arcChangeTime;
+          bool arcNew;
+      };
+
+
+      typedef std::map<SatID, arcData> SatArcData;
+      typedef std::map<SourceID, SatArcData> SatArcDataMap;
+
+
          /// Map holding information regarding every satellite
-      std::map<SatID, double> satArcMap;
+      SatArcData m_satArcData;
 
-
-         /// Map holding information about epoch of last arc change
-      std::map<SatID, CommonTime> satArcChangeMap;
-
-
-         /// Map keeping track if this satellite is new or not
-      std::map<SatID, bool> satIsNewMap;
+         /// Map holding information for gnssDataMap
+      SatArcDataMap m_satArcDataMap;
 
 
    }; // End of class 'SatArcMarker'

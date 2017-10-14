@@ -1,17 +1,10 @@
-#pragma ident "$Id: $"
-
-/**
- * @file NetworkObsStreams.cpp
- * This class synchronizes rinex observation data streams.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,14 +16,34 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
+//  Copyright 2004, The University of Texas at Austin
 //  Wei Yan - Chinese Academy of Sciences . 2009, 2010
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software.
+//
+//Pursuant to DoD Directive 523024
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file NetworkObsStreams.cpp
+ * This class synchronizes rinex observation data streams.
+ */
 
 #include "NetworkObsStreams.hpp"
-#include "RinexObsHeader.hpp"
+#include "Rinex3ObsHeader.hpp"
 
+using namespace std;
 
 namespace gpstk
 {
@@ -45,7 +58,7 @@ namespace gpstk
       try
       {
             // allocate memory
-         oData.pObsStream = new RinexObsStream();
+         oData.pObsStream = new Rinex3ObsStream();
          oData.pSynchro = new Synchronize();
          if(!oData.pObsStream || !oData.pSynchro)
          {
@@ -59,20 +72,20 @@ namespace gpstk
          oData.pObsStream->open(oData.obsFile, std::ios::in);
 
             // We reader the header of the obs file
-         RinexObsHeader obsHeader;
+         Rinex3ObsHeader obsHeader;
          (*oData.pObsStream) >> obsHeader;
 
 
-         oData.obsSource.type = SatIDsystem2SourceIDtype(obsHeader.system);
+         oData.obsSource.type = SatIDsystem2SourceIDtype(obsHeader.fileSysSat);
          oData.obsSource.sourceName = obsHeader.markerName;
 
-         oData.pSynchro->setReferenceStream(*oData.pObsStream);
+         oData.pSynchro->setReferenceSource(*oData.pObsStream);
 
             // Now, we should store the data for the receiver
          allStreamData.push_back(oData);
 
-         srcStreamMap[oData.obsSource] = oData.pObsStream;
-         srcSyncMap[oData.obsSource] = oData.pSynchro;
+         mapSourceStream[oData.obsSource] = oData.pObsStream;
+         mapSourceSynchro[oData.obsSource] = oData.pSynchro;
 
          referenceSource = oData.obsSource;
 
@@ -85,7 +98,7 @@ namespace gpstk
 
          // We have to deallocate the memory here
          delete oData.pObsStream;
-         oData.pObsStream = (RinexObsStream*)0;
+         oData.pObsStream = (Rinex3ObsStream*)0;
 
          return false;
       }
@@ -94,7 +107,7 @@ namespace gpstk
 
       // Get epoch data of the network
       // @gdsMap  Object hold epoch observation data of the network
-      // @return  Is there more epoch data for the network 
+      // @return  Is there more epoch data for the network
    bool NetworkObsStreams::readEpochData(gnssDataMap& gdsMap)
       throw(SynchronizeException)
    {
@@ -102,22 +115,22 @@ namespace gpstk
       gdsMap.clear();
 
 
-      RinexObsStream* pRefObsStream = srcStreamMap[referenceSource];
+      Rinex3ObsStream* pRefObsStream = mapSourceStream[referenceSource];
 
       gnssRinex gRef;
-  
+
       if( (*pRefObsStream) >> gRef )
       {
          gdsMap.addGnssRinex(gRef);
 
-         std::map<SourceID, RinexObsStream*>::iterator it;
-         for( it = srcStreamMap.begin();
-              it != srcStreamMap.end();
-            ++it)
+         std::map<SourceID, Rinex3ObsStream*>::iterator it;
+         for( it = mapSourceStream.begin();
+              it != mapSourceStream.end();
+              ++it )
          {
             if( it->first == referenceSource) continue;
 
-            Synchronize* synchro = srcSyncMap[it->first];
+            Synchronize* synchro = mapSourceSynchro[it->first];
             synchro->setRoverData(gRef);
 
             gnssRinex gRin;
@@ -141,8 +154,8 @@ namespace gpstk
                }
             }
 
-         }  // End of 'for(std::map<SourceID, RinexObsStream*>::iterator it;
-         
+         }  // End of 'for(std::map<SourceID, Rinex3ObsStream*>::iterator it;
+
          return true;
 
       }  // End of 'if( (*pRefObsStream) >> gRef )'
@@ -152,10 +165,10 @@ namespace gpstk
 
    }  // End of method 'NetworkObsStreams::readEpochData()'
 
-      // do some clean operation 
+      // do some clean operation
    void NetworkObsStreams::cleanUp()
    {
-      srcStreamMap.clear();
+      mapSourceStream.clear();
 
       std::list<ObsData>::iterator it;
       for( it = allStreamData.begin();
@@ -166,9 +179,9 @@ namespace gpstk
          {
             it->pObsStream->close();
             delete it->pObsStream;
-            it->pObsStream = (RinexObsStream*)0;
+            it->pObsStream = (Rinex3ObsStream*)0;
          }
-         
+
          if(it->pSynchro)
          {
             delete it->pSynchro;
@@ -185,15 +198,15 @@ namespace gpstk
    {
       try
       {
-         RinexObsStream rin;
+         Rinex3ObsStream rin;
          rin.exceptions(std::ios::failbit);
          rin.open(obsFile, std::ios::in);
- 
+
          gnssRinex gRin;
          rin >> gRin;
 
          rin.close();
-         
+
          return gRin.header.source;
       }
       catch(...)
@@ -202,7 +215,7 @@ namespace gpstk
          // Maybe it doesn't exist or you don't have proper read permissions
 
          Exception e("Problem opening the file "
-            + obsFile 
+            + obsFile
             + "Maybe it doesn't exist or you don't have proper read permissions");
 
          GPSTK_THROW(e);
@@ -211,7 +224,3 @@ namespace gpstk
    }  // End of method 'NetworkObsStreams::sourceIDOfRinexObsFile'
 
 }  // End of namespace gpstk
-
-
-
-

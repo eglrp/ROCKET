@@ -1,9 +1,0 @@
-Installation of the GPSTk library and applications
---------------------------------------------------
-
-CMAKE is used as the management tool, thus the installation
-of the software is the same as the common cmake-like software, such
-as GPSTK. 
-
-please refer to the INSTALL of the GPSTK.
-

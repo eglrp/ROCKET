@@ -1,20 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file Rinex3ClockStream.hpp
- * File stream for RINEX3 clock data file
- */
-
-#ifndef GPSTK_RINEX3CLOCKSTREAM_HPP
-#define GPSTK_RINEX3CLOCKSTREAM_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -25,101 +15,75 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//
-//  Octavian Andrei - FGI ( http://www.fgi.fi ). 2008
+//  
+//  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
 
-// system
-#include <vector>
-#include <list>
-#include <map>
-#include <string>
-// GPSTk
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software. 
+//
+//Pursuant to DoD Directive 523024 
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public 
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file Rinex3ClockStream.hpp
+ * gpstk::Rinex3ClockStream - RINEX Clock format file stream
+ */
+
+#ifndef RINEX3CLOCKSTREAM_HPP
+#define RINEX3CLOCKSTREAM_HPP
+
+#include <iostream>
+#include <fstream>
+
 #include "FFTextStream.hpp"
-#include "Rinex3ClockHeader.hpp"
 
 namespace gpstk
 {
-
-      /** @addtogroup Rinex3Clock */
+      /// @ingroup FileHandling
       //@{
 
-      /** This class reads RINEX3 clock data files.
-       *
-       * @sa gpstk::Rinex3ClockData and gpstk::Rinex3ClockHeader.
-       * @sa rinex_clk_test.cpp and rinex_clk_read_write.cpp for examples.
-       */
+      /** This class performs file I/O on an RINEX Clock format file
+       * for the Rinex3ClockHeader and Rinex3ClockData classes. */
    class Rinex3ClockStream : public FFTextStream
    {
    public:
-
-
          /// Default constructor
-      Rinex3ClockStream()
-         : headerRead(false) {};
+      Rinex3ClockStream();
 
+         /** Common constructor: open (default: read mode)
+          * @param[in] filename the name of the ASCII Rinex3Clock
+          *   format file to be opened
+          * @param[in] mode the ios::openmode to be used */
+      Rinex3ClockStream(const char* filename,
+                        std::ios::openmode mode=std::ios::in);
 
-         /** Common constructor.
-          *
-          * @param fn      the RINEX3 clock data file to open
-          * @param mode    how to open \a fn.
-          */
-      Rinex3ClockStream( const char* fn,
-                         std::ios::openmode mode=std::ios::in )
-         : FFTextStream(fn, mode), headerRead(false) {};
+         /// destructor
+      virtual ~Rinex3ClockStream();
 
+         /** override open() to reset the header
+          * @param[in] filename the name of the ASCII RINEX Clock format file
+          * @param[in] mode the ios::openmode to be used */
+      virtual void open(const char* filename, std::ios::openmode mode);
 
-         /** Common constructor.
-          *
-          * @param fn      the RINEX3 clock data file to open
-          * @param mode    how to open \a fn.
-          */
-      Rinex3ClockStream( const std::string fn,
-                         std::ios::openmode mode=std::ios::in )
-         : FFTextStream(fn.c_str(), mode), headerRead(false) {};
+      bool headerRead;             ///< true if the header has been read
 
-
-         /// Destructor
-      virtual ~Rinex3ClockStream() {};
-
-
-         /** Overrides open to reset the header
-          *
-          * @param fn      the RINEX3 clock data file to open
-          * @param mode    how to open \a fn.
-          */
-      virtual void open( const char* fn,
-                         std::ios::openmode mode )
-      {
-         FFTextStream::open(fn, mode);
-         headerRead = false;
-         header = Rinex3ClockHeader();
-      };
-
-
-         /** Overrides open to reset the header
-          *
-          * @param fn      the RINEX3 clock data file to open
-          * @param mode    how to open \a fn.
-          */
-      virtual void open( const std::string& fn,
-                         std::ios::openmode mode )
-      { open(fn.c_str(), mode); };
-
-
-         /// Whether or not the Rinex3ClockHeader has been read
-      bool headerRead;
-
-
-         /// The header for this file.
-      Rinex3ClockHeader header;
-
-
-   }; // End of class 'Rinex3ClockStream'
-
+   private:
+         /// initialize internal data structures
+      void init();
+   }; // class Rinex3ClockStream
+   
       //@}
+   
+} // namespace gpstk
 
-}  // End of namespace gpstk
-
-#endif   // GPSTK_RINEX3CLOCKSTREAM_HPP
+#endif // RINEX3CLOCKSTREAM_HPP

@@ -98,8 +98,7 @@ install (TARGETS rocket DESTINATION lib)
 install (FILES ${HEADERS} ${HEADERS2} DESTINATION include/rocket )
 
 ## Parallel Options
-option(USE_OPENMP "Option for parallel computing, default value is OFF" OFF)
-
+option(USE_OPENMP "Use openmp" ON)
 message("openmp=${USE_OPENMP}")
 
 if (USE_OPENMP)
@@ -128,6 +127,5 @@ if (USE_OPENMP)
 endif(USE_OPENMP)
 
 
-# GPSTk Subdirectories
-add_subdirectory (apps)
-add_subdirectory (oldtests)
+# ROCKET Subdirectories
+add_subdirectory (tests)

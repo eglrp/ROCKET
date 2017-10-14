@@ -1,17 +1,10 @@
-#pragma ident "$Id$"
-
-/**
- * @file Synchronize.cpp
- * This class synchronizes two GNSS Data Structures data streams.
- */
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -23,13 +16,33 @@
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
 //
+//  Copyright 2004, The University of Texas at Austin
 //  Dagoberto Salazar - gAGE ( http://www.gage.es ). 2008, 2011
 //
 //============================================================================
 
+//============================================================================
+//
+//This software developed by Applied Research Laboratories at the University of
+//Texas at Austin, under contract to an agency or agencies within the U.S.
+//Department of Defense. The U.S. Government retains all rights to use,
+//duplicate, distribute, disclose, or release this software.
+//
+//Pursuant to DoD Directive 523024
+//
+// DISTRIBUTION STATEMENT A: This software has been approved for public
+//                           release, distribution is unlimited.
+//
+//=============================================================================
+
+/**
+ * @file Synchronize.cpp
+ * This class synchronizes two GNSS Data Structures data streams.
+ */
 
 #include "Synchronize.hpp"
 
+using namespace std;
 
 namespace gpstk
 {
@@ -71,7 +84,7 @@ namespace gpstk
       Process(time,gData);
 
       return gData;
-      
+
    }  // End of method 'Synchronize::Process()'
 
 
@@ -85,10 +98,10 @@ namespace gpstk
       throw(SynchronizeException)
    {
       CommonTime time(pgRov1->header.epoch);
-      
+
       gnssRinex gRin;
       Process(time,gRin);
-      
+
       gData.header = gRin.header;
       gData.body = gRin.body;
 
@@ -100,7 +113,7 @@ namespace gpstk
    gnssRinex& Synchronize::Process(CommonTime time, gnssRinex& gData)
       throw(SynchronizeException)
    {
-      
+
       if (firstTime)
       {
          (*pRinexRef) >> gData;      // Get data out of ref station RINEX file
@@ -113,7 +126,7 @@ namespace gpstk
 
       gData = gnssRinexBuffer.front();
 
-      if( (gData.header.epoch > time) && 
+      if( (gData.header.epoch > time) &&
          (std::abs( gData.header.epoch - time ) > tolerance ))
       {
          // If synchronization is not possible, we issue an exception
@@ -130,9 +143,10 @@ namespace gpstk
       while ( ( gData.header.epoch < time ) &&
          (std::abs( gData.header.epoch - time ) > tolerance ) )
       {
-         (*pRinexRef) >> gData;   // Get data out of ref station RINEX file
-      }
+          if((*pRinexRef).eof()) break;
 
+          (*pRinexRef) >> gData;   // Get data out of ref station RINEX file
+      }
 
       // If we couldn't synchronize data streams (i.e.: "tolerance"
       // is not met), skip this epoch.
@@ -144,8 +158,8 @@ namespace gpstk
          GPSTK_THROW(e);
       }
 
-
       return gData;
+
    }  // End of method 'Synchronize::Process(CommonTime time, gnssRinex& gData)'
 
 }  // End of namespace gpstk

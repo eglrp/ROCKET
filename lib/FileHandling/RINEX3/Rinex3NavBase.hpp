@@ -1,21 +1,10 @@
-#pragma ident "$Id$"
-
-
-/**
- * @file Rinex3NavBase.hpp
- * Base class for RINEX Navigation data
- */
-
-#ifndef GPSTK_RINEX3NAVBASE_HPP
-#define GPSTK_RINEX3NAVBASE_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -45,27 +34,34 @@
 //
 //=============================================================================
 
+/**
+ * @file Rinex3NavBase.hpp
+ * Base class for RINEX Navigation data
+ */
+
+#ifndef GPSTK_RINEX3NAVBASE_HPP
+#define GPSTK_RINEX3NAVBASE_HPP
 
 #include "FFData.hpp"
 
 namespace gpstk
 {
-   /** @defgroup Rinex3Nav RINEX 3 navigation files */
-   //@{
+      /// @ingroup FileHandling
+      //@{
 
-  /**
-   * This class serves no purpose other than to make readable diagrams.
-   */
+      /**
+       * This class serves no purpose other than to make readable diagrams.
+       */
 
    class Rinex3NavBase : public FFData
    {
    public:
 
-      /// Destructor
+         /// Destructor
       virtual ~Rinex3NavBase() {}
    };
 
-   //@}
+      //@}
 
 }
 

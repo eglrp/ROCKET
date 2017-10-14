@@ -1,21 +1,10 @@
-#pragma ident "$Id$"
-
-
-/**
- * @file Rinex3NavStream.hpp
- * File stream for Rinex 3 navigation file data
- */
-
-#ifndef GPSTK_RINEX3NAVSTREAM_HPP
-#define GPSTK_RINEX3NAVSTREAM_HPP
-
 //============================================================================
 //
 //  This file is part of GPSTk, the GPS Toolkit.
 //
 //  The GPSTk is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU Lesser General Public License as published
-//  by the Free Software Foundation; either version 2.1 of the License, or
+//  by the Free Software Foundation; either version 3.0 of the License, or
 //  any later version.
 //
 //  The GPSTk is distributed in the hope that it will be useful,
@@ -45,14 +34,21 @@
 //
 //=============================================================================
 
+/**
+ * @file Rinex3NavStream.hpp
+ * File stream for Rinex 3 navigation file data
+ */
+
+#ifndef RINEX3NAVSTREAM_HPP
+#define RINEX3NAVSTREAM_HPP
 
 #include "FFTextStream.hpp"
 #include "Rinex3NavHeader.hpp"
 
 namespace gpstk
 {
-   /** @addtogroup Rinex3Nav */
-   //@{
+      /// @ingroup FileHandling
+      //@{
 
       /**
        * This class performs file i/o on a RINEX 3 NAV file.
@@ -64,28 +60,19 @@ namespace gpstk
    class Rinex3NavStream : public FFTextStream
    {
    public:
-
          /// Default constructor
-      Rinex3NavStream()
-            : headerRead(false)
-         {}
+      Rinex3NavStream();
       
          /** Constructor 
           * Opens a file named \a fn using ios::openmode \a mode.
           */
-      Rinex3NavStream(const char* fn, std::ios::openmode mode=std::ios::in)
-            : FFTextStream(fn, mode), headerRead(false) {}
+      Rinex3NavStream(const char* fn, std::ios::openmode mode=std::ios::in);
       
          /// Destructor
-      virtual ~Rinex3NavStream() {}
+      virtual ~Rinex3NavStream();
       
          /// overrides open to reset the header
-      virtual void open(const char* fn, std::ios::openmode mode)
-         { 
-            FFTextStream::open(fn, mode); 
-            headerRead = false; 
-            header = Rinex3NavHeader();
-         }
+      virtual void open(const char* fn, std::ios::openmode mode);
 
          /// RINEX NAV header for this file.
       Rinex3NavHeader header;
@@ -93,9 +80,12 @@ namespace gpstk
          /// Flag showing whether or not the header has been read.
       bool headerRead;
 
+   private:
+         /// initialize internal data structures
+      void init();
    };
 
-   //@}
+      //@}
 
 }
 

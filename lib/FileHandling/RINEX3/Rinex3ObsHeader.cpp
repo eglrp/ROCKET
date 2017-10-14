@@ -20,7 +20,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -28,13 +28,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -89,6 +89,7 @@ namespace gpstk
    const string Rinex3ObsHeader::stringPrnObs            = "PRN / # OF OBS";
    const string Rinex3ObsHeader::stringEoH               = "END OF HEADER";
 
+
    void Rinex3ObsHeader::reallyPutRecord(FFStream& ffs) const
       throw(exception, FFStreamError, StringException)
    {
@@ -100,6 +101,7 @@ namespace gpstk
       if     (version == 3.00)  allValid = allValid30;
       else if(version == 3.01)  allValid = allValid301;
       else if(version == 3.02)  allValid = allValid302;
+      else if(version == 3.03)  allValid = allValid303;
       else if(version <  3)     allValid = allValid2;
       else {
          FFStreamError err("Unknown RINEX version: " + asString(version,2));
@@ -111,7 +113,9 @@ namespace gpstk
          ostringstream msg;
          msg << endl;
          msg << "Version = " << version << hex << endl;
-         if(version == 3.02)
+         if(version == 3.03)
+            msg << "allValid303 = 0x" << setw(8) << nouppercase << allValid303 << endl;
+         else if(version == 3.02)
             msg << "allValid302 = 0x" << setw(8) << nouppercase << allValid302 << endl;
          else if(version == 3.01)
             msg << "allValid301 = 0x" << setw(8) << nouppercase << allValid301 << endl;
@@ -520,12 +524,12 @@ namespace gpstk
          strm << line << endl;
 //       cout << "Line >" << line << "<" << endl;
          strm.lineNumber++;
-         
+
             // handle continuation lines
          if(!extraWaveFactList.empty())
          {
             vector<ExtraWaveFact>::const_iterator itr = extraWaveFactList.begin();
-            
+
             while (itr != extraWaveFactList.end())
             {
                const int maxSatsPerLine = 7;
@@ -863,7 +867,7 @@ namespace gpstk
                   catch (Exception& e)
                   {
                      FFStreamError ffse(e);
-                     GPSTK_RETHROW(ffse); 
+                     GPSTK_RETHROW(ffse);
                   }
                }
                else if((numObsWritten % maxObsPerLine) == 0) {    // end of line
@@ -908,7 +912,7 @@ namespace gpstk
    {
       int i;
       string label(line, 60, 20);
-         
+
       if(label == stringVersion)
       {
          version  = asDouble(line.substr( 0,20));
@@ -1098,7 +1102,7 @@ namespace gpstk
                }
                mapObsTypes[satSysTemp] = newTypeList;
             }
-            else                    // it's a new line, use info. read in
+            else                  // it's a new line, use info. read in
             {
                vector<RinexObsID> newTypeList;
                for(i = 0; (i < numObs) && (i < maxObsPerLine); i++)
@@ -1137,24 +1141,24 @@ namespace gpstk
             ewf.wavelengthFactor[0] = asInt(line.substr(0,6));
             ewf.wavelengthFactor[1] = asInt(line.substr(6,6));
             Nsats = asInt(line.substr(12,6));
-               
+
             if(Nsats > maxSatsPerLine)   // > not >=
             {
                FFStreamError e("Invalid number of Sats for " + stringWaveFact);
                GPSTK_THROW(e);
             }
-               
+
             for(i = 0; i < Nsats; i++) {
                try {
                   RinexSatID prn(line.substr(21+i*6,3));
-                  ewf.satList.push_back(prn); 
+                  ewf.satList.push_back(prn);
                }
                catch (Exception& e){
                   FFStreamError ffse(e);
                   GPSTK_RETHROW(ffse);
                }
             }
-               
+
             extraWaveFactList.push_back(ewf);
          }
       }
@@ -1171,6 +1175,8 @@ namespace gpstk
       else if(label == stringFirstTime)
       {
          firstObs = parseTime(line);
+         if(firstObs.getTimeSystem() == TimeSystem::Unknown)
+             firstObs.setTimeSystem(TimeSystem::GPS);
          valid |= validFirstTime;
       }
       else if(label == stringLastTime)
@@ -1246,70 +1252,75 @@ namespace gpstk
 
          valid |= validSystemScaleFac;
       }
-      else if(label == stringSystemPhaseShift) ///< "SYS / PHASE SHIFT"    R3.01
+      else if(label == stringSystemPhaseShift
+           || label == "SYS / PHASE SHIFTS") ///< "SYS / PHASE SHIFT"    R3.01
+          // Add "SYS / PHASE SHIFTS" for exceptional cases.
       {
-         //map<string, map<RinexObsID, map<RinexSatID,double> > > sysPhaseShift;
-         RinexSatID sat;
-         // system
-         satSysTemp = strip(line.substr(0,1));
+         if(!strip(line.substr(0,60)).empty())
+         {
+             //map<string, map<RinexObsID, map<RinexSatID,double> > > sysPhaseShift;
+             RinexSatID sat;
+             // system
+             satSysTemp = strip(line.substr(0,1));
 
-         if(satSysTemp.empty()) {                  // continuation line
-            satSysTemp = satSysPrev;
+             if(satSysTemp.empty()) {                  // continuation line
+                satSysTemp = satSysPrev;
 
-            if(sysPhaseShift[satSysTemp].find(sysPhaseShiftObsID)
-                                          == sysPhaseShift[satSysTemp].end())
-            {
-               FFStreamError e("SYS / PHASE SHIFT: unexpected continuation line");
-               GPSTK_THROW(e);
-            }
+                if(sysPhaseShift[satSysTemp].find(sysPhaseShiftObsID)
+                                              == sysPhaseShift[satSysTemp].end())
+                {
+                   FFStreamError e("SYS / PHASE SHIFT: unexpected continuation line");
+                   GPSTK_THROW(e);
+                }
 
-            map<RinexSatID,double>& satcorrmap(sysPhaseShift[satSysTemp][sysPhaseShiftObsID]);
-            double cor(sysPhaseShift[satSysTemp][sysPhaseShiftObsID].begin()->second);
-            for(i=0; i<10; i++) {
-               string str = strip(line.substr(19+4*i,3));
-               if(str.empty()) break;
-               sat = RinexSatID(str);
-               satcorrmap.insert(make_pair(sat,cor));
-            }
-         }
-         else {                                    // not a cont. line
-            sat.fromString(satSysTemp);
-            if(sysPhaseShift.find(satSysTemp) == sysPhaseShift.end()) {
-               map<RinexObsID, map<RinexSatID, double> > obssatcormap;
-               sysPhaseShift.insert(make_pair(satSysTemp,obssatcormap));
-            }
+                map<RinexSatID,double>& satcorrmap(sysPhaseShift[satSysTemp][sysPhaseShiftObsID]);
+                double cor(sysPhaseShift[satSysTemp][sysPhaseShiftObsID].begin()->second);
+                for(i=0; i<10; i++) {
+                   string str = strip(line.substr(19+4*i,3));
+                   if(str.empty()) break;
+                   sat = RinexSatID(str);
+                   satcorrmap.insert(make_pair(sat,cor));
+                }
+             }
+             else {                                    // not a cont. line
+                sat.fromString(satSysTemp);
+                if(sysPhaseShift.find(satSysTemp) == sysPhaseShift.end()) {
+                   map<RinexObsID, map<RinexSatID, double> > obssatcormap;
+                   sysPhaseShift.insert(make_pair(satSysTemp,obssatcormap));
+                }
 
-            // obs id
-            string str = strip(line.substr(2,3));
+                // obs id
+                string str = strip(line.substr(2,3));
 
-            // obsid and correction may be blank <=> unknown: ignore this
-            if(!str.empty()) {
-               RinexObsID obsid(satSysTemp+str);
-               //cout << "Found Phase shift obsid " << satSysTemp << str
-               //<< " " << obsid << endl;
-               double cor(asDouble(strip(line.substr(6,8))));
-               int nsat(asInt(strip(line.substr(16,2))));
-               if(nsat > 0) {          // list of sats
-                  map<RinexSatID,double> satcorrmap;
-                  for(i=0; i<(nsat < 10 ? nsat : 10); i++) {
-                     sat = RinexSatID(strip(line.substr(19+4*i,3)));
-                     satcorrmap.insert(make_pair(sat,cor));
-                  }
-                  sysPhaseShift[satSysTemp].insert(make_pair(obsid,satcorrmap));
-                  if(nsat > 10)        // expect continuation
-                     sysPhaseShiftObsID = obsid;
-               }
-               else {                  // no sat, just system
-                  map<RinexSatID,double> satcorrmap;
-                  satcorrmap.insert(make_pair(sat,cor));
-                  sysPhaseShift[satSysTemp].insert(make_pair(obsid,satcorrmap));
-               }
-            }
+                // obsid and correction may be blank <=> unknown: ignore this
+                if(!str.empty()) {
+                   RinexObsID obsid(satSysTemp+str);
+                   //cout << "Found Phase shift obsid " << satSysTemp << str
+                   //<< " " << obsid << endl;
+                   double cor(asDouble(strip(line.substr(6,8))));
+                   int nsat(asInt(strip(line.substr(16,2))));
+                   if(nsat > 0) {          // list of sats
+                      map<RinexSatID,double> satcorrmap;
+                      for(i=0; i<(nsat < 10 ? nsat : 10); i++) {
+                         sat = RinexSatID(strip(line.substr(19+4*i,3)));
+                         satcorrmap.insert(make_pair(sat,cor));
+                      }
+                      sysPhaseShift[satSysTemp].insert(make_pair(obsid,satcorrmap));
+                      if(nsat > 10)        // expect continuation
+                         sysPhaseShiftObsID = obsid;
+                   }
+                   else {                  // no sat, just system
+                      map<RinexSatID,double> satcorrmap;
+                      satcorrmap.insert(make_pair(sat,cor));
+                      sysPhaseShift[satSysTemp].insert(make_pair(obsid,satcorrmap));
+                   }
+                }
 
-            // save for continuation lines
-            satSysPrev = satSysTemp;
+                // save for continuation lines
+                satSysPrev = satSysTemp;
+             }
 
-            valid |= validSystemPhaseShift;
+             valid |= validSystemPhaseShift;
          }
       }
       else if(label == stringGlonassSlotFreqNo)
@@ -1330,7 +1341,8 @@ namespace gpstk
 
          valid |= validGlonassFreqNo;
       }
-      else if(label == stringGlonassCodPhsBias) {
+      else if(label == stringGlonassCodPhsBias
+           || label == "GLONASS COD/PHS/BIS#") {
          //std::map<RinexObsID,double> GlonassCodePhaseBias; ///< "GLONASS COD/PHS/BIS"            R3.02
          for(i=0; i<4; i++) {
             string str(strip(line.substr(i*13+1,3)));
@@ -1426,7 +1438,7 @@ namespace gpstk
 
    // This function parses the entire header from the given stream
    void Rinex3ObsHeader::reallyGetRecord(FFStream& ffs)
-      throw(exception, FFStreamError, 
+      throw(exception, FFStreamError,
             gpstk::StringUtils::StringException)
    {
       Rinex3ObsStream& strm = dynamic_cast<Rinex3ObsStream&>(ffs);
@@ -1684,9 +1696,10 @@ namespace gpstk
       else if(version == 3.0)  allValid = allValid30;
       else if(version == 3.01) allValid = allValid301;
       else if(version == 3.02) allValid = allValid302;
+      else if(version == 3.03) allValid = allValid303;
       else
       {
-         FFStreamError e("Unknown or unsupported RINEX version " + 
+         FFStreamError e("Unknown or unsupported RINEX version " +
                          asString(version));
          GPSTK_THROW(e);
       }
@@ -1711,13 +1724,13 @@ namespace gpstk
       {
          if(fileSysSat.system == SatID::systemGPS)
             strm.timesystem = TimeSystem::GPS;
-         else if(fileSysSat.system == SatID::systemGlonass)
+         else if(fileSysSat.system == SatID::systemGLONASS)
             strm.timesystem = TimeSystem::UTC;
          else if(fileSysSat.system == SatID::systemGalileo)
             strm.timesystem = TimeSystem::GAL;
          else if(fileSysSat.system == SatID::systemQZSS)
             strm.timesystem = TimeSystem::QZS;
-         else if(fileSysSat.system == SatID::systemBeiDou)
+         else if(fileSysSat.system == SatID::systemBDS)
             strm.timesystem = TimeSystem::BDT;
          else if(fileSysSat.system == SatID::systemMixed) {
             FFStreamError e("TimeSystem in MIXED files must be given by first obs");
@@ -1738,7 +1751,7 @@ namespace gpstk
       double sec;
       string tsys;
       TimeSystem ts;
-   
+
       year  = asInt(   line.substr(0,   6));
       month = asInt(   line.substr(6,   6));
       day   = asInt(   line.substr(12,  6));
@@ -1887,7 +1900,7 @@ namespace gpstk
          rsid.fromString(iter->first);
          s << rsid.systemString() << " Observation types ("
             << iter->second.size() << "):" << endl;
-         for(i = 0; i < iter->second.size(); i++) 
+         for(i = 0; i < iter->second.size(); i++)
             s << " Type #" << setw(2) << setfill('0') << i+1 << setfill(' ')
             << " (" << iter->second[i].asString() << ") "
               << asString(static_cast<ObsID>(iter->second[i])) << endl;
@@ -1899,6 +1912,7 @@ namespace gpstk
       if     (version == 3.0)   allValid = allValid30;
       else if(version == 3.01)  allValid = allValid301;
       else if(version == 3.02)  allValid = allValid302;
+      else if(version == 3.03)  allValid = allValid303;
 
       s << "(This header is ";
       if((valid & allValid) == allValid)
@@ -1992,7 +2006,7 @@ namespace gpstk
             s << " from source " << infoPCVS[i].source << "." << endl;
          }
       }
-      if(valid & validSystemScaleFac   )
+      if(valid & validSystemScaleFac)
       {
          map<string, sfacMap>::const_iterator mapIter;
          // loop over GNSSes
@@ -2007,7 +2021,7 @@ namespace gpstk
                s << "   " << iter->first.asString() << " " << iter->second << endl;
          }
       }
-      if(valid & validSystemPhaseShift )
+      if(valid & validSystemPhaseShift)
       {
          map<string, map<RinexObsID, map<RinexSatID,double> > >::const_iterator it;
          for(it=sysPhaseShift.begin(); it!=sysPhaseShift.end(); ++it) {
@@ -2126,7 +2140,7 @@ namespace gpstk
 
          // Extract the GNSS from the type
       string sysStr( type, 0, 1 );
-      
+
          // Create a RinexObsID object from current type
       RinexObsID robs(type);
 

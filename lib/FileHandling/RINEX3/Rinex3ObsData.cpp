@@ -45,8 +45,8 @@
 #include "Rinex3ObsStream.hpp"
 #include "Rinex3ObsData.hpp"
 
-using namespace gpstk::StringUtils;
 using namespace std;
+using namespace gpstk::StringUtils;
 
 namespace gpstk
 {

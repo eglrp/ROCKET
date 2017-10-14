@@ -20,7 +20,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -28,13 +28,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -60,24 +60,6 @@ namespace gpstk
       catch(InvalidParameter& ip) { GPSTK_RETHROW(ip); }
    }
 
-   RinexObsID::RinexObsID(const RinexObsType& rot) : ObsID()
-   {
-      // Note that the choice of tracking code for L1, L2, S1, S2 are arbitrary
-      // since they are ambiguous in the rinex 2 specifications
-      // L1 -> L1P; P1 -> C1P; C1 -> C1C; S1 -> S1P; D1 -> D1P
-      if      (rot == RinexObsHeader::L1) {type=otPhase;   band=cbL1; code=tcP;}
-      else if (rot == RinexObsHeader::P1) {type=otRange;   band=cbL1; code=tcP;}
-      else if (rot == RinexObsHeader::C1) {type=otRange;   band=cbL1; code=tcCA;}
-      else if (rot == RinexObsHeader::S1) {type=otSNR;     band=cbL1; code=tcP;}
-      else if (rot == RinexObsHeader::D1) {type=otDoppler; band=cbL1; code=tcP;}
-      // L2 -> L2P; P2 -> C2P; C2 -> C2X; S2 -> S2P; D2 -> D2P
-      else if (rot == RinexObsHeader::L2) {type=otPhase;   band=cbL2; code=tcP;}
-      else if (rot == RinexObsHeader::P2) {type=otRange;   band=cbL2; code=tcP;}
-      else if (rot == RinexObsHeader::C2) {type=otRange;   band=cbL2; code=tcC2LM;}
-      else if (rot == RinexObsHeader::S2) {type=otSNR;     band=cbL2; code=tcP;}
-      else if (rot == RinexObsHeader::D2) {type=otDoppler; band=cbL2; code=tcP;}
-   }
-
    // Represent this object using the Rinex3 notation
    std::string RinexObsID::asString() const
    {
@@ -99,7 +81,7 @@ namespace gpstk
       }
    }
 
-   // RINEX 3.01 document, section 5.1
+   // RINEX 3.03 document, section 5.1
    // GPS
    //       L1   C,S,L,X,P,W,Y,M,N(but not C1N)       G 1 CSLXPWYMN (but not C1N)
    //       L2   C,D,S,L,X,P,W,Y,M,N(but not C2N)     G 2 CDSLXPWYMN (but not C1N)
@@ -107,6 +89,7 @@ namespace gpstk
    // GLO
    //       G1   C,P                                  R 1 CP
    //       G2   C,P                                  R 2 CP
+   //       G3   I,Q,X                                R 3 IQX
    // GAL
    //       E1   A,B,C,X,Z                            E 1 ABCXZ
    //       E5a  I,Q,X                                E 5 IQX
@@ -116,17 +99,20 @@ namespace gpstk
    // SBAS
    //       L1   C                                    S 1 C
    //       L5   I,Q,X                                S 5 IQX
-   // BDS
-   //       B1   I,Q,X                                C 1 IQX
-   //       B2   I,Q,X                                C 7 IQX
-   //       B3   I,Q,X                                C 6 IQX
    // QZSS
    //       L1   C,S,L,X,Z                            J 1 CSLXZ
    //       L2   S,L,X                                J 2 SLX
    //       L5   I,Q,X                                J 5 IQX
    //       L6   S,L,X                                J 6 SLX
+   // BDS
+   //       B1   I,Q,X                                C 2 IQX
+   //       B2   I,Q,X                                C 7 IQX
+   //       B3   I,Q,X                                C 6 IQX
+   // IRNSS
+   //       L5   A,B,C,X                              I 1 ABCX
+   //       S    A,B,C,X                              I 2 ABCX
 
-   // Determine if the given ObsID is valid. If the input string is 3 
+   // Determine if the given ObsID is valid. If the input string is 3
    // characters long, the system is assumed to be GPS. If this string is 4
    // characters long, the first character is the system designator as
    // described in the Rinex 3 specification.

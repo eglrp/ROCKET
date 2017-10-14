@@ -58,10 +58,10 @@ namespace gpstk
       {
 
          SatIDSet satRejectedSet;
-   
+
             // Loop through all the satellites
          satTypeValueMap::iterator it;
-         for (it = gData.begin(); it != gData.end(); ++it) 
+         for (it = gData.begin(); it != gData.end(); ++it)
          {
             if( isBadSat(epoch,it->first)) satRejectedSet.insert(it->first);
          }
@@ -121,7 +121,7 @@ namespace gpstk
       if(istrm.bad()) return -1;
 
       string buffer;
-      
+
       // let's skip the first 6 lines
       for(int i=0;i<6;i++) getline(istrm,buffer);
 
@@ -134,13 +134,13 @@ namespace gpstk
 
          StringUtils::strip(buffer);
          if (buffer.length()<1) break;
-         
-       
+
+
          int satellite(0), problem(0), action(0);
          stringstream ss(data);
          ss >> satellite >> problem >> action;
-         
-         int s[6]={0.0};
+
+         int s[6]={0};
          for(int i=0;i<6;i++) ss >> s[i];
 
          CivilTime tempEpoch(s[0],s[1],s[2],s[3],s[4],double(s[5]));
@@ -150,30 +150,30 @@ namespace gpstk
          if( data.length()>70 )
          {
             for(int i=0;i<6;i++) ss >> s[i];
-            
+
             CivilTime tempEpoch2(s[0],s[1],s[2],s[3],s[4],double(s[5]));
             endEpoch = tempEpoch2.convertToCommonTime();
          }
-         
+
          int spiltFlag = 0;
 
          string temp = StringUtils::stripLeading(data);
          if(temp[0]=='+') spiltFlag = 1;
          if(temp[0]=='-') spiltFlag =-1;
-         
+
          // We only handle GPS satellites
          if( std::abs(satellite) <= 32 )
          {
             SatID sat(std::abs(satellite),SatID::systemGPS);
-            
+
             SatDataMap::iterator it = satDataMap.find(sat);
             if(it==satDataMap.end())
             {
                satDataMap[sat] = SatDataList();
             }
-            
+
             SatDataList& satDataList = satDataMap[sat];
-            
+
             SatData satData;
             satData.spiltFlag = spiltFlag;
             satData.problemFlag = problem;
@@ -183,7 +183,7 @@ namespace gpstk
 
             satDataList.push_back(satData);
          }
-        
+
          counter++;
       }
 
@@ -206,12 +206,12 @@ namespace gpstk
       {
          if( time >= itt->startEpoch && time <= itt->endEpoch )
          {
-            if( (itt->actionFlag == 2) || 
+            if( (itt->actionFlag == 2) ||
                 (itt->problemFlag== 1) ||
                 (itt->problemFlag== 2) ||
                 (itt->problemFlag== 3)   ) { return true; }
 
-         } 
+         }
 
       }  // for( SatDataList::iterator...
 

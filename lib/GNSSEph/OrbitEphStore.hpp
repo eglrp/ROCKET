@@ -23,7 +23,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -31,13 +31,13 @@
 //============================================================================
 //
 //This software developed by Applied Research Laboratories at the University of
-//Texas at Austin, under contract to an agency or agencies within the U.S. 
+//Texas at Austin, under contract to an agency or agencies within the U.S.
 //Department of Defense. The U.S. Government retains all rights to use,
-//duplicate, distribute, disclose, or release this software. 
+//duplicate, distribute, disclose, or release this software.
 //
-//Pursuant to DoD Directive 523024 
+//Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -53,27 +53,26 @@
 #include "SatID.hpp"
 #include "CommonTime.hpp"
 #include "XvtStore.hpp"
-//#include "Rinex3NavData.hpp"
 
 namespace gpstk
 {
    /** @addtogroup ephemstore */
    //@{
 
-   /// Class for storing and accessing an objects position, 
+   /// Class for storing and accessing an objects position,
    /// velocity, and clock data. Also defines a simple interface to remove
    /// data that has been added.
    class OrbitEphStore : public XvtStore<SatID>
    {
    public:
-      
+
       /// Default empty constructor. Derived classes may want to override this
       /// constructor in order to set the store's time system. If the store will be
       /// used only for satellites of a single time system, member timeSystem could
       /// be defined to that system; TimeSystem::Any is used here to allow store
       /// to hold satellites with differing time systems.
       OrbitEphStore()
-         : initialTime(CommonTime::END_OF_TIME), 
+         : initialTime(CommonTime::END_OF_TIME),
            finalTime(CommonTime::BEGINNING_OF_TIME),
            strictMethod(true), onlyHealthy(false)
       {
@@ -114,7 +113,7 @@ namespace gpstk
       /// Edit the dataset, removing data outside the indicated time interval
       /// @param[in] tmin defines the beginning of the time interval
       /// @param[in] tmax defines the end of the time interval
-      virtual void edit(const CommonTime& tmin, 
+      virtual void edit(const CommonTime& tmin,
                         const CommonTime& tmax = CommonTime::END_OF_TIME);
 
       /// Clear the dataset, meaning remove all data
@@ -123,7 +122,7 @@ namespace gpstk
          for(SatTableMap::iterator ui=satTables.begin(); ui!=satTables.end(); ui++) {
             TimeOrbitEphTable& toet = ui->second;
             toet.clear();
-         } 
+         }
 
          satTables.clear();
 
@@ -197,7 +196,7 @@ namespace gpstk
          return false;
       }
 
-      /// Return the time system of the store. This may be redefined in the 
+      /// Return the time system of the store. This may be redefined in the
       /// default constructor by the derived class.
       virtual TimeSystem getTimeSystem(void) const
       { return timeSystem; }
@@ -249,7 +248,7 @@ namespace gpstk
       /// that are outside the range of validity and therefore need to be used
       /// with caution. Therefore, use findNearOrbitEph() only directly, carefully
       /// examining the resulting set of orbital elements and make an informed
-      /// decision before using the OrbitEph.getXvt() functions.  
+      /// decision before using the OrbitEph.getXvt() functions.
       /// @param sat SatID of satellite of interest
       /// @param t time with which to search for OrbitEph
       /// @return a pointer to the desired OrbitEph, or NULL if no OrbitEph found.
@@ -367,7 +366,7 @@ namespace gpstk
          if(beg < initialTime) initialTime = beg;
          if(end > finalTime) finalTime = end;
       }
-      
+
    }; // end class OrbitEphStore
 
    //@}

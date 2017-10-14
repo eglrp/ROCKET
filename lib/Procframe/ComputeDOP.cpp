@@ -54,21 +54,21 @@ namespace gpstk
       try
       {
 
-         bool valid1(false), valid2(false); 
+         bool valid1(false), valid2(false);
 
             // First, let's define a set with XYZt unknowns
          TypeIDSet tempSet1;
-         tempSet1.insert(TypeID::dx);
-         tempSet1.insert(TypeID::dy);
-         tempSet1.insert(TypeID::dz);
-         tempSet1.insert(TypeID::cdt);
+         tempSet1.insert(TypeID::dStaX);
+         tempSet1.insert(TypeID::dStaY);
+         tempSet1.insert(TypeID::dStaZ);
+         tempSet1.insert(TypeID::cdtSta);
 
             // Second, let's define a set with NEUt unknowns
          TypeIDSet tempSet2;
-         tempSet2.insert(TypeID::dLat);
-         tempSet2.insert(TypeID::dLon);
-         tempSet2.insert(TypeID::dH);
-         tempSet2.insert(TypeID::cdt);
+         tempSet2.insert(TypeID::dStaLat);
+         tempSet2.insert(TypeID::dStaLon);
+         tempSet2.insert(TypeID::dStaH);
+         tempSet2.insert(TypeID::cdtSta);
 
             // Then, generate the corresponding geometry/design matrices
          Matrix<double> dMatrix1(gData.getMatrixOfTypes(tempSet1));
@@ -148,5 +148,29 @@ namespace gpstk
 
    }  // End of method 'ComputeDOP::Process()'
 
+
+     /** Returns a gnssDataMap object, adding the new data generated
+      *  when calling this object.
+      *
+      * @param gData    Data object holding the data.
+      */
+   gnssDataMap& ComputeDOP::Process(gnssDataMap& gData)
+      throw(ProcessingException)
+   {
+
+      for( gnssDataMap::iterator gdmIt = gData.begin();
+           gdmIt != gData.end();
+           ++gdmIt )
+      {
+         for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+              sdmIt != gdmIt->second.end(); sdmIt++ )
+         {
+            Process( gdmIt->first, sdmIt->second );
+         }
+      }
+
+      return gData;
+
+   }  // End of method 'ComputeDOP::Process()'
 
 }  // End of namespace gpstk

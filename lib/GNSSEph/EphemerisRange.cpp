@@ -44,10 +44,9 @@
 #include "EphemerisRange.hpp"
 #include "MiscMath.hpp"
 #include "GPSEllipsoid.hpp"
-#include "GNSSconstants.hpp"
+#include "constants.hpp"
 
 using namespace std;
-using namespace gpstk;
 
 namespace gpstk
 {
@@ -117,6 +116,7 @@ namespace gpstk
                         const XvtStore<SatID>& Eph)
       throw(InvalidRequest, Exception)
    {
+
       try {
          CommonTime tt;
 
@@ -142,6 +142,7 @@ namespace gpstk
          }
 
          rotateEarth(Rx);
+
          // raw range
          rawrange = RSS(svPosVel.x[0]-Rx.X(),
                         svPosVel.x[1]-Rx.Y(),

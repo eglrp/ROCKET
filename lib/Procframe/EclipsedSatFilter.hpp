@@ -32,14 +32,12 @@
 
 
 
-#include <math.h>
+#include <cmath>
 #include "Triple.hpp"
 #include "SunPosition.hpp"
 #include "Position.hpp"
 #include "ProcessingClass.hpp"
-#include "GNSSconstants.hpp"                   // DEG_TO_RAD
-
-
+#include "constants.hpp"
 
 
 namespace gpstk
@@ -130,7 +128,7 @@ namespace gpstk
          throw(ProcessingException);
 
 
-         /** Returns a gnnsSatTypeValue object, adding the new data generated
+         /** Returns a gnssSatTypeValue object, adding the new data generated
           *  when calling this object.
           *
           * @param gData    Data object holding the data.
@@ -140,12 +138,21 @@ namespace gpstk
       { Process(gData.header.epoch, gData.body); return gData; };
 
 
-         /** Returns a gnnsRinex object, adding the new data generated when
+         /** Returns a gnssRinex object, adding the new data generated when
           *  calling this object.
           *
           * @param gData    Data object holding the data.
           */
       virtual gnssRinex& Process(gnssRinex& gData)
+         throw(ProcessingException);
+
+
+         /** Returns a gnssDataMap object, adding the new data generated when
+          *  calling this object.
+          *
+          * @param gData    Data object holding the data.
+          */
+      virtual gnssDataMap& Process(gnssDataMap& gData)
          throw(ProcessingException);
 
 
@@ -163,13 +170,13 @@ namespace gpstk
       virtual EclipsedSatFilter& setConeAngle(const double angle);
 
 
-         /// Returns time after exiting shadow that satellite will still be 
+         /// Returns time after exiting shadow that satellite will still be
          /// filtered out, in seconds.
       virtual double getPostShadowPeriod(void) const
       { return postShadowPeriod; };
 
 
-         /** Sets time after exiting shadow that satellite will still be 
+         /** Sets time after exiting shadow that satellite will still be
           *  filtered out, in seconds.
           * @param pShTime    Time after exiting shadow that satellite will
           *                   still be filtered out, in seconds.
@@ -191,7 +198,7 @@ namespace gpstk
          /// Aperture angle of shadow cone, in degrees.
       double coneAngle;
 
-         /// Time after exiting shadow that satellite will still be 
+         /// Time after exiting shadow that satellite will still be
          /// filtered out, in seconds.
       double postShadowPeriod;
 

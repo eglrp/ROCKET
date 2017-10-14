@@ -20,7 +20,7 @@
 //  You should have received a copy of the GNU Lesser General Public
 //  License along with GPSTk; if not, write to the Free Software Foundation,
 //  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110, USA
-//  
+//
 //  Copyright 2004, The University of Texas at Austin
 //
 //============================================================================
@@ -28,13 +28,13 @@
 //============================================================================
 //
 // This software developed by Applied Research Laboratories at the University
-// of Texas at Austin, under contract to an agency or agencies within the U.S. 
+// of Texas at Austin, under contract to an agency or agencies within the U.S.
 // Department of Defense. The U.S. Government retains all rights to use,
-// duplicate, distribute, disclose, or release this software. 
+// duplicate, distribute, disclose, or release this software.
 //
-// Pursuant to DoD Directive 523024 
+// Pursuant to DoD Directive 523024
 //
-// DISTRIBUTION STATEMENT A: This software has been approved for public 
+// DISTRIBUTION STATEMENT A: This software has been approved for public
 //                           release, distribution is unlimited.
 //
 //=============================================================================
@@ -75,12 +75,12 @@ namespace gpstk
          switch(s)
          {
             case systemGPS:
+            case systemGLONASS:
             case systemGalileo:
-            case systemGlonass:
-            case systemGeosync:
-            case systemTransit:
+            case systemSBAS:
             case systemQZSS:
-            case systemBeiDou:
+            case systemBDS:
+            case systemIRNSS:
             case systemMixed:
                break;
             // Invalidate anything non-RINEX.
@@ -135,12 +135,12 @@ namespace gpstk
          switch(system)
          {
             case systemGPS:     return 'G';
+            case systemGLONASS: return 'R';
             case systemGalileo: return 'E';
-            case systemGlonass: return 'R';
-            case systemGeosync: return 'S';
-            case systemTransit: return 'T';
+            case systemSBAS:    return 'S';
             case systemQZSS:    return 'J';
-            case systemBeiDou:  return 'C';
+            case systemBDS:     return 'C';
+            case systemIRNSS:   return 'I';
             default:            return '?';
          }
       };
@@ -154,12 +154,12 @@ namespace gpstk
          switch(system)
          {
             case systemGPS:     return "GPS";
+            case systemGLONASS: return "GLONASS";
             case systemGalileo: return "Galileo";
-            case systemGlonass: return "GLONASS";
-            case systemGeosync: return "Geosync";
-            case systemTransit: return "Transit";
+            case systemSBAS:    return "SBAS";
             case systemQZSS:    return "QZSS";
-            case systemBeiDou:  return "BeiDou";
+            case systemBDS:     return "BDS";
+            case systemIRNSS:   return "IRNSS";
             default:            return "Unknown";
          }
       };
@@ -172,12 +172,12 @@ namespace gpstk
          switch(system)
          {
             case systemGPS:     return "GPS";
+            case systemGLONASS: return "GLO";
             case systemGalileo: return "GAL";
-            case systemGlonass: return "GLO";
-            case systemGeosync: return "GEO";
-            case systemTransit: return "TRN";     // RINEX ver 2
+            case systemSBAS:    return "SBA";
             case systemQZSS:    return "QZS";
-            case systemBeiDou:  return "BDS";
+            case systemBDS:     return "BDS";
+            case systemIRNSS:   return "IRN";
             default:            return "Unk";
          }
       };
@@ -206,28 +206,28 @@ namespace gpstk
                system = SatID::systemGPS;
                break;
             case 'R': case 'r':
-               system = SatID::systemGlonass;
-               break;
-            case 'T': case 't':
-               system = SatID::systemTransit;
-               break;
-            case 'S': case 's':
-               system = SatID::systemGeosync;
+               system = SatID::systemGLONASS;
                break;
             case 'E': case 'e':
                system = SatID::systemGalileo;
+               break;
+            case 'S': case 's':
+               system = SatID::systemSBAS;
+               break;
+            case 'J': case 'j':
+               system = SatID::systemQZSS;
+               break;
+            case 'C': case 'c':
+               system = SatID::systemBDS;
+               break;
+            case 'I': case 'i':
+               system = SatID::systemIRNSS;
                break;
             case 'M': case 'm':
                system = SatID::systemMixed;
                break;
             case ' ': case 'G': case 'g':
                system = SatID::systemGPS;
-               break;
-            case 'J': case 'j':
-               system = SatID::systemQZSS;
-               break;
-            case 'C': case 'c':
-               system = SatID::systemBeiDou;
                break;
             default:                   // non-RINEX system character
                Exception e(std::string("Invalid system character \"")

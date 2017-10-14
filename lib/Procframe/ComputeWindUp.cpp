@@ -35,9 +35,9 @@ using namespace std;
 namespace gpstk
 {
 
-      // Returns a string identifying this object.
-   std::string ComputeWindUp::getClassName() const
-   { return "ComputeWindUp"; }
+    // Returns a string identifying this object.
+    std::string ComputeWindUp::getClassName() const
+    { return "ComputeWindUp"; }
 
 
 
@@ -47,133 +47,186 @@ namespace gpstk
        * @param time      Epoch corresponding to the data.
        * @param gData     Data object holding the data.
        */
-   satTypeValueMap& ComputeWindUp::Process( const CommonTime& time,
-                                            satTypeValueMap& gData )
-      throw(ProcessingException)
-   {
-
-      try
-      {
-
+    satTypeValueMap& ComputeWindUp::Process( const CommonTime& time,
+                                             satTypeValueMap& gData )
+        throw(ProcessingException)
+    {
+        try
+        {
             // Compute Sun position at this epoch
-         SunPosition sunPosition;
-         Triple sunPos(sunPosition.getPosition(time));
+            SunPosition sunPosition;
+            Triple sunPos(sunPosition.getPosition(time));
 
             // Define a Triple that will hold satellite position, in ECEF
-         Triple svPos(0.0, 0.0, 0.0);
+            Triple svPos(0.0, 0.0, 0.0);
 
-         SatIDSet satRejectedSet;
+            SatIDSet satRejectedSet;
 
             // Loop through all the satellites
-         for ( satTypeValueMap::iterator it = gData.begin();
-               it != gData.end();
-               ++it )
-         {
-
-               // First check if this satellite has previous arc information
-            if( satArcMap.find( (*it).first ) == satArcMap.end() )
+            for ( satTypeValueMap::iterator it = gData.begin();
+                  it != gData.end();
+                  ++it )
             {
-                  // If it doesn't have an entry, insert one
-               satArcMap[ (*it).first ] = 0.0;
-            };
+                // First check if this satellite has previous arc information
+                if( m_satPhaseData.find( (*it).first ) == m_satPhaseData.end() )
+                {
+                    // If it doesn't have an entry, insert one
+                    m_satPhaseData[ (*it).first ].arcNum = 0.0;
+                }
 
-               // Then, check both if there is arc information, and if current
-               // arc number is different from arc number in storage (which
-               // means a cycle slip happened)
-            if ( (*it).second.find(TypeID::satArc) != (*it).second.end() &&
-                 (*it).second(TypeID::satArc) != satArcMap[ (*it).first ] )
-            {
-                  // If different, update satellite arc in storage
-               satArcMap[ (*it).first ] = (*it).second(TypeID::satArc);
+                // Then, check both if there is arc information, and if current
+                // arc number is different from arc number in storage (which
+                // means a cycle slip happened)
+                if ( (*it).second.find(TypeID::satArc) != (*it).second.end() &&
+                     (*it).second(TypeID::satArc) != m_satPhaseData[ (*it).first ].arcNum )
+                {
+                    // If different, update satellite arc in storage
+                    m_satPhaseData[ (*it).first ].arcNum = (*it).second(TypeID::satArc);
 
-                  // Reset phase information
-               phase_satellite[ (*it).first ].previousPhase = 0.0;
-               phase_station[ (*it).first ].previousPhase = 0.0;
-
-            }
-
-
-               // Use ephemeris if satellite position is not already computed
-            if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satY) == (*it).second.end() ) ||
-                ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
-            {
-
-               if(pEphemeris==NULL)
-               {
-
-                     // If ephemeris is missing, then remove all satellites
-                  satRejectedSet.insert( (*it).first );
-
-                  continue;
-
-               }
-               else
-               {
-
-                     // Try to get satellite position
-                     // if it is not already computed
-                  try
-                  {
-                        // For our purposes, position at receive time
-                        // is fine enough
-                     Xvt svPosVel(pEphemeris->getXvt( (*it).first, time ));
-
-                        // If everything is OK, then continue processing.
-                     svPos[0] = svPosVel.x.theArray[0];
-                     svPos[1] = svPosVel.x.theArray[1];
-                     svPos[2] = svPosVel.x.theArray[2];
-
-                  }
-                  catch(...)
-                  {
-
-                        // If satellite is missing, then schedule it
-                        // for removal
-                     satRejectedSet.insert( (*it).first );
-
-                     continue;
-
-                  }
-
-               }
-
-            }
-            else
-            {
-
-                  // Get satellite position out of GDS
-               svPos[0] = (*it).second[TypeID::satX];
-               svPos[1] = (*it).second[TypeID::satY];
-               svPos[2] = (*it).second[TypeID::satZ];
-
-            }  // End of 'if( ( (*it).second.find(TypeID::satX) == ...'
+                    // Reset phase information
+                    m_satPhaseData[ (*it).first ].satPreviousPhase = 0.0;
+                    m_satPhaseData[ (*it).first ].staPreviousPhase = 0.0;
+                }
 
 
-               // Let's get wind-up value in radians, and insert it
-               // into GNSS data structure.
-            (*it).second[TypeID::windUp] =
-               getWindUp((*it).first, time, svPos, sunPos);
+                // Use ephemeris if satellite position is not already computed
+                if( ( (*it).second.find(TypeID::satX) == (*it).second.end() ) ||
+                    ( (*it).second.find(TypeID::satY) == (*it).second.end() ) ||
+                    ( (*it).second.find(TypeID::satZ) == (*it).second.end() ) )
+                {
 
-         }  // End of 'for (it = gData.begin(); it != gData.end(); ++it)'
+                    if(pEphStore==NULL)
+                    {
+                        // If ephemeris is missing, then remove all satellites
+                        satRejectedSet.insert( (*it).first );
+                        continue;
+                    }
+                    else
+                    {
+                        // Try to get satellite position
+                        // if it is not already computed
+                        try
+                        {
+                            // For our purposes, position at receive time
+                            // is fine enough
+                            Xvt svPosVel(pEphStore->getXvt( (*it).first, time ));
+
+                            // If everything is OK, then continue processing.
+                            svPos[0] = svPosVel.x.theArray[0];
+                            svPos[1] = svPosVel.x.theArray[1];
+                            svPos[2] = svPosVel.x.theArray[2];
+                        }
+                        catch(...)
+                        {
+                            // If satellite is missing, then schedule it
+                            // for removal
+                            satRejectedSet.insert( (*it).first );
+                            continue;
+                        }
+                    }
+                }
+                else
+                {
+                    // Get satellite position out of GDS
+                    svPos[0] = (*it).second[TypeID::satX];
+                    svPos[1] = (*it).second[TypeID::satY];
+                    svPos[2] = (*it).second[TypeID::satZ];
+
+                }  // End of 'if( ( (*it).second.find(TypeID::satX) == ...'
+
+
+                // Let's get wind-up value in radians, and insert it
+                // into GNSS data structure.
+                (*it).second[TypeID::windUp] =
+                                    getWindUp((*it).first, time, svPos, sunPos);
+
+            }  // End of 'for (it = gData.begin(); it != gData.end(); ++it)'
 
             // Remove satellites with missing data
-         gData.removeSatID(satRejectedSet);
+            gData.removeSatID(satRejectedSet);
 
-         return gData;
-
-      }
-      catch(Exception& u)
-      {
+            return gData;
+        }
+        catch(Exception& u)
+        {
             // Throw an exception if something unexpected happens
-         ProcessingException e( getClassName() + ":"
-                                + u.what() );
+            ProcessingException e( getClassName() + ":" + u.what() );
 
-         GPSTK_THROW(e);
+            GPSTK_THROW(e);
+        }
 
-      }
+    }  // End of method 'ComputeWindUp::Process()'
 
-   }  // End of method 'ComputeWindUp::Process()'
+
+
+     /** Returns a gnssDataMap object, adding the new data generated
+      *  when calling this object.
+      *
+      * @param gData    Data object holding the data.
+      */
+    gnssDataMap& ComputeWindUp::Process(gnssDataMap& gData)
+        throw(ProcessingException)
+    {
+        SourceIDSet sourceRejectedSet;
+
+        SourceID source;
+        string station;
+
+        for( gnssDataMap::iterator gdmIt = gData.begin();
+             gdmIt != gData.end();
+             ++gdmIt )
+        {
+            CommonTime epoch( gdmIt->first );
+            epoch.setTimeSystem( TimeSystem::Unknown );
+
+            for( sourceDataMap::iterator sdmIt = gdmIt->second.begin();
+                 sdmIt != gdmIt->second.end();
+                 ++sdmIt )
+            {
+                source = sdmIt->first;
+                station = source.sourceName;
+
+                if(pMSCStore == NULL)
+                {
+                    sourceRejectedSet.insert( source );
+                    continue;
+                }
+
+                MSCData mscData;
+                try
+                {
+                    mscData = pMSCStore->findMSC(station,epoch);
+                }
+                catch(...)
+                {
+                    sourceRejectedSet.insert( source );
+                    continue;
+                }
+
+                nominalPos = mscData.coordinates;
+
+                SatPhaseDataMap::iterator satPhaseDataIt = m_satPhaseDataMap.find(source);
+
+                if(satPhaseDataIt != m_satPhaseDataMap.end())
+                {
+                    m_satPhaseData = satPhaseDataIt->second;
+                }
+                else
+                {
+                    m_satPhaseData = SatPhaseData();
+                }
+
+                Process( gdmIt->first, sdmIt->second );
+
+                m_satPhaseDataMap[source] = m_satPhaseData;
+            }
+        }
+
+        gData.removeSourceID( sourceRejectedSet );
+
+        return gData;
+
+    }  // End of method 'ComputeWindUp::Process()'
 
 
 
@@ -202,8 +255,8 @@ namespace gpstk
        */
    double ComputeWindUp::getWindUp( const SatID& satid,
                                     const CommonTime& time,
-                                    const Triple& sat,
-                                    const Triple& sunPosition )
+                                    const Triple& satPos,
+                                    const Triple& sunPos )
    {
 
          // Get satellite rotation angle
@@ -212,13 +265,13 @@ namespace gpstk
       Triple rxPos(nominalPos.X(), nominalPos.Y(), nominalPos.Z());
 
          // Vector from SV to Sun center of mass
-      Triple gps_sun( sunPosition-sat );
+      Triple sat_sun( sunPos-satPos );
 
          // Define rk: Unitary vector from satellite to Earth mass center
-      Triple rk( ( (-1.0)*(sat.unitVector()) ) );
+      Triple rk( ( (-1.0)*(satPos.unitVector()) ) );
 
-         // Define rj: rj = rk x gps_sun, then make sure it is unitary
-      Triple rj( (rk.cross(gps_sun)).unitVector() );
+         // Define rj: rj = rk x sat_sun, then make sure it is unitary
+      Triple rj( (rk.cross(sat_sun)).unitVector() );
 
          // Define ri: ri = rj x rk, then make sure it is unitary
          // Now, ri, rj, rk form a base in the satellite body reference
@@ -226,8 +279,8 @@ namespace gpstk
       Triple ri( (rj.cross(rk)).unitVector() );
 
 
-         // Compute unitary vector vector from satellite to RECEIVER
-      Triple rrho( (rxPos-sat).unitVector() );
+         // Compute unitary vector from satellite to receiver
+      Triple rrho( (rxPos-satPos).unitVector() );
 
          // Projection of "rk" vector to line of sight vector (rrho)
       double zk(rrho.dot(rk));
@@ -281,61 +334,22 @@ namespace gpstk
 
       double wind_up(0.0);
 
-         // Find out if satellite belongs to block "IIR", because
-         // satellites of block IIR have a 180 phase shift
-      CommonTime time2(time);
-      time2.setTimeSystem(TimeSystem::Any);
-      	
-         // Read Block Type From Antex file
-      if( pAntexReader != NULL )
-      {
-            // Get satellite information in Antex format. Currently this
-            // only works for GPS 
-         if( satid.system == SatID::systemGPS )
-         {
-            std::stringstream sat;
-            sat << "G";
-            if( satid.id < 10 )
-            {
-               sat << "0";
-            }
-            sat << satid.id;
-
-               // Get satellite antenna information out of AntexReader object
-            Antenna antenna( pAntexReader->getAntenna( sat.str(), time ) );
-
-            
-               // Get antenna type from this antenna
-            string antennaType( antenna.getAntennaType());
-
-            if(antennaType.substr(0,9) == "BLOCK IIR")
-            {
-               wind_up = PI;
-            }
-
-         }
-      }
-      else if(satData.getBlock( satid, time2 ) == "IIR")
-      {
-         wind_up = PI;
-      }
-
       alpha1 = alpha1 + wind_up;
 
-      double da1(alpha1-phase_satellite[satid].previousPhase);
+      double da1(alpha1-m_satPhaseData[satid].satPreviousPhase);
 
-      double da2(alpha2-phase_station[satid].previousPhase);
+      double da2(alpha2-m_satPhaseData[satid].staPreviousPhase);
 
          // Let's avoid problems when passing from 359 to 0 degrees.
-      phase_satellite[satid].previousPhase += std::atan2( std::sin(da1),
-                                                          std::cos(da1) );
+      m_satPhaseData[satid].satPreviousPhase += std::atan2( std::sin(da1),
+                                                            std::cos(da1) );
 
-      phase_station[satid].previousPhase += std::atan2( std::sin(da2),
-                                                        std::cos(da2) );
+      m_satPhaseData[satid].staPreviousPhase += std::atan2( std::sin(da2),
+                                                            std::cos(da2) );
 
          // Compute wind up effect in radians
-      wind_up = phase_satellite[satid].previousPhase -
-                phase_station[satid].previousPhase;
+      wind_up = m_satPhaseData[satid].satPreviousPhase -
+                m_satPhaseData[satid].staPreviousPhase;
 
       return wind_up;
 

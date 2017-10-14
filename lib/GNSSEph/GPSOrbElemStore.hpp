@@ -62,16 +62,16 @@ namespace gpstk
    /** @addtogroup ephemstore */
    //@{
 
-   /// Class for storing and accessing GPS SV's position, 
+   /// Class for storing and accessing GPS SV's position,
    /// velocity, and clock data. Also defines a simple interface to remove
    /// data that has been added.
    class GPSOrbElemStore : public OrbElemStore
    {
    public:
-      
+
       GPSOrbElemStore()
          throw()
-         : initialTime(CommonTime::END_OF_TIME), 
+         : initialTime(CommonTime::END_OF_TIME),
            finalTime(CommonTime::BEGINNING_OF_TIME),
            strictMethod(true)
       {
@@ -95,11 +95,11 @@ namespace gpstk
       ///       1. No orbital elements stored for the SV
       ///       2. No orbital elements with time of validity covering time t
       ///       3. Orbital elements appropriate for time t are unhealhty
-      ///  The purpose of getX is to be as SAFE as possible.  
+      ///  The purpose of getX is to be as SAFE as possible.
       ///  If you MUST obtain SV PVT in the failure conditions noted above,
-      ///  please consider calling findOrbElem( ) or findNearOrbElem( ) 
-      ///  directly to obtain elements, then use OrbElem.getXvt( ) 
-      ///  to obtain positions.  
+      ///  please consider calling findOrbElem( ) or findNearOrbElem( )
+      ///  directly to obtain elements, then use OrbElem.getXvt( )
+      ///  to obtain positions.
       virtual Xvt getXvt( const SatID& sat, const CommonTime& t ) const
          throw( InvalidRequest );
 
@@ -114,7 +114,7 @@ namespace gpstk
       /// @param tmin defines the beginning of the time interval, included
       /// @param tmax defines the end of the time interval. not included
       /// [tmin, tmax)
-      virtual void edit( const CommonTime& tmin, 
+      virtual void edit( const CommonTime& tmin,
                          const CommonTime& tmax = CommonTime::END_OF_TIME )
          throw();
 
@@ -123,7 +123,7 @@ namespace gpstk
       virtual TimeSystem getTimeSystem(void) const throw()
          { return TimeSystem::GPS; }
 
-      /// Determine the earliest time for which this object can successfully 
+      /// Determine the earliest time for which this object can successfully
       /// determine the Xvt for any satellite.
       /// @return The initial time
       /// @throw InvalidRequest This is thrown if the object has no data.
@@ -186,12 +186,12 @@ namespace gpstk
             {
                delete oi->second;
             }
-         } 
+         }
         ube.clear();
         initialTime = gpstk::CommonTime::END_OF_TIME;
         finalTime = gpstk::CommonTime::BEGINNING_OF_TIME;
         initialTime.setTimeSystem(TimeSystem::GPS);
-        finalTime.setTimeSystem(TimeSystem::GPS); 
+        finalTime.setTimeSystem(TimeSystem::GPS);
        }
 
       /// Get the number of OrbElem objects in this collection.
@@ -201,30 +201,30 @@ namespace gpstk
 
       /*
        *  Explanation of find( ) function for GPSOrbElemStore
-       *  
+       *
        *  The findOrbElem( ) funtion
        *  does the best possible job of emulating the choice
        *  that would be made by a real-time user following the
        *  selection crieteria and warnings defined in the
-       *  IS-GPS-200.  
+       *  IS-GPS-200.
        *
-       *  It is strongly suggested that the user load ALL 
-       *  available set of orbital elements into the store, 
+       *  It is strongly suggested that the user load ALL
+       *  available set of orbital elements into the store,
        *  regardless of health status.  It is furthermore
        *  suggested the user call rationalize( ) to adjust
-       *  the begin/end times of validity after loading 
-       *  all the elements and before using the store. 
+       *  the begin/end times of validity after loading
+       *  all the elements and before using the store.
        *
        *  There exists a second find fuction, findNearOrbElem( ).
        *  This is provided for compatibility with past uses
-       *  of the GPSEphemerisStore class.  findNearOrbElem( ) MAY 
-       *  return elements that are outside the range of 
-       *  validity and therefore need to be used with caution.   
+       *  of the GPSEphemerisStore class.  findNearOrbElem( ) MAY
+       *  return elements that are outside the range of
+       *  validity and therefore need to be used with caution.
        *  Therefore,if you wish
-       *  to use findNearOrbElem( ), you should do so directly, 
+       *  to use findNearOrbElem( ), you should do so directly,
        *  carefully examine the resulting set of orbital elements
-       *  and make an informed decision before using the 
-       *  OrbElem.get????( ) functions.  
+       *  and make an informed decision before using the
+       *  OrbElem.get????( ) functions.
        */
       /// @param sat SatID of satellite of interest
       /// @param t time with which to search for OrbElem
@@ -260,7 +260,7 @@ namespace gpstk
       { strictMethod = true; }
 
       /// This is intended to store sets of unique orbital elements for a single SV.
-      /// The key is the beginning of the period of validity for each set of elements. 
+      /// The key is the beginning of the period of validity for each set of elements.
       typedef std::map<CommonTime, OrbElem*> OrbElemMap;
 
       /// Returns a map of the ephemerides available for the specified
@@ -275,29 +275,29 @@ namespace gpstk
        *  The timing relationships defined in IS-GPS-200 20.3.4.5 mean
        *  (1.) The end of validity of a given set of orbital elements
        *  may be determined by the beginning of transmission of a new
-       *  upload.   
+       *  upload.
        *  (2.) The beginning of validity of the SECOND set of elements
        *  following and upload should be Toe-(0.5 fit interval) but
        *  it is not practical to differentiate between the first and
 
-       *  second set following an upload when only looking at a 
+       *  second set following an upload when only looking at a
        *  single set of elements.
        *
-       *  The rationalize( ) function is a means of addressing these 
+       *  The rationalize( ) function is a means of addressing these
        *  shortcomings.   The intention is to load all the navigation
        *  message data in the store, then call rationalize( ).  The
        *  function will sweep through the ordered set of elements and
-       *  make appropriate adjustments to beginning and end of 
+       *  make appropriate adjustments to beginning and end of
        *  validity values.  In general, the only changes will
        *  occur in set of elements immediately before an upload,
        *  the first set following the upload, and (perhaps) the
-       *  second set following the upload. 
-       * 
-       */ 
+       *  second set following the upload.
+       *
+       */
       void rationalize( );
 
       protected:
-     
+
       /// This is intended to hold all unique EngEphemerides for each SV
       /// The key is the prn of the SV.
       typedef std::map<SatID, OrbElemMap> UBEMap;
@@ -315,13 +315,13 @@ namespace gpstk
       // Here are a couple of methods to simplify the .cpp
       void updateInitialFinal(const OrbElem& eph)
       {
-        if (eph.beginValid<initialTime)       
+        if (eph.beginValid<initialTime)
           initialTime = eph.beginValid;
-         
-        if (eph.endValid>finalTime)               
+
+        if (eph.endValid>finalTime)
           finalTime = eph.endValid;
       }
-      
+
      // virtual void dumpOnePRN( std::ostream& s = std::cout, OrbElemMap& em) const
      //    throw();
 
