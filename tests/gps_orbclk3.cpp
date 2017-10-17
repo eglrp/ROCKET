@@ -384,6 +384,7 @@ int main(int argc, char* argv[])
     CommonTime tt0( refSys.GPS2TT(gps0) );
 
     Matrix<double> t2cRaw(3,3,0.0), t2cDot(3,3,0.0);
+    Matrix<double> c2tRaw(3,3,0.0), c2tDot(3,3,0.0);
 
     Vector<double> rsat_t(3,0.0), vsat_t(3,0.0);
     Vector<double> rsat_c(3,0.0), vsat_c(3,0.0);
@@ -965,8 +966,6 @@ int main(int argc, char* argv[])
     sourceVectorMap sourcePosECI, sourcePosECEF;
     sourceValueMap sourceClock;
 
-    satVectorMap satPosECI, satPosECEF;
-
     Vector<double> orbit;
     Vector<double> srpc;
     double clock;
@@ -1003,16 +1002,22 @@ int main(int argc, char* argv[])
         t2cRaw = refSys.T2CMatrix(utc);
         t2cDot = refSys.dT2CMatrix(utc);
 
+        c2tRaw = transpose(t2cRaw);
+        c2tDot = transpose(t2cDot);
+
+//        cout << CivilTime(gps) << endl;
+
         try
         {
+            //////// start of station clock estimation ////////
+
             gDataBak = gData;
 
-            // preprocessing
             gDataBak >> requireObs             // C1C,C2W
                      >> cc2noncc               // C1W,C2W
-                     >> linearPC                // PC
-                     >> basicModel              // r,v,cdt of sat
-                                                // rho,elev,azim of sat-sta
+                     >> linearPC               // PC
+                     >> basicModel             // r,v,cdt of sat
+                                               // rho,elev,azim of sat-sta
                      >> elevWeights            // weight
                      >> correctObs             // disp,ARP,PCO,PCV of sta
                      >> computeTM              // tropo delay
@@ -1026,6 +1031,12 @@ int main(int argc, char* argv[])
 
             // source clock
             sourceClock = computeStaClock.getSourceClock();
+
+            //////// end of station clock estimation ////////
+
+
+
+            //////// start of obs equation linearization ////////
 
             basicModel2.setSourceClock( sourceClock );
             basicModel2.setSatState( satOrbit );
@@ -1044,11 +1055,10 @@ int main(int argc, char* argv[])
             sourcePosECI = basicModel2.getSourcePosECI();
             sourcePosECEF = basicModel2.getSourcePosECEF();
 
-            satPosECI = basicModel2.getSatPosECI();
-            satPosECEF = basicModel2.getSatPosECEF();
+            //////// end of obs equation linearization ////////
 
 
-            //////// start of initialization ////////
+            //////// start of filter initialization ////////
 
             sourceSet = gData.getSourceIDSet();
             satSet = gData.getSatIDSet();
@@ -1087,10 +1097,10 @@ int main(int argc, char* argv[])
                     state(id+1) = 0.0;
 
                     // initialize the covariance of clock
-                    covar(id+0,id+0) = 1e2 * 1e2;
+                    covar(id+0,id+0) = 1e+2 * 1e+2;
 
                     // initialize the covariance of tropo
-                    covar(id+1,id+1) = 0.5 * 0.5;
+                    covar(id+1,id+1) = 5e-1 * 5e-1;
 
                     // setup the index of this source
                     sourceIndex[source] = id;
@@ -1113,14 +1123,14 @@ int main(int argc, char* argv[])
                     for(int i=0; i<3; ++i)
                     {
                         state(id+i) = orbit(i);
-                        covar(id+i,id+i) = 1.0 * 1.0;
+                        covar(id+i,id+i) = 1e+0 * 1e+0;
                     }
 
                     // initialize the vel and its covariance of this sat
                     for(int i=3; i<6; ++i)
                     {
                         state(id+i) = orbit(i);
-                        covar(id+i,id+i) = 0.001 * 0.001;
+                        covar(id+i,id+i) = 1e-2 * 1e-2;
                     }
 
                     // initialize the srpc and its covariance of this sat
@@ -1129,18 +1139,18 @@ int main(int argc, char* argv[])
                         state(id+i) = srpc(i-6);
                     }
 
-                    covar(id+ 6,id+ 6) = 1.0 * 1.0;
-                    covar(id+ 7,id+ 7) = 1e-3*1e-3;
-                    covar(id+ 8,id+ 8) = 1e-3*1e-3;
-                    covar(id+ 9,id+ 9) = 1e-3*1e-3;
-                    covar(id+10,id+10) = 1e-3*1e-3;
+                    covar(id+ 6,id+ 6) = 1e+0 * 1e+0;
+                    covar(id+ 7,id+ 7) = 1e-1 * 1e-1;
+                    covar(id+ 8,id+ 8) = 1e-1 * 1e-1;
+                    covar(id+ 9,id+ 9) = 1e-1 * 1e-1;
+                    covar(id+10,id+10) = 1e-1 * 1e-1;
 
                     // initialize the clock of this sat
                     // be aware that the estimated one IS the true one
                     state(id+11) = clock;
 
                     // initialize the covariance of clock
-                    covar(id+11,id+11) = 1e2 * 1e2;
+                    covar(id+11,id+11) = 1e+2 * 1e+2;
 
                     // setup the index of this sat
                     satIndex[sat] = id;
@@ -1195,8 +1205,8 @@ int main(int argc, char* argv[])
                         state2(id2+0) = 0.0;
                         state2(id2+1) = 0.0;
 
-                        covar2(id2+0,id2+0) = 1e2 * 1e2;
-                        covar2(id2+1,id2+1) = 0.5 * 0.5;
+                        covar2(id2+0,id2+0) = 1e+2 * 1e+2;
+                        covar2(id2+1,id2+1) = 5e-1 * 5e-1;
 
                         id2 = id2 + 2;
                     }
@@ -1256,21 +1266,21 @@ int main(int argc, char* argv[])
 
                         for(int i=0; i<3; ++i)
                         {
-                            covar2(id2+i,id2+i) = 1.0 * 1.0;
+                            covar2(id2+i,id2+i) = 1e+0 * 1e+0;
                         }
 
                         for(int i=3; i<6; ++i)
                         {
-                            covar2(id2+i,id2+i) = 0.001 * 0.001;
+                            covar2(id2+i,id2+i) = 1e-2 * 1e-2;
                         }
 
-                        covar2(id2+ 6,id2+ 6) = 1.0*1.0;
-                        covar2(id2+ 7,id2+ 7) = 1e-3*1e-3;
-                        covar2(id2+ 8,id2+ 8) = 1e-3*1e-3;
-                        covar2(id2+ 9,id2+ 9) = 1e-3*1e-3;
-                        covar2(id2+10,id2+10) = 1e-3*1e-3;
+                        covar2(id2+ 6,id2+ 6) = 1e+0 * 1e+0;
+                        covar2(id2+ 7,id2+ 7) = 1e-1 * 1e-1;
+                        covar2(id2+ 8,id2+ 8) = 1e-1 * 1e-1;
+                        covar2(id2+ 9,id2+ 9) = 1e-1 * 1e-1;
+                        covar2(id2+10,id2+10) = 1e-1 * 1e-1;
 
-                        covar2(id2+11,id2+11) = 1e2 * 1e2;
+                        covar2(id2+11,id2+11) = 1e+2 * 1e+2;
 
                         id2 = id2 + 12;
                     }
@@ -1291,7 +1301,7 @@ int main(int argc, char* argv[])
 //            }
 //            cout << endl;
 
-            //////// end of initialization ////////
+            //////// end of filter initialization ////////
 
 
             //////// start of clock constraint ////////
@@ -1440,6 +1450,7 @@ int main(int argc, char* argv[])
                                           posSatECI(2)*velSatECI(2) )/C_MPS/C_MPS;
 
                             dT = dlight + dclock - drel;
+                            dT2 = dT * dT;
                         }
 
                         Matrix<double> I = ident<double>(3);
@@ -1485,7 +1496,7 @@ int main(int argc, char* argv[])
                                   - wmf * state(idSource+1)
                                   + 1.0 * state(idSat+11);
 
-//                        if(omc > 2.0) continue;
+                        if(omc > 3.0) continue;
 
                         // p * h'
                         Vector<double> pht(numUnknown,0.0);
@@ -1525,16 +1536,6 @@ int main(int argc, char* argv[])
                             }
                         }
 
-//                        cout << "after meas update" << endl;
-//                        cout << sat << endl;
-//                        for(int i=numSource*2; i<numSource*2+12*5; ++i)
-//                        {
-//                            cout << setprecision(3) << setw(15) << state(i)
-//                                 << setprecision(6) << setw(25) << covar(i,i);
-//                            cout << endl;
-//                        }
-//                        cout << endl;
-
                     } // End of for(satTypeValueMap::iterator stvmIt = ...)
 
                 } // End of for(sourceDataMap::iterator sdmIt = ...)
@@ -1542,56 +1543,76 @@ int main(int argc, char* argv[])
             } // End of for(gnssDataMap::iterator gdmIt = ...)
 
 
-            cout << "after meas update" << endl;
-            for(int i=numSource*2; i<numSource*2+12; ++i)
-            {
-                cout << setprecision(3) << setw(15) << state(i)
-                     << setprecision(6) << setw(25) << covar(i,i);
-                cout << endl;
-            }
-            cout << endl;
-
-
-//            for(SatIDSet::iterator itSat = satSet.begin();
-//                itSat != satSet.end();
-//                ++itSat)
+//            cout << "after meas update" << endl;
+//            for(int i=0; i<numUnknown; i=i+1)
 //            {
-//                sat = *itSat;
-//
-//                idSat = satIndex[sat];
-//
-//                Vector<double> rcom_c(3,0.0);
-//                rcom_c(0) = state(idSat+0);
-//                rcom_c(1) = state(idSat+1);
-//                rcom_c(2) = state(idSat+2);
-//
-//                Vector<double> rcom_t(3,0.0);
-//                rcom_t = transpose(t2cRaw) * rcom_c;
-//
-//                Vector<double> rref_t(3,0.0);
-//
-//                try
-//                {
-//                    rref_t = sp3Store.getXvt(sat,gps).x.toVector();
-//                }
-//                catch(...)
-//                {
-//                    continue;
-//                }
-//
-//                Vector<double> dxyz( rcom_t-rref_t );
-//
-////                cout << sat;
-//                cout << setprecision(3)
-//                     << setw(10) << dxyz(0)
-//                     << setw(10) << dxyz(1)
-//                     << setw(10) << dxyz(2);
+//                cout << setprecision(3) << setw(15) << state(i)
+//                     << setprecision(6) << setw(25) << covar(i,i);
+//                cout << endl;
+//            }
+//            cout << endl;
+
+//            for(int i=numSource*2; i<numUnknown; ++i)
+//            {
+//                cout << setprecision(3) << setw(10) << covar(i,i);
 //            }
 //            cout << endl;
 
 
+            for(SatIDSet::iterator itSat = satSet.begin();
+                itSat != satSet.end();
+                ++itSat)
+            {
+                sat = *itSat;
+
+                idSat = satIndex[sat];
+
+                Vector<double> rcom_c(3,0.0);
+                rcom_c(0) = state(idSat+0);
+                rcom_c(1) = state(idSat+1);
+                rcom_c(2) = state(idSat+2);
+
+                Vector<double> vcom_c(3,0.0);
+                vcom_c(0) = state(idSat+3);
+                vcom_c(1) = state(idSat+4);
+                vcom_c(2) = state(idSat+5);
+
+                Vector<double> rcom_t(3,0.0), vcom_t(3,0.0);
+                rcom_t = c2tRaw * rcom_c;
+                vcom_t = c2tRaw * vcom_c + c2tDot * rcom_c;
+
+
+                Vector<double> rref_t(3,0.0), vref_t(3,0.0);
+
+                try
+                {
+                    rref_t = sp3Store.getXvt(sat,gps).x.toVector();
+                    vref_t = sp3Store.getXvt(sat,gps).v.toVector();
+                }
+                catch(...)
+                {
+                    continue;
+                }
+
+                Vector<double> dr( rcom_t - rref_t );
+                Vector<double> dv( (vcom_t - vref_t)*1e+2 );
+
+//                cout << sat;
+                cout << setprecision(3)
+                     << setw(10) << dr(0)
+                     << setw(10) << dr(1)
+                     << setw(10) << dr(2)
+                     << setprecision(3)
+                     << setw(10) << dv(0)
+                     << setw(10) << dv(1)
+                     << setw(10) << dv(2);
+            }
+            cout << endl;
+
             //////// end of measment update ////////
 
+
+            //////// start of orbit integration ////////
 
             // update orbit and srpc
             for(SatIDSet::iterator itSat = satSet.begin();
@@ -1603,7 +1624,7 @@ int main(int argc, char* argv[])
 
                 // update orbit
                 for(int i=0; i<72; ++i) orbit(i) = 0.0;
-                for(int i=0; i<6; ++i) orbit(i) = state(id+i+0);
+                for(int i=0; i< 6; ++i) orbit(i) = state(id+i+0);
                 orbit( 6) = 1.0; orbit(10) = 1.0; orbit(14) = 1.0;
                 orbit(33) = 1.0; orbit(37) = 1.0; orbit(41) = 1.0;
 
@@ -1621,57 +1642,108 @@ int main(int argc, char* argv[])
             rkf78.setCurrentTime(tt);
             rkf78.setCurrentState(satOrbit);
 
-
-            //////// start of time update ////////
-
             gps = gps + dt;
             utc = refSys.GPS2UTC(gps);
             tt = refSys.GPS2TT(gps);
 
-            // time update for source-related parameters
-            Matrix<double> pSource1(2,2,0.0), pSource2(2,2,0.0);
+            // orbit integration
+            satOrbit = rkf78.integrateTo(tt);
 
-            // process noise of source-related parameters
+            //////// end of orbit integration ////////
+
+
+            //////// start of time update ////////
+
+            // time update for source-related parameters
+
+            phi = ident<double>(2);
+            phit = transpose(phi);
+
             noise.resize(2,2,0.0);
             noise(0,0) = 1e+2 * dt;
-            noise(1,1) = 3e-8 * dt;
+            noise(1,1) = 1e-9 * dt;
+
+            Matrix<double> pSource1(2,numUnknown,0.0);
+            Matrix<double> pSource2(numUnknown,2,0.0);
 
             for(SourceIDSet::iterator itSource = sourceSet.begin();
                 itSource != sourceSet.end();
                 ++itSource)
             {
                 source = *itSource;
-                id = sourceIndex[source];
+                idSource = sourceIndex[source];
 
                 // state update
                 // constant for clock and dwet
 
                 // covariance update
-                covar(id+0,id+0) += noise(0,0);
-                covar(id+1,id+1) += noise(1,1);
+
+                // phi * p
+                for(int i=0; i<2; ++i)
+                {
+                    for(int j=0; j<numUnknown; ++j)
+                    {
+                        pSource1(i,j) = covar(idSource+i,j);
+                    }
+                }
+
+                pSource1 = phi * pSource1;
+
+                for(int i=0; i<2; ++i)
+                {
+                    for(int j=0; j<numUnknown; ++j)
+                    {
+                        covar(idSource+i,j) = pSource1(i,j);
+                    }
+                }
+
+                // phi * p * phi'
+                for(int i=0; i<numUnknown; ++i)
+                {
+                    for(int j=0; j<2; ++j)
+                    {
+                        pSource2(i,j) = covar(i,idSource+j);
+                    }
+                }
+
+                pSource2 = pSource2 * phit;
+
+                for(int i=0; i<numUnknown; ++i)
+                {
+                    for(int j=0; j<2; ++j)
+                    {
+                        covar(i,idSource+j) = pSource2(i,j);
+                    }
+                }
+
+                // phi * p * phi' + q
+                for(int i=0; i<2; ++i)
+                {
+                    covar(idSource+i,idSource+i) += noise(i,i);
+                }
             }
 
-            // orbit integration
-            satOrbit = rkf78.integrateTo(tt);
 
             // time update for sat-related parameters
-            Matrix<double> pSat1(12,12,0.0), pSat2(12,12,0.0);
 
-            // process noise
+            phi = ident<double>(12);
+
             noise.resize(12,12,0.0);
-            noise(11,11) = 1.0 * dt;
+            for(int i=0; i<5; ++i) noise(i+6,i+6) = 1e-14 * dt;
+            noise(11,11) = 1e+0 * dt;
+
+            Matrix<double> pSat1(12,numUnknown,0.0);
+            Matrix<double> pSat2(numUnknown,12,0.0);
 
             for(SatIDSet::iterator itSat = satSet.begin();
                 itSat != satSet.end();
                 ++itSat)
             {
                 sat = *itSat;
-                id = satIndex[sat];
+                idSat = satIndex[sat];
 
                 orbit = satOrbit[sat];
                 srpc = satSRPC[sat];
-
-                phi = ident<double>(12);
 
                 for(int i=0; i<3; ++i)
                 {
@@ -1692,60 +1764,80 @@ int main(int argc, char* argv[])
 
                 phit = transpose(phi);
 
-//                cout << sat << endl;
-//
-//                for(int i=0; i<11; ++i)
-//                {
-//                    for(int j=0; j<11; ++j)
-//                    {
-//                        cout << setw(10) << phi(i,j);
-//                    }
-//                    cout << endl;
-//                }
-
                 // state update
 
                 // integration for orbit
                 // constant for srpc and clock
-                for(int i=0; i<6; ++i) state(id+i+0) = orbit(i);
+                for(int i=0; i<6; ++i) state(idSat+i+0) = orbit(i);
 
                 // covariance update
 
-                // first, get the covariance of this sat
+                // phi * p
                 for(int i=0; i<12; ++i)
                 {
-                    for(int j=0; j<12; ++j)
+                    for(int j=0; j<numUnknown; ++j)
                     {
-                        pSat1(i,j) = covar(id+i,id+j);
+                        pSat1(i,j) = covar(idSat+i,j);
                     }
                 }
 
-                // second, perform covariance update for this sat
-                pSat2 = phi * pSat1 * phit + noise;
+                pSat1 = phi * pSat1;
 
-                // last, set the covariance of this sat
                 for(int i=0; i<12; ++i)
+                {
+                    for(int j=0; j<numUnknown; ++j)
+                    {
+                        covar(idSat+i,j) = pSat1(i,j);
+                    }
+                }
+
+                // phi * p * phi'
+                for(int i=0; i<numUnknown; ++i)
                 {
                     for(int j=0; j<12; ++j)
                     {
-                        covar(id+i,id+j) = pSat2(i,j);
+                        pSat2(i,j) = covar(i,idSat+j);
                     }
+                }
+
+                pSat2 = pSat2 * phit;
+
+                for(int i=0; i<numUnknown; ++i)
+                {
+                    for(int j=0; j<12; ++j)
+                    {
+                        covar(i,idSat+j) = pSat2(i,j);
+                    }
+                }
+
+                // phi * p * phi' + q
+                for(int i=0; i<12; ++i)
+                {
+                    covar(idSat+i,idSat+i) += noise(i,i);
                 }
             }
 
-            cout << "after time update" << endl;
-            for(int i=numSource*2; i<numSource*2+12; i=i+1)
-            {
-                cout << setprecision(3) << setw(15) << state(i)
-                     << setprecision(6) << setw(25) << covar(i,i)
-                     << endl;
-            }
-            cout << endl;
+            Matrix<double> covar1( covar );
+            covar = (covar1 + transpose(covar1))/2.0;
 
+//            cout << "after time update" << endl;
+//            for(int i=0; i<numUnknown; i=i+1)
+//            {
+//                cout << setprecision(3) << setw(15) << state(i)
+//                     << setprecision(6) << setw(25) << covar(i,i)
+//                     << endl;
+//            }
+//            cout << endl;
+
+//            for(int i=numSource*2; i<numUnknown; ++i)
+//            {
+//                cout << setprecision(3) << setw(10) << covar(i,i);
+//            }
+//            cout << endl;
 
             //////// end of time update ////////
 
-            if(gps-gps0 > 60 * 30.0) break;
+            if(gps-gps0 > 22*120 * 30.0) break;
 
         }
         catch(...)
@@ -1754,13 +1846,11 @@ int main(int argc, char* argv[])
             break;
         }
 
-//        break;
-
     } // End of 'while( obsStreams.readEpochData(gData) )'
 
     double clock_end( Counter::now() );
 
-//    cout << clock_end - clock_start << endl;
+    cerr << clock_end - clock_start << endl;
 
     return 0;
 

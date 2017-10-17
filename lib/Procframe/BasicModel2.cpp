@@ -142,6 +142,7 @@ namespace gpstk
                                   posSatECI(2)*velSatECI(2) )/C_MPS/C_MPS;
 
                     dT = dlight + dclock - drel;
+                    dT = dT * dT;
                 }
 
                 // R(t-dT), dR(t-dT)
